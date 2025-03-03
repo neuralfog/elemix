@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`State In Props > Change Value State In Props 1`] = `
+"
+<state-in-props><!-- #shadowroot -->
+  <h1>StateInProps</h1>
+  <p>Changed Value From Child Level</p>
+  <state-in-props-child><!-- #shadowroot -->
+    <h1>StateInPropsChild</h1>
+  </state-in-props-child>
+</state-in-props>
+"
+`;
+
+exports[`State In Props > Initial State 1`] = `
+"
+<state-in-props><!-- #shadowroot -->
+  <h1>StateInProps</h1>
+  <p>Nested Initial Value</p>
+  <state-in-props-child><!-- #shadowroot -->
+    <h1>StateInPropsChild</h1>
+  </state-in-props-child>
+</state-in-props>
+"
+`;

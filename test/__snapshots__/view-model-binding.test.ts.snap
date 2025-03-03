@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`View Model Binding > Initial State 1`] = `
+"
+<view-model-binding-app><!-- #shadowroot -->
+  <h1>RefApp</h1>
+  <p></p><input type="text">
+</view-model-binding-app>
+"
+`;
+
+exports[`View Model Binding > Update Input Value 1`] = `
+"
+<view-model-binding-app><!-- #shadowroot -->
+  <h1>RefApp</h1>
+  <p>Brown Hounds</p><input type="text">
+</view-model-binding-app>
+"
+`;
+
+exports[`View Model Binding > Update View Model 1`] = `
+"
+<view-model-binding-app><!-- #shadowroot -->
+  <h1>RefApp</h1>
+  <p>Brown Hounds</p><input type="text">
+</view-model-binding-app>
+"
+`;

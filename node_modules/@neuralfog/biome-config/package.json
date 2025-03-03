@@ -1,0 +1,14 @@
+{
+    "name": "@neuralfog/biome-config",
+    "version": "0.1.2",
+    "license": "MIT",
+    "author": "brownhounds",
+    "main": "biome.jsonc",
+    "type": "module",
+    "exports": {
+        "./biome": "./biome.jsonc"
+    },
+    "peerDependencies": {
+        "@biomejs/biome": "1.9.4"
+    }
+}

@@ -1,0 +1,33 @@
+{
+    "name": "@neuralfog/elemix-testing",
+    "version": "0.1.0",
+    "license": "MIT",
+    "author": "brownhounds",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": ["./dist/**/*"],
+    "exports": {
+        ".": "./dist/index.js",
+        "./snapshots": "./dist/snapshots.js",
+        "./mocks": "./dist/mocks.js"
+    },
+    "scripts": {
+        "clean": "rm -rf ./dist",
+        "emit-declarations": "tsc --emitDeclarationOnly --declaration --outDir ./dist",
+        "build-lib": "vite build",
+        "build": "npm run clean && npm run build-lib && npm run emit-declarations",
+        "lint": "tsc --noEmit && biome format && biome lint",
+        "release": "npm run clean && npm run build && npm publish --access public"
+    },
+    "devDependencies": {
+        "@neuralfog/biome-config": "0.1.2",
+        "@neuralfog/elemix-renderer": "0.1.3",
+        "@neuralfog/ts-config": "0.1.1",
+        "rehype-format": "4.0.1",
+        "rehype-parse": "8.0.4",
+        "rehype-stringify": "9.0.3",
+        "typescript": "5.8.2",
+        "unified": "10.1.2",
+        "vite": "6.2.0"
+    }
+}

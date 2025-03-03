@@ -1,0 +1,96 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`List Rendering > Initial State - Multiple Component 1`] = `
+"
+<list-app><!-- #shadowroot -->
+  <h1>ListApp</h1>
+  <ul>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+  </ul>
+</list-app>
+"
+`;
+
+exports[`List Rendering > Initial State - Single Component 1`] = `
+"
+<list-app><!-- #shadowroot -->
+  <h1>ListApp</h1>
+  <ul>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+  </ul>
+</list-app>
+"
+`;
+
+exports[`onDispose > Single Component 1`] = `
+"
+<list-app><!-- #shadowroot -->
+  <h1>ListApp</h1>
+  <ul><!--[0]--></ul>
+</list-app>
+"
+`;

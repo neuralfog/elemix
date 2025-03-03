@@ -1,0 +1,37 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Props > Initial State 1`] = `
+"
+<main-app><!-- #shadowroot -->
+  <h1>MainApp</h1>
+  <p id="main-app-state">Initial State Value</p>
+  <test-comp><!-- #shadowroot -->
+    <div>
+      <h1>TestComp</h1>
+      <p id="test-comp-state">Initial State Value</p>
+      <p id="test-comp-state-2">0</p>
+      <p id="test-comp-signal">Initial Signal Value</p>
+      <p id="test-comp-props">Initial Color - 0</p>
+    </div>
+  </test-comp>
+</main-app>
+"
+`;
+
+exports[`Props > Modify Props, State and Signal 1`] = `
+"
+<main-app><!-- #shadowroot -->
+  <h1>MainApp</h1>
+  <p id="main-app-state">Initial State Value</p>
+  <test-comp><!-- #shadowroot -->
+    <div>
+      <h1>TestComp</h1>
+      <p id="test-comp-state">New state Value</p>
+      <p id="test-comp-state-2">10</p>
+      <p id="test-comp-signal">New Signal Value</p>
+      <p id="test-comp-props">purple - 6</p>
+    </div>
+  </test-comp>
+</main-app>
+"
+`;

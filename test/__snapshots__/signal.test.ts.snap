@@ -1,0 +1,123 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Signal > Initial State - Multiple Component 1`] = `
+"
+<list-app><!-- #shadowroot -->
+  <h1>ListApp</h1>
+  <ul>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+  </ul>
+</list-app>
+"
+`;
+
+exports[`Signal > Initial State - Single Component 1`] = `
+"
+<list-app><!-- #shadowroot -->
+  <h1>ListApp</h1>
+  <ul>
+    <li>
+      <test-comp><!-- #shadowroot -->
+        <div>
+          <h1>TestComp</h1>
+          <p id="test-comp-state">Initial State Value</p>
+          <p id="test-comp-state-2">0</p>
+          <p id="test-comp-signal">Initial Signal Value</p>
+          <p id="test-comp-props">-</p>
+        </div>
+      </test-comp>
+    </li>
+  </ul>
+</list-app>
+"
+`;
+
+exports[`Signal > Initial State 1`] = `
+"
+<main-app><!-- #shadowroot -->
+  <h1>MainApp</h1>
+  <p id="main-app-state">Initial State Value</p>
+  <test-comp><!-- #shadowroot -->
+    <div>
+      <h1>TestComp</h1>
+      <p id="test-comp-state">Initial State Value</p>
+      <p id="test-comp-state-2">0</p>
+      <p id="test-comp-signal">Initial Signal Value</p>
+      <p id="test-comp-props">Initial Color - 0</p>
+    </div>
+  </test-comp>
+</main-app>
+"
+`;
+
+exports[`Signal > Modify Signal 1`] = `
+"
+<main-app><!-- #shadowroot -->
+  <h1>MainApp</h1>
+  <p id="main-app-state">Initial State Value</p>
+  <test-comp><!-- #shadowroot -->
+    <div>
+      <h1>TestComp</h1>
+      <p id="test-comp-state">Initial State Value</p>
+      <p id="test-comp-state-2">0</p>
+      <p id="test-comp-signal">New Value</p>
+      <p id="test-comp-props">Initial Color - 0</p>
+    </div>
+  </test-comp>
+</main-app>
+"
+`;

@@ -1,0 +1,36 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`State > Initial State 1`] = `
+"
+<state-app><!-- #shadowroot -->
+  <h1>StateApp</h1>
+  <p>Initial Value</p>
+  <p>0</p>
+  <p>null</p>
+  <p>undefined</p>
+  <p>Initial Value</p>
+  <ul>
+    <li>apple</li>
+    <li>orange</li>
+  </ul>
+</state-app>
+"
+`;
+
+exports[`State > Modify State 1`] = `
+"
+<state-app><!-- #shadowroot -->
+  <h1>StateApp</h1>
+  <p>New Value</p>
+  <p>10</p>
+  <p>null</p>
+  <p>undefined</p>
+  <p>New Value</p>
+  <ul>
+    <li>apple</li>
+    <li>orange</li>
+    <li>banana</li>
+  </ul>
+</state-app>
+"
+`;

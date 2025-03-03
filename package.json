@@ -1,0 +1,41 @@
+{
+    "name": "@brownhounds/wc-micro",
+    "version": "0.3.0",
+    "license": "MIT",
+    "author": "brownhounds",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": ["./dist/**/*"],
+    "exports": {
+        ".": "./dist/index.js",
+        "./decorators": "./dist/decorators.js",
+        "./signal": "./dist/signal.js",
+        "./reactive": "./dist/reactive.js",
+        "./config": "./dist/config.js",
+        "./app": "./dist/app.js",
+        "./utilities": "./dist/utilities.js"
+    },
+    "scripts": {
+        "clean": "rm -rf ./dist",
+        "emit-declarations": "tsc --emitDeclarationOnly --declaration --outDir ./dist",
+        "build-lib": "vite build",
+        "build": "npm run clean && npm run build-lib && npm run emit-declarations",
+        "test": "vitest run --coverage --reporter verbose",
+        "test-nc": "vitest run",
+        "lint": "tsc --noEmit && biome format && biome lint"
+    },
+    "devDependencies": {
+        "@neuralfog/biome-config": "0.1.2",
+        "@neuralfog/elemix-testing": "0.1.0",
+        "@neuralfog/ts-config": "0.1.1",
+        "@vitest/coverage-v8": "3.0.7",
+        "@vitest/ui": "3.0.7",
+        "typescript": "5.8.2",
+        "vite": "6.2.0",
+        "jsdom": "26.0.0",
+        "vitest": "3.0.7"
+    },
+    "peerDependencies": {
+        "@neuralfog/elemix-renderer": "0.1.3"
+    }
+}
