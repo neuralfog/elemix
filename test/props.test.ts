@@ -14,7 +14,7 @@ describe('Props', () => {
     });
 
     test('Initial State', async () => {
-        const presenter = new Present().screen(html`<main-app />`);
+        const presenter = new Present().screen(html`<main-app></main-app>`);
 
         await presenter.wait();
         await presenter.wait();

@@ -28,8 +28,12 @@ describe('Signal', () => {
 
     test('Initial State - Single Component', async () => {
         const presenter = new Present().screen(html`<list-app />`);
+
         await presenter.wait();
         await presenter.wait();
+        await presenter.wait();
+        await presenter.wait();
+
         expect(HTML(presenter.root<ListApp>())).toMatchSnapshot();
     });
 

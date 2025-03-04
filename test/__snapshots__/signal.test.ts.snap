@@ -9,10 +9,10 @@ exports[`Signal > Initial State - Multiple Component 1`] = `
       <test-comp><!-- #shadowroot -->
         <div>
           <h1>TestComp</h1>
-          <p id="test-comp-state">Initial State Value</p>
-          <p id="test-comp-state-2">0</p>
-          <p id="test-comp-signal">Initial Signal Value</p>
-          <p id="test-comp-props">-</p>
+          <p id="test-comp-state">Initial State Value<!--₥0--></p>
+          <p id="test-comp-state-2">0<!--₥1--></p>
+          <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+          <p id="test-comp-props"><!--₥3-->-<!--₥4--></p>
         </div>
       </test-comp>
     </li>
@@ -20,10 +20,10 @@ exports[`Signal > Initial State - Multiple Component 1`] = `
       <test-comp><!-- #shadowroot -->
         <div>
           <h1>TestComp</h1>
-          <p id="test-comp-state">Initial State Value</p>
-          <p id="test-comp-state-2">0</p>
-          <p id="test-comp-signal">Initial Signal Value</p>
-          <p id="test-comp-props">-</p>
+          <p id="test-comp-state">Initial State Value<!--₥0--></p>
+          <p id="test-comp-state-2">0<!--₥1--></p>
+          <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+          <p id="test-comp-props"><!--₥3-->-<!--₥4--></p>
         </div>
       </test-comp>
     </li>
@@ -31,10 +31,10 @@ exports[`Signal > Initial State - Multiple Component 1`] = `
       <test-comp><!-- #shadowroot -->
         <div>
           <h1>TestComp</h1>
-          <p id="test-comp-state">Initial State Value</p>
-          <p id="test-comp-state-2">0</p>
-          <p id="test-comp-signal">Initial Signal Value</p>
-          <p id="test-comp-props">-</p>
+          <p id="test-comp-state">Initial State Value<!--₥0--></p>
+          <p id="test-comp-state-2">0<!--₥1--></p>
+          <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+          <p id="test-comp-props"><!--₥3-->-<!--₥4--></p>
         </div>
       </test-comp>
     </li>
@@ -42,10 +42,10 @@ exports[`Signal > Initial State - Multiple Component 1`] = `
       <test-comp><!-- #shadowroot -->
         <div>
           <h1>TestComp</h1>
-          <p id="test-comp-state">Initial State Value</p>
-          <p id="test-comp-state-2">0</p>
-          <p id="test-comp-signal">Initial Signal Value</p>
-          <p id="test-comp-props">-</p>
+          <p id="test-comp-state">Initial State Value<!--₥0--></p>
+          <p id="test-comp-state-2">0<!--₥1--></p>
+          <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+          <p id="test-comp-props"><!--₥3-->-<!--₥4--></p>
         </div>
       </test-comp>
     </li>
@@ -53,10 +53,10 @@ exports[`Signal > Initial State - Multiple Component 1`] = `
       <test-comp><!-- #shadowroot -->
         <div>
           <h1>TestComp</h1>
-          <p id="test-comp-state">Initial State Value</p>
-          <p id="test-comp-state-2">0</p>
-          <p id="test-comp-signal">Initial Signal Value</p>
-          <p id="test-comp-props">-</p>
+          <p id="test-comp-state">Initial State Value<!--₥0--></p>
+          <p id="test-comp-state-2">0<!--₥1--></p>
+          <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+          <p id="test-comp-props"><!--₥3-->-<!--₥4--></p>
         </div>
       </test-comp>
     </li>
@@ -74,10 +74,10 @@ exports[`Signal > Initial State - Single Component 1`] = `
       <test-comp><!-- #shadowroot -->
         <div>
           <h1>TestComp</h1>
-          <p id="test-comp-state">Initial State Value</p>
-          <p id="test-comp-state-2">0</p>
-          <p id="test-comp-signal">Initial Signal Value</p>
-          <p id="test-comp-props">-</p>
+          <p id="test-comp-state">Initial State Value<!--₥0--></p>
+          <p id="test-comp-state-2">0<!--₥1--></p>
+          <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+          <p id="test-comp-props"><!--₥3-->-<!--₥4--></p>
         </div>
       </test-comp>
     </li>
@@ -90,14 +90,14 @@ exports[`Signal > Initial State 1`] = `
 "
 <main-app><!-- #shadowroot -->
   <h1>MainApp</h1>
-  <p id="main-app-state">Initial State Value</p>
+  <p id="main-app-state">Initial State Value<!--₥0--></p>
   <test-comp><!-- #shadowroot -->
     <div>
       <h1>TestComp</h1>
-      <p id="test-comp-state">Initial State Value</p>
-      <p id="test-comp-state-2">0</p>
-      <p id="test-comp-signal">Initial Signal Value</p>
-      <p id="test-comp-props">Initial Color - 0</p>
+      <p id="test-comp-state">Initial State Value<!--₥0--></p>
+      <p id="test-comp-state-2">0<!--₥1--></p>
+      <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+      <p id="test-comp-props">Initial Color<!--₥3--> - 0<!--₥4--></p>
     </div>
   </test-comp>
 </main-app>
@@ -108,14 +108,14 @@ exports[`Signal > Modify Signal 1`] = `
 "
 <main-app><!-- #shadowroot -->
   <h1>MainApp</h1>
-  <p id="main-app-state">Initial State Value</p>
+  <p id="main-app-state">Initial State Value<!--₥0--></p>
   <test-comp><!-- #shadowroot -->
     <div>
       <h1>TestComp</h1>
-      <p id="test-comp-state">Initial State Value</p>
-      <p id="test-comp-state-2">0</p>
-      <p id="test-comp-signal">New Value</p>
-      <p id="test-comp-props">Initial Color - 0</p>
+      <p id="test-comp-state">Initial State Value<!--₥0--></p>
+      <p id="test-comp-state-2">0<!--₥1--></p>
+      <p id="test-comp-signal">New Value<!--₥2--></p>
+      <p id="test-comp-props">Initial Color<!--₥3--> - 0<!--₥4--></p>
     </div>
   </test-comp>
 </main-app>

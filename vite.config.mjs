@@ -7,6 +7,7 @@ export default defineConfig({
             entry: [
                 resolve('index.ts'),
                 resolve('decorators.ts'),
+                resolve('directives.ts'),
                 resolve('reactive.ts'),
                 resolve('signal.ts'),
                 resolve('app.ts'),

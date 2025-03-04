@@ -33,7 +33,7 @@ export class StateInProps extends Component {
         return html`
             <h1>StateInProps</h1>
             <p>${this.state.nested.nestedValue}</p>
-            <state-in-props-child .state=${this.state.nested} />
+            <state-in-props-child :state=${this.state.nested} />
         `;
     };
 }

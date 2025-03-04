@@ -2,6 +2,7 @@ import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
 import { state } from '../../src/decorators/state';
+import { repeat } from '../../directives';
 
 @component({ tag: 'state-app' })
 export class StateApp extends Component {
@@ -33,7 +34,11 @@ export class StateApp extends Component {
             <p>${String(this.state.undefined)}</p>
             <p>${this.state.object.nested.value}</p>
             <ul>
-                ${this.state.list.map((value) => html`<li>${value}</li>`)}
+                ${repeat(
+                    this.state.list,
+                    (_, index) => String(index),
+                    (val: string) => html`<li>${val}</li>`,
+                )}
             </ul>
         `;
     };

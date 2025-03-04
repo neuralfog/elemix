@@ -23,9 +23,9 @@ export class MainApp extends Component {
             <h1>MainApp</h1>
             <p id="main-app-state">${this.state.string}</p>
             <test-comp
-                .color=${this.state.color}
-                .size=${this.state.size}
-                .handler=${this.propsHandler}
+                :color=${this.state.color}
+                :size=${this.state.size}
+                :handler=${this.propsHandler}
             />
         `;
     };

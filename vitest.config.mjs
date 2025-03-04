@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
     test: {
-        name: '@brownhounds/wc-micro',
+        name: '@neuralfog/elemix',
         root: './',
         environment: 'jsdom',
         setupFiles: ['vitest.setup.mjs'],

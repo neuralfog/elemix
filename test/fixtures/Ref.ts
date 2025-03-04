@@ -9,6 +9,6 @@ export class RefApp extends Component {
 
     template = (): Template => {
         return html` <h1>RefApp</h1>
-            <div ref=${this.ref}>Important stuff needs a ref</div>`;
+            <div :ref=${this.ref}>Important stuff needs a ref</div>`;
     };
 }

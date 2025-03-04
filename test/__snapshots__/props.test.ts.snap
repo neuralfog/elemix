@@ -4,14 +4,14 @@ exports[`Props > Diffing Primitives And Handlers 1`] = `
 "
 <main-app><!-- #shadowroot -->
   <h1>MainApp</h1>
-  <p id="main-app-state">random stuff 3</p>
+  <p id="main-app-state">random stuff 3<!--₥0--></p>
   <test-comp><!-- #shadowroot -->
     <div>
       <h1>TestComp</h1>
-      <p id="test-comp-state">Initial State Value</p>
-      <p id="test-comp-state-2">0</p>
-      <p id="test-comp-signal">Initial Signal Value</p>
-      <p id="test-comp-props">Initial Color - 0</p>
+      <p id="test-comp-state">Initial State Value<!--₥0--></p>
+      <p id="test-comp-state-2">0<!--₥1--></p>
+      <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+      <p id="test-comp-props">Initial Color<!--₥3--> - 0<!--₥4--></p>
     </div>
   </test-comp>
 </main-app>
@@ -22,14 +22,14 @@ exports[`Props > Initial State 1`] = `
 "
 <main-app><!-- #shadowroot -->
   <h1>MainApp</h1>
-  <p id="main-app-state">Initial State Value</p>
+  <p id="main-app-state">Initial State Value<!--₥0--></p>
   <test-comp><!-- #shadowroot -->
     <div>
       <h1>TestComp</h1>
-      <p id="test-comp-state">Initial State Value</p>
-      <p id="test-comp-state-2">0</p>
-      <p id="test-comp-signal">Initial Signal Value</p>
-      <p id="test-comp-props">Initial Color - 0</p>
+      <p id="test-comp-state">Initial State Value<!--₥0--></p>
+      <p id="test-comp-state-2">0<!--₥1--></p>
+      <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+      <p id="test-comp-props">Initial Color<!--₥3--> - 0<!--₥4--></p>
     </div>
   </test-comp>
 </main-app>
@@ -40,14 +40,14 @@ exports[`Props > Modify Props 1`] = `
 "
 <main-app><!-- #shadowroot -->
   <h1>MainApp</h1>
-  <p id="main-app-state">Initial State Value</p>
+  <p id="main-app-state">Initial State Value<!--₥0--></p>
   <test-comp><!-- #shadowroot -->
     <div>
       <h1>TestComp</h1>
-      <p id="test-comp-state">Initial State Value</p>
-      <p id="test-comp-state-2">0</p>
-      <p id="test-comp-signal">Initial Signal Value</p>
-      <p id="test-comp-props">purple - 6</p>
+      <p id="test-comp-state">Initial State Value<!--₥0--></p>
+      <p id="test-comp-state-2">0<!--₥1--></p>
+      <p id="test-comp-signal">Initial Signal Value<!--₥2--></p>
+      <p id="test-comp-props">purple<!--₥3--> - 6<!--₥4--></p>
     </div>
   </test-comp>
 </main-app>

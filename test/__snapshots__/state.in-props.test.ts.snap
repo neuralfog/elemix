@@ -4,7 +4,7 @@ exports[`State In Props > Change Value State In Props 1`] = `
 "
 <state-in-props><!-- #shadowroot -->
   <h1>StateInProps</h1>
-  <p>Changed Value From Child Level</p>
+  <p>Changed Value From Child Level<!--₥0--></p>
   <state-in-props-child><!-- #shadowroot -->
     <h1>StateInPropsChild</h1>
   </state-in-props-child>
@@ -16,7 +16,7 @@ exports[`State In Props > Initial State 1`] = `
 "
 <state-in-props><!-- #shadowroot -->
   <h1>StateInProps</h1>
-  <p>Nested Initial Value</p>
+  <p>Nested Initial Value<!--₥0--></p>
   <state-in-props-child><!-- #shadowroot -->
     <h1>StateInPropsChild</h1>
   </state-in-props-child>

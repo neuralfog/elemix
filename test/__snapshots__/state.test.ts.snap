@@ -4,14 +4,14 @@ exports[`State > Initial State 1`] = `
 "
 <state-app><!-- #shadowroot -->
   <h1>StateApp</h1>
-  <p>Initial Value</p>
-  <p>0</p>
-  <p>null</p>
-  <p>undefined</p>
-  <p>Initial Value</p>
+  <p>Initial Value<!--₥0--></p>
+  <p>0<!--₥1--></p>
+  <p>null<!--₥2--></p>
+  <p>undefined<!--₥3--></p>
+  <p>Initial Value<!--₥4--></p>
   <ul>
-    <li>apple</li>
-    <li>orange</li>
+    <li>apple<!--₥0--></li>
+    <li>orange<!--₥0--></li>
   </ul>
 </state-app>
 "
@@ -21,15 +21,15 @@ exports[`State > Modify State 1`] = `
 "
 <state-app><!-- #shadowroot -->
   <h1>StateApp</h1>
-  <p>New Value</p>
-  <p>10</p>
-  <p>null</p>
-  <p>undefined</p>
-  <p>New Value</p>
+  <p>New Value<!--₥0--></p>
+  <p>10<!--₥1--></p>
+  <p>null<!--₥2--></p>
+  <p>undefined<!--₥3--></p>
+  <p>New Value<!--₥4--></p>
   <ul>
-    <li>apple</li>
-    <li>orange</li>
-    <li>banana</li>
+    <li>apple<!--₥0--></li>
+    <li>orange<!--₥0--></li>
+    <li>banana<!--₥0--></li>
   </ul>
 </state-app>
 "

@@ -2,6 +2,7 @@ import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
 import { state } from '../../src/decorators/state';
+import { repeat } from '../../directives';
 
 import './TestComp';
 
@@ -16,7 +17,9 @@ export class ListApp extends Component {
         return html`
             <h1>ListApp</h1>
             <ul>
-                ${Array.from(Array(this.state.count).keys()).map(
+                ${repeat(
+                    Array.from(Array(this.state.count).keys()),
+                    (_, index) => String(index),
                     () => html`<li><test-comp /></li>`,
                 )}
             </ul>
