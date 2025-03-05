@@ -3,6 +3,7 @@ import { Renderer } from './Renderer';
 import { LocalState } from './LocalState';
 import { Props } from './Props';
 import { Styles } from './Styles';
+import { activeRenderers } from '../renderers';
 
 export class Component<ComponentProps = unknown> extends HTMLElement {
     private $props = new Props<ComponentProps>(this);
@@ -36,6 +37,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     }
 
     disconnectedCallback(): void {
+        activeRenderers.delete(this.$renderer);
         this.unsubscribeFromSignals();
         this.onDispose?.();
     }

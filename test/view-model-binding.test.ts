@@ -3,6 +3,7 @@ import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
 import { Present } from '@neuralfog/elemix-testing';
 import type { ViewModelBinding } from './fixtures/ViewModelBinding';
+import { render } from '../utilities';
 
 import './fixtures/ViewModelBinding';
 
@@ -16,7 +17,8 @@ describe('View Model Binding', () => {
             html`<view-model-binding-app />`,
         );
         const viewModelApp = presenter.root<ViewModelBinding>();
-        await presenter.wait();
+
+        await render();
 
         expect(HTML(viewModelApp)).toMatchSnapshot();
     });
@@ -26,7 +28,8 @@ describe('View Model Binding', () => {
             html`<view-model-binding-app />`,
         );
         const viewModelApp = presenter.root<ViewModelBinding>();
-        await presenter.wait();
+
+        await render();
 
         const input = presenter.getByTag<HTMLInputElement>('input');
         input.value = 'Brown Hounds';
@@ -36,7 +39,7 @@ describe('View Model Binding', () => {
         });
         input.dispatchEvent(event);
 
-        await presenter.wait();
+        await render();
 
         expect(viewModelApp.state.input.value).toBe('Brown Hounds');
         expect(HTML(viewModelApp)).toMatchSnapshot();
@@ -49,7 +52,7 @@ describe('View Model Binding', () => {
         const viewModelApp = presenter.root<ViewModelBinding>();
         viewModelApp.state.input.value = 'Brown Hounds';
 
-        await presenter.wait();
+        await render();
 
         expect(HTML(viewModelApp)).toMatchSnapshot();
 

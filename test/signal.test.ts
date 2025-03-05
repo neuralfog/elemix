@@ -7,6 +7,7 @@ import { restoreSignal, store } from './fixtures/signal';
 import { RenderTrigger } from '../src/types';
 import type { TestComp } from './fixtures/TestComp';
 import type { ListApp } from './fixtures/ListApp';
+import { render } from '../utilities';
 
 import './fixtures/ListApp';
 import './fixtures/MainApp';
@@ -20,8 +21,7 @@ describe('Signal', () => {
     test('Initial State', async () => {
         const presenter = new Present().screen(html`<main-app />`);
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
     });
@@ -29,10 +29,7 @@ describe('Signal', () => {
     test('Initial State - Single Component', async () => {
         const presenter = new Present().screen(html`<list-app />`);
 
-        await presenter.wait();
-        await presenter.wait();
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<ListApp>())).toMatchSnapshot();
     });
@@ -42,16 +39,15 @@ describe('Signal', () => {
         const listApp = presenter.root<ListApp>();
         listApp.state.count = 5;
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<ListApp>())).toMatchSnapshot();
     });
 
     test('Modify Signal', async () => {
         const presenter = new Present().screen(html`<main-app />`);
-        await presenter.wait();
-        await presenter.wait();
+
+        await render();
 
         const testComp = presenter.getByTag<TestComp>('test-comp');
         const onRender = vi.spyOn(testComp, 'onRender');
@@ -59,7 +55,7 @@ describe('Signal', () => {
         expect(store.value.value).toBe('Initial Signal Value');
         store.value.value = 'New Value';
 
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
         expect(onRender).toHaveBeenCalledOnce();
@@ -75,15 +71,15 @@ describe('Signal Cleanup', () => {
 
     test('Single Component', async () => {
         const presenter = new Present().screen(html`<list-app />`);
-        await presenter.wait();
-        await presenter.wait();
+
+        await render();
+
         expect(store.subscribers.size).toBe(1);
 
         const listApp = presenter.root<ListApp>();
         listApp.state.count = 0;
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(store.subscribers.size).toBe(0);
     });
@@ -93,14 +89,13 @@ describe('Signal Cleanup', () => {
         const listApp = presenter.root<ListApp>();
         listApp.state.count = 5;
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
+
         expect(store.subscribers.size).toBe(5);
 
         listApp.state.count = 0;
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(store.subscribers.size).toBe(0);
     });

@@ -4,6 +4,7 @@ import { Present } from '@neuralfog/elemix-testing';
 import type { LifeCycle } from './fixtures/LifeCycle';
 import type { LifeCycleNoTemplate } from './fixtures/LifeCycleNoTemplate';
 import { RenderTrigger } from '../src/types';
+import { render } from '../utilities';
 
 import './fixtures/LifeCycle';
 import './fixtures/LifeCycleNoTemplate';
@@ -20,7 +21,7 @@ describe('Lifecycle Methods', () => {
         const onRender = vi.spyOn(lifeCycle, 'onRender');
         const onMount = vi.spyOn(lifeCycle, 'onMount');
 
-        await presenter.wait();
+        await render();
 
         expect(onRender).toHaveBeenCalledOnce();
         expect(onRender).toHaveBeenCalledWith([RenderTrigger.ON_MOUNT]);
@@ -37,7 +38,7 @@ describe('Lifecycle Methods', () => {
         const onRender = vi.spyOn(lifeCycle, 'onRender');
         const onMount = vi.spyOn(lifeCycle, 'onMount');
 
-        await presenter.wait();
+        await render();
 
         expect(onRender).toHaveBeenCalledTimes(0);
         expect(onMount).toHaveBeenCalledTimes(0);
@@ -49,7 +50,7 @@ describe('Lifecycle Methods', () => {
 
         const onDispose = vi.spyOn(lifeCycle, 'onDispose');
 
-        await presenter.wait();
+        await render();
 
         presenter.root<LifeCycle>().remove();
         expect(onDispose).toHaveBeenCalledOnce();

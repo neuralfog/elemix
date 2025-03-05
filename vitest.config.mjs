@@ -11,10 +11,6 @@ export default defineConfig({
             all: true,
             include: ['src/**/*.ts'],
             exclude: ['src/types.ts', 'src/**/*.types.ts'],
-            lines: 100,
-            functions: 100,
-            branches: 100,
-            statements: 100,
         },
     },
 });

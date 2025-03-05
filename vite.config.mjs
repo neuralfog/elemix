@@ -13,12 +13,12 @@ export default defineConfig({
                 resolve('app.ts'),
                 resolve('utilities.ts'),
             ],
-            name: 'wc-micro',
+            name: 'elemix',
             fileName: (_, entryName) => `${entryName}.js`,
             formats: ['cjs'],
         },
         rollupOptions: {
-            external: ['@brownhounds/uhtml'],
+            external: ['@neuralfog/elemix-renderer'],
         },
     },
 });

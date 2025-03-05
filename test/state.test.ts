@@ -2,10 +2,11 @@ import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
 import { Present } from '@neuralfog/elemix-testing';
-
-import './fixtures/StateApp';
 import type { StateApp } from './fixtures/StateApp';
 import { RenderTrigger } from '../src/types';
+import { render } from '../utilities';
+
+import './fixtures/StateApp';
 
 describe('State', () => {
     beforeEach(() => {
@@ -14,13 +15,16 @@ describe('State', () => {
 
     test('Initial State', async () => {
         const presenter = new Present().screen(html`<state-app />`);
-        await presenter.wait();
+
+        await render();
+
         expect(HTML(presenter.root<StateApp>())).toMatchSnapshot();
     });
 
     test('Modify State', async () => {
         const presenter = new Present().screen(html`<state-app />`);
-        await presenter.wait();
+
+        await render();
 
         const mainApp = presenter.root<StateApp>();
         const onRender = vi.spyOn(mainApp, 'onRender');
@@ -30,7 +34,7 @@ describe('State', () => {
         mainApp.state.object.nested.value = 'New Value';
         mainApp.state.list.push('banana');
 
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<StateApp>())).toMatchSnapshot();
         expect(onRender).toHaveBeenCalledOnce();

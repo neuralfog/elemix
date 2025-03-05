@@ -1,6 +1,7 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { html } from '@neuralfog/elemix-renderer';
 import { Present } from '@neuralfog/elemix-testing';
+import { render } from '../utilities';
 import {
     CUSTOM_STATE_FLAG_1,
     CUSTOM_STATE_FLAG_2,
@@ -22,7 +23,7 @@ describe('User Defined Render Flags', () => {
         const presenter = new Present().screen(html`<flags-app />`);
         const flagsApp = presenter.root<FlagsApp>();
 
-        await presenter.wait();
+        await render();
 
         const onRender = vi.spyOn(flagsApp, 'onRender');
 
@@ -30,7 +31,7 @@ describe('User Defined Render Flags', () => {
         flagsApp.state2.value = 'New Value';
         signalWithFlag.value.value = 'New Value';
 
-        await presenter.wait();
+        await render();
 
         expect(onRender).toHaveBeenCalledOnce();
         expect(onRender).toHaveBeenCalledWith([

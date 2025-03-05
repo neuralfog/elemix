@@ -1,6 +1,7 @@
+import { render } from '@neuralfog/elemix-renderer';
 import type { Component } from './Component';
 import type { RenderTriggerType } from '../types';
-import { render } from '@neuralfog/elemix-renderer';
+import { activeRenderers } from '../renderers';
 
 export class Renderer {
     private locked = false;
@@ -16,10 +17,12 @@ export class Renderer {
             if (renderTrigger) this.scheduledRenderTriggers.add(renderTrigger);
             if (!this.locked) {
                 this.locked = true;
+                activeRenderers.add(this);
                 setTimeout(() => {
                     this.render(Array.from(this.scheduledRenderTriggers));
                     this.scheduledRenderTriggers.clear();
                     this.locked = false;
+                    activeRenderers.delete(this);
                     if (isConnectedCallback) this.component.onMount?.();
                 }, 0);
             }

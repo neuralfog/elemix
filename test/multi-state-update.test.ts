@@ -2,12 +2,13 @@ import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
 import { Present } from '@neuralfog/elemix-testing';
-
-import './fixtures/MainApp';
+import { render } from '../utilities';
 import type { MainApp } from './fixtures/MainApp';
 import type { TestComp } from './fixtures/TestComp';
 import { restoreSignal, store } from './fixtures/signal';
 import { RenderTrigger } from '../src/types';
+
+import './fixtures/MainApp';
 
 describe('Props', () => {
     beforeEach(() => {
@@ -18,16 +19,15 @@ describe('Props', () => {
     test('Initial State', async () => {
         const presenter = new Present().screen(html`<main-app />`);
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
     });
 
     test('Modify Props, State and Signal', async () => {
         const presenter = new Present().screen(html`<main-app />`);
-        await presenter.wait();
-        await presenter.wait();
+
+        await render();
 
         const testComp = presenter.getByTag<TestComp>('test-comp');
         const onRender = vi.spyOn(testComp, 'onRender');
@@ -44,9 +44,7 @@ describe('Props', () => {
         testComp.state.string = 'New state Value';
         testComp.state2.number = 10;
 
-        await presenter.wait(100);
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
         expect(onRender).toHaveBeenCalledOnce();

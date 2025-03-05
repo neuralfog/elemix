@@ -2,11 +2,12 @@ import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
 import { Present } from '@neuralfog/elemix-testing';
-
-import './fixtures/MainApp';
+import { render } from '../utilities';
 import type { MainApp } from './fixtures/MainApp';
 import type { TestComp } from './fixtures/TestComp';
 import { RenderTrigger } from '../src/types';
+
+import './fixtures/MainApp';
 
 describe('Props', () => {
     beforeEach(() => {
@@ -16,16 +17,15 @@ describe('Props', () => {
     test('Initial State', async () => {
         const presenter = new Present().screen(html`<main-app></main-app>`);
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
     });
 
     test('Modify Props', async () => {
         const presenter = new Present().screen(html`<main-app />`);
-        await presenter.wait();
-        await presenter.wait();
+
+        await render();
 
         const testComp = presenter.getByTag<TestComp>('test-comp');
         const onRender = vi.spyOn(testComp, 'onRender');
@@ -39,8 +39,7 @@ describe('Props', () => {
         mainApp.state.color = 'purple';
         mainApp.state.size = 6;
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
         expect(onRender).toHaveBeenCalledOnce();
@@ -49,8 +48,8 @@ describe('Props', () => {
 
     test('Diffing Primitives And Handlers', async () => {
         const presenter = new Present().screen(html`<main-app />`);
-        await presenter.wait(100);
-        await presenter.wait();
+
+        await render();
 
         const testComp = presenter.getByTag<TestComp>('test-comp');
         const onRender = vi.spyOn(testComp, 'onRender');
@@ -58,18 +57,15 @@ describe('Props', () => {
         const mainApp = presenter.root<MainApp>();
         mainApp.state.string = 'random stuff';
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         mainApp.state.string = 'random stuff 2';
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         mainApp.state.string = 'random stuff 3';
 
-        await presenter.wait();
-        await presenter.wait();
+        await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
         expect(onRender).toBeCalledTimes(0);
