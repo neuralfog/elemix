@@ -24,3 +24,13 @@ export function render(): Promise<boolean> {
         check();
     });
 }
+
+export const camelToKebabCase = (input: string): string => {
+    return (
+        input.match(
+            /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|[0-9]*$)|[A-Z]?[a-z]+|[A-Z]|[0-9]+/g,
+        ) || []
+    )
+        .map((x) => x.toLowerCase())
+        .join('-');
+};

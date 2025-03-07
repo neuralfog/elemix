@@ -2,7 +2,7 @@ import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
 import { state } from '../../src/decorators/state';
-import { store } from './signal';
+import { store } from './Signal';
 
 type TestCompProps = {
     color: string;

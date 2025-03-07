@@ -3,7 +3,7 @@ import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
 import { Present } from '@neuralfog/elemix-testing';
 import type { MainApp } from './fixtures/MainApp';
-import { restoreSignal, store } from './fixtures/signal';
+import { restoreSignal, store } from './fixtures/Signal';
 import { RenderTrigger } from '../src/types';
 import type { TestComp } from './fixtures/TestComp';
 import type { ListApp } from './fixtures/ListApp';
@@ -49,7 +49,7 @@ describe('Signal', () => {
 
         await render();
 
-        const testComp = presenter.getByTag<TestComp>('test-comp');
+        const testComp = presenter.getComponent<TestComp>('test-comp');
         const onRender = vi.spyOn(testComp, 'onRender');
 
         expect(store.value.value).toBe('Initial Signal Value');

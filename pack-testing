@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd ~/dev/@neuralfog/testing && npm run clean && npm run build
+cd ~/dev/@neuralfog/elemix && npm install "$(npm pack ~/dev/@neuralfog/testing)"

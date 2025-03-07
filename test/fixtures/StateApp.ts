@@ -36,7 +36,6 @@ export class StateApp extends Component {
             <ul>
                 ${repeat(
                     this.state.list,
-                    (_, index) => String(index),
                     (val: string) => html`<li>${val}</li>`,
                 )}
             </ul>

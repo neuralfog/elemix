@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Renderer Multiple Root Nodes > render 1`] = `
+"
+<multiple-root-nodes><!-- #shadowroot -->
+  <div>Hello There!!</div>
+  <div>Hello There!!</div>
+  <div>Hello There!!</div>
+</multiple-root-nodes>
+"
+`;

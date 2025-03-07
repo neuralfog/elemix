@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Renderer Self Closing Tags > end 1`] = `
+"
+<self-closing-tags><!-- #shadowroot -->
+  <p>hello there</p>
+  <self-closed><!-- #shadowroot -->
+    <div>Self Closed!!</div>
+  </self-closed>
+</self-closing-tags>
+"
+`;
+
+exports[`Renderer Self Closing Tags > middle 1`] = `
+"
+<self-closing-tags><!-- #shadowroot -->
+  <p>hello there</p>
+  <self-closed><!-- #shadowroot -->
+    <div>Self Closed!!</div>
+  </self-closed>
+  <p>hello there</p>
+</self-closing-tags>
+"
+`;
+
+exports[`Renderer Self Closing Tags > single 1`] = `
+"
+<self-closing-tags><!-- #shadowroot -->
+  <self-closed><!-- #shadowroot -->
+    <div>Self Closed!!</div>
+  </self-closed>
+</self-closing-tags>
+"
+`;
+
+exports[`Renderer Self Closing Tags > start 1`] = `
+"
+<self-closing-tags><!-- #shadowroot -->
+  <self-closed><!-- #shadowroot -->
+    <div>Self Closed!!</div>
+  </self-closed>
+  <p>Hello There</p>
+</self-closing-tags>
+"
+`;

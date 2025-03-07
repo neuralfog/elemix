@@ -1,0 +1,72 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Renderer Nested Lists > render one level 1`] = `
+"
+<renderer-nested-list><!-- #shadowroot -->
+  <ul>
+    <li>Emily Johnson
+      <ul>
+        <li>Emily Johnson<!--₥0--></li>
+        <li>Michael Smith<!--₥0--></li>
+        <li>Olivia Davis<!--₥0--></li>
+      </ul>
+    </li>
+    <li>Michael Smith
+      <ul>
+        <li>Emily Johnson<!--₥0--></li>
+        <li>Michael Smith<!--₥0--></li>
+        <li>Olivia Davis<!--₥0--></li>
+      </ul>
+    </li>
+    <li>Olivia Davis
+      <ul>
+        <li>Emily Johnson<!--₥0--></li>
+        <li>Michael Smith<!--₥0--></li>
+        <li>Olivia Davis<!--₥0--></li>
+      </ul>
+    </li>
+  </ul>
+</renderer-nested-list>
+"
+`;
+
+exports[`Renderer Nested Lists > render two levels 1`] = `
+"
+<renderer-tripple-nested-list><!-- #shadowroot -->
+  <ul>
+    <li>Emily Johnson
+      <ul>
+        <li>Emily Johnson
+          <ul>
+            <li>Emily Johnson<!--₥0--></li>
+            <li>Michael Smith<!--₥0--></li>
+          </ul>
+        </li>
+        <li>Michael Smith
+          <ul>
+            <li>Emily Johnson<!--₥0--></li>
+            <li>Michael Smith<!--₥0--></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Michael Smith
+      <ul>
+        <li>Emily Johnson
+          <ul>
+            <li>Emily Johnson<!--₥0--></li>
+            <li>Michael Smith<!--₥0--></li>
+          </ul>
+        </li>
+        <li>Michael Smith
+          <ul>
+            <li>Emily Johnson<!--₥0--></li>
+            <li>Michael Smith<!--₥0--></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</renderer-tripple-nested-list>
+"
+`;

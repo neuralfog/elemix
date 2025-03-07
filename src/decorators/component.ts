@@ -1,7 +1,8 @@
 import type { Reactive } from '../Reactive';
+import { camelToKebabCase } from '../utilities';
 
 type ComponentDecoratorConfig = {
-    tag: string;
+    tag?: string;
     signals?: Reactive<unknown>[];
     styles?: string[];
 };
@@ -15,21 +16,23 @@ const define = (tag: string, component: Component): void => {
 };
 
 export const component =
-    ({ tag, signals, styles }: ComponentDecoratorConfig) =>
+    (config?: ComponentDecoratorConfig) =>
     (component: Component): void => {
+        const componentTag = config?.tag || camelToKebabCase(component.name);
+
         const extendedClass = class extends component {
             constructor() {
                 super();
 
-                if (signals?.length) {
-                    for (const signal of signals) {
+                if (config?.signals?.length) {
+                    for (const signal of config.signals) {
                         signal.subscribe(this as any);
                     }
                 }
             }
         };
 
-        component.$signals = signals || [];
-        component.$styles = styles || [];
-        define(tag, extendedClass);
+        component.$signals = config?.signals || [];
+        component.$styles = config?.styles || [];
+        define(componentTag, extendedClass);
     };

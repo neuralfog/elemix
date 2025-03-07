@@ -27,7 +27,7 @@ describe('Props', () => {
 
         await render();
 
-        const testComp = presenter.getByTag<TestComp>('test-comp');
+        const testComp = presenter.getComponent<TestComp>('test-comp');
         const onRender = vi.spyOn(testComp, 'onRender');
 
         expect(testComp.props).toMatchObject({
@@ -51,7 +51,7 @@ describe('Props', () => {
 
         await render();
 
-        const testComp = presenter.getByTag<TestComp>('test-comp');
+        const testComp = presenter.getComponent<TestComp>('test-comp');
         const onRender = vi.spyOn(testComp, 'onRender');
 
         const mainApp = presenter.root<MainApp>();

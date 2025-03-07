@@ -5,7 +5,7 @@ import { Present } from '@neuralfog/elemix-testing';
 import { render } from '../utilities';
 import type { MainApp } from './fixtures/MainApp';
 import type { TestComp } from './fixtures/TestComp';
-import { restoreSignal, store } from './fixtures/signal';
+import { restoreSignal, store } from './fixtures/Signal';
 import { RenderTrigger } from '../src/types';
 
 import './fixtures/MainApp';
@@ -29,7 +29,7 @@ describe('Props', () => {
 
         await render();
 
-        const testComp = presenter.getByTag<TestComp>('test-comp');
+        const testComp = presenter.getComponent<TestComp>('test-comp');
         const onRender = vi.spyOn(testComp, 'onRender');
 
         expect(testComp.props).toMatchObject({

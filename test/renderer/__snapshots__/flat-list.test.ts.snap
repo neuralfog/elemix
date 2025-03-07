@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Renderer Flat List > render 1`] = `
+"
+<renderer-list><!-- #shadowroot -->
+  <ul>
+    <li>Emily Johnson<!--₥0--></li>
+    <li>Michael Smith<!--₥0--></li>
+    <li>Olivia Davis<!--₥0--></li>
+    <li>Benjamin Williams<!--₥0--></li>
+    <li>Sophia Brown<!--₥0--></li>
+  </ul>
+</renderer-list>
+"
+`;
+
+exports[`Renderer Flat List > render 2`] = `
+"
+<renderer-list><!-- #shadowroot -->
+  <ul>
+    <li>Sophia Brown<!--₥0--></li>
+    <li>Olivia Davis<!--₥0--></li>
+    <li>John Doe<!--₥0--></li>
+    <li>Benjamin Williams<!--₥0--></li>
+    <li>Emily Johnson<!--₥0--></li>
+    <li>Michael Smith<!--₥0--></li>
+  </ul>
+</renderer-list>
+"
+`;
+
+exports[`Renderer Flat List > render 3`] = `
+"
+<renderer-list><!-- #shadowroot -->
+  <ul>
+    <li>Michael Smith<!--₥0--></li>
+    <li>Benjamin Williams<!--₥0--></li>
+  </ul>
+</renderer-list>
+"
+`;
+
+exports[`Renderer Flat List > render 4`] = `
+"
+<renderer-list><!-- #shadowroot -->
+  <ul><!--₥0--></ul>
+</renderer-list>
+"
+`;

@@ -19,7 +19,6 @@ export class ListApp extends Component {
             <ul>
                 ${repeat(
                     Array.from(Array(this.state.count).keys()),
-                    (_, index) => String(index),
                     () => html`<li><test-comp /></li>`,
                 )}
             </ul>

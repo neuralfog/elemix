@@ -12,7 +12,7 @@ import './fixtures/FlagsApp';
 import {
     CUSTOM_SIGNAL_FLAG,
     signalWithFlag,
-} from './fixtures/signalCustomFlag';
+} from './fixtures/SignalCustomFlag';
 
 describe('User Defined Render Flags', () => {
     beforeEach(() => {

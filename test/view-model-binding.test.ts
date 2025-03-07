@@ -31,7 +31,7 @@ describe('View Model Binding', () => {
 
         await render();
 
-        const input = presenter.getByTag<HTMLInputElement>('input');
+        const input = presenter.getComponent<HTMLInputElement>('input');
         input.value = 'Brown Hounds';
 
         const event = new Event('input', {
@@ -56,7 +56,7 @@ describe('View Model Binding', () => {
 
         expect(HTML(viewModelApp)).toMatchSnapshot();
 
-        const input = presenter.getByTag<HTMLInputElement>('input');
+        const input = presenter.getComponent<HTMLInputElement>('input');
         expect(input.value).toBe('Brown Hounds');
     });
 });

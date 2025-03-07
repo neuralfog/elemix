@@ -30,7 +30,7 @@
     },
     "devDependencies": {
         "@neuralfog/biome-config": "0.1.2",
-        "@neuralfog/elemix-testing": "0.1.2",
+        "@neuralfog/elemix-testing": "file:neuralfog-elemix-testing-0.1.2.tgz",
         "@neuralfog/ts-config": "0.1.1",
         "@vitest/coverage-v8": "3.0.7",
         "@vitest/ui": "3.0.7",
@@ -40,6 +40,6 @@
         "vitest": "3.0.7"
     },
     "peerDependencies": {
-        "@neuralfog/elemix-renderer": "0.1.45"
+        "@neuralfog/elemix-renderer": "file:neuralfog-elemix-renderer-0.1.45.tgz"
     }
 }

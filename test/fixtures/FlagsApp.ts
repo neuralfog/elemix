@@ -2,7 +2,7 @@ import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
 import { state } from '../../src/decorators/state';
-import { signalWithFlag } from './signalCustomFlag';
+import { signalWithFlag } from './SignalCustomFlag';
 
 export const CUSTOM_STATE_FLAG_1 = 'user defined state flag 1';
 export const CUSTOM_STATE_FLAG_2 = 'user defined state flag 2';

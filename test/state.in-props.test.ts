@@ -27,7 +27,7 @@ describe('State In Props', () => {
 
         await render();
 
-        const child = presenter.getByTag<StateInPropsChild>(
+        const child = presenter.getComponent<StateInPropsChild>(
             'state-in-props-child',
         );
 
