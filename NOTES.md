@@ -73,22 +73,16 @@
 -   [x] Setup Github Actions - Run tests on every push
 
 ## Discovery
-
--   [] WC-Micro why do I need a tag in decorator config, why not to derive this from class name ?
+    
+-   [x] Remove `uhtml` as dependency, write my own renderer.
+-   [x] WC-Micro why do I need a tag in decorator config, why not to derive this from class name ?
 
 ## Nice To Have
 
 -   [] Centralized Error Handler
 -   [] Improve View Model Binding - (~value:input)
--   [] Can I have collections in my reactive state
 -   [] Can I have async in onMount, can onMount itself be async
 -   [] Prop Validation ??
 -   [] Can I detect dangling custom elements tags ?? missing imports ??
--   [] Prop rendering array dependency ??
 -   [] Releasing based on tags
 
-## SSR
-
--   https://developer.chrome.com/docs/css-ui/declarative-shadow-dom
--   https://github.com/nksaraf/vinxi
--   https://nitro.unjs.io/
