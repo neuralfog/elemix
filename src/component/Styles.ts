@@ -17,6 +17,7 @@ export class Styles {
                 this.component.shadowRoot.adoptedStyleSheets = [
                     ...baseStyles,
                     sheet,
+                    ...this.component.controlStyles,
                 ];
             }
         }

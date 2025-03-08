@@ -10,6 +10,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     private $renderer = new Renderer(this);
     private $localState = new LocalState(this);
     private $styles = new Styles(this);
+    private $controlStyles?: CSSStyleSheet[];
 
     public get root(): HTMLElement | ShadowRoot | null {
         return this.shadowRoot;
@@ -23,16 +24,20 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         return this.$styles;
     }
 
+    public get controlStyles(): CSSStyleSheet[] {
+        return this.$controlStyles || [];
+    }
+
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
     }
 
     connectedCallback(): void {
+        this.beforeMount();
         this.$styles.initialize();
         this.$props.initialize();
         this.$localState.initialize();
-        this.beforeMount();
         this.render(RenderTrigger.ON_MOUNT, true);
     }
 
