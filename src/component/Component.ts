@@ -32,25 +32,27 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         this.$styles.initialize();
         this.$props.initialize();
         this.$localState.initialize();
-        this.beforeMount?.();
+        this.beforeMount();
         this.render(RenderTrigger.ON_MOUNT, true);
     }
 
     disconnectedCallback(): void {
         activeRenderers.delete(this.$renderer);
         this.unsubscribeFromSignals();
-        this.onDispose?.();
+        this.onDispose();
     }
 
-    public template?: () => Template;
+    // @ts-ignore
+    public template(): Template {
+        // @ts-ignore
+        return undefined;
+    }
 
-    public onRender?: (renderTriggers?: RenderTriggerType[]) => void;
-
-    public beforeMount?: () => void;
-
-    public onMount?: () => void;
-
-    public onDispose?: () => void;
+    // @ts-ignore
+    public onRender(renderTriggers?: RenderTriggerType[]): void {}
+    public beforeMount(): void {}
+    public onMount(): void {}
+    public onDispose(): void {}
 
     public render(
         renderTrigger?: RenderTriggerType,

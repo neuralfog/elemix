@@ -1,4 +1,4 @@
-import { render } from '@neuralfog/elemix-renderer';
+import { type HtmlTemplate, render } from '@neuralfog/elemix-renderer';
 import type { Component } from './Component';
 import type { RenderTriggerType } from '../types';
 import { activeRenderers } from '../renderers';
@@ -13,7 +13,7 @@ export class Renderer {
         renderTrigger?: RenderTriggerType,
         isConnectedCallback = false,
     ): void {
-        if (this.component.template) {
+        if (this.component.template()) {
             if (renderTrigger) this.scheduledRenderTriggers.add(renderTrigger);
             if (!this.locked) {
                 this.locked = true;
@@ -23,19 +23,17 @@ export class Renderer {
                     this.scheduledRenderTriggers.clear();
                     this.locked = false;
                     activeRenderers.delete(this);
-                    if (isConnectedCallback) this.component.onMount?.();
+                    if (isConnectedCallback) this.component.onMount();
                 }, 0);
             }
         }
     }
 
     private render(renderTriggers: RenderTriggerType[]): void {
-        if (this.component.template) {
-            render(
-                this.component.template(),
-                this.component.root as HTMLElement,
-            );
-            this.component.onRender?.(renderTriggers);
-        }
+        render(
+            this.component.template() as HtmlTemplate,
+            this.component.root as HTMLElement,
+        );
+        this.component.onRender(renderTriggers);
     }
 }
