@@ -3,35 +3,22 @@ import type { Component } from './Component';
 
 export class Styles {
     public styles: string[];
-    public sheet?: CSSStyleSheet;
 
     constructor(private component: Component) {
         this.styles = (this.component.constructor as any).$styles;
     }
 
     public initialize(): void {
-        if (
-            this.component.shadowRoot &&
-            !this.component.shadowRoot.adoptedStyleSheets?.length
-        ) {
-            if (App.config.cssReset?.length) {
-                this.styles = this.prependStyles(
-                    App.config.cssReset,
-                    this.styles,
-                );
-            }
-
+        if (this.component.shadowRoot) {
             if (this.styles.length) {
-                this.sheet = new CSSStyleSheet();
-                this.sheet.replaceSync(this.styles.join(' '));
-                this.component.shadowRoot.adoptedStyleSheets = [this.sheet];
+                const sheet = new CSSStyleSheet();
+                sheet.replaceSync(this.styles.join(' '));
+                const baseStyles = App.config.baseStyles || [];
+                this.component.shadowRoot.adoptedStyleSheets = [
+                    ...baseStyles,
+                    sheet,
+                ];
             }
         }
-    }
-
-    private prependStyles(value: string, array: string[]): string[] {
-        const newArray = array.slice();
-        newArray.unshift(value);
-        return newArray;
     }
 }

@@ -1,11 +1,5 @@
-// TODO: Come back to this
-// cssReset stupid idea, better to have more generic list of styles instances
-// that get passed to every component
-//
-// Does it have to be a class ?? I do like it though LOL
-// what is that entry point for, was that for router ? :shrug:
 type AppConfig = {
-    cssReset?: string;
+    baseStyles?: CSSStyleSheet[];
     entryPoint?: () => Promise<any>;
 };
 

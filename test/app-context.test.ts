@@ -1,5 +1,6 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { App, initApp } from '../app';
+import { makeCssStylesheet } from '../utilities';
 
 describe('App Context', () => {
     beforeEach(() => {
@@ -8,14 +9,14 @@ describe('App Context', () => {
 
     test('initApp', async () => {
         const entryPoint = vi.fn();
-        const cssReset = 'reset goes in here';
+        const baseStyles = [makeCssStylesheet('body { color: white; }')];
 
         initApp({
-            cssReset,
+            baseStyles,
             entryPoint,
         });
 
         expect(entryPoint).toHaveBeenCalledOnce();
-        expect(App.config.cssReset).toBe(cssReset);
+        expect(App.config.baseStyles).toBe(baseStyles);
     });
 });

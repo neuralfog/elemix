@@ -40,6 +40,6 @@
         "vitest": "3.0.7"
     },
     "peerDependencies": {
-        "@neuralfog/elemix-renderer": "0.1.5"
+        "@neuralfog/elemix-renderer": "0.1.6"
     }
 }

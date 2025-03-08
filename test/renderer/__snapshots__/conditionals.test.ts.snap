@@ -1,0 +1,73 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Render Conditionals > end 1`] = `
+"
+<conditional-rendering><!-- #shadowroot -->
+  <p>hello there</p>
+  <p>true</p>
+</conditional-rendering>
+"
+`;
+
+exports[`Render Conditionals > end 2`] = `
+"
+<conditional-rendering><!-- #shadowroot -->
+  <p>hello there</p>
+  <p>false</p>
+</conditional-rendering>
+"
+`;
+
+exports[`Render Conditionals > middle 1`] = `
+"
+<conditional-rendering><!-- #shadowroot -->
+  <p>hello there</p>
+  <p>true</p>
+  <p>hello there</p>
+</conditional-rendering>
+"
+`;
+
+exports[`Render Conditionals > middle 2`] = `
+"
+<conditional-rendering><!-- #shadowroot -->
+  <p>hello there</p>
+  <p>false</p>
+  <p>hello there</p>
+</conditional-rendering>
+"
+`;
+
+exports[`Render Conditionals > single 1`] = `
+"
+<conditional-rendering><!-- #shadowroot -->
+  <p>true</p>
+</conditional-rendering>
+"
+`;
+
+exports[`Render Conditionals > single 2`] = `
+"
+<conditional-rendering><!-- #shadowroot -->
+  <p>false</p>
+</conditional-rendering>
+"
+`;
+
+exports[`Render Conditionals > start 1`] = `
+"
+<conditional-rendering><!-- #shadowroot -->
+  <p>true</p>
+  <p>hello there</p>
+</conditional-rendering>
+"
+`;
+
+exports[`Render Conditionals > start 2`] = `
+"
+<conditional-rendering><!-- #shadowroot -->
+  <p>false</p>
+  <p>hello there</p>
+</conditional-rendering>
+"
+`;

@@ -34,3 +34,9 @@ export const camelToKebabCase = (input: string): string => {
         .map((x) => x.toLowerCase())
         .join('-');
 };
+
+export const makeCssStylesheet = (styles: string): CSSStyleSheet => {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(styles);
+    return sheet;
+};
