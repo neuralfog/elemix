@@ -1,6 +1,6 @@
 {
     "name": "@neuralfog/elemix",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "license": "MIT",
     "author": "brownhounds",
     "main": "dist/index.js",
@@ -40,6 +40,6 @@
         "vitest": "3.0.7"
     },
     "peerDependencies": {
-        "@neuralfog/elemix-renderer": "0.1.6"
+        "@neuralfog/elemix-renderer": "0.1.7"
     }
 }

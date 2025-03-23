@@ -7,7 +7,7 @@ import { signalWithFlag } from './SignalCustomFlag';
 export const CUSTOM_STATE_FLAG_1 = 'user defined state flag 1';
 export const CUSTOM_STATE_FLAG_2 = 'user defined state flag 2';
 
-@component({ tag: 'flags-app', signals: [signalWithFlag] })
+@component({ signals: [signalWithFlag] })
 export class FlagsApp extends Component {
     @state(CUSTOM_STATE_FLAG_1)
     state = {

@@ -2,7 +2,7 @@ import { expect, test, describe, beforeEach } from 'vitest';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
 import { Present } from '@neuralfog/elemix-testing';
-import type { ViewModelBinding } from './fixtures/ViewModelBinding';
+import type { ViewModelBindingApp } from './fixtures/ViewModelBinding';
 import { render } from '../utilities';
 
 import './fixtures/ViewModelBinding';
@@ -16,7 +16,7 @@ describe('View Model Binding', () => {
         const presenter = new Present().screen(
             html`<view-model-binding-app />`,
         );
-        const viewModelApp = presenter.root<ViewModelBinding>();
+        const viewModelApp = presenter.root<ViewModelBindingApp>();
 
         await render();
 
@@ -27,7 +27,7 @@ describe('View Model Binding', () => {
         const presenter = new Present().screen(
             html`<view-model-binding-app />`,
         );
-        const viewModelApp = presenter.root<ViewModelBinding>();
+        const viewModelApp = presenter.root<ViewModelBindingApp>();
 
         await render();
 
@@ -49,7 +49,7 @@ describe('View Model Binding', () => {
         const presenter = new Present().screen(
             html`<view-model-binding-app />`,
         );
-        const viewModelApp = presenter.root<ViewModelBinding>();
+        const viewModelApp = presenter.root<ViewModelBindingApp>();
         viewModelApp.state.input.value = 'Brown Hounds';
 
         await render();

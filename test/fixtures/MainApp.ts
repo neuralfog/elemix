@@ -5,7 +5,7 @@ import { state } from '../../src/decorators/state';
 
 import './TestComp';
 
-@component({ tag: 'main-app' })
+@component()
 export class MainApp extends Component {
     @state()
     state = {

@@ -4,8 +4,8 @@ import { component } from '../../src/decorators/component';
 import { ref } from '../../src/utilities';
 import { state } from '../../src/decorators/state';
 
-@component({ tag: 'view-model-binding-app' })
-export class ViewModelBinding extends Component {
+@component()
+export class ViewModelBindingApp extends Component {
     @state()
     state = {
         input: ref(''),

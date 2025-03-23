@@ -10,7 +10,7 @@ type TestCompProps = {
     handler: () => void;
 };
 
-@component({ tag: 'test-comp', signals: [store] })
+@component({ signals: [store] })
 export class TestComp extends Component<TestCompProps> {
     @state()
     state = {

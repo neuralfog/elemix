@@ -3,7 +3,7 @@ import { component } from '../../src/decorators/component';
 import type { Template } from '../../src/types';
 import { html } from '../../src/types';
 
-@component({ tag: 'life-cycle' })
+@component()
 export class LifeCycle extends Component {
     beforeMount = (): void => {};
     onRender = (_renderTrigger?: string[]): void => {};

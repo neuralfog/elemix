@@ -9,7 +9,7 @@ export type StateInPropsChildProps = {
     };
 };
 
-@component({ tag: 'state-in-props-child' })
+@component()
 export class StateInPropsChild extends Component<StateInPropsChildProps> {
     onRender = (_renderTrigger?: string[]): void => {};
 
@@ -18,7 +18,7 @@ export class StateInPropsChild extends Component<StateInPropsChildProps> {
     };
 }
 
-@component({ tag: 'state-in-props' })
+@component()
 export class StateInProps extends Component {
     @state()
     state = {

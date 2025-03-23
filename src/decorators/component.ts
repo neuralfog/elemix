@@ -2,7 +2,6 @@ import type { Reactive } from '../Reactive';
 import { camelToKebabCase } from '../utilities';
 
 type ComponentDecoratorConfig = {
-    tag?: string;
     signals?: Reactive<unknown>[];
     styles?: string[];
 };
@@ -18,7 +17,7 @@ const define = (tag: string, component: Component): void => {
 export const component =
     (config?: ComponentDecoratorConfig) =>
     (component: Component): void => {
-        const componentTag = config?.tag || camelToKebabCase(component.name);
+        const componentTag = camelToKebabCase(component.name);
 
         const extendedClass = class extends component {
             constructor() {

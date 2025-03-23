@@ -4,7 +4,7 @@ import { component } from '../../src/decorators/component';
 import { state } from '../../src/decorators/state';
 import { repeat } from '../../directives';
 
-@component({ tag: 'state-app' })
+@component()
 export class StateApp extends Component {
     @state()
     state = {

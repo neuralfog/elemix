@@ -6,7 +6,7 @@ import { repeat } from '../../directives';
 
 import './TestComp';
 
-@component({ tag: 'list-app' })
+@component()
 export class ListApp extends Component {
     @state()
     state = {
