@@ -4,7 +4,7 @@ import { Present } from '@neuralfog/elemix-testing';
 import { render } from '../../utilities';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 
-import '../fixtures/renderer/MultilpleRootNodes.ts';
+import '../fixtures/renderer/MultilpleRootNodes';
 
 describe('Renderer Multiple Root Nodes', () => {
     beforeEach(() => {

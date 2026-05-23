@@ -8,7 +8,7 @@ import {
     type ConditionalRendering,
 } from '../fixtures/renderer/ConditionalRendering';
 
-import '../fixtures/renderer/ConditionalRendering.ts';
+import '../fixtures/renderer/ConditionalRendering';
 
 describe('Render Conditionals', () => {
     beforeEach(() => {
