@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import type { StateInProps, StateInPropsChild } from './fixtures/StateInProps';
 import { RenderTrigger } from '../src/types';
 import { render } from '../utilities';
@@ -14,7 +14,9 @@ describe('State In Props', () => {
     });
 
     test('Initial State', async () => {
-        const presenter = new Present().screen(html`<state-in-props />`);
+        const presenter = present().screen(
+            html`<state-in-props></state-in-props>`,
+        );
 
         await render();
 
@@ -22,7 +24,9 @@ describe('State In Props', () => {
     });
 
     test('Change Value State In Props', async () => {
-        const presenter = new Present().screen(html`<state-in-props />`);
+        const presenter = present().screen(
+            html`<state-in-props></state-in-props>`,
+        );
         const parent = presenter.root<StateInProps>();
 
         await render();

@@ -4,14 +4,8 @@ import { LocalState } from './LocalState';
 import { Props } from './Props';
 import { Styles } from './Styles';
 import { activeRenderers } from '../renderers';
-import { Emits } from './Emits';
-
-export class Component<
-    ComponentProps = unknown,
-    ComponentEmits = unknown,
-> extends HTMLElement {
+export class Component<ComponentProps = unknown> extends HTMLElement {
     private $props = new Props<ComponentProps>(this);
-    private $emits = new Emits<ComponentEmits>();
     private $renderer = new Renderer(this);
     private $localState = new LocalState(this);
     private $styles = new Styles(this);
@@ -23,10 +17,6 @@ export class Component<
 
     public get props(): ComponentProps {
         return this.$props.data;
-    }
-
-    public get emits(): ComponentEmits {
-        return this.$emits.data;
     }
 
     public get styles(): Styles {

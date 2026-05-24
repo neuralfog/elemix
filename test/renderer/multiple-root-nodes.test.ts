@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import { render } from '../../utilities';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 
@@ -12,7 +12,9 @@ describe('Renderer Multiple Root Nodes', () => {
     });
 
     test('render', async () => {
-        const presenter = new Present().screen(html`<multiple-root-nodes />`);
+        const presenter = present().screen(
+            html`<multiple-root-nodes></multiple-root-nodes>`,
+        );
         await render();
         expect(HTML(presenter.root())).toMatchSnapshot();
     });

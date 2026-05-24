@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import type { MainApp } from './fixtures/MainApp';
 import { restoreSignal, store } from './fixtures/Signal';
 import { RenderTrigger } from '../src/types';
@@ -19,7 +19,7 @@ describe('Signal', () => {
     });
 
     test('Initial State', async () => {
-        const presenter = new Present().screen(html`<main-app />`);
+        const presenter = present().screen(html`<main-app></main-app>`);
 
         await render();
 
@@ -27,7 +27,7 @@ describe('Signal', () => {
     });
 
     test('Initial State - Single Component', async () => {
-        const presenter = new Present().screen(html`<list-app />`);
+        const presenter = present().screen(html`<list-app></list-app>`);
 
         await render();
 
@@ -35,7 +35,7 @@ describe('Signal', () => {
     });
 
     test('Initial State - Multiple Component', async () => {
-        const presenter = new Present().screen(html`<list-app />`);
+        const presenter = present().screen(html`<list-app></list-app>`);
         const listApp = presenter.root<ListApp>();
         listApp.state.count = 5;
 
@@ -45,7 +45,7 @@ describe('Signal', () => {
     });
 
     test('Modify Signal', async () => {
-        const presenter = new Present().screen(html`<main-app />`);
+        const presenter = present().screen(html`<main-app></main-app>`);
 
         await render();
 
@@ -70,7 +70,7 @@ describe('Signal Cleanup', () => {
     });
 
     test('Single Component', async () => {
-        const presenter = new Present().screen(html`<list-app />`);
+        const presenter = present().screen(html`<list-app></list-app>`);
 
         await render();
 
@@ -85,7 +85,7 @@ describe('Signal Cleanup', () => {
     });
 
     test('Multiple Component', async () => {
-        const presenter = new Present().screen(html`<list-app />`);
+        const presenter = present().screen(html`<list-app></list-app>`);
         const listApp = presenter.root<ListApp>();
         listApp.state.count = 5;
 

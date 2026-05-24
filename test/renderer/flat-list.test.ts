@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import { render } from '../../utilities';
 import type { RendererList } from '../fixtures/renderer/RendererList';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
@@ -14,7 +14,9 @@ describe('Renderer Flat List', () => {
 
     test('render', async () => {
         // Initial State
-        const presenter = new Present().screen(html`<renderer-list />`);
+        const presenter = present().screen(
+            html`<renderer-list></renderer-list>`,
+        );
         const component = presenter.getComponent<RendererList>('renderer-list');
         await render();
         expect(HTML(presenter.root<RendererList>())).toMatchSnapshot();

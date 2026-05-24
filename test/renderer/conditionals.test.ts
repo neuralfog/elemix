@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import { render } from '../../utilities';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import {
@@ -17,7 +17,9 @@ describe('Render Conditionals', () => {
 
     test('single', async () => {
         // Initial State
-        const presenter = new Present().screen(html`<conditional-rendering />`);
+        const presenter = present().screen(
+            html`<conditional-rendering></conditional-rendering>`,
+        );
         const component = presenter.getComponent<ConditionalRendering>(
             'conditional-rendering',
         );
@@ -30,7 +32,9 @@ describe('Render Conditionals', () => {
     });
 
     test('start', async () => {
-        const presenter = new Present().screen(html`<conditional-rendering />`);
+        const presenter = present().screen(
+            html`<conditional-rendering></conditional-rendering>`,
+        );
         const component = presenter.getComponent<ConditionalRendering>(
             'conditional-rendering',
         );
@@ -46,7 +50,9 @@ describe('Render Conditionals', () => {
     });
 
     test('end', async () => {
-        const presenter = new Present().screen(html`<conditional-rendering />`);
+        const presenter = present().screen(
+            html`<conditional-rendering></conditional-rendering>`,
+        );
         const component = presenter.getComponent<ConditionalRendering>(
             'conditional-rendering',
         );
@@ -62,7 +68,9 @@ describe('Render Conditionals', () => {
     });
 
     test('middle', async () => {
-        const presenter = new Present().screen(html`<conditional-rendering />`);
+        const presenter = present().screen(
+            html`<conditional-rendering></conditional-rendering>`,
+        );
         const component = presenter.getComponent<ConditionalRendering>(
             'conditional-rendering',
         );

@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import type { StateApp } from './fixtures/StateApp';
 import { RenderTrigger } from '../src/types';
 import { render } from '../utilities';
@@ -14,7 +14,7 @@ describe('State', () => {
     });
 
     test('Initial State', async () => {
-        const presenter = new Present().screen(html`<state-app />`);
+        const presenter = present().screen(html`<state-app></state-app>`);
 
         await render();
 
@@ -22,7 +22,7 @@ describe('State', () => {
     });
 
     test('Modify State', async () => {
-        const presenter = new Present().screen(html`<state-app />`);
+        const presenter = present().screen(html`<state-app></state-app>`);
 
         await render();
 

@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import { render } from '../utilities';
 import {
     CUSTOM_STATE_FLAG_1,
@@ -20,7 +20,7 @@ describe('User Defined Render Flags', () => {
     });
 
     test('onRender called with user defined flags', async () => {
-        const presenter = new Present().screen(html`<flags-app />`);
+        const presenter = present().screen(html`<flags-app></flags-app>`);
         const flagsApp = presenter.root<FlagsApp>();
 
         await render();

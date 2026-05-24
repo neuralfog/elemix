@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import type { LifeCycle } from './fixtures/LifeCycle';
 import type { LifeCycleNoTemplate } from './fixtures/LifeCycleNoTemplate';
 import { RenderTrigger } from '../src/types';
@@ -15,7 +15,7 @@ describe('Lifecycle Methods', () => {
     });
 
     test('onMount with template', async () => {
-        const presenter = new Present().screen(html`<life-cycle />`);
+        const presenter = present().screen(html`<life-cycle></life-cycle>`);
         const lifeCycle = presenter.root<LifeCycle>();
 
         const onRender = vi.spyOn(lifeCycle, 'onRender');
@@ -30,8 +30,8 @@ describe('Lifecycle Methods', () => {
     });
 
     test('onMount without template', async () => {
-        const presenter = new Present().screen(
-            html`<life-cycle-no-template />`,
+        const presenter = present().screen(
+            html`<life-cycle-no-template></life-cycle-no-template>`,
         );
         const lifeCycle = presenter.root<LifeCycleNoTemplate>();
 
@@ -45,7 +45,7 @@ describe('Lifecycle Methods', () => {
     });
 
     test('onDispose', async () => {
-        const presenter = new Present().screen(html`<life-cycle />`);
+        const presenter = present().screen(html`<life-cycle></life-cycle>`);
         const lifeCycle = presenter.root<LifeCycle>();
 
         const onDispose = vi.spyOn(lifeCycle, 'onDispose');

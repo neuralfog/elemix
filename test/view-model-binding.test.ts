@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { HTML } from '@neuralfog/elemix-testing/snapshots';
 import { html } from '@neuralfog/elemix-renderer';
-import { Present } from '@neuralfog/elemix-testing';
+import { present } from '@neuralfog/elemix-testing';
 import type { ViewModelBindingApp } from './fixtures/ViewModelBinding';
 import { render } from '../utilities';
 
@@ -13,8 +13,8 @@ describe('View Model Binding', () => {
     });
 
     test('Initial State', async () => {
-        const presenter = new Present().screen(
-            html`<view-model-binding-app />`,
+        const presenter = present().screen(
+            html`<view-model-binding-app></view-model-binding-app>`,
         );
         const viewModelApp = presenter.root<ViewModelBindingApp>();
 
@@ -24,8 +24,8 @@ describe('View Model Binding', () => {
     });
 
     test('Update Input Value', async () => {
-        const presenter = new Present().screen(
-            html`<view-model-binding-app />`,
+        const presenter = present().screen(
+            html`<view-model-binding-app></view-model-binding-app>`,
         );
         const viewModelApp = presenter.root<ViewModelBindingApp>();
 
@@ -46,8 +46,8 @@ describe('View Model Binding', () => {
     });
 
     test('Update View Model', async () => {
-        const presenter = new Present().screen(
-            html`<view-model-binding-app />`,
+        const presenter = present().screen(
+            html`<view-model-binding-app></view-model-binding-app>`,
         );
         const viewModelApp = presenter.root<ViewModelBindingApp>();
         viewModelApp.state.input.value = 'Brown Hounds';

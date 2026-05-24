@@ -1,6 +1,6 @@
 {
     "name": "@neuralfog/elemix",
-    "version": "0.1.8",
+    "version": "0.2.0",
     "license": "MIT",
     "author": "brownhounds",
     "main": "dist/index.js",
@@ -26,20 +26,21 @@
         "test-nc": "vitest run",
         "test-ui": "npx vitest --api.host 0.0.0.0 --ui",
         "lint": "tsc --noEmit && biome format && biome lint",
+        "lint:fix": "biome format --write && biome lint --fix",
         "release": "npm run clean && npm run build && npm publish --access public"
     },
     "devDependencies": {
         "@neuralfog/biome-config": "0.1.2",
-        "@neuralfog/elemix-testing": "0.1.4",
-        "@neuralfog/ts-config": "0.1.1",
-        "@vitest/coverage-v8": "3.0.7",
-        "@vitest/ui": "3.0.7",
-        "jsdom": "26.0.0",
-        "typescript": "5.8.2",
-        "vite": "6.2.3",
-        "vitest": "3.0.7"
+        "@neuralfog/elemix-testing": "0.2.0",
+        "@neuralfog/ts-config": "0.1.2",
+        "@vitest/coverage-v8": "4.1.7",
+        "@vitest/ui": "4.1.7",
+        "jsdom": "29.1.1",
+        "typescript": "6.0.3",
+        "vite": "8.0.14",
+        "vitest": "4.1.7"
     },
     "peerDependencies": {
-        "@neuralfog/elemix-renderer": "0.1.8"
+        "@neuralfog/elemix-renderer": "0.3.0"
     }
 }

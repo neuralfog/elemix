@@ -280,39 +280,12 @@ export class Dashboard extends Component {
 }
 ```
 
-## Emits
-
-Use the `@emits:` prefix to pass event handlers to child components.
-
-```typescript
-html`<child-component @emits:change=${(value) => console.log(value)} />`;
-```
-
-The child component accesses emits via `this.emits`:
-
-```typescript
-@component()
-export class ChildComponent extends Component {
-    template(): Template {
-        return html`<button @click=${() => this.emits.change('updated')}>
-            Notify
-        </button>`;
-    }
-}
-```
-
 ## Conditionals
 
-Use ternary expressions in templates, or the `condition` directive.
+Use ternary expressions in templates.
 
 ```typescript
 html`${isActive ? html`<p>Active</p>` : html`<p>Inactive</p>`}`;
-```
-
-```typescript
-import { condition } from '@neuralfog/elemix/directives';
-
-html`${condition(isActive, html`<p>Active</p>`, html`<p>Inactive</p>`)}`;
 ```
 
 ## Repeat
