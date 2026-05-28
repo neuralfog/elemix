@@ -1,11 +1,13 @@
 {
     "name": "@neuralfog/elemix",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "license": "MIT",
     "author": "brownhounds",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
-    "files": ["./dist/**/*"],
+    "files": [
+        "./dist/**/*"
+    ],
     "exports": {
         ".": "./dist/index.js",
         "./decorators": "./dist/decorators.js",
@@ -17,11 +19,12 @@
         "./utilities": "./dist/utilities.js"
     },
     "scripts": {
-        "clean": "rm -rf ./dist ./coverage",
+        "clean": "rm -rf ./dist ./bundle ./coverage",
         "clean-npm": "rm -rf ./node_modules/ && rm package-lock.json && npm i",
         "emit-declarations": "tsc --emitDeclarationOnly --declaration --outDir ./dist",
         "build-lib": "vite build",
         "build": "npm run clean && npm run build-lib && npm run emit-declarations",
+        "build:bundle": "vite build --config vite.bundle.config.mjs",
         "test": "vitest run --coverage --reporter verbose",
         "test-nc": "vitest run",
         "test-ui": "npx vitest --api.host 0.0.0.0 --ui",
@@ -35,6 +38,7 @@
         "@neuralfog/ts-config": "0.1.2",
         "@vitest/coverage-v8": "4.1.7",
         "@vitest/ui": "4.1.7",
+        "esbuild": "0.28.0",
         "jsdom": "29.1.1",
         "typescript": "6.0.3",
         "vite": "8.0.14",
