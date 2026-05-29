@@ -23,7 +23,10 @@ export class Renderer {
                     this.scheduledRenderTriggers.clear();
                     this.locked = false;
                     activeRenderers.delete(this);
-                    if (isConnectedCallback) this.component.onMount();
+                    if (isConnectedCallback) {
+                        this.component.onMount();
+                        this.component.removeAttribute('data-cloak');
+                    }
                 }, 0);
             }
         }

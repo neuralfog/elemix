@@ -30,6 +30,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
+        this.setAttribute('data-cloak', '');
     }
 
     connectedCallback(): void {
