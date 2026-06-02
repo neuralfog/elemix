@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { html, render } from '@neuralfog/elemix-renderer';
-import { repeat } from '@neuralfog/elemix-renderer/directives';
+import { html, render } from '../../src/renderer/render';
+import { repeat } from '../../src/renderer/directives';
 
 describe('Directives', () => {
     beforeEach(() => {

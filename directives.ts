@@ -1,3 +1,1 @@
-import { repeat } from '@neuralfog/elemix-renderer/directives';
-
-export { repeat };
+export { repeat } from './src/renderer/directives';

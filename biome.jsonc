@@ -1,9 +1,19 @@
 {
     "extends": ["@neuralfog/biome-config/biome"],
     "files": {
-        "ignore": ["node_modules/**/*", "dist/**/*", "coverage/**/*"]
+        "ignore": [
+            "node_modules/**/*",
+            "dist/**/*",
+            "bundle/**/*",
+            "coverage/**/*"
+        ]
     },
     "formatter": {
-        "ignore": ["node_modules/**/*", "dist/**/*", "coverage/**/*"]
+        "ignore": [
+            "node_modules/**/*",
+            "dist/**/*",
+            "bundle/**/*",
+            "coverage/**/*"
+        ]
     }
 }

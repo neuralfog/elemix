@@ -1,4 +1,4 @@
-import { repeat } from '@neuralfog/elemix-renderer/directives';
+import { repeat } from '../../../src/renderer/directives';
 import { Component } from '../../../src/component/Component';
 import { html, type Template } from '../../../src/types';
 import { component } from '../../../src/decorators/component';

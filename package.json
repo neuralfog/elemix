@@ -1,6 +1,6 @@
 {
     "name": "@neuralfog/elemix",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "license": "MIT",
     "author": "brownhounds",
     "main": "dist/index.js",
@@ -10,6 +10,7 @@
         ".": "./dist/index.js",
         "./decorators": "./dist/decorators.js",
         "./directives": "./dist/directives.js",
+        "./render": "./dist/render.js",
         "./signal": "./dist/signal.js",
         "./reactive": "./dist/reactive.js",
         "./config": "./dist/config.js",
@@ -41,8 +42,5 @@
         "typescript": "6.0.3",
         "vite": "8.0.14",
         "vitest": "4.1.7"
-    },
-    "peerDependencies": {
-        "@neuralfog/elemix-renderer": "0.4.0"
     }
 }

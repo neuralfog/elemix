@@ -9,6 +9,7 @@ export default defineConfig({
                 resolve('decorators.ts'),
                 resolve('directives.ts'),
                 resolve('reactive.ts'),
+                resolve('render.ts'),
                 resolve('signal.ts'),
                 resolve('app.ts'),
                 resolve('utilities.ts'),
@@ -16,9 +17,6 @@ export default defineConfig({
             name: 'elemix',
             fileName: (_, entryName) => `${entryName}.js`,
             formats: ['cjs'],
-        },
-        rollupOptions: {
-            external: ['@neuralfog/elemix-renderer'],
         },
     },
 });

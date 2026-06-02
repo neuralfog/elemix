@@ -1,4 +1,5 @@
-import { type HtmlTemplate, render } from '@neuralfog/elemix-renderer';
+import { render } from '../renderer/render';
+import type { HtmlTemplate } from '../renderer/types';
 import type { Component } from './Component';
 import type { RenderTriggerType } from '../types';
 import { activeRenderers, renderTracking } from '../renderers';

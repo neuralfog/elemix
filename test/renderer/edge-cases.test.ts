@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { html, render } from '@neuralfog/elemix-renderer';
+import { html, render } from '../../src/renderer/render';
 import { present } from '@neuralfog/elemix-testing';
 
 describe('Edge Cases', () => {

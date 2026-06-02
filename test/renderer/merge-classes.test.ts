@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { mergeClasses } from '@neuralfog/elemix-renderer/utils';
+import { mergeClasses } from '../../src/renderer/utils';
 
 describe('mergeClasses', () => {
     test('merges two class strings', () => {

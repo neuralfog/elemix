@@ -1,5 +1,5 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { html } from '@neuralfog/elemix-renderer';
+import { html } from '../../src/renderer/render';
 import { present } from '@neuralfog/elemix-testing';
 import { render } from '../../utilities';
 import type { RendererList } from '../fixtures/renderer/RendererList';

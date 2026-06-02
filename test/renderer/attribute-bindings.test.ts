@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { html } from '@neuralfog/elemix-renderer';
+import { html } from '../../src/renderer/render';
 import { present } from '@neuralfog/elemix-testing';
 
 class PropEl extends HTMLElement {

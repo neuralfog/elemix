@@ -1,2 +1,2 @@
-export { mergeClasses } from '@neuralfog/elemix-renderer/utils';
+export { mergeClasses } from './src/renderer/utils';
 export * from './src/utilities';
