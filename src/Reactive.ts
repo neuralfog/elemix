@@ -1,5 +1,6 @@
 import type { Component } from './component/Component';
 import type { RenderTriggerType } from './types';
+import { renderTracking } from './renderers';
 
 export class Reactive<State> {
     public subscribers = new Set<Component>();
@@ -35,6 +36,16 @@ export class Reactive<State> {
                 const prop = target[name];
 
                 unsupportedCollectionError(prop);
+
+                // Auto-subscribe whichever component is rendering right now.
+                // Bidirectional bookkeeping: signal tracks the component as a
+                // subscriber, component tracks the signal so it can unsubscribe
+                // on next render / disposal.
+                const reader = renderTracking.active;
+                if (reader) {
+                    reactive.subscribers.add(reader);
+                    reader.tracked.add(reactive);
+                }
 
                 if (
                     typeof prop === 'object' &&

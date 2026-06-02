@@ -1,7 +1,7 @@
 import { type HtmlTemplate, render } from '@neuralfog/elemix-renderer';
 import type { Component } from './Component';
 import type { RenderTriggerType } from '../types';
-import { activeRenderers } from '../renderers';
+import { activeRenderers, renderTracking } from '../renderers';
 
 export class Renderer {
     private locked = false;
@@ -33,10 +33,25 @@ export class Renderer {
     }
 
     private render(renderTriggers: RenderTriggerType[]): void {
-        render(
-            this.component.template() as HtmlTemplate,
-            this.component.root as HTMLElement,
-        );
+        // Drop subscriptions captured during the previous render so we don't
+        // hold stale dependencies for signals no longer read.
+        for (const sig of this.component.tracked) {
+            sig.unsubscribe(this.component);
+        }
+        this.component.tracked.clear();
+
+        // Mark this component as the active reader so Reactive proxies
+        // subscribe it automatically when their values are read.
+        const prev = renderTracking.active;
+        renderTracking.active = this.component;
+        try {
+            render(
+                this.component.template() as HtmlTemplate,
+                this.component.root as HTMLElement,
+            );
+        } finally {
+            renderTracking.active = prev;
+        }
         this.component.onRender(renderTriggers);
     }
 }

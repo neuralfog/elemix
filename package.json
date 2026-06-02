@@ -45,6 +45,6 @@
         "vitest": "4.1.7"
     },
     "peerDependencies": {
-        "@neuralfog/elemix-renderer": "0.3.0"
+        "@neuralfog/elemix-renderer": "file:neuralfog-elemix-renderer-0.3.0.tgz"
     }
 }

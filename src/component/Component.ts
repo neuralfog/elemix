@@ -4,12 +4,22 @@ import { LocalState } from './LocalState';
 import { Props } from './Props';
 import { Styles } from './Styles';
 import { activeRenderers } from '../renderers';
+
+type Trackable = { unsubscribe(c: Component): unknown };
+
 export class Component<ComponentProps = unknown> extends HTMLElement {
     private $props = new Props<ComponentProps>(this);
     private $renderer = new Renderer(this);
     private $localState = new LocalState(this);
     private $styles = new Styles(this);
     private $controlStyles?: CSSStyleSheet[];
+
+    /**
+     * Signals auto-subscribed during template() execution via the
+     * renderTracking mechanism. Cleared and rebuilt on every render so
+     * conditional reads correctly add and remove subscriptions.
+     */
+    public tracked = new Set<Trackable>();
 
     public get root(): HTMLElement | ShadowRoot | null {
         return this.shadowRoot;
@@ -72,9 +82,10 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     }
 
     private unsubscribeFromSignals(): void {
-        for (const signal of (this.constructor as any).$signals) {
-            signal.unsubscribe(this);
+        for (const sig of this.tracked) {
+            sig.unsubscribe(this);
         }
+        this.tracked.clear();
     }
 
     public hasSlot(name: string): boolean {
