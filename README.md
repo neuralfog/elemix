@@ -61,6 +61,18 @@ export class HelloWorld extends Component {
 }
 ```
 
+## Cloak
+
+Every component is created with a `data-cloak` attribute that is removed automatically once the first render completes. Use it to prevent flash of unrendered content — hide components in global CSS until they're ready:
+
+```css
+[data-cloak] {
+    visibility: hidden;
+}
+```
+
+Once the component mounts and finishes its first render, `data-cloak` is dropped and the element becomes visible.
+
 ## Rendering
 
 Renders are triggered implicitly by mutating `@state()` properties or subscribed signals. To trigger a render manually, call `this.render()`. This is useful when you want fine control over rendering without reactivity getting in the way.
@@ -80,6 +92,22 @@ export class UserCard extends Component {
     }
 }
 ```
+
+## Self-Closing Tags
+
+Custom elements and other non-void HTML elements can be written in self-closing form. The renderer expands `<my-tag />` to `<my-tag></my-tag>` before parsing, so you can drop the redundant closing tag whenever the element has no children.
+
+```typescript
+template(): Template {
+    return html`
+        <pf-icon-search />
+        <pf-divider />
+        <pf-card data-variant="primary" />
+    `;
+}
+```
+
+Void HTML elements (`br`, `hr`, `img`, `input`, `link`, `meta`, etc.) are left alone — they're already self-closing per the HTML spec.
 
 ## Props
 
@@ -215,7 +243,11 @@ export class Form extends Component {
 
 ## Signals
 
-Signals are reactive stores shared across components. Define a signal as a standalone module and subscribe components via the `@component` decorator.
+Signals are reactive stores shared across components. Read a signal's value inside a component's `template()` and the component re-renders whenever that signal changes — **no manual subscription needed**.
+
+Subscription is fully automatic: while `template()` runs, every `signal.value.x` access tells the framework "this component depends on this signal." After the render, the component is subscribed to every signal it actually read. On the next render, stale subscriptions are dropped and current ones re-tracked, so conditional reads stay correct and nothing leaks. When the component leaves the DOM, all of its signal subscriptions are cleaned up automatically.
+
+You don't register signals anywhere. You just read them.
 
 ### Definition
 
@@ -230,15 +262,13 @@ export const counter = signal({
 
 ### Usage
 
-Subscribe to a signal by passing it to the `signals` array. Access its state via `signal.value` and mutate it directly to trigger re-renders in all subscribed components.
-
 ```typescript
 import { Component, html, type Template } from '@neuralfog/elemix';
 import { component } from '@neuralfog/elemix/decorators';
 
 import { counter } from '../signals/counter';
 
-@component({ signals: [counter] })
+@component()
 export class CounterDisplay extends Component {
     template(): Template {
         const { count, label } = counter.value;

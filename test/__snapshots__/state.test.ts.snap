@@ -2,7 +2,7 @@
 
 exports[`State > Initial State 1`] = `
 "
-<state-app><!-- #shadowroot -->
+<state-app data-cloak=""><!-- #shadowroot -->
   <h1>StateApp</h1>
   <p>Initial Value<!--₥0--></p>
   <p>0<!--₥1--></p>
@@ -19,7 +19,7 @@ exports[`State > Initial State 1`] = `
 
 exports[`State > Modify State 1`] = `
 "
-<state-app><!-- #shadowroot -->
+<state-app data-cloak=""><!-- #shadowroot -->
   <h1>StateApp</h1>
   <p>New Value<!--₥0--></p>
   <p>10<!--₥1--></p>

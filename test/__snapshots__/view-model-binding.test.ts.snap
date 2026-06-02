@@ -2,7 +2,7 @@
 
 exports[`View Model Binding > Initial State 1`] = `
 "
-<view-model-binding-app><!-- #shadowroot -->
+<view-model-binding-app data-cloak=""><!-- #shadowroot -->
   <h1>RefApp</h1>
   <p><!--₥0--></p><input type="text">
 </view-model-binding-app>
@@ -11,7 +11,7 @@ exports[`View Model Binding > Initial State 1`] = `
 
 exports[`View Model Binding > Update Input Value 1`] = `
 "
-<view-model-binding-app><!-- #shadowroot -->
+<view-model-binding-app data-cloak=""><!-- #shadowroot -->
   <h1>RefApp</h1>
   <p>Brown Hounds<!--₥0--></p><input type="text">
 </view-model-binding-app>
@@ -20,7 +20,7 @@ exports[`View Model Binding > Update Input Value 1`] = `
 
 exports[`View Model Binding > Update View Model 1`] = `
 "
-<view-model-binding-app><!-- #shadowroot -->
+<view-model-binding-app data-cloak=""><!-- #shadowroot -->
   <h1>RefApp</h1>
   <p>Brown Hounds<!--₥0--></p><input type="text">
 </view-model-binding-app>

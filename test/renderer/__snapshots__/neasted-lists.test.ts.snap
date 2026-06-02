@@ -2,7 +2,7 @@
 
 exports[`Renderer Nested Lists > render one level 1`] = `
 "
-<renderer-nested-list><!-- #shadowroot -->
+<renderer-nested-list data-cloak=""><!-- #shadowroot -->
   <ul>
     <li>Emily Johnson
       <ul>
@@ -32,7 +32,7 @@ exports[`Renderer Nested Lists > render one level 1`] = `
 
 exports[`Renderer Nested Lists > render two levels 1`] = `
 "
-<renderer-tripple-nested-list><!-- #shadowroot -->
+<renderer-tripple-nested-list data-cloak=""><!-- #shadowroot -->
   <ul>
     <li>Emily Johnson
       <ul>

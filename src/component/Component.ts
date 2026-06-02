@@ -89,6 +89,8 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     }
 
     public hasSlot(name: string): boolean {
-        return Array.from(this.children).some((c) => c.getAttribute('slot') === name);
+        return Array.from(this.children).some(
+            (c) => c.getAttribute('slot') === name,
+        );
     }
 }

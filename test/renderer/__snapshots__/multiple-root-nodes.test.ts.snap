@@ -2,7 +2,7 @@
 
 exports[`Renderer Multiple Root Nodes > render 1`] = `
 "
-<multiple-root-nodes><!-- #shadowroot -->
+<multiple-root-nodes data-cloak=""><!-- #shadowroot -->
   <div>Hello There!!</div>
   <div>Hello There!!</div>
   <div>Hello There!!</div>

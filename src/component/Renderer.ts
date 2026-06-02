@@ -13,7 +13,19 @@ export class Renderer {
         renderTrigger?: RenderTriggerType,
         isConnectedCallback = false,
     ): void {
-        if (this.component.template()) {
+        // The truthiness check below runs `template()` synchronously. If we
+        // happen to be inside another component's render, signal reads inside
+        // this template would auto-subscribe the WRONG component. Suspend the
+        // tracking just for the check.
+        const prev = renderTracking.active;
+        renderTracking.active = null;
+        let hasTemplate: unknown;
+        try {
+            hasTemplate = this.component.template();
+        } finally {
+            renderTracking.active = prev;
+        }
+        if (hasTemplate) {
             if (renderTrigger) this.scheduledRenderTriggers.add(renderTrigger);
             if (!this.locked) {
                 this.locked = true;

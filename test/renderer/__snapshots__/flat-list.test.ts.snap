@@ -2,7 +2,7 @@
 
 exports[`Renderer Flat List > render 1`] = `
 "
-<renderer-list><!-- #shadowroot -->
+<renderer-list data-cloak=""><!-- #shadowroot -->
   <ul>
     <li>Emily Johnson<!--₥0--></li>
     <li>Michael Smith<!--₥0--></li>
@@ -16,7 +16,7 @@ exports[`Renderer Flat List > render 1`] = `
 
 exports[`Renderer Flat List > render 2`] = `
 "
-<renderer-list><!-- #shadowroot -->
+<renderer-list data-cloak=""><!-- #shadowroot -->
   <ul>
     <li>Sophia Brown<!--₥0--></li>
     <li>Olivia Davis<!--₥0--></li>
@@ -31,7 +31,7 @@ exports[`Renderer Flat List > render 2`] = `
 
 exports[`Renderer Flat List > render 3`] = `
 "
-<renderer-list><!-- #shadowroot -->
+<renderer-list data-cloak=""><!-- #shadowroot -->
   <ul>
     <li>Michael Smith<!--₥0--></li>
     <li>Benjamin Williams<!--₥0--></li>
@@ -42,7 +42,7 @@ exports[`Renderer Flat List > render 3`] = `
 
 exports[`Renderer Flat List > render 4`] = `
 "
-<renderer-list><!-- #shadowroot -->
+<renderer-list data-cloak=""><!-- #shadowroot -->
   <ul><!--₥0--></ul>
 </renderer-list>
 "

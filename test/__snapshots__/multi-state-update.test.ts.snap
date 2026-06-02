@@ -2,10 +2,10 @@
 
 exports[`Props > Initial State 1`] = `
 "
-<main-app><!-- #shadowroot -->
+<main-app data-cloak=""><!-- #shadowroot -->
   <h1>MainApp</h1>
   <p id="main-app-state">Initial State Value<!--₥0--></p>
-  <test-comp><!-- #shadowroot -->
+  <test-comp data-cloak=""><!-- #shadowroot -->
     <div>
       <h1>TestComp</h1>
       <p id="test-comp-state">Initial State Value<!--₥0--></p>
@@ -20,10 +20,10 @@ exports[`Props > Initial State 1`] = `
 
 exports[`Props > Modify Props, State and Signal 1`] = `
 "
-<main-app><!-- #shadowroot -->
+<main-app data-cloak=""><!-- #shadowroot -->
   <h1>MainApp</h1>
   <p id="main-app-state">Initial State Value<!--₥0--></p>
-  <test-comp><!-- #shadowroot -->
+  <test-comp data-cloak=""><!-- #shadowroot -->
     <div>
       <h1>TestComp</h1>
       <p id="test-comp-state">New state Value<!--₥0--></p>

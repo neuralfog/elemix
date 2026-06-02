@@ -7,7 +7,7 @@ import { signalWithFlag } from './SignalCustomFlag';
 export const CUSTOM_STATE_FLAG_1 = 'user defined state flag 1';
 export const CUSTOM_STATE_FLAG_2 = 'user defined state flag 2';
 
-@component({ signals: [signalWithFlag] })
+@component()
 export class FlagsApp extends Component {
     @state(CUSTOM_STATE_FLAG_1)
     state = {
@@ -22,6 +22,9 @@ export class FlagsApp extends Component {
     onRender = (_renderTrigger?: string[]): void => {};
 
     template = (): Template => {
-        return html` <h1>FlagsApp</h1> `;
+        return html`
+            <h1>FlagsApp</h1>
+            <p>${signalWithFlag.value.value}</p>
+        `;
     };
 }

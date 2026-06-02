@@ -1,13 +1,11 @@
 {
     "name": "@neuralfog/elemix",
-    "version": "0.2.2",
+    "version": "0.3.0",
     "license": "MIT",
     "author": "brownhounds",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
-    "files": [
-        "./dist/**/*"
-    ],
+    "files": ["./dist/**/*"],
     "exports": {
         ".": "./dist/index.js",
         "./decorators": "./dist/decorators.js",
@@ -45,6 +43,6 @@
         "vitest": "4.1.7"
     },
     "peerDependencies": {
-        "@neuralfog/elemix-renderer": "file:neuralfog-elemix-renderer-0.3.0.tgz"
+        "@neuralfog/elemix-renderer": "0.4.0"
     }
 }

@@ -2,7 +2,7 @@
 
 exports[`Render Conditionals > end 1`] = `
 "
-<conditional-rendering><!-- #shadowroot -->
+<conditional-rendering data-cloak=""><!-- #shadowroot -->
   <p>hello there</p>
   <p>true</p>
 </conditional-rendering>
@@ -11,7 +11,7 @@ exports[`Render Conditionals > end 1`] = `
 
 exports[`Render Conditionals > end 2`] = `
 "
-<conditional-rendering><!-- #shadowroot -->
+<conditional-rendering data-cloak=""><!-- #shadowroot -->
   <p>hello there</p>
   <p>false</p>
 </conditional-rendering>
@@ -20,7 +20,7 @@ exports[`Render Conditionals > end 2`] = `
 
 exports[`Render Conditionals > middle 1`] = `
 "
-<conditional-rendering><!-- #shadowroot -->
+<conditional-rendering data-cloak=""><!-- #shadowroot -->
   <p>hello there</p>
   <p>true</p>
   <p>hello there</p>
@@ -30,7 +30,7 @@ exports[`Render Conditionals > middle 1`] = `
 
 exports[`Render Conditionals > middle 2`] = `
 "
-<conditional-rendering><!-- #shadowroot -->
+<conditional-rendering data-cloak=""><!-- #shadowroot -->
   <p>hello there</p>
   <p>false</p>
   <p>hello there</p>
@@ -40,7 +40,7 @@ exports[`Render Conditionals > middle 2`] = `
 
 exports[`Render Conditionals > single 1`] = `
 "
-<conditional-rendering><!-- #shadowroot -->
+<conditional-rendering data-cloak=""><!-- #shadowroot -->
   <p>true</p>
 </conditional-rendering>
 "
@@ -48,7 +48,7 @@ exports[`Render Conditionals > single 1`] = `
 
 exports[`Render Conditionals > single 2`] = `
 "
-<conditional-rendering><!-- #shadowroot -->
+<conditional-rendering data-cloak=""><!-- #shadowroot -->
   <p>false</p>
 </conditional-rendering>
 "
@@ -56,7 +56,7 @@ exports[`Render Conditionals > single 2`] = `
 
 exports[`Render Conditionals > start 1`] = `
 "
-<conditional-rendering><!-- #shadowroot -->
+<conditional-rendering data-cloak=""><!-- #shadowroot -->
   <p>true</p>
   <p>hello there</p>
 </conditional-rendering>
@@ -65,7 +65,7 @@ exports[`Render Conditionals > start 1`] = `
 
 exports[`Render Conditionals > start 2`] = `
 "
-<conditional-rendering><!-- #shadowroot -->
+<conditional-rendering data-cloak=""><!-- #shadowroot -->
   <p>false</p>
   <p>hello there</p>
 </conditional-rendering>
