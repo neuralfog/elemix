@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { HTML } from '@neuralfog/elemix-testing/snapshots';
+import { HTML } from '../testing/snapshots';
 import { html } from '../src/renderer/render';
-import { present } from '@neuralfog/elemix-testing';
+import { present } from '../testing';
 import type { ViewModelBindingApp } from './fixtures/ViewModelBinding';
 import { render } from '../utilities';
 

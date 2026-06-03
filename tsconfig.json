@@ -1,4 +1,7 @@
 {
     "extends": "@neuralfog/ts-config/index.json",
+    "compilerOptions": {
+        "types": ["node"]
+    },
     "include": ["."]
 }

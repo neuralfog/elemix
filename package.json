@@ -1,6 +1,6 @@
 {
     "name": "@neuralfog/elemix",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "license": "MIT",
     "author": "brownhounds",
     "main": "dist/index.js",
@@ -15,7 +15,10 @@
         "./reactive": "./dist/reactive.js",
         "./config": "./dist/config.js",
         "./app": "./dist/app.js",
-        "./utilities": "./dist/utilities.js"
+        "./utilities": "./dist/utilities.js",
+        "./testing": "./dist/testing/index.js",
+        "./testing/snapshots": "./dist/testing/snapshots.js",
+        "./testing/mocks": "./dist/testing/mocks.js"
     },
     "scripts": {
         "clean": "rm -rf ./dist ./bundle ./coverage",
@@ -31,15 +34,31 @@
         "lint:fix": "biome format --write && biome lint --fix",
         "release": "npm run clean && npm run build && npm publish --access public"
     },
+    "peerDependencies": {
+        "rehype-format": "5.0.1",
+        "rehype-parse": "9.0.1",
+        "rehype-stringify": "10.0.1",
+        "unified": "11.0.5"
+    },
+    "peerDependenciesMeta": {
+        "rehype-format": { "optional": true },
+        "rehype-parse": { "optional": true },
+        "rehype-stringify": { "optional": true },
+        "unified": { "optional": true }
+    },
     "devDependencies": {
         "@neuralfog/biome-config": "0.1.2",
-        "@neuralfog/elemix-testing": "0.2.0",
         "@neuralfog/ts-config": "0.1.2",
+        "@types/node": "25.9.1",
         "@vitest/coverage-v8": "4.1.7",
         "@vitest/ui": "4.1.7",
         "esbuild": "0.28.0",
         "jsdom": "29.1.1",
+        "rehype-format": "5.0.1",
+        "rehype-parse": "9.0.1",
+        "rehype-stringify": "10.0.1",
         "typescript": "6.0.3",
+        "unified": "11.0.5",
         "vite": "8.0.14",
         "vitest": "4.1.7"
     }

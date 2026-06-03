@@ -1,0 +1,116 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Renderer Self-Closing Tags > conditional template hole with self-closing tag — off / on / off > off 1`] = `
+"
+<conditional-self-close data-cloak=""><!-- #shadowroot -->
+  <div class="container"><span class="leading">leading</span><input type="text" placeholder="search"></div>
+</conditional-self-close>
+"
+`;
+
+exports[`Renderer Self-Closing Tags > conditional template hole with self-closing tag — off / on / off > off-again 1`] = `
+"
+<conditional-self-close data-cloak=""><!-- #shadowroot -->
+  <div class="container"><span class="leading">leading</span><input type="text" placeholder="search"></div>
+</conditional-self-close>
+"
+`;
+
+exports[`Renderer Self-Closing Tags > conditional template hole with self-closing tag — off / on / off > on 1`] = `
+"
+<conditional-self-close data-cloak=""><!-- #shadowroot -->
+  <div class="container"><span class="leading">leading</span><input type="text" placeholder="search"><button class="action"><self-closing-child data-cloak=""><!-- #shadowroot --><span class="child"></span></self-closing-child></button></div>
+</conditional-self-close>
+"
+`;
+
+exports[`Renderer Self-Closing Tags > search-with-clear — empty / with-query / cleared > cleared 1`] = `
+"
+<search-with-clear data-cloak=""><!-- #shadowroot -->
+  <div class="search"><span class="search-icon"></span><input type="text" class="search-input" placeholder="Search…" value=""></div>
+</search-with-clear>
+"
+`;
+
+exports[`Renderer Self-Closing Tags > search-with-clear — empty / with-query / cleared > empty 1`] = `
+"
+<search-with-clear data-cloak=""><!-- #shadowroot -->
+  <div class="search"><span class="search-icon"></span><input type="text" class="search-input" placeholder="Search…" value=""></div>
+</search-with-clear>
+"
+`;
+
+exports[`Renderer Self-Closing Tags > search-with-clear — empty / with-query / cleared > with-query 1`] = `
+"
+<search-with-clear data-cloak=""><!-- #shadowroot -->
+  <div class="search"><span class="search-icon"></span><input type="text" class="search-input" placeholder="Search…" value="hello"><button type="button" class="search-clear" title="Clear"><self-closing-child data-cloak=""><!-- #shadowroot --><span class="child"></span></self-closing-child></button></div>
+</search-with-clear>
+"
+`;
+
+exports[`Renderer Self-Closing Tags > self-closing slotted siblings reach the right slots 1`] = `
+"
+<self-closing-slot-host data-cloak=""><!-- #shadowroot -->
+  <self-closing-slots data-cloak=""><!-- #shadowroot -->
+    <div class="card">
+      <self-closing-child slot="icon" data-cloak=""><!-- #shadowroot --><span class="child"></span></self-closing-child><span slot="text">Label</span>
+      <self-closing-child slot="trailing" data-cloak=""><!-- #shadowroot --><span class="child"></span></self-closing-child>
+    </div>
+  </self-closing-slots>
+</self-closing-slot-host>
+"
+`;
+
+exports[`Renderer Self-Closing Tags > sibling self-closing children render correctly 1`] = `
+"
+<self-closing-host data-cloak=""><!-- #shadowroot -->
+  <div>
+    <self-closing-child data-cloak=""><!-- #shadowroot --><span class="child"></span></self-closing-child>
+    <self-closing-child data-cloak=""><!-- #shadowroot --><span class="child"></span></self-closing-child>
+    <self-closing-child data-cloak=""><!-- #shadowroot --><span class="child"></span></self-closing-child>
+  </div>
+</self-closing-host>
+"
+`;
+
+exports[`Renderer Self-Closing Tags > void HTML elements remain self-closing inside templates 1`] = `
+"
+<void-element-host data-cloak=""><!-- #shadowroot -->
+  <div><br>
+    <hr><input type="text">
+  </div>
+</void-element-host>
+"
+`;
+
+exports[`fixSelfClosing (preprocessor) > does not touch tags that already have explicit close 1`] = `"<div></div>"`;
+
+exports[`fixSelfClosing (preprocessor) > does not touch tags that already have explicit close 2`] = `"<pf-icon-close></pf-icon-close>"`;
+
+exports[`fixSelfClosing (preprocessor) > expands multiple self-closing tags in a single string 1`] = `"<pf-icon-a></pf-icon-a><pf-icon-b></pf-icon-b><pf-icon-c></pf-icon-c>"`;
+
+exports[`fixSelfClosing (preprocessor) > expands self-closing custom elements into open + close pairs 1`] = `"<pf-icon-close></pf-icon-close>"`;
+
+exports[`fixSelfClosing (preprocessor) > expands self-closing custom elements into open + close pairs 2`] = `"<pf-icon-close data-x="1"></pf-icon-close>"`;
+
+exports[`fixSelfClosing (preprocessor) > handles attributes whose quoted values contain \`>\` (hole markers) 1`] = `"<pf-icon data-x="<!--₥0-->"></pf-icon>"`;
+
+exports[`fixSelfClosing (preprocessor) > handles attributes whose quoted values contain \`>\` (hole markers) 2`] = `"<pf-icon data-x="<!--₥0-->" data-y="<!--₥1-->"></pf-icon>"`;
+
+exports[`fixSelfClosing (preprocessor) > handles attributes whose quoted values contain \`>\` (hole markers) 3`] = `"<pf-icon data-x="a > b" />"`;
+
+exports[`fixSelfClosing (preprocessor) > handles multi-line self-closing tags 1`] = `
+"<pf-icon
+    data-x="value"
+    data-y="other"></pf-icon>"
+`;
+
+exports[`fixSelfClosing (preprocessor) > handles single-quoted attribute values 1`] = `"<pf-icon data-x='a > b' />"`;
+
+exports[`fixSelfClosing (preprocessor) > preserves void HTML elements as self-closing 1`] = `"<br />"`;
+
+exports[`fixSelfClosing (preprocessor) > preserves void HTML elements as self-closing 2`] = `"<input type="text" />"`;
+
+exports[`fixSelfClosing (preprocessor) > preserves void HTML elements as self-closing 3`] = `"<img src="x" />"`;
+
+exports[`fixSelfClosing (preprocessor) > preserves void HTML elements as self-closing 4`] = `"<hr />"`;

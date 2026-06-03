@@ -1,6 +1,11 @@
 import type { AttrDef, Fragment, Hole, HtmlTemplate } from './types';
 import { MARKER } from './types';
-import { fixAttributeQuotes, indexFromMarker, makeMarker } from './utils';
+import {
+    fixAttributeQuotes,
+    fixSelfClosing,
+    indexFromMarker,
+    makeMarker,
+} from './utils';
 import { createContentHole, detectAttribute, hydrateAttributes } from './holes';
 
 export const createFragment = (template: HtmlTemplate): Fragment => {
@@ -18,7 +23,7 @@ export const createFragment = (template: HtmlTemplate): Fragment => {
             markup += makeMarker(i);
         }
     }
-    markup = fixAttributeQuotes(markup);
+    markup = fixSelfClosing(fixAttributeQuotes(markup));
 
     const clone = (): DocumentFragment => {
         if (!tpl) {

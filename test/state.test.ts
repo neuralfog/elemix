@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
-import { HTML } from '@neuralfog/elemix-testing/snapshots';
+import { HTML } from '../testing/snapshots';
 import { html } from '../src/renderer/render';
-import { present } from '@neuralfog/elemix-testing';
+import { present } from '../testing';
 import type { StateApp } from './fixtures/StateApp';
 import { RenderTrigger } from '../src/types';
 import { render } from '../utilities';

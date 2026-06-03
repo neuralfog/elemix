@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 import { html } from '../../src/renderer/render';
-import { present } from '@neuralfog/elemix-testing';
+import { present } from '../../testing';
 
 class PropEl extends HTMLElement {
     $props = new Map<string, unknown>();
@@ -41,68 +41,6 @@ describe('Attribute Bindings', () => {
             expect(presenter.getComponent<HTMLDivElement>('div').id).toBe(
                 'same',
             );
-        });
-    });
-
-    describe('.bind-attrs', () => {
-        test('sets multiple attributes from object', () => {
-            const presenter = present().screen(
-                html`<div .bind-attrs=${{ id: 'foo', 'data-test': 'bar' }}></div>`,
-            );
-            const div = presenter.getComponent<HTMLDivElement>('div');
-            expect(div.id).toBe('foo');
-            expect(div.getAttribute('data-test')).toBe('bar');
-        });
-
-        test('removes attribute when value is null', () => {
-            const presenter = present();
-            const t = (attrs: Record<string, unknown>) =>
-                html`<div .bind-attrs=${attrs}></div>`;
-            presenter.screen(t({ id: 'foo' }));
-            expect(presenter.getComponent<HTMLDivElement>('div').id).toBe(
-                'foo',
-            );
-            presenter.screen(t({ id: null }));
-            expect(
-                presenter
-                    .getComponent<HTMLDivElement>('div')
-                    .hasAttribute('id'),
-            ).toBe(false);
-        });
-
-        test('removes attribute when value is false', () => {
-            const presenter = present();
-            const t = (attrs: Record<string, unknown>) =>
-                html`<div .bind-attrs=${attrs}></div>`;
-            presenter.screen(t({ 'data-active': 'true' }));
-            presenter.screen(t({ 'data-active': false }));
-            expect(
-                presenter
-                    .getComponent<HTMLDivElement>('div')
-                    .hasAttribute('data-active'),
-            ).toBe(false);
-        });
-
-        test('merges class with initial class', () => {
-            const presenter = present().screen(
-                html`<div class="initial" .bind-attrs=${{ class: 'dynamic' }}></div>`,
-            );
-            expect(
-                presenter
-                    .getComponent<HTMLDivElement>('div')
-                    .getAttribute('class'),
-            ).toBe('initial dynamic');
-        });
-
-        test('converts camelCase to kebab-case', () => {
-            const presenter = present().screen(
-                html`<div .bind-attrs=${{ dataValue: 'test' }}></div>`,
-            );
-            expect(
-                presenter
-                    .getComponent<HTMLDivElement>('div')
-                    .getAttribute('data-value'),
-            ).toBe('test');
         });
     });
 

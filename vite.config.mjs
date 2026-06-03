@@ -4,19 +4,32 @@ import { resolve } from 'node:path';
 export default defineConfig({
     build: {
         lib: {
-            entry: [
-                resolve('index.ts'),
-                resolve('decorators.ts'),
-                resolve('directives.ts'),
-                resolve('reactive.ts'),
-                resolve('render.ts'),
-                resolve('signal.ts'),
-                resolve('app.ts'),
-                resolve('utilities.ts'),
-            ],
+            entry: {
+                index: resolve('index.ts'),
+                decorators: resolve('decorators.ts'),
+                directives: resolve('directives.ts'),
+                reactive: resolve('reactive.ts'),
+                render: resolve('render.ts'),
+                signal: resolve('signal.ts'),
+                app: resolve('app.ts'),
+                utilities: resolve('utilities.ts'),
+                'testing/index': resolve('testing/index.ts'),
+                'testing/snapshots': resolve('testing/snapshots.ts'),
+                'testing/mocks': resolve('testing/mocks.ts'),
+            },
             name: 'elemix',
             fileName: (_, entryName) => `${entryName}.js`,
             formats: ['cjs'],
+        },
+        rollupOptions: {
+            // Keep the rehype/unified pipeline out of the lib build so they
+            // ship as peer/runtime deps for consumers that opt into /testing.
+            external: [
+                'unified',
+                'rehype-parse',
+                'rehype-format',
+                'rehype-stringify',
+            ],
         },
     },
 });

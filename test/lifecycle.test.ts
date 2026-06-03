@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
 import { html } from '../src/renderer/render';
-import { present } from '@neuralfog/elemix-testing';
+import { present } from '../testing';
 import type { LifeCycle } from './fixtures/LifeCycle';
 import type { LifeCycleNoTemplate } from './fixtures/LifeCycleNoTemplate';
 import { RenderTrigger } from '../src/types';

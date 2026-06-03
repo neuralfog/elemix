@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach, vi } from 'vitest';
-import { HTML } from '@neuralfog/elemix-testing/snapshots';
+import { HTML } from '../testing/snapshots';
 import { html } from '../src/renderer/render';
-import { present } from '@neuralfog/elemix-testing';
+import { present } from '../testing';
 import type { MainApp } from './fixtures/MainApp';
 import { restoreSignal, store } from './fixtures/Signal';
 import { RenderTrigger } from '../src/types';

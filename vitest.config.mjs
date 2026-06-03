@@ -10,7 +10,11 @@ export default defineConfig({
             provider: 'v8',
             all: true,
             include: ['src/**/*.ts'],
-            exclude: ['src/types.ts', 'src/**/*.types.ts'],
+            exclude: [
+                'src/types.ts',
+                'src/**/*.types.ts',
+                'src/testing/types.ts',
+            ],
         },
     },
 });

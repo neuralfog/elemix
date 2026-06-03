@@ -1,4 +1,0 @@
-#!/bin/bash
-
-cd ~/dev/elemix-testing && npm run clean && npm run build
-cd ~/dev/elemix && npm install "$(npm pack ~/dev/elemix-testing/)"

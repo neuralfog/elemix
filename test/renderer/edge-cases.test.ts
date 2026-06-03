@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 import { html, render } from '../../src/renderer/render';
-import { present } from '@neuralfog/elemix-testing';
+import { present } from '../../testing';
 
 describe('Edge Cases', () => {
     beforeEach(() => {

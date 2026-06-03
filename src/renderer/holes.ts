@@ -6,7 +6,7 @@ import {
     type HtmlTemplate,
 } from './types';
 import { diff } from './diff';
-import { camelToKebab, makeMarker, mergeClasses } from './utils';
+import { makeMarker, mergeClasses } from './utils';
 
 export const isTemplate = (v: unknown): v is HtmlTemplate =>
     v !== null &&
@@ -43,17 +43,9 @@ export const detectAttribute = (
     } else if (p === '~' && name.startsWith('~model')) {
         def.virtual = true;
         def.type = Attr.MODEL;
-    } else if (p === '.') {
-        if (name.startsWith('.bind-attrs')) {
-            def.virtual = true;
-            def.type = Attr.BIND_ATTRS;
-        } else if (name.startsWith('.bind-events')) {
-            def.virtual = true;
-            def.type = Attr.BIND_EVENTS;
-        } else if (name.startsWith('.class')) {
-            def.virtual = true;
-            def.type = Attr.DIRECT_CLASS;
-        }
+    } else if (p === '.' && name.startsWith('.class')) {
+        def.virtual = true;
+        def.type = Attr.DIRECT_CLASS;
     }
 
     return def;
@@ -327,38 +319,6 @@ const refHole = (node: HTMLElement): Hole => {
     };
 };
 
-const bindAttrsHole = (node: HTMLElement): Hole => {
-    const initClass = node.getAttribute('class') || '';
-    let lastClass: string | undefined;
-    return (v) => {
-        if (v == null || typeof v !== 'object') return;
-        for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
-            const attr = camelToKebab(k);
-
-            if (val === undefined || val === null || val === false) {
-                if (node.hasAttribute(attr)) node.removeAttribute(attr);
-                if (initClass.length && lastClass !== initClass) {
-                    lastClass = initClass;
-                    node.setAttribute('class', initClass);
-                }
-                continue;
-            }
-
-            if (attr === 'class') {
-                const next = mergeClasses(initClass, String(val));
-                if (lastClass !== next) {
-                    lastClass = next;
-                    node.setAttribute('class', next);
-                }
-                continue;
-            }
-
-            const s = String(val);
-            if (node.getAttribute(attr) !== s) node.setAttribute(attr, s);
-        }
-    };
-};
-
 const directClassHole = (node: HTMLElement): Hole => {
     const initClass = node.getAttribute('class') || '';
     let last: string | undefined;
@@ -399,27 +359,11 @@ const directClassHole = (node: HTMLElement): Hole => {
     };
 };
 
-const bindEventsHole = (node: HTMLElement): Hole => {
-    const prev = new Map<string, unknown>();
-    return (v) => {
-        if (v == null || typeof v !== 'object') return;
-        for (const [name, handler] of Object.entries(
-            v as Record<string, unknown>,
-        )) {
-            if (prev.get(name) === handler) continue;
-            prev.set(name, handler);
-            (node as any)[`on${name}`] = handler;
-        }
-    };
-};
-
 const ATTR_DISPATCH: Record<number, (n: HTMLElement, d: AttrDef) => Hole> = {
     [Attr.STD]: stdAttrHole,
     [Attr.EVENT]: eventHole,
     [Attr.PROP]: propHole,
     [Attr.MODEL]: (n) => modelHole(n),
     [Attr.REF]: (n) => refHole(n),
-    [Attr.BIND_ATTRS]: (n) => bindAttrsHole(n),
-    [Attr.BIND_EVENTS]: (n) => bindEventsHole(n),
     [Attr.DIRECT_CLASS]: (n) => directClassHole(n),
 };

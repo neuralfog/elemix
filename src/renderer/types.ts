@@ -20,9 +20,7 @@ export const Attr = {
     MODEL: 2,
     STD: 3,
     REF: 4,
-    BIND_ATTRS: 5,
-    BIND_EVENTS: 6,
-    DIRECT_CLASS: 7,
+    DIRECT_CLASS: 5,
 } as const;
 
 export type Attr = (typeof Attr)[keyof typeof Attr];

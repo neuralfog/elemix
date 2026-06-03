@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { html } from '../src/renderer/render';
-import { present } from '@neuralfog/elemix-testing';
+import { present } from '../testing';
 import { render } from '../utilities';
 import type { RefApp } from './fixtures/Ref';
 

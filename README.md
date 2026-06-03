@@ -369,18 +369,3 @@ html`<div .class=${'active highlight'}>String</div>`;
 html`<div .class=${{ active: isActive, disabled: isDisabled }}>Object</div>`;
 ```
 
-## Bind Attributes
-
-Use `.bind-attrs` to dynamically set multiple attributes from an object.
-
-```typescript
-html`<div .bind-attrs=${{ 'data-id': '123', 'aria-label': 'Card' }}>Content</div>`;
-```
-
-## Bind Events
-
-Use `.bind-events` to dynamically attach multiple event handlers from an object.
-
-```typescript
-html`<div .bind-events=${{ click: onClick, input: onInput }}>Content</div>`;
-```

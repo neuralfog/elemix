@@ -1,9 +1,9 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { html } from '../../src/renderer/render';
-import { present } from '@neuralfog/elemix-testing';
+import { present } from '../../testing';
 import { render } from '../../utilities';
 import type { RendererList } from '../fixtures/renderer/RendererList';
-import { HTML } from '@neuralfog/elemix-testing/snapshots';
+import { HTML } from '../../testing/snapshots';
 
 import '../fixtures/renderer/RendererList';
 
