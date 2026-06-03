@@ -19,19 +19,24 @@ describe('ref', () => {
 });
 
 describe('Ref<T>', () => {
-    test('is the same shape ref() returns', () => {
-        const r: Ref<HTMLInputElement> = ref<HTMLInputElement>();
+    test('no-arg ref() returns Ref<T | undefined>', () => {
+        const r: Ref<HTMLInputElement | undefined> = ref<HTMLInputElement>();
         expect(r).toEqual({ value: undefined });
-        // Re-assignment to a value of the declared type works.
         const fake = {} as HTMLInputElement;
         r.value = fake;
         expect(r.value).toBe(fake);
     });
 
+    test('seeded ref(value) returns Ref<T> with non-optional value', () => {
+        const r: Ref<string> = ref('hello');
+        expect(r.value).toBe('hello');
+        r.value = 'world';
+        expect(r.value).toBe('world');
+    });
+
     test('is accepted as a declared field type', () => {
-        // No-op runtime — the real assertion is that this file compiles.
         class Holder {
-            input: Ref<HTMLInputElement> = ref();
+            input: Ref<HTMLInputElement | undefined> = ref();
             text: Ref<string> = ref('');
         }
         const h = new Holder();
@@ -39,9 +44,9 @@ describe('Ref<T>', () => {
         expect(h.text).toEqual({ value: '' });
     });
 
-    test('the return type of ref() matches Ref<T>', () => {
+    test('the return type of ref() distinguishes no-arg vs seeded', () => {
         expectTypeOf(ref<HTMLInputElement>()).toEqualTypeOf<
-            Ref<HTMLInputElement>
+            Ref<HTMLInputElement | undefined>
         >();
         expectTypeOf(ref('hi')).toEqualTypeOf<Ref<string>>();
     });

@@ -1,14 +1,15 @@
 import { activeRenderers } from './renderers';
 
-export type Ref<Value> = { value?: Value };
+export type Ref<Value> = { value: Value };
 
-export const ref = <Value>(
-    value: Value | undefined = undefined,
-): Ref<Value> => {
-    return {
-        value,
-    };
+type RefFn = {
+    <Value>(): Ref<Value | undefined>;
+    <Value>(value: Value): Ref<Value>;
 };
+
+export const ref: RefFn = <Value>(value?: Value): Ref<Value | undefined> => ({
+    value,
+});
 
 export const fastUID = (): string =>
     Math.floor(performance.now() * 1000).toString(36) +
