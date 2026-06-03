@@ -10,8 +10,22 @@ export const indexFromMarker = (comment: string): number => {
 
 export const makeMarker = (index: number): string => `<!--${MARKER}${index}-->`;
 
+/**
+ * Wrap unquoted attribute values in double quotes so the HTML parser
+ * accepts them. Two cases match:
+ *   - `attr=<!--MARKER-->` — a template-hole comment substituted into an
+ *     attribute position (the marker contains `>`, so it has to be matched
+ *     explicitly instead of via the bare-value class).
+ *   - `attr=value` — a literal unquoted run of non-whitespace, non-quote,
+ *     non-`>` characters.
+ *
+ * Already-quoted values (double OR single quoted) are deliberately left
+ * untouched — the leading quote causes the bare matcher to fail (both `"`
+ * and `'` are excluded), so the regex never tries to "fix" them and the
+ * original quoting survives intact.
+ */
 export const fixAttributeQuotes = (input: string): string =>
-    input.replace(/(\S+)=((<!--[\s\S]*?-->)|([^\s">]+))/g, '$1="$2"');
+    input.replace(/(\S+)=((<!--[\s\S]*?-->)|([^\s'">]+))/g, '$1="$2"');
 
 /**
  * HTML void elements that genuinely have no closing tag.
