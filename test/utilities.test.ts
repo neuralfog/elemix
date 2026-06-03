@@ -1,5 +1,5 @@
-import { expect, test, describe } from 'vitest';
-import { ref, fastUID, camelToKebabCase } from '../utilities';
+import { expect, test, describe, expectTypeOf } from 'vitest';
+import { ref, fastUID, camelToKebabCase, type Ref } from '../utilities';
 
 describe('ref', () => {
     test('returns a wrapper with undefined when called with no argument', () => {
@@ -15,6 +15,35 @@ describe('ref', () => {
     test('typed ref carries the supplied object value', () => {
         const r = ref<{ x: number }>({ x: 42 });
         expect(r.value).toEqual({ x: 42 });
+    });
+});
+
+describe('Ref<T>', () => {
+    test('is the same shape ref() returns', () => {
+        const r: Ref<HTMLInputElement> = ref<HTMLInputElement>();
+        expect(r).toEqual({ value: undefined });
+        // Re-assignment to a value of the declared type works.
+        const fake = {} as HTMLInputElement;
+        r.value = fake;
+        expect(r.value).toBe(fake);
+    });
+
+    test('is accepted as a declared field type', () => {
+        // No-op runtime — the real assertion is that this file compiles.
+        class Holder {
+            input: Ref<HTMLInputElement> = ref();
+            text: Ref<string> = ref('');
+        }
+        const h = new Holder();
+        expect(h.input).toEqual({ value: undefined });
+        expect(h.text).toEqual({ value: '' });
+    });
+
+    test('the return type of ref() matches Ref<T>', () => {
+        expectTypeOf(ref<HTMLInputElement>()).toEqualTypeOf<
+            Ref<HTMLInputElement>
+        >();
+        expectTypeOf(ref('hi')).toEqualTypeOf<Ref<string>>();
     });
 });
 

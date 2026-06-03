@@ -21,15 +21,5 @@ export default defineConfig({
             fileName: (_, entryName) => `${entryName}.js`,
             formats: ['cjs'],
         },
-        rollupOptions: {
-            // Keep the rehype/unified pipeline out of the lib build so they
-            // ship as peer/runtime deps for consumers that opt into /testing.
-            external: [
-                'unified',
-                'rehype-parse',
-                'rehype-format',
-                'rehype-stringify',
-            ],
-        },
     },
 });

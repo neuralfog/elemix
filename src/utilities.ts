@@ -1,8 +1,10 @@
 import { activeRenderers } from './renderers';
 
+export type Ref<Value> = { value?: Value };
+
 export const ref = <Value>(
     value: Value | undefined = undefined,
-): { value?: Value } => {
+): Ref<Value> => {
     return {
         value,
     };
