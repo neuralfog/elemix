@@ -43,9 +43,11 @@ export const detectAttribute = (
     } else if (p === '~' && name.startsWith('~model')) {
         def.virtual = true;
         def.type = Attr.MODEL;
-    } else if (p === '.' && name.startsWith('.class')) {
+    } else if (p === '.') {
         def.virtual = true;
-        def.type = Attr.DIRECT_CLASS;
+        def.type = name.startsWith('.class')
+            ? Attr.DIRECT_CLASS
+            : Attr.DIRECT_PROP;
     }
 
     return def;
@@ -359,6 +361,22 @@ const directClassHole = (node: HTMLElement): Hole => {
     };
 };
 
+/**
+ * `.someProp=${value}` — direct property write on the underlying DOM node.
+ * The leading `.` is stripped to derive the property name. The `.someProp`
+ * attribute itself was already removed during hydration (virtual=true), so
+ * after this the DOM has only the property set, no stray attribute.
+ */
+const directPropHole = (node: HTMLElement, def: AttrDef): Hole => {
+    const prop = def.name.slice(1);
+    let last: unknown;
+    return (v) => {
+        if (last === v) return;
+        last = v;
+        (node as unknown as Record<string, unknown>)[prop] = v;
+    };
+};
+
 const ATTR_DISPATCH: Record<number, (n: HTMLElement, d: AttrDef) => Hole> = {
     [Attr.STD]: stdAttrHole,
     [Attr.EVENT]: eventHole,
@@ -366,4 +384,5 @@ const ATTR_DISPATCH: Record<number, (n: HTMLElement, d: AttrDef) => Hole> = {
     [Attr.MODEL]: (n) => modelHole(n),
     [Attr.REF]: (n) => refHole(n),
     [Attr.DIRECT_CLASS]: (n) => directClassHole(n),
+    [Attr.DIRECT_PROP]: directPropHole,
 };

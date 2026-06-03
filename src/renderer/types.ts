@@ -21,6 +21,7 @@ export const Attr = {
     STD: 3,
     REF: 4,
     DIRECT_CLASS: 5,
+    DIRECT_PROP: 6,
 } as const;
 
 export type Attr = (typeof Attr)[keyof typeof Attr];

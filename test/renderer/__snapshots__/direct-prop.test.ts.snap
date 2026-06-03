@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`\`.prop=\${value}\` direct property assignment > rendered shadow snapshot has no \`.prop\` attributes left behind 1`] = `
+"
+<direct-prop-host data-cloak=""><!-- #shadowroot --><input type="text" disabled tabindex="7"></direct-prop-host>
+"
+`;

@@ -51,15 +51,18 @@ const VOID_ELEMENTS = new Set([
 /**
  * Match a self-closing tag of the form `<name attrs.../>` without crossing
  * into adjacent tags. The attribute matcher accepts, in order:
- *   - a double-quoted hole-marker comment (`"<!--...-->"`), which is the only
- *     case where `<` and `>` may appear inside a quoted value
- *   - a regular double-quoted value (excludes `<>` so greedy matching can't
- *     span across multiple quote pairs and swallow intervening tags)
- *   - a regular single-quoted value (same)
- *   - a single character that isn't `<` or `>`
+ *   - a double-quoted hole-marker comment (`"<!--...-->"`). The inner content
+ *     uses `[^<>]*` (NOT `[\s\S]*?`) so the marker matcher can never
+ *     backtrack across `>`/`<` chars and span multiple separate markers —
+ *     that would let `<div .class="<!--₥0-->" >...<input ... .x="<!--₥6-->"/>`
+ *     be matched as one self-close on `div`, swallowing the input and
+ *     incorrectly closing the wrapper after it.
+ *   - a regular double-quoted value (excludes `<>` for the same reason).
+ *   - a regular single-quoted value (same).
+ *   - a single character that isn't `<` or `>`.
  */
 const SELF_CLOSE_RE =
-    /<([a-zA-Z][a-zA-Z0-9-]*)((?:"<!--[\s\S]*?-->"|"[^"<>]*"|'[^'<>]*'|[^<>])*?)\s*\/>/g;
+    /<([a-zA-Z][a-zA-Z0-9-]*)((?:"<!--[^<>]*-->"|"[^"<>]*"|'[^'<>]*'|[^<>])*?)\s*\/>/g;
 
 /**
  * Browsers do NOT honor XHTML-style self-closing on non-void HTML elements:
