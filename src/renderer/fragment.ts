@@ -57,15 +57,29 @@ export const createFragment = (template: HtmlTemplate): Fragment => {
         hydrateAttributes(frag, attrs, holes);
     };
 
+    /**
+     * Push every hole's initial value into the (still-disconnected) DOM
+     * subtree so that custom-element `connectedCallback` / `beforeMount`
+     * see the real attribute / property values — not the literal
+     * `<!--MARKER-->` strings the parser put there. Without this,
+     * `getAttribute('data-foo')` in `beforeMount` would return the marker
+     * comment and any consumer parsing it (e.g. `JSON.parse`) would throw.
+     */
+    const applyInitial = (values: unknown[]): void => {
+        for (const [i, hole] of holes) hole(values[i]);
+    };
+
     const mount = (target: ParentNode, values: unknown[]): void => {
         const frag = clone();
         hydrate(frag, values);
+        applyInitial(values);
         target.appendChild(frag);
     };
 
     const mountBefore = (ref: ChildNode, values: unknown[]): ChildNode[] => {
         const frag = clone();
         hydrate(frag, values);
+        applyInitial(values);
         const children = Array.from(frag.childNodes);
         ref.before(frag);
         return children;
