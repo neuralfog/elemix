@@ -8,6 +8,13 @@ export class Props<ComponentProps = unknown> {
     constructor(private component: Component) {}
 
     public initialize(): void {
+        const el = this.component as unknown as {
+            __pendingProps?: Record<string, unknown>;
+        };
+        if (el.__pendingProps) {
+            Object.assign(this.data as object, el.__pendingProps);
+            el.__pendingProps = undefined;
+        }
         this.data = new Reactive<ComponentProps>(
             this.data,
             RenderTrigger.PROPS,

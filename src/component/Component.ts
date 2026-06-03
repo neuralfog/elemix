@@ -44,10 +44,10 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     }
 
     connectedCallback(): void {
-        this.beforeMount();
         this.$styles.initialize();
         this.$props.initialize();
         this.$localState.initialize();
+        this.beforeMount();
         this.render(RenderTrigger.ON_MOUNT, true);
     }
 

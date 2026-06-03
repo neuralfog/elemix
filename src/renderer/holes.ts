@@ -295,7 +295,16 @@ const propHole = (node: HTMLElement, def: AttrDef): Hole => {
     const prop = def.name.slice(1);
     return (v) => {
         const el = node as any;
-        if (el.$props) el.$props.set(prop, v);
+        if (el.$props) {
+            el.$props.set(prop, v);
+            return;
+        }
+        // Custom element not upgraded yet (e.g. when a parent template is
+        // cloned, child custom elements aren't upgraded until insertion). Buffer
+        // the prop on the node so $props.initialize() can drain it on first
+        // connection — before beforeMount() or template() run.
+        if (!el.__pendingProps) el.__pendingProps = {};
+        el.__pendingProps[prop] = v;
     };
 };
 
