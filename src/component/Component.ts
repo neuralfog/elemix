@@ -8,11 +8,15 @@ import { activeRenderers } from '../renderers';
 type Trackable = { unsubscribe(c: Component): unknown };
 
 export class Component<ComponentProps = unknown> extends HTMLElement {
+    public static formAssociated?: boolean;
+
     private $props = new Props<ComponentProps>(this);
     private $renderer = new Renderer(this);
     private $localState = new LocalState(this);
     private $styles = new Styles(this);
     private $controlStyles?: CSSStyleSheet[];
+
+    public internals?: ElementInternals;
 
     /**
      * Signals auto-subscribed during template() execution via the
@@ -46,9 +50,18 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     connectedCallback(): void {
         this.$styles.initialize();
         this.$props.initialize();
+        this.attachFormInternals();
         this.$localState.initialize();
         this.beforeMount();
         this.render(RenderTrigger.ON_MOUNT, true);
+    }
+
+    private attachFormInternals(): void {
+        if (this.internals) return;
+        const ctor = this.constructor as typeof Component;
+        if (ctor.formAssociated) {
+            this.internals = this.attachInternals();
+        }
     }
 
     disconnectedCallback(): void {
