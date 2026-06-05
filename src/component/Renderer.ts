@@ -63,6 +63,9 @@ export class Renderer {
         // subscribe it automatically when their values are read.
         const prev = renderTracking.active;
         renderTracking.active = this.component;
+
+        this.component.beforeRender(renderTriggers);
+
         try {
             render(
                 this.component.template() as HtmlTemplate,
@@ -71,6 +74,7 @@ export class Renderer {
         } finally {
             renderTracking.active = prev;
         }
+
         this.component.onRender(renderTriggers);
     }
 }

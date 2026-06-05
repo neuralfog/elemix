@@ -78,6 +78,8 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
     // @ts-ignore
     public onRender(renderTriggers?: RenderTriggerType[]): void {}
+    // @ts-ignore
+    public beforeRender(renderTriggers?: RenderTriggerType[]): void {}
     public beforeMount(): void {}
     public onMount(): void {}
     public onDispose(): void {}
