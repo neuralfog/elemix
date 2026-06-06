@@ -40,6 +40,9 @@ export const detectAttribute = (
     } else if (p === ':') {
         def.virtual = true;
         def.type = name.endsWith(':ref') ? Attr.REF : Attr.PROP;
+    } else if (p === '~' && name.startsWith('~onmodel')) {
+        def.virtual = true;
+        def.type = Attr.ONMODEL;
     } else if (p === '~' && name.startsWith('~model')) {
         def.virtual = true;
         def.type = Attr.MODEL;
@@ -308,19 +311,30 @@ const propHole = (node: HTMLElement, def: AttrDef): Hole => {
     };
 };
 
+type OnModelNode = HTMLElement & { __onmodel?: (v: string) => string };
+
 const modelHole = (node: HTMLElement): Hole => {
+    const input = node as HTMLInputElement;
     return (v) => {
         if (v === undefined) return;
         const m = v as { value: string };
-        const input = node as HTMLInputElement;
-        if (input.value !== m.value) {
-            input.value = m.value;
-        }
+        if (input.value !== m.value) input.value = m.value;
+
         if (!node.oninput) {
-            node.oninput = (e: Event) => {
-                m.value = (e.target as HTMLInputElement).value;
+            node.oninput = () => {
+                if (input.value === m.value) return;
+                const onmodel = (node as OnModelNode).__onmodel;
+                if (onmodel) input.value = onmodel(input.value);
+                m.value = input.value;
             };
         }
+    };
+};
+
+const onModelHole = (node: HTMLElement): Hole => {
+    return (v) => {
+        (node as OnModelNode).__onmodel =
+            typeof v === 'function' ? (v as (s: string) => string) : undefined;
     };
 };
 
@@ -370,12 +384,6 @@ const directClassHole = (node: HTMLElement): Hole => {
     };
 };
 
-/**
- * `.someProp=${value}` — direct property write on the underlying DOM node.
- * The leading `.` is stripped to derive the property name. The `.someProp`
- * attribute itself was already removed during hydration (virtual=true), so
- * after this the DOM has only the property set, no stray attribute.
- */
 const directPropHole = (node: HTMLElement, def: AttrDef): Hole => {
     const prop = def.name.slice(1);
     let last: unknown;
@@ -391,6 +399,7 @@ const ATTR_DISPATCH: Record<number, (n: HTMLElement, d: AttrDef) => Hole> = {
     [Attr.EVENT]: eventHole,
     [Attr.PROP]: propHole,
     [Attr.MODEL]: (n) => modelHole(n),
+    [Attr.ONMODEL]: (n) => onModelHole(n),
     [Attr.REF]: (n) => refHole(n),
     [Attr.DIRECT_CLASS]: (n) => directClassHole(n),
     [Attr.DIRECT_PROP]: directPropHole,

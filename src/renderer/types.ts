@@ -22,6 +22,7 @@ export const Attr = {
     REF: 4,
     DIRECT_CLASS: 5,
     DIRECT_PROP: 6,
+    ONMODEL: 7,
 } as const;
 
 export type Attr = (typeof Attr)[keyof typeof Attr];

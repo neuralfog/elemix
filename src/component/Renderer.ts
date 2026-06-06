@@ -19,18 +19,14 @@ export class Renderer {
         // still triggers onMount + data-cloak removal even when a prior
         // schedule (e.g. a beforeMount state mutation) already locked us.
         if (isConnectedCallback) this.pendingOnMount = true;
-        // The truthiness check below runs `template()` synchronously. If we
-        // happen to be inside another component's render, signal reads inside
-        // this template would auto-subscribe the WRONG component. Suspend the
-        // tracking just for the check.
+
         const prev = renderTracking.active;
         renderTracking.active = null;
-        let hasTemplate: unknown;
-        try {
-            hasTemplate = this.component.template();
-        } finally {
-            renderTracking.active = prev;
-        }
+        const hasTemplate = this.component.template();
+        if (!hasTemplate) return;
+
+        renderTracking.active = prev;
+
         if (hasTemplate) {
             if (renderTrigger) this.scheduledRenderTriggers.add(renderTrigger);
             if (!this.locked) {
@@ -64,16 +60,12 @@ export class Renderer {
         const prev = renderTracking.active;
         renderTracking.active = this.component;
 
-        this.component.beforeRender(renderTriggers);
+        render(
+            this.component.template() as HtmlTemplate,
+            this.component.root as HTMLElement,
+        );
 
-        try {
-            render(
-                this.component.template() as HtmlTemplate,
-                this.component.root as HTMLElement,
-            );
-        } finally {
-            renderTracking.active = prev;
-        }
+        renderTracking.active = prev;
 
         this.component.onRender(renderTriggers);
     }

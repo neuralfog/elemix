@@ -9,7 +9,7 @@ import { render } from '../utilities';
 let mountCounter = 0;
 
 @component()
-export class BeforeMountChild extends Component {
+class BeforeMountChild extends Component {
     beforeMount(): void {
         mountCounter++;
     }
@@ -27,7 +27,7 @@ class BeforeMountParent extends Component {
 }
 
 @component()
-export class BeforeMountSwapParent extends Component {
+class BeforeMountSwapParent extends Component {
     @state()
     state = { showB: false };
 

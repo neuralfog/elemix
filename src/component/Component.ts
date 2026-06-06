@@ -76,10 +76,19 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         return undefined;
     }
 
+    // @Note @Question Not entirly sure of this, I noticed that I start to abuse it :|
+    // Can I come up with anything better, this may run a lot by a design
+    // Executing render does not mean DOM mutations will happen, it just means that
+    // template() was reevaluated and render() called, in most cases I am looking for
+    // state change, although this seesm to be falling in watcher space from Vue
+    // which I don't love, same principal easy to abuse cause of convienince
+    //
+    // State change == dom mutation
+    // Could renderer return dirty flag ?? based on that invoke a hook for changes based on
+    // real dom mutation ?? :thinking:
+
     // @ts-ignore
     public onRender(renderTriggers?: RenderTriggerType[]): void {}
-    // @ts-ignore
-    public beforeRender(renderTriggers?: RenderTriggerType[]): void {}
     public beforeMount(): void {}
     public onMount(): void {}
     public onDispose(): void {}
