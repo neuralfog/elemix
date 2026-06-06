@@ -1,5 +1,4 @@
 import { Reactive } from '../Reactive';
-import { RenderTrigger } from '../types';
 import type { Component } from './Component';
 
 export class Props<ComponentProps = unknown> {
@@ -15,10 +14,9 @@ export class Props<ComponentProps = unknown> {
             Object.assign(this.data as object, el.__pendingProps);
             el.__pendingProps = undefined;
         }
-        this.data = new Reactive<ComponentProps>(
-            this.data,
-            RenderTrigger.PROPS,
-        ).subscribe(this.component).value;
+        this.data = new Reactive<ComponentProps>(this.data).subscribe(
+            this.component,
+        ).value;
     }
 
     public setReactive(name: string, value: unknown): void {

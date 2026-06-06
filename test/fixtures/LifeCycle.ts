@@ -6,7 +6,6 @@ import { html } from '../../src/types';
 @component()
 export class LifeCycle extends Component {
     beforeMount = (): void => {};
-    onRender = (_renderTrigger?: string[]): void => {};
     onMount = (): void => {};
     onDispose = (): void => {};
 

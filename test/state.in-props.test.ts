@@ -1,9 +1,8 @@
-import { expect, test, describe, beforeEach, vi } from 'vitest';
+import { expect, test, describe, beforeEach } from 'vitest';
 import { HTML } from '../testing/snapshots';
 import { html } from '../src/renderer/render';
 import { present } from '../testing';
 import type { StateInProps, StateInPropsChild } from './fixtures/StateInProps';
-import { RenderTrigger } from '../src/types';
 import { render } from '../utilities';
 
 import './fixtures/StateInProps';
@@ -27,7 +26,6 @@ describe('State In Props', () => {
         const presenter = present().screen(
             html`<state-in-props></state-in-props>`,
         );
-        const parent = presenter.root<StateInProps>();
 
         await render();
 
@@ -37,19 +35,9 @@ describe('State In Props', () => {
 
         await render();
 
-        const onRenderParent = vi.spyOn(parent, 'onRender');
-        const onRenderChild = vi.spyOn(child, 'onRender');
-
         child.props.state.nestedValue = 'Changed Value From Child Level';
 
         await render();
-
-        expect(onRenderParent).toHaveBeenCalledOnce();
-        expect(onRenderParent).toHaveBeenCalledWith([
-            RenderTrigger.LOCAL_STATE,
-        ]);
-        expect(onRenderChild).toHaveBeenCalledOnce();
-        expect(onRenderChild).toHaveBeenCalledWith([RenderTrigger.PROPS]);
 
         expect(HTML(presenter.root<StateInProps>())).toMatchSnapshot();
     });

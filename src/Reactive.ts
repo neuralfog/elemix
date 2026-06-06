@@ -1,5 +1,4 @@
 import type { Component } from './component/Component';
-import type { RenderTriggerType } from './types';
 import { renderTracking } from './renderers';
 
 export class Reactive<State> {
@@ -11,10 +10,7 @@ export class Reactive<State> {
         return this.proxy;
     }
 
-    constructor(
-        state: any,
-        private renderTrigger?: RenderTriggerType,
-    ) {
+    constructor(state: any) {
         this.proxy = this.create(state);
     }
 
@@ -77,7 +73,7 @@ export class Reactive<State> {
 
     private notify(): void {
         for (const subscriber of this.subscribers) {
-            subscriber.render(this.renderTrigger);
+            subscriber.render();
         }
     }
 }

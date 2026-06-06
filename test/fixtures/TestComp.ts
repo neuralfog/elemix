@@ -22,8 +22,6 @@ export class TestComp extends Component<TestCompProps> {
         number: 0,
     };
 
-    onRender = (_renderTrigger?: string[]): void => {};
-
     onDispose = (): void => {};
 
     template = (): Template => {

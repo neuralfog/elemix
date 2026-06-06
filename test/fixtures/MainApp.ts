@@ -16,8 +16,6 @@ export class MainApp extends Component {
 
     propsHandler = (): void => {};
 
-    onRender = (_renderTrigger?: string[]): void => {};
-
     template = (): Template => {
         return html`
             <h1>MainApp</h1>

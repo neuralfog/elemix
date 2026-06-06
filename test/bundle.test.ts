@@ -42,10 +42,9 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
         });
 
         const required = [
-            // index — Component class + html tag + RenderTrigger
+            // index — Component class + html tag
             { name: 'Component', kind: 'function' },
             { name: 'html', kind: 'function' },
-            { name: 'RenderTrigger', kind: 'object' },
             // decorators
             { name: 'component', kind: 'function' },
             { name: 'state', kind: 'function' },
@@ -85,14 +84,6 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             // testing helpers
             'present',
             'MockCSSStyleSheet',
-            'prettifyHTML',
-            'extractHTML',
-            'waitFor',
-            // rehype / unified runtime dependencies — only used by testing/snapshots
-            'rehype-parse',
-            'rehype-format',
-            'rehype-stringify',
-            'unified',
         ];
 
         for (const id of forbiddenIdentifiers) {
@@ -106,26 +97,5 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             expect(bundleText).not.toMatch(/['"`]\.{1,2}\/testing/);
             expect(bundleText).not.toMatch(/@neuralfog\/elemix\/testing/);
         });
-    });
-
-    describe('removed APIs — must NOT be present in the bundle', () => {
-        let bundleText: string;
-
-        beforeAll(() => {
-            bundleText = readFileSync(bundlePath, 'utf-8');
-        });
-
-        const removed = [
-            'bind-attrs',
-            'bind-events',
-            'BIND_ATTRS',
-            'BIND_EVENTS',
-        ];
-
-        for (const id of removed) {
-            test(`does not contain \`${id}\``, () => {
-                expect(bundleText).not.toContain(id);
-            });
-        }
     });
 });

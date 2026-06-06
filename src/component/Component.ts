@@ -1,4 +1,4 @@
-import { RenderTrigger, type RenderTriggerType, type Template } from '../types';
+import type { Template } from '../types';
 import { Renderer } from './Renderer';
 import { LocalState } from './LocalState';
 import { Props } from './Props';
@@ -53,7 +53,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         this.attachFormInternals();
         this.$localState.initialize();
         this.beforeMount();
-        this.render(RenderTrigger.ON_MOUNT, true);
+        this.render(true);
     }
 
     private attachFormInternals(): void {
@@ -76,28 +76,13 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         return undefined;
     }
 
-    // @Note @Question Not entirly sure of this, I noticed that I start to abuse it :|
-    // Can I come up with anything better, this may run a lot by a design
-    // Executing render does not mean DOM mutations will happen, it just means that
-    // template() was reevaluated and render() called, in most cases I am looking for
-    // state change, although this seesm to be falling in watcher space from Vue
-    // which I don't love, same principal easy to abuse cause of convienince
-    //
-    // State change == dom mutation
-    // Could renderer return dirty flag ?? based on that invoke a hook for changes based on
-    // real dom mutation ?? :thinking:
-
-    // @ts-ignore
-    public onRender(renderTriggers?: RenderTriggerType[]): void {}
+    public onMutation(): void {}
     public beforeMount(): void {}
     public onMount(): void {}
     public onDispose(): void {}
 
-    public render(
-        renderTrigger?: RenderTriggerType,
-        isConnectedCallback = false,
-    ): void {
-        this.$renderer.schedule(renderTrigger, isConnectedCallback);
+    public render(isConnectedCallback = false): void {
+        this.$renderer.schedule(isConnectedCallback);
     }
 
     // :thinking: - still like the concept, it may change!

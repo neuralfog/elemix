@@ -1,11 +1,9 @@
-import { expect, test, describe, beforeEach, vi } from 'vitest';
+import { expect, test, describe, beforeEach } from 'vitest';
 import { HTML } from '../testing/snapshots';
 import { html } from '../src/renderer/render';
 import { present } from '../testing';
 import type { MainApp } from './fixtures/MainApp';
 import { restoreSignal, store } from './fixtures/Signal';
-import { RenderTrigger } from '../src/types';
-import type { TestComp } from './fixtures/TestComp';
 import type { ListApp } from './fixtures/ListApp';
 import { render } from '../utilities';
 
@@ -49,17 +47,12 @@ describe('Signal', () => {
 
         await render();
 
-        const testComp = presenter.getComponent<TestComp>('test-comp');
-        const onRender = vi.spyOn(testComp, 'onRender');
-
         expect(store.value.value).toBe('Initial Signal Value');
         store.value.value = 'New Value';
 
         await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
-        expect(onRender).toHaveBeenCalledOnce();
-        expect(onRender).toBeCalledWith([RenderTrigger.SIGNAL]);
     });
 });
 

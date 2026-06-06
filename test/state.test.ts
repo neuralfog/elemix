@@ -1,9 +1,8 @@
-import { expect, test, describe, beforeEach, vi } from 'vitest';
+import { expect, test, describe, beforeEach } from 'vitest';
 import { HTML } from '../testing/snapshots';
 import { html } from '../src/renderer/render';
 import { present } from '../testing';
 import type { StateApp } from './fixtures/StateApp';
-import { RenderTrigger } from '../src/types';
 import { render } from '../utilities';
 
 import './fixtures/StateApp';
@@ -27,7 +26,6 @@ describe('State', () => {
         await render();
 
         const mainApp = presenter.root<StateApp>();
-        const onRender = vi.spyOn(mainApp, 'onRender');
 
         mainApp.state.string = 'New Value';
         mainApp.state.number = 10;
@@ -37,7 +35,5 @@ describe('State', () => {
         await render();
 
         expect(HTML(presenter.root<StateApp>())).toMatchSnapshot();
-        expect(onRender).toHaveBeenCalledOnce();
-        expect(onRender).toBeCalledWith([RenderTrigger.LOCAL_STATE]);
     });
 });

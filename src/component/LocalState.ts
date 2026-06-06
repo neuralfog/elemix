@@ -6,14 +6,13 @@ export class LocalState {
 
     public initialize(): void {
         const stateProperties = this.component.constructor.prototype
-            .stateProperties as Map<string, string>;
+            .stateProperties as Set<string>;
 
         if (stateProperties)
-            for (const [propertyName, renderTrigger] of stateProperties) {
+            for (const propertyName of stateProperties) {
                 const context = this.component as any;
                 context[propertyName] = new Reactive<unknown>(
                     context[propertyName],
-                    renderTrigger,
                 ).subscribe(this.component).value;
             }
     }

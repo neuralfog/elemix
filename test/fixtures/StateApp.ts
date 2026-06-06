@@ -21,8 +21,6 @@ export class StateApp extends Component {
         },
     };
 
-    onRender = (_renderTrigger?: string[]): void => {};
-
     onDispose = (): void => {};
 
     template = (): Template => {

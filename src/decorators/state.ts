@@ -1,20 +1,11 @@
-import { RenderTrigger, type RenderTriggerType } from '../types';
-
 type Component = any;
 
 export const state =
-    (renderTrigger?: string) =>
+    () =>
     (component: Component, propertyName: string): void => {
         if (!component.stateProperties) {
-            component.stateProperties = new Map<
-                string,
-                string | RenderTriggerType
-            >();
+            component.stateProperties = new Set<string>();
         }
 
-        if (!component.stateProperties.has(propertyName))
-            component.stateProperties.set(
-                propertyName,
-                renderTrigger || RenderTrigger.LOCAL_STATE,
-            );
+        component.stateProperties.add(propertyName);
     };

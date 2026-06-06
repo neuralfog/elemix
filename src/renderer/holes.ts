@@ -8,6 +8,18 @@ import {
 import { diff } from './diff';
 import { makeMarker, mergeClasses } from './utils';
 
+let dirty = false;
+
+export const resetDirty = (): void => {
+    dirty = false;
+};
+
+export const readDirty = (): boolean => dirty;
+
+const markDirty = (): void => {
+    dirty = true;
+};
+
 export const isTemplate = (v: unknown): v is HtmlTemplate =>
     v !== null &&
     v !== undefined &&
@@ -141,7 +153,10 @@ const stringHole = (anchor: Comment): ContentSubHole => {
     return {
         update: (v) => {
             const s = v != null ? String(v) : '';
-            if (node.textContent !== s) node.textContent = s;
+            if (node.textContent !== s) {
+                node.textContent = s;
+                markDirty();
+            }
         },
         dispose: () => {
             node.remove();
@@ -155,6 +170,7 @@ const templateHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
     let nodes: ChildNode[] = [];
 
     const clear = (): void => {
+        if (nodes.length) markDirty();
         for (let i = 0; i < nodes.length; i++) nodes[i].remove();
         nodes = [];
     };
@@ -170,6 +186,7 @@ const templateHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
                 frag = mk(t);
                 prevStrings = t.strings;
                 nodes = frag.mountBefore(anchor, t.values);
+                markDirty();
             }
             frag.update(t.values);
         },
@@ -196,11 +213,13 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
             if (children.length) {
                 nodeMap.set(t.key, children[children.length - 1]);
             }
+            markDirty();
         }
         return frag;
     };
 
     const clear = (): void => {
+        if (nodeMap.size) markDirty();
         for (const [, n] of nodeMap) n.remove();
         frags.clear();
         nodeMap.clear();
@@ -240,6 +259,7 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
                 return;
             }
 
+            if (deletes.length) markDirty();
             for (let i = deletes.length - 1; i >= 0; i--) {
                 const k = deletes[i].key;
                 nodeMap.get(k)?.remove();
@@ -247,6 +267,7 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
                 frags.delete(k);
             }
 
+            if (moves.length) markDirty();
             for (let i = moves.length - 1; i >= 0; i--) {
                 const node = nodeMap.get(moves[i].key);
                 const before = nodeMap.get(moves[i].beforeKey as string);
@@ -281,6 +302,7 @@ const stdAttrHole = (node: HTMLElement, def: AttrDef): Hole => {
         if (last === s) return;
         last = s;
         node.setAttribute(name, s);
+        markDirty();
     };
 };
 
@@ -318,7 +340,10 @@ const modelHole = (node: HTMLElement): Hole => {
     return (v) => {
         if (v === undefined) return;
         const m = v as { value: string };
-        if (input.value !== m.value) input.value = m.value;
+        if (input.value !== m.value) {
+            input.value = m.value;
+            markDirty();
+        }
 
         if (!node.oninput) {
             node.oninput = () => {
@@ -352,6 +377,7 @@ const directClassHole = (node: HTMLElement): Hole => {
             if (initClass.length && last !== initClass) {
                 last = initClass;
                 node.setAttribute('class', initClass);
+                markDirty();
             }
             return;
         }
@@ -361,6 +387,7 @@ const directClassHole = (node: HTMLElement): Hole => {
             if (last !== next) {
                 last = next;
                 node.setAttribute('class', next);
+                markDirty();
             }
             return;
         }
@@ -379,6 +406,7 @@ const directClassHole = (node: HTMLElement): Hole => {
             if (last !== next) {
                 last = next;
                 node.setAttribute('class', next);
+                markDirty();
             }
         }
     };

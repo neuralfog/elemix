@@ -283,7 +283,7 @@ export class CounterDisplay extends Component {
 
 ## Lifecycle Hooks
 
-Components support four lifecycle hooks: `beforeMount`, `onMount`, `onRender`, and `onDispose`.
+Components support four lifecycle hooks: `beforeMount`, `onMount`, `onMutation`, and `onDispose`.
 
 ```typescript
 @component()
@@ -296,8 +296,8 @@ export class Dashboard extends Component {
         // Called after first render
     }
 
-    onRender(renderTriggers?: string[]): void {
-        // Called after each render with triggers that caused the update
+    onMutation(): void {
+        // Called after a render that actually mutated the DOM
     }
 
     onDispose(): void {
@@ -310,6 +310,40 @@ export class Dashboard extends Component {
 }
 ```
 
+## Side Effects with `onMutation`
+
+`onMutation` is the right place for DOM-coupled side effects — measuring layout, syncing a canvas or SVG to its container, scrolling into view, positioning popovers, firing intersection checks, anything that needs the DOM to be in a known new state before it runs.
+
+It is distinct from "ran a render." A render happens whenever subscribed state, props, or signals change. But a render does not always mutate the DOM:
+
+- Setting a state field to the same value triggers a render, but no DOM write happens — `onMutation` does not fire.
+- A parent re-renders because its state changed, but the only thing in its template that uses that state is a prop passed into a child. The parent's own DOM is untouched, so the parent's `onMutation` does not fire. The child's `onMutation` does.
+- A list re-renders with the same keys and the same text — no inserts, no deletes, no text writes — `onMutation` does not fire.
+
+Whenever any hole actually writes to user-visible DOM (text content, attributes, classes, list inserts/deletes/moves, template swaps, input value sync), `onMutation` fires once at the end of that render — after every write has flushed and before paint.
+
+```typescript
+@component()
+export class Chart extends Component {
+    @state()
+    state = { points: [] as number[] };
+
+    private canvas = ref<HTMLCanvasElement>();
+
+    onMutation(): void {
+        const el = this.canvas.value;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        el.width = rect.width;
+        el.height = rect.height;
+        drawChart(el, this.state.points);
+    }
+
+    template(): Template {
+        return html`<canvas :ref=${this.canvas}></canvas>`;
+    }
+}
+```
 ## Conditionals
 
 Use ternary expressions in templates.

@@ -5,7 +5,6 @@ import { present } from '../testing';
 import { render } from '../utilities';
 import type { MainApp } from './fixtures/MainApp';
 import type { TestComp } from './fixtures/TestComp';
-import { RenderTrigger } from '../src/types';
 
 import './fixtures/MainApp';
 
@@ -28,7 +27,6 @@ describe('Props', () => {
         await render();
 
         const testComp = presenter.getComponent<TestComp>('test-comp');
-        const onRender = vi.spyOn(testComp, 'onRender');
 
         expect(testComp.props).toMatchObject({
             color: 'Initial Color',
@@ -42,8 +40,6 @@ describe('Props', () => {
         await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
-        expect(onRender).toHaveBeenCalledOnce();
-        expect(onRender).toBeCalledWith([RenderTrigger.PROPS]);
     });
 
     test('Diffing Primitives And Handlers', async () => {
@@ -52,7 +48,7 @@ describe('Props', () => {
         await render();
 
         const testComp = presenter.getComponent<TestComp>('test-comp');
-        const onRender = vi.spyOn(testComp, 'onRender');
+        const onMutation = vi.spyOn(testComp, 'onMutation');
 
         const mainApp = presenter.root<MainApp>();
         mainApp.state.string = 'random stuff';
@@ -68,6 +64,6 @@ describe('Props', () => {
         await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
-        expect(onRender).toBeCalledTimes(0);
+        expect(onMutation).toBeCalledTimes(0);
     });
 });

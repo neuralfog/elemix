@@ -1,21 +1,16 @@
 import { render } from '../renderer/render';
 import type { HtmlTemplate } from '../renderer/types';
 import type { Component } from './Component';
-import type { RenderTriggerType } from '../types';
 import { activeRenderers, renderTracking } from '../renderers';
 
 export class Renderer {
     private locked = false;
     private pendingOnMount = false;
-    private scheduledRenderTriggers = new Set<RenderTriggerType>();
 
     constructor(private component: Component) {}
 
-    public schedule(
-        renderTrigger?: RenderTriggerType,
-        isConnectedCallback = false,
-    ): void {
-        // Persist on the Renderer so a connectedCallback's render(_, true)
+    public schedule(isConnectedCallback = false): void {
+        // Persist on the Renderer so a connectedCallback's render(true)
         // still triggers onMount + data-cloak removal even when a prior
         // schedule (e.g. a beforeMount state mutation) already locked us.
         if (isConnectedCallback) this.pendingOnMount = true;
@@ -27,27 +22,23 @@ export class Renderer {
 
         renderTracking.active = prev;
 
-        if (hasTemplate) {
-            if (renderTrigger) this.scheduledRenderTriggers.add(renderTrigger);
-            if (!this.locked) {
-                this.locked = true;
-                activeRenderers.add(this);
-                setTimeout(() => {
-                    this.render(Array.from(this.scheduledRenderTriggers));
-                    this.scheduledRenderTriggers.clear();
-                    this.locked = false;
-                    activeRenderers.delete(this);
-                    if (this.pendingOnMount) {
-                        this.pendingOnMount = false;
-                        this.component.onMount();
-                        this.component.removeAttribute('data-cloak');
-                    }
-                }, 0);
-            }
+        if (!this.locked) {
+            this.locked = true;
+            activeRenderers.add(this);
+            setTimeout(() => {
+                this.render();
+                this.locked = false;
+                activeRenderers.delete(this);
+                if (this.pendingOnMount) {
+                    this.pendingOnMount = false;
+                    this.component.onMount();
+                    this.component.removeAttribute('data-cloak');
+                }
+            }, 0);
         }
     }
 
-    private render(renderTriggers: RenderTriggerType[]): void {
+    private render(): void {
         // Drop subscriptions captured during the previous render so we don't
         // hold stale dependencies for signals no longer read.
         for (const sig of this.component.tracked) {
@@ -60,13 +51,13 @@ export class Renderer {
         const prev = renderTracking.active;
         renderTracking.active = this.component;
 
-        render(
+        const dirty = render(
             this.component.template() as HtmlTemplate,
             this.component.root as HTMLElement,
         );
 
         renderTracking.active = prev;
 
-        this.component.onRender(renderTriggers);
+        if (dirty) this.component.onMutation();
     }
 }

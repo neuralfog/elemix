@@ -1,5 +1,6 @@
 import type { Fragment, HtmlTemplate } from './types';
 import { createFragment } from './fragment';
+import { resetDirty, readDirty } from './holes';
 
 export const html = (
     strings: TemplateStringsArray,
@@ -15,12 +16,14 @@ type CachedElement = HTMLElement & {
 export const render = (
     template: HtmlTemplate,
     container: HTMLElement | null,
-): void => {
+): boolean => {
     if (!container) {
         throw new Error(
             'render method needs to accept instance of HTMLElement',
         );
     }
+
+    resetDirty();
 
     const el = container as CachedElement;
     if (!el[CACHE]) el[CACHE] = new Map();
@@ -34,4 +37,6 @@ export const render = (
     }
 
     frag.update(template.values);
+
+    return readDirty();
 };

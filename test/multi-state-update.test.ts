@@ -1,4 +1,4 @@
-import { expect, test, describe, beforeEach, vi } from 'vitest';
+import { expect, test, describe, beforeEach } from 'vitest';
 import { HTML } from '../testing/snapshots';
 import { html } from '../src/renderer/render';
 import { present } from '../testing';
@@ -6,7 +6,6 @@ import { render } from '../utilities';
 import type { MainApp } from './fixtures/MainApp';
 import type { TestComp } from './fixtures/TestComp';
 import { restoreSignal, store } from './fixtures/Signal';
-import { RenderTrigger } from '../src/types';
 
 import './fixtures/MainApp';
 
@@ -30,7 +29,6 @@ describe('Props', () => {
         await render();
 
         const testComp = presenter.getComponent<TestComp>('test-comp');
-        const onRender = vi.spyOn(testComp, 'onRender');
 
         expect(testComp.props).toMatchObject({
             color: 'Initial Color',
@@ -47,11 +45,5 @@ describe('Props', () => {
         await render();
 
         expect(HTML(presenter.root<MainApp>())).toMatchSnapshot();
-        expect(onRender).toHaveBeenCalledOnce();
-        expect(onRender).toBeCalledWith([
-            RenderTrigger.SIGNAL,
-            RenderTrigger.LOCAL_STATE,
-            RenderTrigger.PROPS,
-        ]);
     });
 });

@@ -11,8 +11,6 @@ export type StateInPropsChildProps = {
 
 @component()
 export class StateInPropsChild extends Component<StateInPropsChildProps> {
-    onRender = (_renderTrigger?: string[]): void => {};
-
     template = (): Template => {
         return html` <h1>StateInPropsChild</h1>`;
     };
@@ -26,8 +24,6 @@ export class StateInProps extends Component {
             nestedValue: 'Nested Initial Value',
         },
     };
-
-    onRender = (_renderTrigger?: string[]): void => {};
 
     template = (): Template => {
         return html`
