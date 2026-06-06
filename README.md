@@ -10,7 +10,7 @@ Because I can. The goal is a lean approach that utilizes as much of the native w
 
 ## Reactivity
 
-There is no virtual DOM. Rendering is handled by [elemix-renderer](https://github.com/neuralfog/elemix-renderer) which performs direct DOM mutations. Elemix uses a pub/sub model built on JS proxies. State objects are wrapped in a `Proxy` that intercepts property mutations. When a value is set, the proxy notifies all subscribed components, triggering a re-render. Nested objects are lazily wrapped in proxies on access, so deep mutations are also reactive. Components subscribe automatically when using `@state()` or `signals`.
+There is no virtual DOM. The renderer performs direct DOM mutations via tagged template literals and hole-based diffing. Elemix uses a pub/sub model built on JS proxies. State objects are wrapped in a `Proxy` that intercepts property mutations. When a value is set, the proxy notifies all subscribed components, triggering a re-render. Nested objects are lazily wrapped in proxies on access, so deep mutations are also reactive. Components subscribe automatically when using `@state()` or `signals`.
 
 Render scheduling is batched via `setTimeout(0)` — multiple state mutations in the same synchronous frame are coalesced into a single render. Once a render is scheduled, further mutations are locked until the next microtask, preventing redundant DOM updates.
 
@@ -215,6 +215,35 @@ export class SearchBox extends Component {
     }
 }
 ```
+
+### `~onmodel` — transform on capture
+
+Pair `~model` with `~onmodel=${(v: string) => string}` to run a transform on every keystroke before the value reaches the model. The callback receives the raw input string and returns the value that gets written back into both the input and the bound state.
+
+Use it for clamps, masks, and input sanitization — anything that should rewrite the typed value rather than just observe it.
+
+```typescript
+const clamp = (v: string): string => {
+    const n = Number(v);
+    return String(Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0);
+};
+
+@component()
+export class Percent extends Component {
+    @state()
+    state = { value: { value: '0' } };
+
+    template(): Template {
+        return html`<input
+            type="text"
+            ~model=${this.state.value}
+            ~onmodel=${clamp}
+        />`;
+    }
+}
+```
+
+`~onmodel` is a sidecar to `~model`, not a standalone hook. Without `~model` on the same node the callback is never invoked — there is no `oninput` handler to call it from. Attribute order does not matter; the callback is stashed on the node and `~model`'s handler reads it on every input event.
 
 ## Ref
 
