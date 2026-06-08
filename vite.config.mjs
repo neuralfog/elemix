@@ -11,6 +11,7 @@ export default defineConfig({
                 reactive: resolve('reactive.ts'),
                 render: resolve('render.ts'),
                 signal: resolve('signal.ts'),
+                state: resolve('state.ts'),
                 app: resolve('app.ts'),
                 utilities: resolve('utilities.ts'),
                 'testing/index': resolve('testing/index.ts'),

@@ -12,6 +12,7 @@
         "./directives": "./dist/directives.js",
         "./render": "./dist/render.js",
         "./signal": "./dist/signal.js",
+        "./state": "./dist/state.js",
         "./reactive": "./dist/reactive.js",
         "./config": "./dist/config.js",
         "./app": "./dist/app.js",
