@@ -11,21 +11,35 @@ export const indexFromMarker = (comment: string): number => {
 export const makeMarker = (index: number): string => `<!--${MARKER}${index}-->`;
 
 /**
- * Wrap unquoted attribute values in double quotes so the HTML parser
- * accepts them. Two cases match:
- *   - `attr=<!--MARKER-->` — a template-hole comment substituted into an
- *     attribute position (the marker contains `>`, so it has to be matched
- *     explicitly instead of via the bare-value class).
+ * Match a single start tag, treating hole-marker comments and quoted strings
+ * as opaque units so their internal `>` characters do not terminate the tag.
+ * Closing tags (`</name>`) are intentionally not matched — there are no
+ * attributes to quote there. Bare attribute characters use `[^<>"']` so a
+ * quote is only ever consumed by its dedicated quoted-string alternative,
+ * which avoids alternation ambiguity / backtracking.
+ */
+const START_TAG_RE =
+    /<[a-zA-Z][a-zA-Z0-9-]*(?:<!--[^<>]*-->|"[^"]*"|'[^']*'|[^<>"'])*>/g;
+
+/**
+ * Wrap unquoted attribute values in double quotes so the HTML parser accepts
+ * them. The quoting runs ONLY inside start tags, never over text content —
+ * otherwise literal text like `width=100px` or `.class={...}` would be matched
+ * as `attr=value` and rewritten (swallowing a following `</tag>` up to the next
+ * `>`, breaking the element). Within a tag, two unquoted forms are fixed:
+ *   - `attr=<!--MARKER-->` — a template-hole comment in attribute position
+ *     (the marker contains `>`, matched explicitly, not via the bare-value
+ *     class).
  *   - `attr=value` — a literal unquoted run of non-whitespace, non-quote,
  *     non-`>` characters.
  *
- * Already-quoted values (double OR single quoted) are deliberately left
- * untouched — the leading quote causes the bare matcher to fail (both `"`
- * and `'` are excluded), so the regex never tries to "fix" them and the
- * original quoting survives intact.
+ * Already-quoted values (double OR single quoted) are left untouched — the
+ * leading quote fails the bare matcher, so the original quoting survives.
  */
 export const fixAttributeQuotes = (input: string): string =>
-    input.replace(/(\S+)=((<!--[\s\S]*?-->)|([^\s'">]+))/g, '$1="$2"');
+    input.replace(START_TAG_RE, (tag) =>
+        tag.replace(/(\S+)=((<!--[\s\S]*?-->)|([^\s'">]+))/g, '$1="$2"'),
+    );
 
 /**
  * HTML void elements that genuinely have no closing tag.
