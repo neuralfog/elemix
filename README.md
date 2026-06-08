@@ -2,6 +2,8 @@
 
 pnpm workspace housing the Elemix framework and its tooling.
 
+Live playground: **[playground.elemix.dev](https://playground.elemix.dev/)**
+
 ## Packages
 
 | Package | Description | Docs |
