@@ -30,6 +30,7 @@ Every feature has a live, editable example in the playground — **[playground.e
 - [render()](https://playground.elemix.dev/#render)
 - [Direct Bindings](https://playground.elemix.dev/#direct-bindings)
 - [Conditionals](https://playground.elemix.dev/#conditionals)
+- [When / Choose](https://playground.elemix.dev/#when-choose)
 - [Lifecycle](https://playground.elemix.dev/#lifecycle)
 - [Refs](https://playground.elemix.dev/#refs)
 - [Slots](https://playground.elemix.dev/#slots)
