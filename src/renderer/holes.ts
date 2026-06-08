@@ -196,8 +196,24 @@ const templateHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
 
 const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
     const frags = new Map<string, Fragment>();
-    const nodeMap = new Map<string, ChildNode>();
+    // Each keyed item may mount more than one top-level node (multiple root
+    // elements, or text nodes from surrounding whitespace), so track the full
+    // node set per key — not just one node — for correct removal and movement.
+    const nodeMap = new Map<string, ChildNode[]>();
     let prev: HtmlTemplate[] = [];
+
+    // The leading node of an item, used as the insertion anchor so a new or
+    // moved item lands before the whole target item rather than between its
+    // nodes. Undefined key (end of list) falls back to the list anchor.
+    const firstNode = (key: string | undefined): ChildNode | undefined => {
+        const nodes = key !== undefined ? nodeMap.get(key) : undefined;
+        return nodes?.length ? nodes[0] : undefined;
+    };
+
+    const removeNodes = (key: string): void => {
+        const nodes = nodeMap.get(key);
+        if (nodes) for (let i = 0; i < nodes.length; i++) nodes[i].remove();
+    };
 
     const mountItem = (t: HtmlTemplate, before?: ChildNode): Fragment => {
         if (!t.key) {
@@ -209,10 +225,7 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
             frag = mk(t);
             frags.set(t.key, frag);
             const ref = before || anchor;
-            const children = frag.mountBefore(ref, t.values);
-            if (children.length) {
-                nodeMap.set(t.key, children[children.length - 1]);
-            }
+            nodeMap.set(t.key, frag.mountBefore(ref, t.values));
             markDirty();
         }
         return frag;
@@ -220,7 +233,7 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
 
     const clear = (): void => {
         if (nodeMap.size) markDirty();
-        for (const [, n] of nodeMap) n.remove();
+        for (const [k] of nodeMap) removeNodes(k);
         frags.clear();
         nodeMap.clear();
     };
@@ -262,22 +275,21 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
             if (deletes.length) markDirty();
             for (let i = deletes.length - 1; i >= 0; i--) {
                 const k = deletes[i].key;
-                nodeMap.get(k)?.remove();
+                removeNodes(k);
                 nodeMap.delete(k);
                 frags.delete(k);
             }
 
             if (moves.length) markDirty();
             for (let i = moves.length - 1; i >= 0; i--) {
-                const node = nodeMap.get(moves[i].key);
-                const before = nodeMap.get(moves[i].beforeKey as string);
-                if (node && before) before.before(node);
-                else if (node) anchor.before(node);
+                const nodes = nodeMap.get(moves[i].key);
+                if (!nodes) continue;
+                const before = firstNode(moves[i].beforeKey) || anchor;
+                for (let j = 0; j < nodes.length; j++) before.before(nodes[j]);
             }
 
             for (let i = inserts.length - 1; i >= 0; i--) {
-                const before = nodeMap.get(inserts[i].beforeKey as string);
-                mountItem(inserts[i].value, before);
+                mountItem(inserts[i].value, firstNode(inserts[i].beforeKey));
             }
 
             for (let i = 0; i < items.length; i++) {
