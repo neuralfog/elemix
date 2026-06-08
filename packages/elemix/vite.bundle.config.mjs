@@ -24,7 +24,6 @@ export default defineConfig({
                 if (chunk?.type === 'chunk') {
                     const result = await transform(chunk.code, {
                         minify: true,
-                        keepNames: true,
                         loader: 'js',
                     });
                     chunk.code = result.code;

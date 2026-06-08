@@ -50,6 +50,8 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             { name: 'state', kind: 'function' },
             // directives
             { name: 'repeat', kind: 'function' },
+            { name: 'when', kind: 'function' },
+            { name: 'choose', kind: 'function' },
             // signal
             { name: 'signal', kind: 'function' },
             // reactive

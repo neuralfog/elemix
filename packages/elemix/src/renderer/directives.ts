@@ -11,3 +11,21 @@ export const repeat = <T = unknown>(
         return template;
     });
 };
+
+export const when = (
+    condition: unknown,
+    then: () => HtmlTemplate,
+    otherwise?: () => HtmlTemplate,
+): HtmlTemplate | string => {
+    if (condition) return then();
+    return otherwise ? otherwise() : '';
+};
+
+export const choose = (
+    cases: Array<[condition: unknown, template: () => HtmlTemplate]>,
+): HtmlTemplate | string => {
+    for (const [condition, template] of cases) {
+        if (condition) return template();
+    }
+    return '';
+};

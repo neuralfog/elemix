@@ -1,15 +1,15 @@
 {
     "name": "elemix-monorepo",
-    "version": "0.7.1",
+    "version": "0.7.2",
     "private": true,
     "scripts": {
         "build": "pnpm -r build",
+        "build:bundle": "pnpm --filter @neuralfog/elemix run build:bundle",
         "test": "pnpm -r --no-bail run test",
         "lint": "pnpm -r lint",
         "lint:fix": "pnpm -r run lint:fix",
         "storybook": "pnpm --filter @neuralfog/elemix-storybook storybook",
-        "changeset": "changeset",
-        "version": "changeset version",
+        "bump": "node scripts/bump.mjs",
         "release": "pnpm build && changeset publish"
     },
     "devDependencies": {
