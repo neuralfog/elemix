@@ -1,7 +1,7 @@
 import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
-import { state } from '../../src/decorators/state';
+import { state } from '../../src/State';
 import { signal } from '../../src/Signal';
 import { repeat } from '../../directives';
 
@@ -18,8 +18,7 @@ type ChildProps = { label?: string };
 export class OnMutationStateApp extends Component {
     public mutations = 0;
 
-    @state()
-    state = { label: 'A', tick: 0 };
+    state = state({ label: 'A', tick: 0 });
 
     onMutation(): void {
         this.mutations++;
@@ -44,8 +43,7 @@ export class OnMutationChild extends Component<ChildProps> {
 export class OnMutationPropParent extends Component {
     public mutations = 0;
 
-    @state()
-    state = { label: 'first' };
+    state = state({ label: 'first' });
 
     onMutation(): void {
         this.mutations++;
@@ -72,14 +70,13 @@ export class OnMutationSignalApp extends Component {
 export class OnMutationListApp extends Component {
     public mutations = 0;
 
-    @state()
-    state = {
+    state = state({
         items: [
             { id: 'a', text: 'A' },
             { id: 'b', text: 'B' },
             { id: 'c', text: 'C' },
         ],
-    };
+    });
 
     onMutation(): void {
         this.mutations++;
@@ -100,8 +97,7 @@ export class OnMutationListApp extends Component {
 export class OnMutationSwapApp extends Component {
     public mutations = 0;
 
-    @state()
-    state = { show: 'a' as 'a' | 'b' };
+    state = state({ show: 'a' as 'a' | 'b' });
 
     onMutation(): void {
         this.mutations++;
@@ -122,8 +118,7 @@ export class OnMutationSwapApp extends Component {
 export class OnMutationClassApp extends Component {
     public mutations = 0;
 
-    @state()
-    state = { active: false };
+    state = state({ active: false });
 
     onMutation(): void {
         this.mutations++;

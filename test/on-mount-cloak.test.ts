@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { Component } from '../src/component/Component';
 import { component } from '../src/decorators/component';
-import { state } from '../src/decorators/state';
+import { state } from '../src/State';
 import { html, type Template } from '../src/types';
 import { ref, type Ref } from '../src/utilities';
 import { present } from '../testing';
@@ -24,8 +24,7 @@ class PlainChild extends Component {
 
 @component()
 class StateMutatingChild extends Component {
-    @state()
-    state = { ready: false };
+    state = state({ ready: false });
 
     beforeMount(): void {
         counter('state-mutating-child', beforeMountCounts);
@@ -48,8 +47,7 @@ class StateMutatingChild extends Component {
 
 @component()
 class PropConsumerChild extends Component<{ model: Ref<{ count: number }> }> {
-    @state()
-    state = { internal: 0 };
+    state = state({ internal: 0 });
 
     beforeMount(): void {
         counter('prop-consumer-child', beforeMountCounts);
@@ -68,8 +66,7 @@ class PropConsumerChild extends Component<{ model: Ref<{ count: number }> }> {
 
 @component()
 class PropConsumerParent extends Component {
-    @state()
-    state = { canvas: ref({ count: 5 }) };
+    state = state({ canvas: ref({ count: 5 }) });
 
     template = (): Template => html`
         <prop-consumer-child
@@ -80,8 +77,7 @@ class PropConsumerParent extends Component {
 
 @component()
 class SwapParent extends Component {
-    @state()
-    state = { loaded: false };
+    state = state({ loaded: false });
 
     template = (): Template =>
         this.state.loaded

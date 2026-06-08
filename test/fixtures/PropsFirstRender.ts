@@ -1,6 +1,6 @@
 import { Component } from '../../src/component/Component';
 import { component } from '../../src/decorators/component';
-import { state } from '../../src/decorators/state';
+import { state } from '../../src/State';
 import { html, type Template } from '../../src/types';
 import { ref, type Ref } from '../../src/utilities';
 
@@ -23,8 +23,7 @@ export class PropsFirstRenderChild extends Component<ChildProps> {
 
 @component()
 export class PropsFirstRenderParent extends Component {
-    @state()
-    state = { canvas: ref({ zoom: 1 }) };
+    state = state({ canvas: ref({ zoom: 1 }) });
 
     template = (): Template => {
         return html`<props-first-render-child

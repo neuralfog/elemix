@@ -2,12 +2,11 @@ import { repeat } from '../../../src/renderer/directives';
 import { Component } from '../../../src/component/Component';
 import { html, type Template } from '../../../src/types';
 import { component } from '../../../src/decorators/component';
-import { state } from '../../../decorators';
+import { state } from '../../../src/State';
 
 @component()
 export class RendererList extends Component {
-    @state()
-    state = {
+    state = state({
         list: [
             'Emily Johnson',
             'Michael Smith',
@@ -15,7 +14,7 @@ export class RendererList extends Component {
             'Benjamin Williams',
             'Sophia Brown',
         ],
-    };
+    });
 
     template = (): Template => {
         return html`<ul>

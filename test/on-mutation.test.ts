@@ -21,7 +21,7 @@ describe('onMutation lifecycle hook', () => {
         resetMutationSignal();
     });
 
-    describe('local @state', () => {
+    describe('local state', () => {
         test('fires on initial mount (first paint is a mutation)', async () => {
             const presenter = present().screen(
                 html`<on-mutation-state-app></on-mutation-state-app>`,

@@ -2,7 +2,7 @@ import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
 import { ref } from '../../src/utilities';
-import { state } from '../../src/decorators/state';
+import { state } from '../../src/State';
 
 const clamp = (v: string): string => {
     const n = Number(v);
@@ -11,10 +11,9 @@ const clamp = (v: string): string => {
 
 @component()
 export class OnModelClampApp extends Component {
-    @state()
-    state = {
+    state = state({
         input: ref(''),
-    };
+    });
 
     template = (): Template => {
         return html`
@@ -45,10 +44,9 @@ export class OnModelOnlyApp extends Component {
 
 @component()
 export class OnModelOrderApp extends Component {
-    @state()
-    state = {
+    state = state({
         input: ref(''),
-    };
+    });
 
     template = (): Template => {
         return html`<input

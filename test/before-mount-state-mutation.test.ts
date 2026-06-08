@@ -1,15 +1,14 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { Component } from '../src/component/Component';
 import { component } from '../src/decorators/component';
-import { state } from '../src/decorators/state';
+import { state } from '../src/State';
 import { html, type Template } from '../src/types';
 import { present } from '../testing';
 import { render } from '../utilities';
 
 @component()
 class SwitchLikeComponent extends Component {
-    @state()
-    state = { checked: false };
+    state = state({ checked: false });
 
     public attachCount = 0;
 
@@ -26,7 +25,7 @@ class SwitchLikeComponent extends Component {
     `;
 }
 
-describe('beforeMount mutating @state', () => {
+describe('beforeMount mutating state', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
     });
@@ -68,8 +67,7 @@ describe('beforeMount mutating @state', () => {
             disabled?: boolean;
             onChange?: (v: boolean) => void;
         }> {
-            @state()
-            state = { checked: false };
+            state = state({ checked: false });
 
             beforeMount(): void {
                 this.state.checked = this.hasAttribute('checked');

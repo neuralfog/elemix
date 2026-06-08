@@ -1,7 +1,7 @@
 import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
-import { state } from '../../src/decorators/state';
+import { state } from '../../src/State';
 
 export type StateInPropsChildProps = {
     state: {
@@ -18,12 +18,11 @@ export class StateInPropsChild extends Component<StateInPropsChildProps> {
 
 @component()
 export class StateInProps extends Component {
-    @state()
-    state = {
+    state = state({
         nested: {
             nestedValue: 'Nested Initial Value',
         },
-    };
+    });
 
     template = (): Template => {
         return html`

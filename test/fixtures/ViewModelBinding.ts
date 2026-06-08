@@ -2,14 +2,13 @@ import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
 import { ref } from '../../src/utilities';
-import { state } from '../../src/decorators/state';
+import { state } from '../../src/State';
 
 @component()
 export class ViewModelBindingApp extends Component {
-    @state()
-    state = {
+    state = state({
         input: ref(''),
-    };
+    });
 
     template = (): Template => {
         return html` <h1>RefApp</h1>

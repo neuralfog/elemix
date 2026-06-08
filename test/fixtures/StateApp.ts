@@ -1,13 +1,12 @@
 import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
-import { state } from '../../src/decorators/state';
+import { state } from '../../src/State';
 import { repeat } from '../../directives';
 
 @component()
 export class StateApp extends Component {
-    @state()
-    state = {
+    state = state({
         string: 'Initial Value',
         number: 0,
         null: null,
@@ -19,7 +18,7 @@ export class StateApp extends Component {
                 value: 'Initial Value',
             },
         },
-    };
+    });
 
     onDispose = (): void => {};
 

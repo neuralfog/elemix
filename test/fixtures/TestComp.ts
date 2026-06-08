@@ -1,7 +1,7 @@
 import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
-import { state } from '../../src/decorators/state';
+import { state } from '../../src/State';
 import { store } from './Signal';
 
 type TestCompProps = {
@@ -12,15 +12,13 @@ type TestCompProps = {
 
 @component()
 export class TestComp extends Component<TestCompProps> {
-    @state()
-    state = {
+    state = state({
         string: 'Initial State Value',
-    };
+    });
 
-    @state()
-    state2 = {
+    state2 = state({
         number: 0,
-    };
+    });
 
     onDispose = (): void => {};
 

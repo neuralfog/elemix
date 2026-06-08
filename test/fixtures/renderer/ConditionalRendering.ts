@@ -1,7 +1,7 @@
 import { Component } from '../../../src/component/Component';
 import { html, type Template } from '../../../src/types';
 import { component } from '../../../src/decorators/component';
-import { state } from '../../../decorators';
+import { state } from '../../../src/State';
 
 export enum State {
     SINGLE = 0,
@@ -12,11 +12,10 @@ export enum State {
 
 @component()
 export class ConditionalRendering extends Component {
-    @state()
-    state = {
+    state = state({
         condition: true,
         case: State.SINGLE,
-    };
+    });
 
     condition = (): Template => {
         return html`${this.state.condition ? html`<p>true</p>` : html`<p>false</p>`}`;

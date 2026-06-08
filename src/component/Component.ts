@@ -1,6 +1,5 @@
 import type { Template } from '../types';
 import { Renderer } from './Renderer';
-import { LocalState } from './LocalState';
 import { Props } from './Props';
 import { Styles } from './Styles';
 import { activeRenderers } from '../renderers';
@@ -12,7 +11,6 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
     private $props = new Props<ComponentProps>(this);
     private $renderer = new Renderer(this);
-    private $localState = new LocalState(this);
     private $styles = new Styles(this);
     private $controlStyles?: CSSStyleSheet[];
 
@@ -51,7 +49,6 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         this.$styles.initialize();
         this.$props.initialize();
         this.attachFormInternals();
-        this.$localState.initialize();
         this.beforeMount();
         this.render(true);
     }

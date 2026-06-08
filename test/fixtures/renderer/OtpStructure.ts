@@ -1,6 +1,6 @@
 import { Component } from '../../../src/component/Component';
 import { component } from '../../../src/decorators/component';
-import { state } from '../../../src/decorators/state';
+import { state } from '../../../src/State';
 import { repeat } from '../../../directives';
 import { ref } from '../../../src/utilities';
 import { html, type Template } from '../../../src/types';
@@ -20,13 +20,12 @@ type Digit = { id: string; value: string };
  */
 @component()
 export class OtpLikeStructure extends Component {
-    @state()
-    state = {
+    state = state({
         digits: Array.from(
             { length: DIGITS },
             (_, i): Digit => ({ id: String(i), value: '' }),
         ),
-    };
+    });
 
     public inputRefs = Array.from({ length: DIGITS }, () =>
         ref<HTMLInputElement>(),

@@ -1,18 +1,17 @@
 import { Component } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 import { component } from '../../src/decorators/component';
-import { state } from '../../src/decorators/state';
+import { state } from '../../src/State';
 
 import './TestComp';
 
 @component()
 export class MainApp extends Component {
-    @state()
-    state = {
+    state = state({
         string: 'Initial State Value',
         color: 'Initial Color',
         size: 0,
-    };
+    });
 
     propsHandler = (): void => {};
 

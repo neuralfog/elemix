@@ -3,10 +3,7 @@ import { html } from '../src/renderer/render';
 import { present } from '../testing';
 import { render } from '../utilities';
 
-import type {
-    PreExistingTag,
-    RepeatedStateDecorator,
-} from './fixtures/DecoratorEdge';
+import type { PreExistingTag } from './fixtures/DecoratorEdge';
 
 import './fixtures/DecoratorEdge';
 
@@ -32,27 +29,5 @@ describe('@component decorator — already-registered tag', () => {
         await render();
         const el = presenter.root<PreExistingTag>();
         expect(el).toBeInstanceOf(HTMLElement);
-    });
-});
-
-describe('@state decorator — duplicate application', () => {
-    beforeEach(() => {
-        document.body.innerHTML = '';
-    });
-
-    test('stacking @state on the same property is idempotent', async () => {
-        const presenter = present().screen(
-            html`<repeated-state-decorator></repeated-state-decorator>`,
-        );
-        await render();
-        const component = presenter.root<RepeatedStateDecorator>();
-        expect(component.shadowRoot?.querySelector('span')?.textContent).toBe(
-            'x',
-        );
-        component.data.value = 'y';
-        await render();
-        expect(component.shadowRoot?.querySelector('span')?.textContent).toBe(
-            'y',
-        );
     });
 });
