@@ -1,11 +1,9 @@
-import { Component } from '../../src/component/Component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
-import { component } from '../../src/decorators/component';
 import { state } from '../../src/State';
 
 import './TestComp';
 
-@component()
 export class MainApp extends Component {
     state = state({
         string: 'Initial State Value',
@@ -27,3 +25,5 @@ export class MainApp extends Component {
         `;
     };
 }
+
+defineComponent('main-app', MainApp);

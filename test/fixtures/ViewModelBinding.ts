@@ -1,10 +1,8 @@
-import { Component } from '../../src/component/Component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
-import { component } from '../../src/decorators/component';
 import { ref } from '../../src/utilities';
 import { state } from '../../src/State';
 
-@component()
 export class ViewModelBindingApp extends Component {
     state = state({
         input: ref(''),
@@ -16,3 +14,5 @@ export class ViewModelBindingApp extends Component {
             <input type="text" ~model=${this.state.input} />`;
     };
 }
+
+defineComponent('view-model-binding-app', ViewModelBindingApp);

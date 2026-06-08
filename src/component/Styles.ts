@@ -5,7 +5,7 @@ export class Styles {
     public styles: string[];
 
     constructor(private component: Component) {
-        this.styles = (this.component.constructor as any).$styles;
+        this.styles = (this.component.constructor as any).styles || [];
     }
 
     public initialize(): void {

@@ -6,8 +6,18 @@ import { activeRenderers } from '../renderers';
 
 type Trackable = { unsubscribe(c: Component): unknown };
 
+export const defineComponent = (
+    tag: string,
+    component: CustomElementConstructor,
+): void => {
+    if (customElements.get(tag) === undefined) {
+        customElements.define(tag, component);
+    }
+};
+
 export class Component<ComponentProps = unknown> extends HTMLElement {
     public static formAssociated?: boolean;
+    public static styles?: string[];
 
     private $props = new Props<ComponentProps>(this);
     private $renderer = new Renderer(this);

@@ -1,5 +1,4 @@
-import { Component } from '../../../src/component/Component';
-import { component } from '../../../src/decorators/component';
+import { Component, defineComponent } from '../../../src/component/Component';
 import { html, type Template } from '../../../src/types';
 
 /**
@@ -11,7 +10,6 @@ import { html, type Template } from '../../../src/types';
  * The fixture captures whatever parsed successfully so the test can assert
  * the attribute was already hydrated by the time `beforeMount` ran.
  */
-@component()
 export class AttrBeforeConnect extends Component {
     public parsed: unknown = null;
     public parseError: string | null = null;
@@ -29,3 +27,5 @@ export class AttrBeforeConnect extends Component {
 
     template = (): Template => html`<div></div>`;
 }
+
+defineComponent('attr-before-connect', AttrBeforeConnect);

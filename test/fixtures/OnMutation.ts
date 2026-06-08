@@ -1,6 +1,5 @@
-import { Component } from '../../src/component/Component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
-import { component } from '../../src/decorators/component';
 import { state } from '../../src/State';
 import { signal } from '../../src/Signal';
 import { repeat } from '../../directives';
@@ -14,7 +13,6 @@ export const resetMutationSignal = (): void => {
 
 type ChildProps = { label?: string };
 
-@component()
 export class OnMutationStateApp extends Component {
     public mutations = 0;
 
@@ -27,7 +25,8 @@ export class OnMutationStateApp extends Component {
     template = (): Template => html`<p>${this.state.label}</p>`;
 }
 
-@component()
+defineComponent('on-mutation-state-app', OnMutationStateApp);
+
 export class OnMutationChild extends Component<ChildProps> {
     public mutations = 0;
 
@@ -39,7 +38,8 @@ export class OnMutationChild extends Component<ChildProps> {
         html`<span class="child">${this.props.label}</span>`;
 }
 
-@component()
+defineComponent('on-mutation-child', OnMutationChild);
+
 export class OnMutationPropParent extends Component {
     public mutations = 0;
 
@@ -55,7 +55,8 @@ export class OnMutationPropParent extends Component {
     `;
 }
 
-@component()
+defineComponent('on-mutation-prop-parent', OnMutationPropParent);
+
 export class OnMutationSignalApp extends Component {
     public mutations = 0;
 
@@ -66,7 +67,8 @@ export class OnMutationSignalApp extends Component {
     template = (): Template => html`<p>${mutationSignal.value.label}</p>`;
 }
 
-@component()
+defineComponent('on-mutation-signal-app', OnMutationSignalApp);
+
 export class OnMutationListApp extends Component {
     public mutations = 0;
 
@@ -93,7 +95,8 @@ export class OnMutationListApp extends Component {
     `;
 }
 
-@component()
+defineComponent('on-mutation-list-app', OnMutationListApp);
+
 export class OnMutationSwapApp extends Component {
     public mutations = 0;
 
@@ -114,7 +117,8 @@ export class OnMutationSwapApp extends Component {
     `;
 }
 
-@component()
+defineComponent('on-mutation-swap-app', OnMutationSwapApp);
+
 export class OnMutationClassApp extends Component {
     public mutations = 0;
 
@@ -128,3 +132,5 @@ export class OnMutationClassApp extends Component {
         <div .class=${{ box: true, active: this.state.active }}></div>
     `;
 }
+
+defineComponent('on-mutation-class-app', OnMutationClassApp);

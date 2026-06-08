@@ -1,6 +1,5 @@
-import { Component } from '../../src/component/Component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
-import { component } from '../../src/decorators/component';
 import { ref } from '../../src/utilities';
 import { state } from '../../src/State';
 
@@ -9,7 +8,6 @@ const clamp = (v: string): string => {
     return String(Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0);
 };
 
-@component()
 export class OnModelClampApp extends Component {
     state = state({
         input: ref(''),
@@ -27,7 +25,8 @@ export class OnModelClampApp extends Component {
     };
 }
 
-@component()
+defineComponent('on-model-clamp-app', OnModelClampApp);
+
 export class OnModelOnlyApp extends Component {
     public calls: string[] = [];
 
@@ -42,7 +41,8 @@ export class OnModelOnlyApp extends Component {
     };
 }
 
-@component()
+defineComponent('on-model-only-app', OnModelOnlyApp);
+
 export class OnModelOrderApp extends Component {
     state = state({
         input: ref(''),
@@ -56,3 +56,5 @@ export class OnModelOrderApp extends Component {
         />`;
     };
 }
+
+defineComponent('on-model-order-app', OnModelOrderApp);

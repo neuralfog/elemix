@@ -1,11 +1,11 @@
-import { Component } from '../../src/component/Component';
-import { component } from '../../src/decorators/component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
 
-@component()
 export class FirstDefinition extends Component {
     template = (): Template => html`<span>first</span>`;
 }
+
+defineComponent('first-definition', FirstDefinition);
 
 // Manually pre-register a tag so the decorator's "already defined" guard fires
 // when the class below is registered through the decorator pipeline.
@@ -15,7 +15,8 @@ if (!customElements.get(preExistingTag)) {
     customElements.define(preExistingTag, Pre);
 }
 
-@component()
 export class PreExistingTag extends Component {
     template = (): Template => html`<span>second</span>`;
 }
+
+defineComponent('pre-existing-tag', PreExistingTag);

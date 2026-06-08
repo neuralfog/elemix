@@ -1,5 +1,4 @@
-import { Component } from '../../src/component/Component';
-import { component } from '../../src/decorators/component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { state } from '../../src/State';
 import { html, type Template } from '../../src/types';
 
@@ -9,7 +8,6 @@ export const resetCounter = (): void => {
     counter.value = 0;
 };
 
-@component()
 export class BeforeMountChild extends Component {
     beforeMount(): void {
         counter.value++;
@@ -17,7 +15,8 @@ export class BeforeMountChild extends Component {
     template = (): Template => html`<span class="child">child</span>`;
 }
 
-@component()
+defineComponent('before-mount-child', BeforeMountChild);
+
 export class BeforeMountParent extends Component {
     state = state({ count: 0 });
 
@@ -26,7 +25,8 @@ export class BeforeMountParent extends Component {
             <span class="counter">${this.state.count}</span>`;
 }
 
-@component()
+defineComponent('before-mount-parent', BeforeMountParent);
+
 export class BeforeMountSwapParent extends Component {
     state = state({ showB: false });
 
@@ -37,3 +37,5 @@ export class BeforeMountSwapParent extends Component {
               </div>`
             : html`<div class="a">loading…</div>`;
 }
+
+defineComponent('before-mount-swap-parent', BeforeMountSwapParent);

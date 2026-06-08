@@ -1,5 +1,4 @@
-import { Component } from '../../../src/component/Component';
-import { component } from '../../../src/decorators/component';
+import { Component, defineComponent } from '../../../src/component/Component';
 import { state } from '../../../src/State';
 import { repeat } from '../../../directives';
 import { ref } from '../../../src/utilities';
@@ -18,7 +17,6 @@ type Digit = { id: string; value: string };
  * and a sibling <div>. The renderer must keep the trailing sibling <div>
  * inside the wrapper, not promote it to a sibling of the wrapper itself.
  */
-@component()
 export class OtpLikeStructure extends Component {
     state = state({
         digits: Array.from(
@@ -70,3 +68,5 @@ export class OtpLikeStructure extends Component {
         </div>
     `;
 }
+
+defineComponent('otp-like-structure', OtpLikeStructure);

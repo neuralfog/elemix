@@ -1,13 +1,12 @@
-import { Component } from '../../../src/component/Component';
+import { Component, defineComponent } from '../../../src/component/Component';
 import { html, type Template } from '../../../src/types';
-import { component } from '../../../src/decorators/component';
 
-@component()
 export class SelfClosingChild extends Component {
     template = (): Template => html`<span class="child"><slot></slot></span>`;
 }
 
-@component()
+defineComponent('self-closing-child', SelfClosingChild);
+
 export class SelfClosingHost extends Component {
     template = (): Template => html`
         <div>
@@ -18,7 +17,8 @@ export class SelfClosingHost extends Component {
     `;
 }
 
-@component()
+defineComponent('self-closing-host', SelfClosingHost);
+
 export class SelfClosingSlots extends Component {
     template = (): Template => html`
         <div class="card">
@@ -29,7 +29,8 @@ export class SelfClosingSlots extends Component {
     `;
 }
 
-@component()
+defineComponent('self-closing-slots', SelfClosingSlots);
+
 export class SelfClosingSlotHost extends Component {
     template = (): Template => html`
         <self-closing-slots>
@@ -40,7 +41,8 @@ export class SelfClosingSlotHost extends Component {
     `;
 }
 
-@component()
+defineComponent('self-closing-slot-host', SelfClosingSlotHost);
+
 export class VoidElementHost extends Component {
     template = (): Template => html`
         <div>
@@ -51,7 +53,8 @@ export class VoidElementHost extends Component {
     `;
 }
 
-@component()
+defineComponent('void-element-host', VoidElementHost);
+
 export class ConditionalSelfClose extends Component {
     public showIcon = false;
 
@@ -70,7 +73,8 @@ export class ConditionalSelfClose extends Component {
     `;
 }
 
-@component()
+defineComponent('conditional-self-close', ConditionalSelfClose);
+
 export class SearchWithClear extends Component {
     public query = '';
 
@@ -105,3 +109,5 @@ export class SearchWithClear extends Component {
         </div>
     `;
 }
+
+defineComponent('search-with-clear', SearchWithClear);

@@ -1,6 +1,5 @@
-import { Component } from '../../src/component/Component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
-import { component } from '../../src/decorators/component';
 import { state } from '../../src/State';
 import { store } from './Signal';
 
@@ -10,7 +9,6 @@ type TestCompProps = {
     handler: () => void;
 };
 
-@component()
 export class TestComp extends Component<TestCompProps> {
     state = state({
         string: 'Initial State Value',
@@ -32,3 +30,5 @@ export class TestComp extends Component<TestCompProps> {
         </div>`;
     };
 }
+
+defineComponent('test-comp', TestComp);

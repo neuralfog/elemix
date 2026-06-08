@@ -6,7 +6,6 @@ export default defineConfig({
         lib: {
             entry: {
                 index: resolve('index.ts'),
-                decorators: resolve('decorators.ts'),
                 directives: resolve('directives.ts'),
                 reactive: resolve('reactive.ts'),
                 render: resolve('render.ts'),

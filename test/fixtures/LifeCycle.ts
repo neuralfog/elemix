@@ -1,9 +1,7 @@
-import { Component } from '../../src/component/Component';
-import { component } from '../../src/decorators/component';
+import { Component, defineComponent } from '../../src/component/Component';
 import type { Template } from '../../src/types';
 import { html } from '../../src/types';
 
-@component()
 export class LifeCycle extends Component {
     beforeMount = (): void => {};
     onMount = (): void => {};
@@ -13,3 +11,5 @@ export class LifeCycle extends Component {
         return html`<h1>Ola !</h1>`;
     };
 }
+
+defineComponent('life-cycle', LifeCycle);

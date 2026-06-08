@@ -1,8 +1,6 @@
-import { Component } from '../../../src/component/Component';
-import { component } from '../../../src/decorators/component';
+import { Component, defineComponent } from '../../../src/component/Component';
 import { html, type Template } from '../../../src/types';
 
-@component()
 export class DirectPropHost extends Component {
     public inputValue = '';
     public flag = false;
@@ -18,13 +16,16 @@ export class DirectPropHost extends Component {
     `;
 }
 
-@component()
+defineComponent('direct-prop-host', DirectPropHost);
+
 export class DirectPropObject extends Component {
     public payload: unknown = { foo: 'bar' };
 
     template = (): Template =>
         html`<x-receiver .data=${this.payload}></x-receiver>`;
 }
+
+defineComponent('direct-prop-object', DirectPropObject);
 
 class XReceiver extends HTMLElement {}
 customElements.define('x-receiver', XReceiver);

@@ -1,6 +1,5 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { Component } from '../src/component/Component';
-import { component } from '../src/decorators/component';
+import { Component, defineComponent } from '../src/component/Component';
 import { state } from '../src/State';
 import { html, type Template } from '../src/types';
 import { ref, type Ref } from '../src/utilities';
@@ -14,7 +13,6 @@ const counter = (key: string, m: Map<string, number>) => {
     m.set(key, (m.get(key) ?? 0) + 1);
 };
 
-@component()
 class PlainChild extends Component {
     onMount(): void {
         counter('plain-child', onMountCounts);
@@ -22,7 +20,8 @@ class PlainChild extends Component {
     template = (): Template => html`<span>plain</span>`;
 }
 
-@component()
+defineComponent('plain-child', PlainChild);
+
 class StateMutatingChild extends Component {
     state = state({ ready: false });
 
@@ -45,7 +44,8 @@ class StateMutatingChild extends Component {
     `;
 }
 
-@component()
+defineComponent('state-mutating-child', StateMutatingChild);
+
 class PropConsumerChild extends Component<{ model: Ref<{ count: number }> }> {
     state = state({ internal: 0 });
 
@@ -64,7 +64,8 @@ class PropConsumerChild extends Component<{ model: Ref<{ count: number }> }> {
     `;
 }
 
-@component()
+defineComponent('prop-consumer-child', PropConsumerChild);
+
 class PropConsumerParent extends Component {
     state = state({ canvas: ref({ count: 5 }) });
 
@@ -75,7 +76,8 @@ class PropConsumerParent extends Component {
     `;
 }
 
-@component()
+defineComponent('prop-consumer-parent', PropConsumerParent);
+
 class SwapParent extends Component {
     state = state({ loaded: false });
 
@@ -84,6 +86,8 @@ class SwapParent extends Component {
             ? html`<state-mutating-child></state-mutating-child>`
             : html`<div class="loader">loading</div>`;
 }
+
+defineComponent('swap-parent', SwapParent);
 
 describe('onMount + data-cloak across schedule paths', () => {
     beforeEach(() => {

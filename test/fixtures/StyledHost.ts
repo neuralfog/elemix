@@ -1,24 +1,29 @@
-import { Component } from '../../src/component/Component';
-import { component } from '../../src/decorators/component';
+import { Component, defineComponent } from '../../src/component/Component';
 import type { Template } from '../../src/types';
 import { html } from '../../src/types';
 
-@component({ styles: ['.styled-host { color: red; }'] })
 export class StyledHost extends Component {
+    static styles = ['.styled-host { color: red; }'];
+
     template = (): Template => html`<div class="styled-host">styled</div>`;
 }
 
-@component()
+defineComponent('styled-host', StyledHost);
+
 export class UnstyledHost extends Component {
     template = (): Template => html`<div>plain</div>`;
 }
 
-@component({ styles: ['.first { color: red; }', '.second { color: blue; }'] })
+defineComponent('unstyled-host', UnstyledHost);
+
 export class MultiStyledHost extends Component {
+    static styles = ['.first { color: red; }', '.second { color: blue; }'];
+
     template = (): Template => html`<div class="first second">multi</div>`;
 }
 
-@component()
+defineComponent('multi-styled-host', MultiStyledHost);
+
 export class SlotHost extends Component {
     template = (): Template => html`
         <div>
@@ -28,3 +33,5 @@ export class SlotHost extends Component {
         </div>
     `;
 }
+
+defineComponent('slot-host', SlotHost);

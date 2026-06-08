@@ -1,10 +1,8 @@
 import { repeat } from '../../../src/renderer/directives';
-import { Component } from '../../../src/component/Component';
+import { Component, defineComponent } from '../../../src/component/Component';
 import { html, type Template } from '../../../src/types';
-import { component } from '../../../src/decorators/component';
 import { state } from '../../../src/State';
 
-@component()
 export class RendererList extends Component {
     state = state({
         list: [
@@ -22,3 +20,5 @@ export class RendererList extends Component {
         </ul>`;
     };
 }
+
+defineComponent('renderer-list', RendererList);

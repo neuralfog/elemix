@@ -1,6 +1,5 @@
-import { Component } from '../../src/component/Component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
-import { component } from '../../src/decorators/component';
 import { state } from '../../src/State';
 
 export type StateInPropsChildProps = {
@@ -9,14 +8,14 @@ export type StateInPropsChildProps = {
     };
 };
 
-@component()
 export class StateInPropsChild extends Component<StateInPropsChildProps> {
     template = (): Template => {
         return html` <h1>StateInPropsChild</h1>`;
     };
 }
 
-@component()
+defineComponent('state-in-props-child', StateInPropsChild);
+
 export class StateInProps extends Component {
     state = state({
         nested: {
@@ -32,3 +31,5 @@ export class StateInProps extends Component {
         `;
     };
 }
+
+defineComponent('state-in-props', StateInProps);

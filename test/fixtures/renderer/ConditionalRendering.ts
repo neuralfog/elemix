@@ -1,6 +1,5 @@
-import { Component } from '../../../src/component/Component';
+import { Component, defineComponent } from '../../../src/component/Component';
 import { html, type Template } from '../../../src/types';
-import { component } from '../../../src/decorators/component';
 import { state } from '../../../src/State';
 
 export enum State {
@@ -10,7 +9,6 @@ export enum State {
     MIDDLE = 3,
 }
 
-@component()
 export class ConditionalRendering extends Component {
     state = state({
         condition: true,
@@ -55,3 +53,5 @@ export class ConditionalRendering extends Component {
         return this.partial();
     };
 }
+
+defineComponent('conditional-rendering', ConditionalRendering);

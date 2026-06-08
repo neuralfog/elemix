@@ -42,11 +42,11 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
         });
 
         const required = [
-            // index — Component class + html tag
+            // index — Component class + html tag + registration
             { name: 'Component', kind: 'function' },
+            { name: 'defineComponent', kind: 'function' },
             { name: 'html', kind: 'function' },
-            // decorators
-            { name: 'component', kind: 'function' },
+            // state
             { name: 'state', kind: 'function' },
             // directives
             { name: 'repeat', kind: 'function' },

@@ -1,10 +1,8 @@
-import { Component } from '../../src/component/Component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { html, type Template } from '../../src/types';
-import { component } from '../../src/decorators/component';
 import { state } from '../../src/State';
 import { repeat } from '../../directives';
 
-@component()
 export class StateApp extends Component {
     state = state({
         string: 'Initial Value',
@@ -39,3 +37,5 @@ export class StateApp extends Component {
         `;
     };
 }
+
+defineComponent('state-app', StateApp);

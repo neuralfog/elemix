@@ -1,12 +1,10 @@
-import { Component } from '../../src/component/Component';
-import { component } from '../../src/decorators/component';
+import { Component, defineComponent } from '../../src/component/Component';
 import { state } from '../../src/State';
 import { html, type Template } from '../../src/types';
 import { ref, type Ref } from '../../src/utilities';
 
 type ChildProps = { model: Ref<{ zoom: number }> };
 
-@component()
 export class PropsFirstRenderChild extends Component<ChildProps> {
     public beforeMountSawModel = false;
     public templateSawModel = false;
@@ -21,7 +19,8 @@ export class PropsFirstRenderChild extends Component<ChildProps> {
     };
 }
 
-@component()
+defineComponent('props-first-render-child', PropsFirstRenderChild);
+
 export class PropsFirstRenderParent extends Component {
     state = state({ canvas: ref({ zoom: 1 }) });
 
@@ -31,3 +30,5 @@ export class PropsFirstRenderParent extends Component {
         ></props-first-render-child>`;
     };
 }
+
+defineComponent('props-first-render-parent', PropsFirstRenderParent);

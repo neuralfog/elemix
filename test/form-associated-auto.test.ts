@@ -1,16 +1,15 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { Component } from '../src/component/Component';
-import { component } from '../src/decorators/component';
+import { Component, defineComponent } from '../src/component/Component';
 import { html, type Template } from '../src/types';
 import { present } from '../testing';
 import { render } from '../utilities';
 
-@component()
 class NoForm extends Component {
     template = (): Template => html`<span>plain</span>`;
 }
 
-@component()
+defineComponent('no-form', NoForm);
+
 class FormBasic extends Component {
     static formAssociated = true;
 
@@ -23,7 +22,8 @@ class FormBasic extends Component {
     template = (): Template => html`<span>form</span>`;
 }
 
-@component()
+defineComponent('form-basic', FormBasic);
+
 class FormSetsValue extends Component {
     static formAssociated = true;
     declare internals: ElementInternals;
@@ -41,6 +41,8 @@ class FormSetsValue extends Component {
 
     template = (): Template => html`<span>form-with-value</span>`;
 }
+
+defineComponent('form-sets-value', FormSetsValue);
 
 describe('formAssociated auto-attach', () => {
     beforeEach(() => {

@@ -1,15 +1,13 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { Component } from '../src/component/Component';
+import { Component, defineComponent } from '../src/component/Component';
 import { html } from '../src/renderer/render';
 import { indexFromMarker } from '../src/renderer/utils';
 import { Reactive } from '../reactive';
 import { diff } from '../src/renderer/diff';
 import { present } from '../testing';
 import { render } from '../utilities';
-import { component } from '../src/decorators/component';
 import type { Template } from '../src/types';
 
-@component()
 class DirectClassEdge extends Component {
     public value: unknown = null;
 
@@ -18,12 +16,15 @@ class DirectClassEdge extends Component {
     `;
 }
 
-@component()
+defineComponent('direct-class-edge', DirectClassEdge);
+
 class DirectClassNoInit extends Component {
     public value: unknown = null;
 
     template = (): Template => html`<div .class=${this.value}>plain</div>`;
 }
+
+defineComponent('direct-class-no-init', DirectClassNoInit);
 
 describe('indexFromMarker', () => {
     test('throws when the comment value does not match the marker shape', () => {

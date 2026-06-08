@@ -1,12 +1,10 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { Component } from '../src/component/Component';
+import { Component, defineComponent } from '../src/component/Component';
 import { html, type Template } from '../src/types';
-import { component } from '../src/decorators/component';
 import { state } from '../src/State';
 import { present } from '../testing';
 import { render } from '../utilities';
 
-@component()
 class StateFnApp extends Component {
     count = state<{ value: number }>({ value: 0 });
     label = state<{ text: string }>({ text: 'hi' });
@@ -14,6 +12,8 @@ class StateFnApp extends Component {
     template = (): Template =>
         html`<p class="out">${this.label.text}:${this.count.value}</p>`;
 }
+
+defineComponent('state-fn-app', StateFnApp);
 
 const out = (app: StateFnApp): string | null | undefined =>
     app.shadowRoot?.querySelector('.out')?.textContent;

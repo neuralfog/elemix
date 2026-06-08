@@ -1,5 +1,4 @@
 export * from './index';
-export * from './decorators';
 export * from './directives';
 export * from './signal';
 export * from './state';

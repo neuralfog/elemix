@@ -1,12 +1,10 @@
 import { expect, test, describe, beforeEach } from 'vitest';
-import { Component } from '../src/component/Component';
-import { component } from '../src/decorators/component';
+import { Component, defineComponent } from '../src/component/Component';
 import { state } from '../src/State';
 import { html, type Template } from '../src/types';
 import { present } from '../testing';
 import { render } from '../utilities';
 
-@component()
 class SwitchLikeComponent extends Component {
     state = state({ checked: false });
 
@@ -24,6 +22,8 @@ class SwitchLikeComponent extends Component {
         >
     `;
 }
+
+defineComponent('switch-like-component', SwitchLikeComponent);
 
 describe('beforeMount mutating state', () => {
     beforeEach(() => {
@@ -51,7 +51,6 @@ describe('beforeMount mutating state', () => {
     });
 
     test('with parent passing :checked, :disabled, :onChange — renders correctly', async () => {
-        @component()
         class SwitchParent extends Component {
             template = (): Template => html`
                 <switch-like-with-props
@@ -61,7 +60,6 @@ describe('beforeMount mutating state', () => {
                 ></switch-like-with-props>
             `;
         }
-        @component()
         class SwitchLikeWithProps extends Component<{
             checked?: boolean;
             disabled?: boolean;
@@ -84,9 +82,8 @@ describe('beforeMount mutating state', () => {
                 >
             `;
         }
-        // satisfy lint
-        void SwitchParent;
-        void SwitchLikeWithProps;
+        defineComponent('switch-parent', SwitchParent);
+        defineComponent('switch-like-with-props', SwitchLikeWithProps);
         const presenter = present().screen(
             html`<switch-parent></switch-parent>`,
         );

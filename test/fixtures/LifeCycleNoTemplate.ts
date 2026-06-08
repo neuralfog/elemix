@@ -1,7 +1,7 @@
-import { Component } from '../../src/component/Component';
-import { component } from '../../src/decorators/component';
+import { Component, defineComponent } from '../../src/component/Component';
 
-@component()
 export class LifeCycleNoTemplate extends Component {
     onMount = (): void => {};
 }
+
+defineComponent('life-cycle-no-template', LifeCycleNoTemplate);
