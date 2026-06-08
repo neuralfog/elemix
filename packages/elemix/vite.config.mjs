@@ -11,15 +11,15 @@ export default defineConfig({
                 render: resolve('render.ts'),
                 signal: resolve('signal.ts'),
                 state: resolve('state.ts'),
-                app: resolve('app.ts'),
                 utilities: resolve('utilities.ts'),
                 'testing/index': resolve('testing/index.ts'),
                 'testing/snapshots': resolve('testing/snapshots.ts'),
                 'testing/mocks': resolve('testing/mocks.ts'),
             },
             name: 'elemix',
-            fileName: (_, entryName) => `${entryName}.js`,
-            formats: ['cjs'],
+            fileName: (format, entryName) =>
+                `${entryName}.${format === 'es' ? 'mjs' : 'cjs'}`,
+            formats: ['es', 'cjs'],
         },
     },
 });

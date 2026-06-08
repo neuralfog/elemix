@@ -1,0 +1,89 @@
+{
+    "name": "@neuralfog/elemix",
+    "version": "0.7.0",
+    "license": "MIT",
+    "author": "brownhounds",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "files": ["./dist/**/*"],
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.cjs"
+        },
+        "./directives": {
+            "types": "./dist/directives.d.ts",
+            "import": "./dist/directives.mjs",
+            "require": "./dist/directives.cjs"
+        },
+        "./render": {
+            "types": "./dist/render.d.ts",
+            "import": "./dist/render.mjs",
+            "require": "./dist/render.cjs"
+        },
+        "./signal": {
+            "types": "./dist/signal.d.ts",
+            "import": "./dist/signal.mjs",
+            "require": "./dist/signal.cjs"
+        },
+        "./state": {
+            "types": "./dist/state.d.ts",
+            "import": "./dist/state.mjs",
+            "require": "./dist/state.cjs"
+        },
+        "./reactive": {
+            "types": "./dist/reactive.d.ts",
+            "import": "./dist/reactive.mjs",
+            "require": "./dist/reactive.cjs"
+        },
+        "./utilities": {
+            "types": "./dist/utilities.d.ts",
+            "import": "./dist/utilities.mjs",
+            "require": "./dist/utilities.cjs"
+        },
+        "./testing": {
+            "types": "./dist/testing/index.d.ts",
+            "import": "./dist/testing/index.mjs",
+            "require": "./dist/testing/index.cjs"
+        },
+        "./testing/snapshots": {
+            "types": "./dist/testing/snapshots.d.ts",
+            "import": "./dist/testing/snapshots.mjs",
+            "require": "./dist/testing/snapshots.cjs"
+        },
+        "./testing/mocks": {
+            "types": "./dist/testing/mocks.d.ts",
+            "import": "./dist/testing/mocks.mjs",
+            "require": "./dist/testing/mocks.cjs"
+        }
+    },
+    "scripts": {
+        "clean": "rm -rf ./dist ./bundle ./coverage",
+        "clean-npm": "rm -rf ./node_modules/ && rm package-lock.json && npm i",
+        "emit-declarations": "tsc --emitDeclarationOnly --declaration --outDir ./dist",
+        "build-lib": "vite build",
+        "build": "npm run clean && npm run build-lib && npm run emit-declarations",
+        "build:bundle": "vite build --config vite.bundle.config.mjs",
+        "test": "vitest run --coverage --reporter verbose",
+        "test-nc": "vitest run",
+        "test-ui": "npx vitest --api.host 0.0.0.0 --ui",
+        "lint": "tsc --noEmit && biome format && biome lint",
+        "lint:fix": "biome format --write && biome lint --fix",
+        "release": "npm run clean && npm run build && npm publish --access public"
+    },
+    "devDependencies": {
+        "@neuralfog/biome-config": "0.1.2",
+        "@neuralfog/ts-config": "0.1.2",
+        "@types/node": "25.9.1",
+        "@vitest/coverage-v8": "4.1.7",
+        "@vitest/ui": "4.1.7",
+        "esbuild": "0.28.0",
+        "jsdom": "29.1.1",
+        "typescript": "6.0.3",
+        "vite": "8.0.14",
+        "vitest": "4.1.7"
+    }
+}

@@ -54,9 +54,6 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             { name: 'signal', kind: 'function' },
             // reactive
             { name: 'Reactive', kind: 'function' },
-            // app
-            { name: 'initApp', kind: 'function' },
-            { name: 'App', kind: 'function' },
             // utilities
             { name: 'ref', kind: 'function' },
             { name: 'fastUID', kind: 'function' },

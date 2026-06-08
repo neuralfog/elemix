@@ -1,4 +1,3 @@
-import { App } from '../App';
 import type { Component } from './Component';
 
 export class Styles {
@@ -13,9 +12,7 @@ export class Styles {
             if (this.styles.length) {
                 const sheet = new CSSStyleSheet();
                 sheet.replaceSync(this.styles.join(' '));
-                const baseStyles = App.config.baseStyles || [];
                 this.component.shadowRoot.adoptedStyleSheets = [
-                    ...baseStyles,
                     sheet,
                     ...this.component.controlStyles,
                 ];

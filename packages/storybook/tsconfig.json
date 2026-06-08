@@ -1,0 +1,21 @@
+{
+    "extends": "@neuralfog/ts-config/index.json",
+    "include": ["index.ts", "src/**/*"],
+    "exclude": [
+        "dist",
+        "node_modules",
+        "**/*.stories.*",
+        "**/*.test.*",
+        "**/*.spec.*",
+        "vite.config.*",
+        "vitest.config.*",
+        ".storybook/**",
+        "storybook/**"
+    ],
+    "compilerOptions": {
+        "paths": {
+            "#src/*": ["./src/*"]
+        },
+        "types": ["node"]
+    }
+}

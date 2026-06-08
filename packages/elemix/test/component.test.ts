@@ -2,7 +2,6 @@ import { expect, test, describe, beforeEach } from 'vitest';
 import { html } from '../src/renderer/render';
 import { present } from '../testing';
 import { render } from '../utilities';
-import { App } from '../app';
 import { makeCssStylesheet } from '../src/utilities';
 
 import type {
@@ -17,7 +16,6 @@ import './fixtures/StyledHost';
 describe('Component — controlStyles getter and setter', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
-        App.config.baseStyles = undefined as unknown as CSSStyleSheet[];
     });
 
     test('controlStyles returns an empty array by default', async () => {
@@ -104,7 +102,6 @@ describe('Component — hasSlot', () => {
 describe('Styles — adoptedStyleSheets wiring', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
-        App.config.baseStyles = undefined as unknown as CSSStyleSheet[];
     });
 
     test('component with no styles leaves adoptedStyleSheets untouched', async () => {
@@ -134,18 +131,6 @@ describe('Styles — adoptedStyleSheets wiring', () => {
         const component = presenter.root<MultiStyledHost>();
         const sheets = component.shadowRoot?.adoptedStyleSheets ?? [];
         expect(sheets).toHaveLength(1);
-    });
-
-    test('App.config.baseStyles are prepended to the adopted list', async () => {
-        const baseSheet = makeCssStylesheet(':host { display: block; }');
-        App.config.baseStyles = [baseSheet];
-
-        const presenter = present().screen(html`<styled-host></styled-host>`);
-        await render();
-        const component = presenter.root<StyledHost>();
-        const sheets = component.shadowRoot?.adoptedStyleSheets ?? [];
-        expect(sheets).toHaveLength(2);
-        expect(sheets[0]).toBe(baseSheet);
     });
 
     test('controlStyles set before connect are appended after the main sheet', async () => {
