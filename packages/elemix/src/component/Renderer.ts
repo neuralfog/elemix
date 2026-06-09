@@ -15,27 +15,26 @@ export class Renderer {
         // schedule (e.g. a beforeMount state mutation) already locked us.
         if (isConnectedCallback) this.pendingOnMount = true;
 
+        if (this.locked) return;
+
         const prev = renderTracking.active;
         renderTracking.active = null;
         const hasTemplate = this.component.template();
+        renderTracking.active = prev;
         if (!hasTemplate) return;
 
-        renderTracking.active = prev;
-
-        if (!this.locked) {
-            this.locked = true;
-            activeRenderers.add(this);
-            setTimeout(() => {
-                this.render();
-                this.locked = false;
-                activeRenderers.delete(this);
-                if (this.pendingOnMount) {
-                    this.pendingOnMount = false;
-                    this.component.onMount();
-                    this.component.removeAttribute('data-cloak');
-                }
-            }, 0);
-        }
+        this.locked = true;
+        activeRenderers.add(this);
+        queueMicrotask(() => {
+            this.render();
+            this.locked = false;
+            activeRenderers.delete(this);
+            if (this.pendingOnMount) {
+                this.pendingOnMount = false;
+                this.component.onMount();
+                this.component.removeAttribute('data-cloak');
+            }
+        });
     }
 
     private render(): void {

@@ -1,9 +1,11 @@
 import {
     Attr,
+    KEYED_LIST,
     type AttrDef,
     type Fragment,
     type Hole,
     type HtmlTemplate,
+    type KeyedList,
 } from './types';
 import { diff } from './diff';
 import { makeMarker, mergeClasses } from './utils';
@@ -106,13 +108,29 @@ export const hydrateAttributes = (
     }
 };
 
+export const applyAttribute = (
+    node: HTMLElement,
+    def: AttrDef,
+    holes: Map<number, Hole>,
+): void => {
+    if (def.virtual) node.removeAttribute(def.name);
+    holes.set(def.index, ATTR_DISPATCH[def.type](node, def));
+};
+
 type MkFrag = (t: HtmlTemplate) => Fragment;
 
 type ContentSubHole = { update: Hole; dispose: () => void };
 type Kind = 'list' | 'template' | 'string';
 
+const isKeyedList = (v: unknown): v is KeyedList =>
+    typeof v === 'object' && v !== null && (v as KeyedList)[KEYED_LIST] === true;
+
 const kindOf = (v: unknown): Kind =>
-    Array.isArray(v) ? 'list' : isTemplate(v) ? 'template' : 'string';
+    Array.isArray(v) || isKeyedList(v)
+        ? 'list'
+        : isTemplate(v)
+          ? 'template'
+          : 'string';
 
 const createSubHole = (
     kind: Kind,
@@ -202,6 +220,35 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
     const nodeMap = new Map<string, ChildNode[]>();
     let prev: HtmlTemplate[] = [];
 
+    let memoCache = new Map<string, { memo: unknown; tpl: HtmlTemplate }>();
+
+    const buildItems = (
+        spec: KeyedList,
+    ): { items: HtmlTemplate[]; reused: Set<string> } => {
+        const { list, cb, keyFn, memoFn } = spec;
+        const out: HtmlTemplate[] = new Array(list.length);
+        const next = new Map<string, { memo: unknown; tpl: HtmlTemplate }>();
+        const reused = new Set<string>();
+        for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            const k = keyFn?.(item, i) || String(i);
+            const m = memoFn(item, i);
+            const hit = memoCache.get(k);
+            let tpl: HtmlTemplate;
+            if (hit && hit.memo === m) {
+                tpl = hit.tpl;
+                reused.add(k);
+            } else {
+                tpl = cb(item, i);
+                tpl.key = k;
+            }
+            next.set(k, { memo: m, tpl });
+            out[i] = tpl;
+        }
+        memoCache = next;
+        return { items: out, reused };
+    };
+
     // The leading node of an item, used as the insertion anchor so a new or
     // moved item lands before the whole target item rather than between its
     // nodes. Undefined key (end of list) falls back to the list anchor.
@@ -246,7 +293,15 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
 
     return {
         update: (v) => {
-            const items = v as HtmlTemplate[];
+            let items: HtmlTemplate[];
+            let skip: Set<string> | undefined;
+            if (isKeyedList(v)) {
+                const built = buildItems(v);
+                items = built.items;
+                skip = built.reused;
+            } else {
+                items = v as HtmlTemplate[];
+            }
 
             if (!prev.length) {
                 renderAll(items);
@@ -293,6 +348,7 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
             }
 
             for (let i = 0; i < items.length; i++) {
+                if (skip?.has(items[i].key)) continue;
                 frags.get(items[i].key)?.update(items[i].values);
             }
 

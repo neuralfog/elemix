@@ -34,3 +34,13 @@ export type AttrDef = {
     virtual: boolean;
     type: Attr;
 };
+
+export const KEYED_LIST = Symbol('keyedList');
+
+export type KeyedList = {
+    [KEYED_LIST]: true;
+    list: unknown[];
+    cb: (val: unknown, index: number) => HtmlTemplate;
+    keyFn?: (val: unknown, index: number) => string;
+    memoFn: (val: unknown, index: number) => unknown;
+};

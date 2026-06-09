@@ -6,6 +6,7 @@
         "build": "pnpm -r build",
         "build:bundle": "pnpm --filter @neuralfog/elemix run build:bundle",
         "test": "pnpm -r --no-bail run test",
+        "render-cost": "pnpm --filter @neuralfog/elemix run render-cost",
         "lint": "pnpm -r lint",
         "lint:fix": "pnpm -r run lint:fix",
         "storybook": "pnpm --filter @neuralfog/elemix-storybook storybook",

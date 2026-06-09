@@ -6,15 +6,43 @@ import {
     indexFromMarker,
     makeMarker,
 } from './utils';
-import { createContentHole, detectAttribute, hydrateAttributes } from './holes';
+import { applyAttribute, createContentHole, detectAttribute } from './holes';
 
-export const createFragment = (template: HtmlTemplate): Fragment => {
-    const holes = new Map<number, Hole>();
+const CONTENT = 0;
+const ATTR = 1;
+
+type Part =
+    | { kind: typeof CONTENT; index: number; path: number[] }
+    | { kind: typeof ATTR; def: AttrDef; path: number[] };
+
+type Prepared = { tpl: HTMLTemplateElement; parts: Part[] };
+
+const templateCache = new WeakMap<TemplateStringsArray, Prepared>();
+
+const pathTo = (node: Node, root: Node): number[] => {
+    const path: number[] = [];
+    let n: Node = node;
+    while (n !== root) {
+        const parent = n.parentNode;
+        if (!parent) break;
+        const siblings = parent.childNodes;
+        let i = 0;
+        while (siblings[i] !== n) i++;
+        path.push(i);
+        n = parent;
+    }
+    return path;
+};
+
+const resolve = (root: Node, path: number[]): Node =>
+    path.reduceRight((node, i) => node.childNodes[i], root);
+
+const prepare = (strings: TemplateStringsArray): Prepared => {
+    const cached = templateCache.get(strings);
+    if (cached) return cached;
+
     const attrs: AttrDef[] = [];
-    let tpl: HTMLTemplateElement | undefined;
-
     let markup = '';
-    const { strings } = template;
     for (let i = 0, len = strings.length; i < len; i++) {
         markup += strings[i];
         if (i < len - 1) {
@@ -25,36 +53,71 @@ export const createFragment = (template: HtmlTemplate): Fragment => {
     }
     markup = fixSelfClosing(fixAttributeQuotes(markup));
 
-    const clone = (): DocumentFragment => {
-        if (!tpl) {
-            tpl = document.createElement('template');
-            tpl.innerHTML = markup;
+    const tpl = document.createElement('template');
+    tpl.innerHTML = markup;
+
+    const byMarker = new Map<string, AttrDef>();
+    for (const d of attrs) byMarker.set(d.value, d);
+
+    const content = tpl.content;
+    const parts: Part[] = [];
+    const w = document.createTreeWalker(
+        content,
+        NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_ELEMENT,
+        // eslint-disable-next-line no-null/no-null
+        null,
+    );
+    let n: Node | null = w.nextNode();
+    while (n) {
+        if (n.nodeType === 8) {
+            const nodeValue = n.nodeValue;
+            if (nodeValue?.startsWith(MARKER)) {
+                parts.push({
+                    kind: CONTENT,
+                    index: indexFromMarker(nodeValue),
+                    path: pathTo(n, content),
+                });
+            }
+        } else {
+            const el = n as Element;
+            const { attributes } = el;
+            for (let i = 0, len = attributes.length; i < len; i++) {
+                const def = byMarker.get(attributes[i].value);
+                if (def) parts.push({ kind: ATTR, def, path: pathTo(el, content) });
+            }
         }
-        return tpl.content.cloneNode(true) as DocumentFragment;
-    };
+        n = w.nextNode();
+    }
+
+    const prepared: Prepared = { tpl, parts };
+    templateCache.set(strings, prepared);
+    return prepared;
+};
+
+export const createFragment = (template: HtmlTemplate): Fragment => {
+    const holes = new Map<number, Hole>();
+    const { tpl, parts } = prepare(template.strings);
+
+    const clone = (): DocumentFragment =>
+        tpl.content.cloneNode(true) as DocumentFragment;
 
     const hydrate = (frag: DocumentFragment, values: unknown[]): void => {
-        const w = document.createTreeWalker(
-            frag,
-            NodeFilter.SHOW_COMMENT,
-            // eslint-disable-next-line no-null/no-null
-            null,
-        );
-        while (w.nextNode()) {
-            const { nodeValue } = w.currentNode;
-            if (nodeValue?.startsWith(MARKER)) {
-                const idx = indexFromMarker(nodeValue);
+        for (let i = 0, len = parts.length; i < len; i++) {
+            const part = parts[i];
+            const node = resolve(frag, part.path);
+            if (part.kind === CONTENT) {
                 holes.set(
-                    idx,
+                    part.index,
                     createContentHole(
-                        values[idx],
-                        w.currentNode as Comment,
+                        values[part.index],
+                        node as Comment,
                         createFragment,
                     ),
                 );
+            } else {
+                applyAttribute(node as HTMLElement, part.def, holes);
             }
         }
-        hydrateAttributes(frag, attrs, holes);
     };
 
     /**

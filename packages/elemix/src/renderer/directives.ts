@@ -1,10 +1,20 @@
-import type { HtmlTemplate } from './types';
+import { KEYED_LIST, type HtmlTemplate, type KeyedList } from './types';
 
 export const repeat = <T = unknown>(
     list: T[],
     callback: (val: T, index: number) => HtmlTemplate,
     key?: (val: T, index: number) => string,
-): HtmlTemplate[] => {
+    memo?: (val: T, index: number) => unknown,
+): HtmlTemplate[] | KeyedList => {
+    if (memo) {
+        return {
+            [KEYED_LIST]: true,
+            list,
+            cb: callback as KeyedList['cb'],
+            keyFn: key as KeyedList['keyFn'],
+            memoFn: memo as KeyedList['memoFn'],
+        };
+    }
     return list.map((item, index) => {
         const template = callback(item, index);
         template.key = key?.(item, index) || String(index);
