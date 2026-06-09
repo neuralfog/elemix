@@ -9,6 +9,7 @@ export type Hole = (value: unknown) => void;
 export type Fragment = {
     mount(target: ParentNode, values: unknown[]): void;
     mountBefore(ref: ChildNode, values: unknown[]): ChildNode[];
+    mountInto(target: ParentNode, values: unknown[]): ChildNode[];
     update(values: unknown[]): void;
 };
 
@@ -42,5 +43,4 @@ export type KeyedList = {
     list: unknown[];
     cb: (val: unknown, index: number) => HtmlTemplate;
     keyFn?: (val: unknown, index: number) => string;
-    memoFn: (val: unknown, index: number) => unknown;
 };

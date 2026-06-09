@@ -34,42 +34,40 @@ test('diff cost', () => {
     console.log(`\ndiff() of a 1000-row swap: ${usPerCall.toFixed(2)} µs/call (one swap op runs it once)\n`);
 });
 
-type Item = { id: number; label: string };
+type Item = { id: number; label: string; selected: boolean };
 
 const c = { rebuilt: 0, reads: 0, textW: 0, attrW: 0, nodeOps: 0 };
 
 let nid = 1;
 const build = (n: number): Item[] =>
-    Array.from({ length: n }, () => ({ id: nid++, label: `row ${nid}` }));
+    Array.from({ length: n }, () => ({ id: nid++, label: `row ${nid}`, selected: false }));
 
-const row = (item: Item, selected: number) => {
+const row = (item: Item) => {
     c.rebuilt++;
-    return html`<tr class=${item.id === selected ? 'danger' : ''}><td>${item.id}</td><td><a data-id=${item.id}>${item.label}</a></td></tr>`;
+    return html`<tr class=${item.selected ? 'danger' : ''}><td>${item.id}</td><td><a data-id=${item.id}>${item.label}</a></td></tr>`;
 };
 
 class CostList extends Component {
-    state = state<{ data: Item[]; selected: number }>({ data: [], selected: 0 });
+    state = state<{ data: Item[] }>({ data: [] });
     template = () =>
         html`<table><tbody>${repeat(
             this.state.data,
-            (item: Item) => row(item, this.state.selected),
+            (item: Item) => row(item),
             (item: Item) => String(item.id),
         )}</tbody></table>`;
 }
 
-class CostListMemo extends Component {
-    state = state<{ data: Item[]; selected: number }>({ data: [], selected: 0 });
+class CostListAuto extends Component {
+    state = state<{ data: Item[] }>({ data: [] });
     template = () =>
         html`<table><tbody>${repeat(
             this.state.data,
-            (item: Item) => row(item, this.state.selected),
-            (item: Item) => String(item.id),
-            (item: Item) => `${item.label}|${item.id === this.state.selected ? 1 : 0}`,
+            (item: Item) => row(item),
         )}</tbody></table>`;
 }
 
 defineComponent('cost-list', CostList);
-defineComponent('cost-list-memo', CostListMemo);
+defineComponent('cost-list-auto', CostListAuto);
 
 type Result = Record<string, number | string>;
 
@@ -102,7 +100,7 @@ const measureComponent = async (tag: string): Promise<Result[]> => {
 
     await measure('create 1k', () => { cmp.state.data.push(...build(1000)); });
     await measure('update 10th', () => { const d = cmp.state.data; for (let i = 0; i < d.length; i += 10) d[i].label += ' !!!'; });
-    await measure('select', () => { cmp.state.selected = cmp.state.data[2].id; });
+    await measure('select', () => { cmp.state.data[2].selected = true; });
     await measure('swap', () => { const d = cmp.state.data; const t = d[1]; d[1] = d[998]; d[998] = t; });
     await measure('remove 1', () => { cmp.state.data.splice(0, 1); });
     await measure('clear', () => { cmp.state.data.splice(0); });
@@ -145,18 +143,18 @@ test('render cost', { timeout: 60_000 }, async () => {
     });
 
     const plain = await measureComponent('cost-list');
-    const memo = await measureComponent('cost-list-memo');
+    const auto = await measureComponent('cost-list-auto');
 
     Element.prototype.setAttribute = origAttr;
     Object.defineProperty(Node.prototype, 'textContent', tc);
 
-    const plainTable = table('repeat(list, cb, key)            — plain', plain);
-    const memoTable = table('repeat(list, cb, key, memoFn)    — memoized', memo);
+    const plainTable = table('repeat(list, cb, key)   — explicit key', plain);
+    const autoTable = table('repeat(list, cb)         — auto identity key', auto);
 
     console.log(
-        `\nElemix render cost — reactive 1000-row list (mutations via cmp.state.data):\n${plainTable}\n${memoTable}`,
+        `\nElemix render cost — reactive 1000-row list (mutations via cmp.state.data):\n${plainTable}\n${autoTable}`,
     );
 
     expect(plainTable).toMatchSnapshot();
-    expect(memoTable).toMatchSnapshot();
+    expect(autoTable).toMatchSnapshot();
 });

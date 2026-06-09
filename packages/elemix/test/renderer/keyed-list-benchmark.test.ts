@@ -15,32 +15,35 @@ const buildData = (n: number): Row[] =>
         return { id, label: `label ${id}` };
     });
 
-const tableTemplate = (s: State, useMemo: boolean) => {
-    const memo = useMemo
-        ? (item: Row) => `${item.label}|${item.id === s.selected}`
-        : undefined;
-    return html`<table><tbody>${repeat(
-        s.data,
-        (item: Row) => html`<tr class=${item.id === s.selected ? 'danger' : ''}><td class="id">${item.id}</td><td><a>${item.label}</a></td></tr>`,
-        (item: Row) => String(item.id),
-        memo,
-    )}</tbody></table>`;
-};
+const row = (item: Row, selected: number) =>
+    html`<tr class=${item.id === selected ? 'danger' : ''}><td class="id">${item.id}</td><td><a>${item.label}</a></td></tr>`;
+
+const tableTemplate = (s: State, useKey: boolean) =>
+    useKey
+        ? html`<table><tbody>${repeat(
+              s.data,
+              (item: Row) => row(item, s.selected),
+              (item: Row) => String(item.id),
+          )}</tbody></table>`
+        : html`<table><tbody>${repeat(
+              s.data,
+              (item: Row) => row(item, s.selected),
+          )}</tbody></table>`;
 
 class ListAppPlain extends Component {
     state = state<State>({ data: [], selected: 0 });
-    template = () => tableTemplate(this.state, false);
-}
-class ListAppMemo extends Component {
-    state = state<State>({ data: [], selected: 0 });
     template = () => tableTemplate(this.state, true);
 }
+class ListAppAuto extends Component {
+    state = state<State>({ data: [], selected: 0 });
+    template = () => tableTemplate(this.state, false);
+}
 defineComponent('list-app-plain', ListAppPlain);
-defineComponent('list-app-memo', ListAppMemo);
+defineComponent('list-app-auto', ListAppAuto);
 
 describe.each([
-    ['plain repeat', 'list-app-plain'],
-    ['memoized repeat', 'list-app-memo'],
+    ['explicit key', 'list-app-plain'],
+    ['auto identity key (no key)', 'list-app-auto'],
 ])('keyed list operations (%s)', (_name, tag) => {
     let cmp: ListAppPlain;
     const rows = () => Array.from(cmp.shadowRoot!.querySelectorAll('tbody tr'));

@@ -34,8 +34,11 @@ const pathTo = (node: Node, root: Node): number[] => {
     return path;
 };
 
-const resolve = (root: Node, path: number[]): Node =>
-    path.reduceRight((node, i) => node.childNodes[i], root);
+const resolve = (root: Node, path: number[]): Node => {
+    let node: Node = root;
+    for (let i = path.length - 1; i >= 0; i--) node = node.childNodes[path[i]];
+    return node;
+};
 
 const prepare = (strings: TemplateStringsArray): Prepared => {
     const cached = templateCache.get(strings);
@@ -94,14 +97,21 @@ const prepare = (strings: TemplateStringsArray): Prepared => {
     return prepared;
 };
 
-export const createFragment = (template: HtmlTemplate): Fragment => {
-    const holes = new Map<number, Hole>();
-    const { tpl, parts } = prepare(template.strings);
+class FragmentInstance implements Fragment {
+    private holes = new Map<number, Hole>();
+    private prepared: Prepared;
 
-    const clone = (): DocumentFragment =>
-        tpl.content.cloneNode(true) as DocumentFragment;
+    constructor(strings: TemplateStringsArray) {
+        this.prepared = prepare(strings);
+    }
 
-    const hydrate = (frag: DocumentFragment, values: unknown[]): void => {
+    private clone(): DocumentFragment {
+        return this.prepared.tpl.content.cloneNode(true) as DocumentFragment;
+    }
+
+    private hydrate(frag: DocumentFragment, values: unknown[]): void {
+        const { parts } = this.prepared;
+        const { holes } = this;
         for (let i = 0, len = parts.length; i < len; i++) {
             const part = parts[i];
             const node = resolve(frag, part.path);
@@ -118,39 +128,44 @@ export const createFragment = (template: HtmlTemplate): Fragment => {
                 applyAttribute(node as HTMLElement, part.def, holes);
             }
         }
-    };
+    }
 
-    /**
-     * Push every hole's initial value into the (still-disconnected) DOM
-     * subtree so that custom-element `connectedCallback` / `beforeMount`
-     * see the real attribute / property values — not the literal
-     * `<!--MARKER-->` strings the parser put there. Without this,
-     * `getAttribute('data-foo')` in `beforeMount` would return the marker
-     * comment and any consumer parsing it (e.g. `JSON.parse`) would throw.
-     */
-    const applyInitial = (values: unknown[]): void => {
-        for (const [i, hole] of holes) hole(values[i]);
-    };
+    // Push every hole's value into the (still-disconnected) subtree before it
+    // is inserted, so custom-element connectedCallback/beforeMount see real
+    // attribute/property values rather than the literal marker comments.
+    private apply(values: unknown[]): void {
+        for (const [i, hole] of this.holes) hole(values[i]);
+    }
 
-    const mount = (target: ParentNode, values: unknown[]): void => {
-        const frag = clone();
-        hydrate(frag, values);
-        applyInitial(values);
+    public mount(target: ParentNode, values: unknown[]): void {
+        const frag = this.clone();
+        this.hydrate(frag, values);
+        this.apply(values);
         target.appendChild(frag);
-    };
+    }
 
-    const mountBefore = (ref: ChildNode, values: unknown[]): ChildNode[] => {
-        const frag = clone();
-        hydrate(frag, values);
-        applyInitial(values);
+    public mountBefore(ref: ChildNode, values: unknown[]): ChildNode[] {
+        const frag = this.clone();
+        this.hydrate(frag, values);
+        this.apply(values);
         const children = Array.from(frag.childNodes);
         ref.before(frag);
         return children;
-    };
+    }
 
-    const update = (values: unknown[]): void => {
-        for (const [i, hole] of holes) hole(values[i]);
-    };
+    public mountInto(target: ParentNode, values: unknown[]): ChildNode[] {
+        const frag = this.clone();
+        this.hydrate(frag, values);
+        this.apply(values);
+        const children = Array.from(frag.childNodes);
+        target.appendChild(frag);
+        return children;
+    }
 
-    return { mount, mountBefore, update };
-};
+    public update(values: unknown[]): void {
+        this.apply(values);
+    }
+}
+
+export const createFragment = (template: HtmlTemplate): Fragment =>
+    new FragmentInstance(template.strings);

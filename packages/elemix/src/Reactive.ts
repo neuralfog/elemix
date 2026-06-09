@@ -1,17 +1,32 @@
 import type { Component } from './component/Component';
-import { renderTracking } from './renderers';
+import {
+    renderTracking,
+    bumpVersion,
+    versionOf,
+    notifyRows,
+} from './renderers';
+
+const observed = new WeakSet<object>();
+const ARRAY_MUTATORS = [
+    'push',
+    'pop',
+    'shift',
+    'unshift',
+    'splice',
+    'sort',
+    'reverse',
+] as const;
 
 export class Reactive<State> {
     public subscribers = new Set<Component>();
-    private proxy: State;
-    private proxySet = new WeakSet<any>();
+    private root: State;
 
     public get value(): State {
-        return this.proxy;
+        return this.root;
     }
 
     constructor(state: any) {
-        this.proxy = this.create(state);
+        this.root = this.observe(state) as State;
     }
 
     public subscribe(instance: Component): Reactive<State> {
@@ -24,56 +39,132 @@ export class Reactive<State> {
         return this;
     }
 
-    private create(state: any): State {
-        const reactive = this;
-
-        return new Proxy(state, {
-            get(target, name): unknown {
-                const prop = target[name];
-
-                unsupportedCollectionError(prop);
-
-                // Auto-subscribe whichever component is rendering right now.
-                // Bidirectional bookkeeping: signal tracks the component as a
-                // subscriber, component tracks the signal so it can unsubscribe
-                // on next render / disposal.
-                const reader = renderTracking.active;
-                if (reader) {
-                    reactive.subscribers.add(reader);
-                    reader.tracked.add(reactive);
+    private track(target: object, rawProp: unknown): void {
+        if (renderTracking.rowReads) {
+            renderTracking.rowReads.push(target, versionOf(target));
+            if (typeof rawProp === 'object' && rawProp !== null) {
+                renderTracking.rowReads.push(rawProp, versionOf(rawProp));
+            }
+        } else {
+            const reader = renderTracking.active;
+            if (reader) {
+                this.subscribers.add(reader);
+                reader.tracked.add(this);
+                reader.deps.set(target, versionOf(target));
+                if (Array.isArray(rawProp)) {
+                    reader.deps.set(rawProp, versionOf(rawProp));
                 }
+            }
+        }
+    }
 
-                if (
-                    typeof prop === 'object' &&
-                    prop !== null &&
-                    !reactive.proxySet.has(prop)
-                ) {
-                    const propRef = new Proxy(prop, this);
-                    reactive.proxySet.add(propRef);
-                    return propRef;
-                }
+    private fire(target: object): void {
+        bumpVersion(target);
+        notifyRows(target);
+        this.notify();
+    }
 
-                return prop;
+    private observe(val: any): any {
+        if (val === null || typeof val !== 'object') return val;
+        if (
+            val instanceof Map ||
+            val instanceof Set ||
+            val instanceof WeakMap ||
+            val instanceof WeakSet
+        ) {
+            return val;
+        }
+        if (observed.has(val)) return val;
+        observed.add(val);
+
+        if (Array.isArray(val)) {
+            this.observeArray(val);
+        } else {
+            for (const key of Object.keys(val)) this.defineReactive(val, key);
+        }
+        return val;
+    }
+
+    private defineReactive(obj: any, key: string): void {
+        let raw = obj[key];
+        let value = this.observe(raw);
+        const self = this;
+        Object.defineProperty(obj, key, {
+            enumerable: true,
+            configurable: true,
+            get(): unknown {
+                unsupportedCollectionError(value);
+                self.track(obj, raw);
+                return value;
             },
-            set(target, name, value): boolean {
-                target[name] = value;
-
-                unsupportedCollectionError(target);
-
-                if (Array.isArray(target) && name === 'length') {
-                    reactive.notify();
-                    return true;
-                }
-
-                reactive.notify();
-                return true;
+            set(next: unknown): void {
+                raw = next;
+                value = self.observe(next);
+                self.fire(obj);
             },
-        }) as State;
+        });
+    }
+
+    private observeArray(arr: any[]): void {
+        const store = arr.slice();
+        for (let i = 0; i < store.length; i++) {
+            store[i] = this.observe(store[i]);
+            this.defineIndex(arr, store, i);
+        }
+        this.patchMutators(arr, store);
+    }
+
+    private defineIndex(arr: any[], store: any[], index: number): void {
+        const self = this;
+        Object.defineProperty(arr, index, {
+            enumerable: true,
+            configurable: true,
+            get(): unknown {
+                self.track(arr, store[index]);
+                return store[index];
+            },
+            set(next: unknown): void {
+                store[index] = self.observe(next);
+                self.fire(arr);
+            },
+        });
+    }
+
+    private syncIndices(arr: any[], store: any[], oldLen: number): void {
+        const newLen = store.length;
+        for (let i = oldLen; i < newLen; i++) this.defineIndex(arr, store, i);
+        if (newLen < oldLen) {
+            for (let i = newLen; i < oldLen; i++) delete arr[i];
+            arr.length = newLen;
+        }
+    }
+
+    private patchMutators(arr: any[], store: any[]): void {
+        const self = this;
+        for (const name of ARRAY_MUTATORS) {
+            Object.defineProperty(arr, name, {
+                enumerable: false,
+                configurable: true,
+                writable: true,
+                value(...args: any[]): unknown {
+                    const oldLen = store.length;
+                    if (name === 'push' || name === 'unshift') {
+                        args = args.map((a) => self.observe(a));
+                    } else if (name === 'splice') {
+                        args = args.map((a, i) => (i >= 2 ? self.observe(a) : a));
+                    }
+                    const result = (Array.prototype[name] as any).apply(store, args);
+                    self.syncIndices(arr, store, oldLen);
+                    self.fire(arr);
+                    return result;
+                },
+            });
+        }
     }
 
     private notify(): void {
         for (const subscriber of this.subscribers) {
-            subscriber.render();
+            if (subscriber.isDirty()) subscriber.render();
         }
     }
 }

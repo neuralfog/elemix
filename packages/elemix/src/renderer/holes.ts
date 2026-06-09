@@ -7,6 +7,13 @@ import {
     type HtmlTemplate,
     type KeyedList,
 } from './types';
+import {
+    renderTracking,
+    versionOf,
+    subscribeRow,
+    unsubscribeRow,
+    type RowScope,
+} from '../renderers';
 import { diff } from './diff';
 import { makeMarker, mergeClasses } from './utils';
 
@@ -220,32 +227,81 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
     const nodeMap = new Map<string, ChildNode[]>();
     let prev: HtmlTemplate[] = [];
 
-    let memoCache = new Map<string, { memo: unknown; tpl: HtmlTemplate }>();
+    type Cached = { tpl: HtmlTemplate; scope: RowScope };
+    let cache = new Map<string, Cached>();
+
+    const depsUnchanged = (deps: (object | number)[]): boolean => {
+        for (let i = 0; i < deps.length; i += 2) {
+            if (versionOf(deps[i] as object) !== deps[i + 1]) return false;
+        }
+        return true;
+    };
+
+    // Run a row's cb with read-tracking active, capturing exactly what it read.
+    const trackRow = (
+        cb: KeyedList['cb'],
+        item: unknown,
+        index: number,
+    ): { tpl: HtmlTemplate; deps: (object | number)[] } => {
+        const deps: (object | number)[] = [];
+        const prev = renderTracking.rowReads;
+        renderTracking.rowReads = deps;
+        const tpl = cb(item, index);
+        renderTracking.rowReads = prev;
+        return { tpl, deps };
+    };
+
+    // A row scope: re-run just this row on a dep change and patch its fragment.
+    const makeScope = (
+        key: string,
+        item: unknown,
+        index: number,
+        cb: KeyedList['cb'],
+        deps: (object | number)[],
+    ): RowScope => {
+        const scope: RowScope = {
+            deps,
+            rerun(): void {
+                unsubscribeRow(scope);
+                const built = trackRow(cb, item, index);
+                built.tpl.key = key;
+                scope.deps = built.deps;
+                subscribeRow(scope);
+                frags.get(key)?.update(built.tpl.values);
+            },
+        };
+        return scope;
+    };
 
     const buildItems = (
         spec: KeyedList,
     ): { items: HtmlTemplate[]; reused: Set<string> } => {
-        const { list, cb, keyFn, memoFn } = spec;
+        const { list, cb, keyFn } = spec;
         const out: HtmlTemplate[] = new Array(list.length);
-        const next = new Map<string, { memo: unknown; tpl: HtmlTemplate }>();
+        const next = new Map<string, Cached>();
         const reused = new Set<string>();
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
             const k = keyFn?.(item, i) || String(i);
-            const m = memoFn(item, i);
-            const hit = memoCache.get(k);
-            let tpl: HtmlTemplate;
-            if (hit && hit.memo === m) {
-                tpl = hit.tpl;
+            const hit = cache.get(k);
+            if (hit && hit.scope.deps.length > 0 && depsUnchanged(hit.scope.deps)) {
                 reused.add(k);
-            } else {
-                tpl = cb(item, i);
-                tpl.key = k;
+                next.set(k, hit);
+                out[i] = hit.tpl;
+                continue;
             }
-            next.set(k, { memo: m, tpl });
+            if (hit) unsubscribeRow(hit.scope);
+            const { tpl, deps } = trackRow(cb, item, i);
+            tpl.key = k;
+            const scope = makeScope(k, item, i, cb, deps);
+            subscribeRow(scope);
+            next.set(k, { tpl, scope });
             out[i] = tpl;
         }
-        memoCache = next;
+        for (const [key, entry] of cache) {
+            if (!next.has(key)) unsubscribeRow(entry.scope);
+        }
+        cache = next;
         return { items: out, reused };
     };
 
@@ -262,20 +318,23 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
         if (nodes) for (let i = 0; i < nodes.length; i++) nodes[i].remove();
     };
 
-    const mountItem = (t: HtmlTemplate, before?: ChildNode): Fragment => {
+    const mountItem = (
+        t: HtmlTemplate,
+        before?: ChildNode,
+    ): { frag: Fragment; fresh: boolean } => {
         if (!t.key) {
             throw new Error('use repeat directive when rendering the lists');
         }
 
-        let frag = frags.get(t.key);
-        if (!frag) {
-            frag = mk(t);
-            frags.set(t.key, frag);
-            const ref = before || anchor;
-            nodeMap.set(t.key, frag.mountBefore(ref, t.values));
-            markDirty();
-        }
-        return frag;
+        const existing = frags.get(t.key);
+        if (existing) return { frag: existing, fresh: false };
+
+        const frag = mk(t);
+        frags.set(t.key, frag);
+        const ref = before || anchor;
+        nodeMap.set(t.key, frag.mountBefore(ref, t.values));
+        markDirty();
+        return { frag, fresh: true };
     };
 
     const clear = (): void => {
@@ -286,9 +345,24 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
     };
 
     const renderAll = (items: HtmlTemplate[]): void => {
+        if (!items.length) return;
+        const batch = document.createDocumentFragment();
         for (let i = 0; i < items.length; i++) {
-            mountItem(items[i]).update(items[i].values);
+            const t = items[i];
+            if (!t.key) {
+                throw new Error('use repeat directive when rendering the lists');
+            }
+            const existing = frags.get(t.key);
+            if (existing) {
+                existing.update(t.values);
+                continue;
+            }
+            const frag = mk(t);
+            frags.set(t.key, frag);
+            nodeMap.set(t.key, frag.mountInto(batch, t.values));
         }
+        anchor.before(batch);
+        markDirty();
     };
 
     return {
@@ -343,13 +417,34 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
                 for (let j = 0; j < nodes.length; j++) before.before(nodes[j]);
             }
 
-            for (let i = inserts.length - 1; i >= 0; i--) {
-                mountItem(inserts[i].value, firstNode(inserts[i].beforeKey));
+            const fresh = new Set<string>();
+            const appendOnly =
+                inserts.length > 1 &&
+                inserts.every((ins) => ins.beforeKey === undefined);
+            if (appendOnly) {
+                const batch = document.createDocumentFragment();
+                for (let i = 0; i < inserts.length; i++) {
+                    const value = inserts[i].value;
+                    const frag = mk(value);
+                    frags.set(value.key, frag);
+                    nodeMap.set(value.key, frag.mountInto(batch, value.values));
+                    fresh.add(value.key);
+                }
+                anchor.before(batch);
+                markDirty();
+            } else {
+                for (let i = inserts.length - 1; i >= 0; i--) {
+                    const value = inserts[i].value;
+                    if (mountItem(value, firstNode(inserts[i].beforeKey)).fresh) {
+                        fresh.add(value.key);
+                    }
+                }
             }
 
             for (let i = 0; i < items.length; i++) {
-                if (skip?.has(items[i].key)) continue;
-                frags.get(items[i].key)?.update(items[i].values);
+                const key = items[i].key;
+                if (skip?.has(key) || fresh.has(key)) continue;
+                frags.get(key)?.update(items[i].values);
             }
 
             prev = items;

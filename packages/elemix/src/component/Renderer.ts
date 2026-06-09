@@ -44,6 +44,7 @@ export class Renderer {
             sig.unsubscribe(this.component);
         }
         this.component.tracked.clear();
+        this.component.deps.clear();
 
         // Mark this component as the active reader so Reactive proxies
         // subscribe it automatically when their values are read.

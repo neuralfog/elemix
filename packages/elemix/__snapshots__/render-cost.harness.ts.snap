@@ -1,25 +1,25 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`render cost 1`] = `
-"repeat(list, cb, key)            — plain
+"repeat(list, cb, key)   — explicit key
 ┌─────────────┬─────────┬────────────┬─────────────┬─────────────┬──────────┐
 │ operation   │ rebuilt │ hole reads │ text writes │ attr writes │ node ops │
 ├─────────────┼─────────┼────────────┼─────────────┼─────────────┼──────────┤
-│ create 1k   │ 1001    │ 4000       │ 2000        │ 2000        │ 1000     │
-│ update 10th │ 2000    │ 2000       │ 100         │ 0           │ 0        │
-│ select      │ 2000    │ 2000       │ 0           │ 1           │ 0        │
-│ swap        │ 2000    │ 2000       │ 0           │ 0           │ 4        │
-│ remove 1    │ 1999    │ 1998       │ 0           │ 0           │ 1        │
+│ create 1k   │ 1000    │ 2000       │ 2000        │ 2000        │ 1000     │
+│ update 10th │ 100     │ 200        │ 100         │ 0           │ 0        │
+│ select      │ 1       │ 2          │ 0           │ 1           │ 0        │
+│ swap        │ 0       │ 0          │ 0           │ 0           │ 4        │
+│ remove 1    │ 0       │ 0          │ 0           │ 0           │ 1        │
 │ clear       │ 0       │ 0          │ 0           │ 0           │ 999      │
 └─────────────┴─────────┴────────────┴─────────────┴─────────────┴──────────┘"
 `;
 
 exports[`render cost 2`] = `
-"repeat(list, cb, key, memoFn)    — memoized
+"repeat(list, cb)         — auto identity key
 ┌─────────────┬─────────┬────────────┬─────────────┬─────────────┬──────────┐
 │ operation   │ rebuilt │ hole reads │ text writes │ attr writes │ node ops │
 ├─────────────┼─────────┼────────────┼─────────────┼─────────────┼──────────┤
-│ create 1k   │ 1000    │ 4000       │ 2000        │ 2000        │ 1000     │
+│ create 1k   │ 1000    │ 2000       │ 2000        │ 2000        │ 1000     │
 │ update 10th │ 100     │ 200        │ 100         │ 0           │ 0        │
 │ select      │ 1       │ 2          │ 0           │ 1           │ 0        │
 │ swap        │ 0       │ 0          │ 0           │ 0           │ 4        │

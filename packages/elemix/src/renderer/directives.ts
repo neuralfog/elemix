@@ -1,25 +1,35 @@
 import { KEYED_LIST, type HtmlTemplate, type KeyedList } from './types';
 
+const identityKeys = new WeakMap<object, string>();
+let identityCounter = 0;
+
+const identityKey = (item: unknown, index: number): string => {
+    if (item !== null && typeof item === 'object') {
+        let key = identityKeys.get(item);
+        if (key === undefined) {
+            key = `@${identityCounter++}`;
+            identityKeys.set(item, key);
+        }
+        return key;
+    }
+    return String(index);
+};
+
 export const repeat = <T = unknown>(
     list: T[],
     callback: (val: T, index: number) => HtmlTemplate,
     key?: (val: T, index: number) => string,
-    memo?: (val: T, index: number) => unknown,
-): HtmlTemplate[] | KeyedList => {
-    if (memo) {
-        return {
-            [KEYED_LIST]: true,
-            list,
-            cb: callback as KeyedList['cb'],
-            keyFn: key as KeyedList['keyFn'],
-            memoFn: memo as KeyedList['memoFn'],
-        };
-    }
-    return list.map((item, index) => {
-        const template = callback(item, index);
-        template.key = key?.(item, index) || String(index);
-        return template;
-    });
+): KeyedList => {
+    const keyOf: (val: T, index: number) => string = key
+        ? (item, index) => key(item, index) || String(index)
+        : identityKey;
+
+    return {
+        [KEYED_LIST]: true,
+        list,
+        cb: callback as KeyedList['cb'],
+        keyFn: keyOf as KeyedList['keyFn'],
+    };
 };
 
 export const when = (

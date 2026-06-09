@@ -2,7 +2,7 @@ import type { Template } from '../types';
 import { Renderer } from './Renderer';
 import { Props } from './Props';
 import { Styles } from './Styles';
-import { activeRenderers } from '../renderers';
+import { activeRenderers, versionOf } from '../renderers';
 
 type Trackable = { unsubscribe(c: Component): unknown };
 
@@ -32,6 +32,20 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
      * conditional reads correctly add and remove subscriptions.
      */
     public tracked = new Set<Trackable>();
+
+    /**
+     * Per-object dependency versions captured during the last render. Lets the
+     * renderer skip a re-render when nothing the component actually read has
+     * changed, instead of re-rendering on every notify().
+     */
+    public deps = new Map<object, number>();
+
+    public isDirty(): boolean {
+        for (const [obj, version] of this.deps) {
+            if (versionOf(obj) !== version) return true;
+        }
+        return false;
+    }
 
     public get root(): HTMLElement | ShadowRoot | null {
         return this.shadowRoot;
