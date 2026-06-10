@@ -148,4 +148,42 @@ describe('Styles — adoptedStyleSheets wiring', () => {
         const sheets = component.shadowRoot?.adoptedStyleSheets ?? [];
         expect(sheets[sheets.length - 1]).toBe(controlSheet);
     });
+
+    test('every instance of a component shares one constructable stylesheet', async () => {
+        present().screen(
+            html`<styled-host></styled-host>
+                <styled-host></styled-host>
+                <styled-host></styled-host>`,
+        );
+        await render();
+
+        const hosts = Array.from(
+            document.querySelectorAll('styled-host'),
+        ) as unknown as StyledHost[];
+        const sheets = hosts.map((h) => h.shadowRoot?.adoptedStyleSheets?.[0]);
+
+        expect(hosts).toHaveLength(3);
+        expect(sheets[0]).toBeDefined();
+        expect(sheets[1]).toBe(sheets[0]);
+        expect(sheets[2]).toBe(sheets[0]);
+    });
+
+    test('different component classes get their own sheet', async () => {
+        present().screen(
+            html`<styled-host></styled-host>
+                <multi-styled-host></multi-styled-host>`,
+        );
+        await render();
+
+        const styled = document.querySelector(
+            'styled-host',
+        ) as unknown as StyledHost;
+        const multi = document.querySelector(
+            'multi-styled-host',
+        ) as unknown as MultiStyledHost;
+
+        expect(styled.shadowRoot?.adoptedStyleSheets?.[0]).not.toBe(
+            multi.shadowRoot?.adoptedStyleSheets?.[0],
+        );
+    });
 });
