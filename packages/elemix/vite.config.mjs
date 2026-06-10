@@ -6,15 +6,8 @@ export default defineConfig({
         lib: {
             entry: {
                 index: resolve('index.ts'),
+                runtime: resolve('runtime.ts'),
                 directives: resolve('directives.ts'),
-                reactive: resolve('reactive.ts'),
-                render: resolve('render.ts'),
-                signal: resolve('signal.ts'),
-                state: resolve('state.ts'),
-                utilities: resolve('utilities.ts'),
-                'testing/index': resolve('testing/index.ts'),
-                'testing/snapshots': resolve('testing/snapshots.ts'),
-                'testing/mocks': resolve('testing/mocks.ts'),
             },
             name: 'elemix',
             fileName: (format, entryName) =>

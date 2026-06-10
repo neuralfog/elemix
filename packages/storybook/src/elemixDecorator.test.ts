@@ -1,8 +1,15 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { html } from '@neuralfog/elemix/render';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { elemixDecorator } from './elemixDecorator';
 
 let idCounter = 0;
+
+// The decorator mounts a story result that is a string or a Node. Build real
+// DOM nodes directly — elemix is compile-only, there is no tpl`` interpreter.
+const node = (markup: string): Node => {
+    const t = document.createElement('template');
+    t.innerHTML = markup;
+    return t.content.firstChild as Node;
+};
 
 const run = (
     story: (ctx: unknown) => unknown,
@@ -21,10 +28,16 @@ describe('elemixDecorator', () => {
         document.body.innerHTML = '';
     });
 
-    test('renders the story template into a [data-elemix-root] host', () => {
-        const host = run(() => html`<p>hello ${'world'}</p>`);
+    test('renders a Node story into a [data-elemix-root] host', () => {
+        const host = run(() => node('<p>hello world</p>'));
 
         expect(host.getAttribute('data-elemix-root')).toBe('');
+        expect(host.querySelector('p')?.textContent).toBe('hello world');
+    });
+
+    test('renders a string story via innerHTML', () => {
+        const host = run(() => '<p>hello world</p>');
+
         expect(host.querySelector('p')?.textContent).toBe('hello world');
     });
 
@@ -34,7 +47,7 @@ describe('elemixDecorator', () => {
         root.innerHTML = '<span>stale</span>';
         document.body.appendChild(root);
 
-        run(() => html`<b>fresh</b>`);
+        run(() => node('<b>fresh</b>'));
 
         expect(root.querySelector('span')).toBeNull();
         expect(root.querySelector('[data-elemix-root] b')?.textContent).toBe(
@@ -43,7 +56,7 @@ describe('elemixDecorator', () => {
     });
 
     test('falls back to document.body when #storybook-root is absent', () => {
-        const host = run(() => html`<i>x</i>`);
+        const host = run(() => node('<i>x</i>'));
         expect(host.parentElement).toBe(document.body);
     });
 
@@ -53,7 +66,7 @@ describe('elemixDecorator', () => {
         run(
             () => {
                 calls.push('render');
-                return html`<i>x</i>`;
+                return node('<i>x</i>');
             },
             {
                 elemix: {
@@ -69,8 +82,8 @@ describe('elemixDecorator', () => {
     test('runs setup only once per story id', () => {
         const setup = vi.fn(() => () => {});
 
-        run(() => html`<i>a</i>`, { elemix: { setup } }, 'shared-id');
-        run(() => html`<i>b</i>`, { elemix: { setup } }, 'shared-id');
+        run(() => node('<i>a</i>'), { elemix: { setup } }, 'shared-id');
+        run(() => node('<i>b</i>'), { elemix: { setup } }, 'shared-id');
 
         expect(setup).toHaveBeenCalledTimes(1);
     });

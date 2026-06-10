@@ -4,6 +4,7 @@
     "license": "MIT",
     "author": "brownhounds",
     "type": "module",
+    "sideEffects": false,
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",
     "types": "./dist/index.d.ts",
@@ -14,50 +15,18 @@
             "import": "./dist/index.mjs",
             "require": "./dist/index.cjs"
         },
+        "./runtime": {
+            "types": "./dist/runtime.d.ts",
+            "import": "./dist/runtime.mjs",
+            "require": "./dist/runtime.cjs"
+        },
         "./directives": {
             "types": "./dist/directives.d.ts",
             "import": "./dist/directives.mjs",
             "require": "./dist/directives.cjs"
         },
-        "./render": {
-            "types": "./dist/render.d.ts",
-            "import": "./dist/render.mjs",
-            "require": "./dist/render.cjs"
-        },
-        "./signal": {
-            "types": "./dist/signal.d.ts",
-            "import": "./dist/signal.mjs",
-            "require": "./dist/signal.cjs"
-        },
-        "./state": {
-            "types": "./dist/state.d.ts",
-            "import": "./dist/state.mjs",
-            "require": "./dist/state.cjs"
-        },
-        "./reactive": {
-            "types": "./dist/reactive.d.ts",
-            "import": "./dist/reactive.mjs",
-            "require": "./dist/reactive.cjs"
-        },
-        "./utilities": {
-            "types": "./dist/utilities.d.ts",
-            "import": "./dist/utilities.mjs",
-            "require": "./dist/utilities.cjs"
-        },
-        "./testing": {
-            "types": "./dist/testing/index.d.ts",
-            "import": "./dist/testing/index.mjs",
-            "require": "./dist/testing/index.cjs"
-        },
-        "./testing/snapshots": {
-            "types": "./dist/testing/snapshots.d.ts",
-            "import": "./dist/testing/snapshots.mjs",
-            "require": "./dist/testing/snapshots.cjs"
-        },
-        "./testing/mocks": {
-            "types": "./dist/testing/mocks.d.ts",
-            "import": "./dist/testing/mocks.mjs",
-            "require": "./dist/testing/mocks.cjs"
+        "./types": {
+            "types": "./dist/src/types.d.ts"
         }
     },
     "scripts": {
@@ -82,7 +51,7 @@
         "@types/node": "25.9.1",
         "@vitest/coverage-v8": "4.1.7",
         "@vitest/ui": "4.1.7",
-        "esbuild": "0.28.0",
+        "esbuild": "0.28.1",
         "jsdom": "29.1.1",
         "typescript": "6.0.3",
         "vite": "8.0.14",

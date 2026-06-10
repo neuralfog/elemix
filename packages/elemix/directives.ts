@@ -1,1 +1,1 @@
-export { repeat, when, choose } from './src/renderer/directives';
+export * from './src/runtime/directives';

@@ -5,15 +5,14 @@
     "scripts": {
         "build": "pnpm -r build",
         "build:bundle": "pnpm --filter @neuralfog/elemix run build:bundle",
+        "build:elemix": "pnpm --filter @neuralfog/elemix build",
         "test": "pnpm -r --no-bail run test",
+        "ec:test": "pnpm --filter @neuralfog/elemix-compiler run test",
         "render-cost": "pnpm --filter @neuralfog/elemix run render-cost",
         "lint": "pnpm -r lint",
         "lint:fix": "pnpm -r run lint:fix",
-        "storybook": "pnpm --filter @neuralfog/elemix-storybook storybook",
+        "storybook": "pnpm --filter @neuralfog/elemix-compiler storybook",
         "bump": "node scripts/bump.mjs",
-        "release": "pnpm build && changeset publish"
-    },
-    "devDependencies": {
-        "@changesets/cli": "^2.27.0"
+        "release": "pnpm build && pnpm -r publish --access public --no-git-checks"
     }
 }

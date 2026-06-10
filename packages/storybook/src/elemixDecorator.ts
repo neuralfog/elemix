@@ -1,5 +1,4 @@
 import type { Decorator } from '@storybook/web-components-vite';
-import { render, type HtmlTemplate } from '@neuralfog/elemix/render';
 import type { ElemixParams, ElemixTeardown } from '#src/elemixStory';
 
 const setupTeardowns = new Map<string, ElemixTeardown | undefined>();
@@ -23,8 +22,12 @@ export const elemixDecorator: Decorator = (Story, context) => {
 
     params.beforeRender?.(context);
 
-    const template = Story(context) as unknown as HtmlTemplate;
-    render(template, host);
+    const result = Story(context) as unknown as string | Node;
+    if (typeof result === 'string') {
+        host.innerHTML = result;
+    } else {
+        host.appendChild(result);
+    }
 
     params.afterRender?.(context);
 

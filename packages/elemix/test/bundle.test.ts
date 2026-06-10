@@ -1,8 +1,8 @@
-import { expect, test, describe, beforeAll } from 'vitest';
+import { execSync } from 'node:child_process';
 import { readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { execSync } from 'node:child_process';
+import { beforeAll, describe, expect, test } from 'vitest';
 
 const pkg = JSON.parse(
     readFileSync(resolve(__dirname, '../package.json'), 'utf-8'),
@@ -31,7 +31,7 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
         expect(size).toBeLessThanOrEqual(20 * 1024);
     });
 
-    describe('exports — the entry points consumers import from', () => {
+    describe('exports — the compile-only surface consumers import from', () => {
         let mod: Record<string, unknown>;
 
         beforeAll(async () => {
@@ -41,33 +41,65 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             >;
         });
 
+        // The bundle entry re-exports ./index + ./runtime. Every public name is
+        // a function (Component is a class — still typeof 'function').
         const required = [
-            // index — Component class + html tag + registration
-            { name: 'Component', kind: 'function' },
-            { name: 'defineComponent', kind: 'function' },
-            { name: 'html', kind: 'function' },
-            // state
-            { name: 'state', kind: 'function' },
-            // directives
-            { name: 'repeat', kind: 'function' },
-            { name: 'when', kind: 'function' },
-            { name: 'choose', kind: 'function' },
-            // signal
-            { name: 'signal', kind: 'function' },
-            // reactive
-            { name: 'Reactive', kind: 'function' },
-            // utilities
-            { name: 'ref', kind: 'function' },
-            { name: 'fastUID', kind: 'function' },
-            { name: 'camelToKebabCase', kind: 'function' },
-            { name: 'makeCssStylesheet', kind: 'function' },
-            { name: 'render', kind: 'function' },
+            // index: component + registration + utilities + state
+            'Component',
+            'defineComponent',
+            'ref',
+            'mergeClasses',
+            'state',
+            // runtime: reactive core
+            'reactive',
+            'effect',
+            'untrack',
+            // runtime: mutation/owner plumbing the codegen targets
+            'withOwner',
+            'currentOwner',
+            'markMutation',
+            // runtime: DOM-wiring primitives (the codegen contract)
+            'template',
+            'clone',
+            '_text',
+            '_attr',
+            '_class',
+            '_style',
+            '_event',
+            '_prop',
+            '_model',
+            '_onmodel',
+            '_ref',
+            '_child',
+            '_list',
         ];
 
-        for (const { name, kind } of required) {
+        for (const name of required) {
             test(`exports \`${name}\``, () => {
                 expect(mod[name]).toBeDefined();
-                expect(typeof mod[name]).toBe(kind);
+                expect(typeof mod[name]).toBe('function');
+            });
+        }
+
+        // The interpreter is gone — these must never reappear in the bundle.
+        // (repeat/when/choose still exist, but on the separate /directives
+        // subpath; when/choose are compile-time-only and erased to _child.)
+        const absent = [
+            'html',
+            'signal',
+            'Reactive',
+            'render',
+            'makeCssStylesheet',
+            'fastUID',
+            'camelToKebabCase',
+            'repeat',
+            'when',
+            'choose',
+        ];
+
+        for (const name of absent) {
+            test(`does not export \`${name}\``, () => {
+                expect(mod[name]).toBeUndefined();
             });
         }
     });

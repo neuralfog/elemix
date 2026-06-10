@@ -1,6 +1,4 @@
-import { activeRenderers } from './renderers';
-
-export type Ref<Value> = { value: Value };
+import type { Ref } from './types';
 
 type RefFn = {
     <Value>(): Ref<Value | undefined>;
@@ -11,35 +9,21 @@ export const ref: RefFn = <Value>(value?: Value): Ref<Value | undefined> => ({
     value,
 });
 
-export const fastUID = (): string =>
-    Math.floor(performance.now() * 1000).toString(36) +
-    Math.random().toString(36).slice(2, 6);
-
-export function render(): Promise<boolean> {
-    return new Promise((resolve) => {
-        const check = () => {
-            if (activeRenderers.size === 0) {
-                resolve(false);
-            } else {
-                setTimeout(check, 0);
+export const mergeClasses = (a: string, b: string): string => {
+    const seen = new Set<string>();
+    let out = '';
+    const add = (s: string) => {
+        const parts = s.split(' ');
+        for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            if (p && !seen.has(p)) {
+                seen.add(p);
+                if (out.length) out += ' ';
+                out += p;
             }
-        };
-        check();
-    });
-}
-
-export const camelToKebabCase = (input: string): string => {
-    return (
-        input.match(
-            /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|[0-9]*$)|[A-Z]?[a-z]+|[A-Z]|[0-9]+/g,
-        ) || []
-    )
-        .map((x) => x.toLowerCase())
-        .join('-');
-};
-
-export const makeCssStylesheet = (styles: string): CSSStyleSheet => {
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(styles);
-    return sheet;
+        }
+    };
+    add(a);
+    add(b);
+    return out;
 };

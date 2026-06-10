@@ -1,48 +1,22 @@
 /**
- * Render-cost harness. Runs in isolation via its own vitest config:
+ * Render-cost harness (compile-only runtime). Runs in isolation via:
  *   pnpm render-cost
- * Mounts real reactive Components, drives every mutation through reactive state
- * (cmp.state.data.push/splice/…), and reports per operation the O(n) bookkeeping
- * (row templates rebuilt, hole reads) vs the O(changed) DOM mutations. Two passes:
- * plain repeat vs memoized repeat.
+ * Mounts a real compiled-style Component — a hand-written view() using the very
+ * primitives the compiler emits (template/clone/_list/_text/_class/_attr) — and
+ * drives every mutation through reactive state (cmp.state.data.push/splice/…).
+ * It reports, per operation, the work the fine-grained runtime actually does:
+ * row builders invoked, text/attr writes, and DOM node ops. The story is that
+ * update/select/swap are O(changed) — zero row rebuilds, no hole re-reads — while
+ * only create/clear are O(n). There is no interpreter, so nothing re-reads the DOM.
  */
-import { expect, test } from 'vitest';
+import { test } from 'vitest';
 import { Component, defineComponent } from './src/component/Component';
-import { html } from './src/renderer/render';
-import { state } from './src/State';
-import { repeat } from './src/renderer/directives';
-import { render as flush } from './src/utilities';
-import { diff } from './src/renderer/diff';
-import type { HtmlTemplate } from './src/renderer/types';
-
-test('diff cost', () => {
-    const make = (keys: string[]): HtmlTemplate[] =>
-        keys.map((k) => ({
-            strings: [] as unknown as TemplateStringsArray,
-            values: [],
-            key: k,
-        }));
-    const keys = Array.from({ length: 1000 }, (_, i) => String(i));
-    const old = make(keys);
-    const swapped = keys.slice();
-    const t = swapped[1];
-    swapped[1] = swapped[998];
-    swapped[998] = t;
-    const next = make(swapped);
-
-    const N = 10000;
-    const t0 = performance.now();
-    for (let i = 0; i < N; i++) diff(old, next);
-    const t1 = performance.now();
-    const usPerCall = ((t1 - t0) / N) * 1000;
-    console.log(
-        `\ndiff() of a 1000-row swap: ${usPerCall.toFixed(2)} µs/call (one swap op runs it once)\n`,
-    );
-});
+import { _attr, _class, _list, _text, clone, template } from './src/runtime';
+import { state } from './src/runtime/state';
 
 type Item = { id: number; label: string; selected: boolean };
 
-const c = { rebuilt: 0, reads: 0, textW: 0, attrW: 0, nodeOps: 0 };
+const c = { rebuilt: 0, textW: 0, attrW: 0, nodeOps: 0 };
 
 let nid = 1;
 const build = (n: number): Item[] =>
@@ -52,37 +26,46 @@ const build = (n: number): Item[] =>
         selected: false,
     }));
 
-const row = (item: Item) => {
+// One compiled-style row: <tr class><td>{id}</td><td><a data-id>{label}</a></td>
+const rowTpl = template('<tr><td></td><td><a></a></td></tr>');
+const buildRow = (item: Item): HTMLElement => {
     c.rebuilt++;
-    return html`<tr class=${item.selected ? 'danger' : ''}><td>${item.id}</td><td><a data-id=${item.id}>${item.label}</a></td></tr>`;
+    const root = clone(rowTpl);
+    const tr = root.firstChild as HTMLElement;
+    const td0 = tr.firstChild as HTMLElement;
+    const a = (tr.children[1] as HTMLElement).firstChild as HTMLElement;
+    const idText = td0.appendChild(document.createTextNode(''));
+    const labelText = a.appendChild(document.createTextNode(''));
+    _class(tr, () => (item.selected ? 'danger' : ''));
+    _text(idText, () => item.id);
+    _attr(a, 'data-id', () => item.id);
+    _text(labelText, () => item.label);
+    return tr;
 };
 
+const listTpl = template('<table><tbody><!----></tbody></table>');
 class CostList extends Component {
     state = state<{ data: Item[] }>({ data: [] });
-    template = () =>
-        html`<table><tbody>${repeat(
-            this.state.data,
-            (item: Item) => row(item),
-            (item: Item) => String(item.id),
-        )}</tbody></table>`;
+    view(): DocumentFragment {
+        const root = clone(listTpl);
+        const tbody = (root.firstChild as HTMLElement)
+            .firstChild as HTMLElement;
+        const anchor = tbody.firstChild as Node; // the <!----> list anchor
+        _list(
+            anchor,
+            () => this.state.data,
+            (item) => String(item.id),
+            buildRow,
+        );
+        return root;
+    }
 }
-
-class CostListAuto extends Component {
-    state = state<{ data: Item[] }>({ data: [] });
-    template = () =>
-        html`<table><tbody>${repeat(this.state.data, (item: Item) =>
-            row(item),
-        )}</tbody></table>`;
-}
-
 defineComponent('cost-list', CostList);
-defineComponent('cost-list-auto', CostListAuto);
 
 type Result = Record<string, number | string>;
 
-const measureComponent = async (tag: string): Promise<Result[]> => {
+const measureComponent = (tag: string): Result[] => {
     document.body.innerHTML = `<${tag}></${tag}>`;
-    await flush();
     const cmp = document.querySelector(tag) as unknown as CostList;
 
     const countNodes = (records: MutationRecord[]) => {
@@ -93,44 +76,42 @@ const measureComponent = async (tag: string): Promise<Result[]> => {
     mo.observe(cmp.root as Node, { childList: true, subtree: true });
 
     const results: Result[] = [];
-    const measure = async (
-        label: string,
-        mutate: () => void,
-    ): Promise<void> => {
-        c.rebuilt = c.reads = c.textW = c.attrW = c.nodeOps = 0;
-        mutate();
-        await flush();
+    const measure = (label: string, mutate: () => void): void => {
+        c.rebuilt = c.textW = c.attrW = c.nodeOps = 0;
+        mutate(); // reactive effects re-run synchronously
         countNodes(mo.takeRecords());
         results.push({
             operation: label,
             rebuilt: c.rebuilt,
-            'hole reads': c.reads,
             'text writes': c.textW,
             'attr writes': c.attrW,
             'node ops': c.nodeOps,
         });
     };
 
-    await measure('create 1k', () => {
+    measure('create 1k', () => {
         cmp.state.data.push(...build(1000));
     });
-    await measure('update 10th', () => {
+    measure('update 10th', () => {
         const d = cmp.state.data;
         for (let i = 0; i < d.length; i += 10) d[i].label += ' !!!';
     });
-    await measure('select', () => {
+    measure('select', () => {
         cmp.state.data[2].selected = true;
     });
-    await measure('swap', () => {
-        const d = cmp.state.data;
+    measure('swap', () => {
+        // index assignment is NOT reactive — swap via an array reassign, exactly
+        // as the compiler lowers it; _list reconciles to minimal (LIS) moves.
+        const d = cmp.state.data.slice();
         const t = d[1];
         d[1] = d[998];
         d[998] = t;
+        cmp.state.data = d;
     });
-    await measure('remove 1', () => {
+    measure('remove 1', () => {
         cmp.state.data.splice(0, 1);
     });
-    await measure('clear', () => {
+    measure('clear', () => {
         cmp.state.data.splice(0);
     });
 
@@ -142,7 +123,6 @@ const table = (title: string, results: Result[]): string => {
     const cols = [
         'operation',
         'rebuilt',
-        'hole reads',
         'text writes',
         'attr writes',
         'node ops',
@@ -165,7 +145,7 @@ const table = (title: string, results: Result[]): string => {
     ].join('\n');
 };
 
-test('render cost', { timeout: 60_000 }, async () => {
+test('render cost', { timeout: 60_000 }, ({ expect }) => {
     const origAttr = Element.prototype.setAttribute;
     Element.prototype.setAttribute = function (
         this: Element,
@@ -174,35 +154,40 @@ test('render cost', { timeout: 60_000 }, async () => {
         c.attrW++;
         return origAttr.apply(this, a);
     };
-    const tc = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent')!;
-    Object.defineProperty(Node.prototype, 'textContent', {
+    // _text writes through CharacterData.data (not textContent).
+    const dataDesc = Object.getOwnPropertyDescriptor(
+        CharacterData.prototype,
+        'data',
+    )!;
+    Object.defineProperty(CharacterData.prototype, 'data', {
         configurable: true,
-        get(this: Node) {
-            c.reads++;
-            return tc.get!.call(this);
+        get(this: CharacterData) {
+            return dataDesc.get!.call(this);
         },
-        set(this: Node, v: string) {
+        set(this: CharacterData, v: string) {
             c.textW++;
-            return tc.set!.call(this, v);
+            return dataDesc.set!.call(this, v);
         },
     });
 
-    const plain = await measureComponent('cost-list');
-    const auto = await measureComponent('cost-list-auto');
+    const results = measureComponent('cost-list');
 
     Element.prototype.setAttribute = origAttr;
-    Object.defineProperty(Node.prototype, 'textContent', tc);
-
-    const plainTable = table('repeat(list, cb, key)   — explicit key', plain);
-    const autoTable = table(
-        'repeat(list, cb)         — auto identity key',
-        auto,
-    );
+    Object.defineProperty(CharacterData.prototype, 'data', dataDesc);
 
     console.log(
-        `\nElemix render cost — reactive 1000-row list (mutations via cmp.state.data):\n${plainTable}\n${autoTable}`,
+        `\nElemix render cost — compiled _list, reactive 1000-row list (mutations via cmp.state.data):\n${table('keyed _list reconcile', results)}\n`,
     );
 
-    expect(plainTable).toMatchSnapshot();
-    expect(autoTable).toMatchSnapshot();
+    // The fine-grained runtime is O(changed), not O(n): mutating a mounted list
+    // never rebuilds existing rows, and a point change touches only its own node.
+    const byOp = Object.fromEntries(
+        results.map((r) => [r.operation, r]),
+    ) as Record<string, Result>;
+    expect(byOp['create 1k'].rebuilt).toBe(1000);
+    expect(byOp['update 10th'].rebuilt).toBe(0);
+    expect(byOp.select.rebuilt).toBe(0);
+    expect(byOp.select['node ops']).toBe(0);
+    expect(byOp.swap.rebuilt).toBe(0);
+    expect(byOp['remove 1'].rebuilt).toBe(0);
 });

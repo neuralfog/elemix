@@ -20,7 +20,18 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      # Rust toolchain — the compiler builds with cargo and `pnpm test` runs `cargo test`.
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/compiler
+
       - run: pnpm install --frozen-lockfile
+
+      # Browser for the compiler's Storybook conformance plays (headless chromium).
+      - name: Install Playwright chromium
+        run: pnpm --filter @neuralfog/elemix-compiler exec playwright install --with-deps chromium
 
       - run: pnpm build
 

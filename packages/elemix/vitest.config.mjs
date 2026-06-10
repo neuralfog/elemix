@@ -5,16 +5,11 @@ export default defineConfig({
         name: '@neuralfog/elemix',
         root: './',
         environment: 'jsdom',
-        setupFiles: ['vitest.setup.mjs'],
         coverage: {
             provider: 'v8',
             all: true,
             include: ['src/**/*.ts'],
-            exclude: [
-                'src/types.ts',
-                'src/**/*.types.ts',
-                'src/testing/types.ts',
-            ],
+            exclude: ['src/types.ts', 'src/**/*.types.ts'],
         },
     },
 });

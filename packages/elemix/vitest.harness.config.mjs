@@ -5,7 +5,6 @@ export default defineConfig({
         name: '@neuralfog/elemix:render-cost',
         root: './',
         environment: 'jsdom',
-        setupFiles: ['vitest.setup.mjs'],
         include: ['render-cost.harness.ts'],
         disableConsoleIntercept: true,
     },

@@ -34,16 +34,77 @@
 
 - [] I am bringing bigger guns this time
   - [] Now we are going after the rest of the party!!
+  - [] Benchmark is purely focused on hyper optimisation for list rendering, so yeah, tuff!! 😂😂😂
 
 **If goals can not be achieved, further work will be terminated as there is no point working on slop**
 
 ## Compiler - We don't React. We compile. 😂😂😂
 
-WIP - fading in to reality
+WIP - it just happened
 
-This will work better than I thought massive wins already 🥸
+This just works 🥸
 
 Target release of fully compiled framework is `v0.9.0`
+
+### Phase 4 - Put it through the paces - BENCH Round 2 🔔🔔🔔
+
+- [] 🤷🤷🤷
+
+### Phase 3 - Packaging and Tooling 🛠️
+
+- [] Package compiler with multi-arch support via npm
+- [] Most likely need another two packages derived from compiler
+- [] `ec-wasm` needs to be able to transpile on `playground`
+- [] Most likely `ec-vite` plugin, got to find a way to make compilation as painless and invisible as possible
+    vite plugin is a good candidate here, we can hook up into the `vite` compilation process, I did it before
+- [] Compiler `cli` may change based on two requirements above
+- [] In theory this should be the easiest part, hard work is done!! 🚀🚀🚀
+
+## TODOS
+
+- [] Design `compiler hints`
+- [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
+- [] I am using `Reflect` purely as a stylistic choice, may add a few nanoseconds as it is an additional function call.
+  Most likely not an issue...
+
+- [ ] Exe shipped as npm module
+  - [ ] Same as tsc, accepts params and configs etc
+  - [ ] Delivery of different CPU architectures should not be an issue
+  - [ ] Rust compiles to wasm - first class support - can still use it in playground
+  - [ ] Where do I spit the files, do I augment original files and spit them out to `.cache`
+    directory ?? 🤔
+  - [ ] 2 pass compilation process, `elemix compiler` => tsc => js 
+
+### Phase 2 - Compiler Implementation 🦀🦀🦀
+
+This went better than I expected:
+- Almost all tests in elemix have been removed now, decided to keep only tests related to package orchestration
+  and render cost, old tests got me here but, they were only transient. So smash that delete button big time.
+  Deleting code my favourite activity.
+- Full integration testing happens in the compiler package, rust unit tests, compiler output. Compiled components
+  passed through `typescript` and exhaustively tested for interaction with storybook.
+- Idea of snapshotting was kinda cute, well it did not work. I caught 3 different bugs related to emitted code by running
+  components in real browser environment 💪💪💪
+- Treat it as a first unoptimised pass - we will see what benchmarks will say, not getting my hopes up 🙈
+- Entire runtime has been dropped 🌟
+- Open for possibilities of custom `pragma like` hints that will be trivial to implement ❤️
+- Best example I can think of replacing freaking decorators with custom compiler hints (in the end I get what I want
+  just better and no coupling to typescript 🤮❤️)
+- OXC does all the heavy lifting for me - tooling is absolutely amazing to work with in opposition trying to hook up into
+  typescript compiler workflow with some shitty plugins that break on every release - what a joke!! 💩💩💩 Saying that
+  I most likely will have to poke at that shite again... 💀🔫 FML
+- Removed testing package 🥹 That stuff did some real heavy lifting 💪
+- Repository is in an approved state to be merged to the main branch 🚀🚀🚀
+- All work done in the past is not lost (interpreted renderer). If not for that I would not be able to move to a compiled workflow
+  not mentioning benefits like establishing an almost final api and battle testing the concept 🥹🪦
+- Most of the work that the compiler does is derived from the old `renderer` ❤️ The only reason why this happened so quickly ⚡
+- Prototype => Proof => Compiler 🚀🚀
+- All marker nodes have been dropped, on a 10k list this will have a big impact - 2 holes per row 20k redundant DOM nodes 💥💥💥
+- Further tightening of public facing API
+- Unified concept of state single `state()` for internal and global state definition
+- Divorced from `html` notation for templates — that's Lit; this is not Lit, so `tpl` 🚀
+- Bundle size down to `2.56kb` - not bad at all 😎😎😎
+- Will prerelease need a convention like `alpha` or `experimental`
 
 ### Phase 1 - Get ready before fun starts
 
@@ -58,7 +119,7 @@ What went well:
   for existing instances... Well rewrite in place - basically trying to do zero cost abstraction here.
   Lower down to native code as much as possible.
 - Ripping off the bandaid and literally starting from scratch. Best decision ever. Performed open
-  heart transplant 😂 "This is an operating table and I am the surgeon here..." 🦇 I am batman 😂
+  heart surgery 😂 "This is an operating table and I am the surgeon here..." 🦇 I am batman 😂
   Note to self insanity levels increasing 😂😂😂
 - All the render code has been eliminated - no more baggage
 - All reactivity code has been replaced with simplified model based on concept of the `effect`
@@ -66,11 +127,11 @@ What went well:
 - Reduced amount of classes to 1, can't get away from that... I need super daddy to extend from.
 - Readability and maintainability of the codebase are incomparable, code is crystal clear 💎
 - Reactivity primitive and `effect` system already tested and validated by reproducing playground
-  apps and few more to get wider surface for compiler implementation.
+  apps and a few more to get a wider surface for compiler implementation.
 - Hand rolling compiled components surfacing the final output created a contract that the compiler has to
   conform to.
 - Directives will become noop macros just for compiler, will not be shipped in final bundle.
-- No more messing with template literals, `html` becomes a template for compiler only, no more
+- No more messing with template literals, `tpl` becomes a template for compiler only, no more
   template literals during run time ❤️
 - LLM has been invaluable here with proper instrumentation I have generated implementation surface
   very quickly, would take me ages to type it all in ☠️ That includes `golden` components and
@@ -79,30 +140,10 @@ What went well:
 
 ### Assumptions
 
-- [] Near native performance going through thin layer of reactivity
+- [] Near native performance going through thin layer of reactivity - well most likely not 🤔
 - [] Memory will drop drastically
 - [] Time to first paint should drop as there is less setup code before component mounts (no more template
   evaluation and tracking)
- 
-## TODOS
-
-- [] Semantics polish: state and signal are both functions now, conceptually there is no difference between the two.
-  Stick with one or the other most likely `state()`, signals are a Solid thing...
-- [] All the tests are broken at the moment while migrating, they will be invaluable as a final boss to make
-  sure there is no regression.
-- [] At the moment reactivity primitive is running of `defineProperty`, maybe better to swap to proxy.
-- [] I am using `Reflect` purely stylistic choice, may add few nanoseconds as is additional function call.
-  Most likely not an issue...
-- [] Need to define `html` type for user to define templates
-- [] The whitespace rule has not been exercised yet...
-
-- [ ] Exe shipped as npm module
-  - [ ] Same as tsc, accepts params and configs etc
-  - [ ] Delivery of different CPU architectures should not be an issue
-  - [ ] Rust compiles to wasm - first class support - can still use it in playground
-  - [ ] Where do I spit the files, do I augment original files and spit them out to `.cache`
-    directory ?? 🤔
-  - [ ] 2 pass compilation process, `elemix compiler` => tsc => js 
 
 **Proceed to next stage only if happy with compiler workflow and benchmark results**
 
@@ -118,7 +159,7 @@ Brief idea:
 
 const count = signal(0)
 const inc = () => count.value++
-const template = (): Template => html`<button @click=${inc}>${count.value}</button>`
+const template = (): Template => tpl`<button @click=${inc}>${count.value}</button>`
 ```
 
 → becomes the existing class form, verbatim to what works now:
@@ -127,7 +168,7 @@ const template = (): Template => html`<button @click=${inc}>${count.value}</butt
 class UserCard extends Component {
   count = signal(0);
   inc = () => this.count.value++;
-  template = () => html`<button @click=${this.inc}>${this.count.value}</button>`;
+  template = () => tpl`<button @click=${this.inc}>${this.count.value}</button>`;
 }
 defineComponent('user-card', UserCard);
 ```
@@ -183,3 +224,10 @@ This will be a headache if I get there 😂❤️😂
     versioning and dirty flags - big mountain of crap in the middle of a clean room 🤮😂 It works though...
 
 - [x] Evaluate the compiler, otherwise kill it with fire 🔥🔥🔥 Entire thing!! - Yeah it will work...
+
+- [x] Need to define `tpl` type for user to define templates
+- [x] The whitespace rule has not been exercised yet...
+- [x] All the tests are broken at the moment while migrating, they will be invaluable as a final boss to make
+- [x] Semantics polish: state and signal are both functions now, conceptually there is no difference between the two.
+  Stick with one or the other most likely `state()`, signals are a Solid thing...
+  sure there is no regression.

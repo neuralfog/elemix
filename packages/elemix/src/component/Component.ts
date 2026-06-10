@@ -1,10 +1,13 @@
+import { initStyles } from './styles';
+import {
+    reactive,
+    collect,
+    dispose,
+    untrack,
+    type Scope,
+} from '../runtime/reactive';
+import { withOwner, type MutationTarget } from '../runtime/mutation';
 import type { Template } from '../types';
-import { Renderer } from './Renderer';
-import { Props } from './Props';
-import { Styles } from './Styles';
-import { activeRenderers, versionOf } from '../renderers';
-
-type Trackable = { unsubscribe(c: Component): unknown };
 
 export const defineComponent = (
     tag: string,
@@ -19,38 +22,26 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     public static formAssociated?: boolean;
     public static styles?: string[];
 
-    private $props = new Props<ComponentProps>(this);
-    private $renderer = new Renderer(this);
-    private $styles = new Styles(this);
-    private $controlStyles?: CSSStyleSheet[];
+    public $props?: Record<string, unknown>;
+    private connected = false;
+    private scopes = new Set<Scope>();
 
     public internals?: ElementInternals;
-
-    public tracked = new Set<Trackable>();
-
-    public deps = new Map<object, number>();
-
-    public isDirty(): boolean {
-        for (const [obj, version] of this.deps) {
-            if (versionOf(obj) !== version) return true;
-        }
-        return false;
-    }
 
     public get root(): HTMLElement | ShadowRoot | null {
         return this.shadowRoot;
     }
 
     public get props(): ComponentProps {
-        return this.$props.data;
+        return this.$props as ComponentProps;
     }
 
-    public get styles(): Styles {
-        return this.$styles;
-    }
-
-    public get controlStyles(): CSSStyleSheet[] {
-        return this.$controlStyles || [];
+    public initProps(): void {
+        const el = this as unknown as {
+            __pendingProps?: Record<string, unknown>;
+        };
+        this.$props = reactive(el.__pendingProps ?? {});
+        el.__pendingProps = undefined;
     }
 
     constructor() {
@@ -59,12 +50,39 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         this.setAttribute('data-cloak', '');
     }
 
+    public template?(): Template;
+    public view?(): DocumentFragment;
+
+    public onMutation?(): void;
+    public beforeMount?(): void;
+    public onMount?(): void;
+    public onDispose?(): void;
+
     connectedCallback(): void {
-        this.$styles.initialize();
-        this.$props.initialize();
-        this.attachFormInternals();
-        this.beforeMount();
-        this.render(true);
+        if (this.connected) return;
+        this.connected = true;
+
+        untrack(() => {
+            initStyles(this);
+            this.attachFormInternals();
+            this.initProps();
+            this.beforeMount?.();
+
+            if (this.view) {
+                const view = this.view;
+                const owner: MutationTarget | null = this.onMutation
+                    ? this
+                    : null;
+                this.shadowRoot?.appendChild(
+                    collect(this.scopes, () =>
+                        withOwner(owner, () => view.call(this)),
+                    ),
+                );
+            }
+
+            this.removeAttribute('data-cloak');
+            this.onMount?.();
+        });
     }
 
     private attachFormInternals(): void {
@@ -76,35 +94,18 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     }
 
     disconnectedCallback(): void {
-        activeRenderers.delete(this.$renderer);
-        this.unsubscribeFromSignals();
-        this.onDispose();
+        queueMicrotask(() => {
+            if (this.isConnected) return;
+            untrack(() => {
+                for (const scope of this.scopes) dispose(scope);
+                this.scopes.clear();
+                this.onDispose?.();
+            });
+        });
     }
 
-    // @ts-ignore
-    public template(): Template {
-        // @ts-ignore
-        return undefined;
-    }
-
-    public onMutation(): void {}
-    public beforeMount(): void {}
-    public onMount(): void {}
-    public onDispose(): void {}
-
-    public render(isConnectedCallback = false): void {
-        this.$renderer.schedule(isConnectedCallback);
-    }
-
-    public setControlStyles(styles: CSSStyleSheet[]): void {
-        this.$controlStyles = styles;
-    }
-
-    private unsubscribeFromSignals(): void {
-        for (const sig of this.tracked) {
-            sig.unsubscribe(this);
-        }
-        this.tracked.clear();
+    public render(): void {
+        for (const scope of this.scopes) scope.rerun();
     }
 
     public hasSlot(name: string): boolean {

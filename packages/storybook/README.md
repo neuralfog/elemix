@@ -1,10 +1,10 @@
-# ⚡ Elemix Storybook
+# ⚡ Elemix Storybook ⚠️ **Compiled Experimental**
 
-Storybook integration for [Elemix](https://github.com/neuralfog/elemix). Renders elemix templates directly inside Storybook's web-components framework via a decorator, and provides typed helpers (`ElemixMeta`, `ElemixStory`) for writing stories with full TypeScript support.
+Storybook integration for [Elemix](https://github.com/neuralfog/elemix). Mounts compiled elemix custom elements inside Storybook's web-components framework via a decorator, and provides typed helpers (`ElemixMeta`, `ElemixStory`) for writing stories with full TypeScript support.
 
 ## Why?
 
-`@storybook/web-components-vite` ships with a lit-html based renderer. Elemix uses its own renderer (`@neuralfog/elemix-renderer`) and a custom-element lifecycle that lit-html can't drive. This package bridges the two — Storybook keeps managing the UI shell, args panel, addons, and HMR, while elemix owns what actually mounts into the story canvas.
+`@storybook/web-components-vite` ships with a lit-html based renderer. Elemix is compile-only — its components are custom elements that lit-html can't drive. This decorator bridges the two: Storybook keeps managing the UI shell, args panel, addons, and HMR, while the decorator mounts whatever the story returns into the story canvas.
 
 ## Install
 
@@ -35,13 +35,15 @@ const preview: Preview = {
 export default preview;
 ```
 
-The decorator clears `#storybook-root`, mounts a fresh `<div data-elemix-root>` host, and pipes the story's returned template through `render()` from `@neuralfog/elemix-renderer`.
+The decorator clears `#storybook-root`, mounts a fresh `<div data-elemix-root>` host, and appends the story's returned string or Node into it.
 
 ## Writing a Story
 
+A story's `render` returns a string (custom-element markup) or a DOM `Node`. Import the component module for its registration side effect.
+
 ```typescript
-import { html } from '@neuralfog/elemix';
 import type { ElemixMeta, ElemixStory } from '@neuralfog/elemix-storybook';
+import './HelloElement'; // registers <hello-element>
 
 type HelloArgs = { text: string };
 
@@ -54,11 +56,9 @@ const meta: ElemixMeta<HelloArgs> = {
 export default meta;
 
 export const Default: ElemixStory<HelloArgs> = {
-    render: (args) => html`<div>Hello ${args.text}</div>`,
+    render: (args) => `<hello-element name="${args.text}"></hello-element>`,
 };
 ```
-
-`ElemixStory.render` returns an elemix `HtmlTemplate` directly — no need to wrap or unwrap. The decorator picks it up and renders it via elemix-renderer.
 
 ## Per-Story Hooks
 

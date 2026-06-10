@@ -1,5 +1,8 @@
 packages:
   - 'packages/*'
+overrides:
+  # CVE: esbuild >= 0.27.3, < 0.28.1 — force every (incl. transitive) copy to the patch.
+  esbuild: 0.28.1
 allowBuilds:
   '@biomejs/biome': true
   esbuild: true

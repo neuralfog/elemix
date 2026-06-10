@@ -1,3 +1,3 @@
 export * from './src/component/Component';
-export * from './src/types';
-export type { HtmlTemplate } from './src/renderer/types';
+export * from './src/utilities';
+export { state } from './src/runtime/state';

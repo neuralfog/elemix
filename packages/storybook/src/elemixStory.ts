@@ -1,4 +1,3 @@
-import type { HtmlTemplate } from '@neuralfog/elemix/render';
 import type {
     StoryContext,
     Parameters,
@@ -21,7 +20,7 @@ export type ElemixStoryParameters<TArgs = Record<string, never>> =
 export type ElemixStoryFn<TArgs = Record<string, never>> = (
     args: TArgs,
     context: StoryContext<TArgs>,
-) => HtmlTemplate;
+) => string | Node;
 
 export type ElemixStory<TArgs = Record<string, never>> = {
     render: ElemixStoryFn<TArgs>;

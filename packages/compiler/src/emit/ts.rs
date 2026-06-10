@@ -1,0 +1,129 @@
+//! Raw-TypeScript emitter — formats `Emitter` calls into source targeting
+//! `@neuralfog/elemix/runtime`. Validated against the golden `view()`s.
+//!
+//! The `() => (...)` thunk that makes a value reactive is added here, in one
+//! place, for every value binding (text/attr/class/style/prop/model/child/list).
+//! Function/ref bindings (event/onmodel/ref) take their expression raw. The
+//! parens also guard against the object-literal arrow-body gotcha.
+
+use super::Emitter;
+use crate::template::node::{NodePath, Step};
+
+#[derive(Default)]
+pub struct TsEmitter;
+
+impl TsEmitter {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Emitter for TsEmitter {
+    fn template_decl(&self, id: &str, markup: &str) -> String {
+        format!("const {id} = template({});", js_string(markup))
+    }
+
+    fn clone_root(&self, root: &str, tpl: &str) -> String {
+        format!("const {root} = clone({tpl});")
+    }
+
+    fn grab(&self, var: &str, parent: &str, path: &NodePath) -> String {
+        format!("const {var} = {parent}{};", accessor(path))
+    }
+
+    fn text_anchor(&self, var: &str, anchor: &str) -> String {
+        format!(
+            "const {var} = document.createTextNode('');\n{anchor}.replaceWith({var});"
+        )
+    }
+
+    fn comment_anchor(&self, var: &str, sibling: &str) -> String {
+        format!("const {var} = document.createComment('');\n{sibling}.before({var});")
+    }
+
+    fn ret(&self, root: &str, builder: bool) -> String {
+        if builder {
+            format!("return {root}.firstChild!;")
+        } else {
+            format!("return {root};")
+        }
+    }
+
+    fn pending(&self, note: &str) -> String {
+        format!("// TODO[ec]: {note}")
+    }
+
+    fn text(&self, node: &str, expr: &str) -> String {
+        format!("_text({node}, () => ({expr}));")
+    }
+
+    fn attr(&self, node: &str, name: &str, expr: &str) -> String {
+        format!("_attr({node}, '{name}', () => ({expr}));")
+    }
+
+    fn class(&self, node: &str, expr: &str) -> String {
+        format!("_class({node}, () => ({expr}));")
+    }
+
+    fn style(&self, node: &str, expr: &str) -> String {
+        format!("_style({node} as HTMLElement, () => ({expr}));")
+    }
+
+    fn event(&self, node: &str, name: &str, handler: &str) -> String {
+        format!("_event({node}, '{name}', {handler});")
+    }
+
+    fn prop(&self, node: &str, name: &str, expr: &str) -> String {
+        format!("_prop({node}, '{name}', () => ({expr}));")
+    }
+
+    fn model(&self, node: &str, expr: &str) -> String {
+        format!("_model({node} as HTMLInputElement, () => ({expr}));")
+    }
+
+    fn onmodel(&self, node: &str, transform: &str) -> String {
+        format!("_onmodel({node} as HTMLInputElement, {transform});")
+    }
+
+    fn reference(&self, node: &str, target: &str) -> String {
+        format!("_ref({node}, {target});")
+    }
+
+    fn child(&self, anchor: &str, getter: &str) -> String {
+        format!("_child({anchor}, () => ({getter}));")
+    }
+
+    fn list(&self, anchor: &str, items: &str, key: &str, render: &str) -> String {
+        format!("_list({anchor}, () => ({items}), {key}, {render});")
+    }
+}
+
+/// Render a path as TS member accesses: `.children[i]` / `.childNodes[i]` /
+/// `.firstChild`.
+fn accessor(path: &NodePath) -> String {
+    let mut s = String::new();
+    for step in path {
+        match step {
+            Step::Child(i) => s.push_str(&format!(".children[{i}]")),
+            Step::ChildNode(i) => s.push_str(&format!(".childNodes[{i}]")),
+            Step::FirstChild => s.push_str(".firstChild"),
+        }
+    }
+    s
+}
+
+/// Quote a string as a single-quoted TS string literal.
+fn js_string(s: &str) -> String {
+    let mut out = String::from("'");
+    for c in s.chars() {
+        match c {
+            '\\' => out.push_str("\\\\"),
+            '\'' => out.push_str("\\'"),
+            '\n' => out.push_str("\\n"),
+            '\r' => {}
+            _ => out.push(c),
+        }
+    }
+    out.push('\'');
+    out
+}
