@@ -15,5 +15,17 @@
             "bundle/**/*",
             "coverage/**/*"
         ]
-    }
+    },
+    "overrides": [
+        {
+            "include": ["**/*.test.ts", "**/*.harness.ts"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "noNonNullAssertion": "off"
+                    }
+                }
+            }
+        }
+    ]
 }

@@ -27,6 +27,7 @@
         "@neuralfog/elemix": "workspace:*"
     },
     "devDependencies": {
+        "@biomejs/biome": "1.9.4",
         "@chromatic-com/storybook": "5.2.1",
         "@neuralfog/biome-config": "0.1.2",
         "@neuralfog/elemix": "workspace:*",

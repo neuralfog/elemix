@@ -12,12 +12,13 @@ const mk = (id: number, n: number): Item => ({ id, n });
 
 class ArrApp extends Component {
     state = state<S>({ items: [] });
-    template = () => html`<div class="len">${this.state.items.length}</div><ul>${repeat(
-        this.state.items,
-        (it: Item) =>
-            html`<li data-id=${it.id}>${it.id}:${it.n}${it.meta ? `:${it.meta.tag}` : ''}</li>`,
-        (it: Item) => String(it.id),
-    )}</ul>`;
+    template = () =>
+        html`<div class="len">${this.state.items.length}</div><ul>${repeat(
+            this.state.items,
+            (it: Item) =>
+                html`<li data-id=${it.id}>${it.id}:${it.n}${it.meta ? `:${it.meta.tag}` : ''}</li>`,
+            (it: Item) => String(it.id),
+        )}</ul>`;
 }
 defineComponent('arr-app', ArrApp);
 

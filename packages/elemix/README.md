@@ -10,7 +10,7 @@ Because I can. The goal is a lean approach that utilizes as much of the native w
 
 ## Reactivity
 
-There is no virtual DOM. The renderer performs direct DOM mutations via tagged template literals and hole-based diffing. Elemix uses a pub/sub model built on JS proxies. State objects are wrapped in a `Proxy` that intercepts property mutations. When a value is set, the proxy notifies all subscribed components, triggering a re-render. Nested objects are lazily wrapped in proxies on access, so deep mutations are also reactive. Components subscribe automatically when using `state()` or `signals`.
+There is no virtual DOM. The renderer performs direct DOM mutations via tagged template literals and hole-based diffing. Reactivity is a pub/sub model: components automatically subscribe to the reactive state they read via `state()` or `signals`, and a mutation notifies only its subscribers — rendering is granular, updating just what changed rather than re-rendering the whole tree.
 
 Render scheduling is batched via `setTimeout(0)` — multiple state mutations in the same synchronous frame are coalesced into a single render. Once a render is scheduled, further mutations are locked until the next microtask, preventing redundant DOM updates.
 

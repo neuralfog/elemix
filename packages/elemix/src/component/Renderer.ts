@@ -10,9 +10,6 @@ export class Renderer {
     constructor(private component: Component) {}
 
     public schedule(isConnectedCallback = false): void {
-        // Persist on the Renderer so a connectedCallback's render(true)
-        // still triggers onMount + data-cloak removal even when a prior
-        // schedule (e.g. a beforeMount state mutation) already locked us.
         if (isConnectedCallback) this.pendingOnMount = true;
 
         if (this.locked) return;
@@ -38,16 +35,12 @@ export class Renderer {
     }
 
     private render(): void {
-        // Drop subscriptions captured during the previous render so we don't
-        // hold stale dependencies for signals no longer read.
         for (const sig of this.component.tracked) {
             sig.unsubscribe(this.component);
         }
         this.component.tracked.clear();
         this.component.deps.clear();
 
-        // Mark this component as the active reader so Reactive proxies
-        // subscribe it automatically when their values are read.
         const prev = renderTracking.active;
         renderTracking.active = this.component;
 

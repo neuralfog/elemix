@@ -86,7 +86,8 @@ const prepare = (strings: TemplateStringsArray): Prepared => {
             const { attributes } = el;
             for (let i = 0, len = attributes.length; i < len; i++) {
                 const def = byMarker.get(attributes[i].value);
-                if (def) parts.push({ kind: ATTR, def, path: pathTo(el, content) });
+                if (def)
+                    parts.push({ kind: ATTR, def, path: pathTo(el, content) });
             }
         }
         n = w.nextNode();
@@ -130,9 +131,6 @@ class FragmentInstance implements Fragment {
         }
     }
 
-    // Push every hole's value into the (still-disconnected) subtree before it
-    // is inserted, so custom-element connectedCallback/beforeMount see real
-    // attribute/property values rather than the literal marker comments.
     private apply(values: unknown[]): void {
         for (const [i, hole] of this.holes) hole(values[i]);
     }

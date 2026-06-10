@@ -14,6 +14,9 @@ importers:
 
   packages/elemix:
     devDependencies:
+      '@biomejs/biome':
+        specifier: 1.9.4
+        version: 1.9.4
       '@neuralfog/biome-config':
         specifier: 0.1.2
         version: 0.1.2(@biomejs/biome@1.9.4)
@@ -47,6 +50,9 @@ importers:
 
   packages/storybook:
     devDependencies:
+      '@biomejs/biome':
+        specifier: 1.9.4
+        version: 1.9.4
       '@chromatic-com/storybook':
         specifier: 5.2.1
         version: 5.2.1(storybook@10.4.1(@testing-library/dom@10.4.1)(@types/react@19.2.17)(prettier@2.8.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))

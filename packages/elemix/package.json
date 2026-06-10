@@ -76,6 +76,7 @@
         "release": "npm run clean && npm run build && npm publish --access public"
     },
     "devDependencies": {
+        "@biomejs/biome": "1.9.4",
         "@neuralfog/biome-config": "0.1.2",
         "@neuralfog/ts-config": "0.1.2",
         "@types/node": "25.9.1",

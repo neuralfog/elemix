@@ -130,7 +130,9 @@ type ContentSubHole = { update: Hole; dispose: () => void };
 type Kind = 'list' | 'template' | 'string';
 
 const isKeyedList = (v: unknown): v is KeyedList =>
-    typeof v === 'object' && v !== null && (v as KeyedList)[KEYED_LIST] === true;
+    typeof v === 'object' &&
+    v !== null &&
+    (v as KeyedList)[KEYED_LIST] === true;
 
 const kindOf = (v: unknown): Kind =>
     Array.isArray(v) || isKeyedList(v)
@@ -221,9 +223,6 @@ const templateHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
 
 const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
     const frags = new Map<string, Fragment>();
-    // Each keyed item may mount more than one top-level node (multiple root
-    // elements, or text nodes from surrounding whitespace), so track the full
-    // node set per key — not just one node — for correct removal and movement.
     const nodeMap = new Map<string, ChildNode[]>();
     let prev: HtmlTemplate[] = [];
 
@@ -237,7 +236,6 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
         return true;
     };
 
-    // Run a row's cb with read-tracking active, capturing exactly what it read.
     const trackRow = (
         cb: KeyedList['cb'],
         item: unknown,
@@ -251,7 +249,6 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
         return { tpl, deps };
     };
 
-    // A row scope: re-run just this row on a dep change and patch its fragment.
     const makeScope = (
         key: string,
         item: unknown,
@@ -284,7 +281,11 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
             const item = list[i];
             const k = keyFn?.(item, i) || String(i);
             const hit = cache.get(k);
-            if (hit && hit.scope.deps.length > 0 && depsUnchanged(hit.scope.deps)) {
+            if (
+                hit &&
+                hit.scope.deps.length > 0 &&
+                depsUnchanged(hit.scope.deps)
+            ) {
                 reused.add(k);
                 next.set(k, hit);
                 out[i] = hit.tpl;
@@ -305,9 +306,6 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
         return { items: out, reused };
     };
 
-    // The leading node of an item, used as the insertion anchor so a new or
-    // moved item lands before the whole target item rather than between its
-    // nodes. Undefined key (end of list) falls back to the list anchor.
     const firstNode = (key: string | undefined): ChildNode | undefined => {
         const nodes = key !== undefined ? nodeMap.get(key) : undefined;
         return nodes?.length ? nodes[0] : undefined;
@@ -350,7 +348,9 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
         for (let i = 0; i < items.length; i++) {
             const t = items[i];
             if (!t.key) {
-                throw new Error('use repeat directive when rendering the lists');
+                throw new Error(
+                    'use repeat directive when rendering the lists',
+                );
             }
             const existing = frags.get(t.key);
             if (existing) {
@@ -435,7 +435,9 @@ const listHole = (anchor: Comment, mk: MkFrag): ContentSubHole => {
             } else {
                 for (let i = inserts.length - 1; i >= 0; i--) {
                     const value = inserts[i].value;
-                    if (mountItem(value, firstNode(inserts[i].beforeKey)).fresh) {
+                    if (
+                        mountItem(value, firstNode(inserts[i].beforeKey)).fresh
+                    ) {
                         fresh.add(value.key);
                     }
                 }
@@ -487,10 +489,6 @@ const propHole = (node: HTMLElement, def: AttrDef): Hole => {
             el.$props.set(prop, v);
             return;
         }
-        // Custom element not upgraded yet (e.g. when a parent template is
-        // cloned, child custom elements aren't upgraded until insertion). Buffer
-        // the prop on the node so $props.initialize() can drain it on first
-        // connection — before beforeMount() or template() run.
         if (!el.__pendingProps) el.__pendingProps = {};
         el.__pendingProps[prop] = v;
     };

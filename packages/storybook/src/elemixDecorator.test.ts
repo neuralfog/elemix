@@ -37,7 +37,9 @@ describe('elemixDecorator', () => {
         run(() => html`<b>fresh</b>`);
 
         expect(root.querySelector('span')).toBeNull();
-        expect(root.querySelector('[data-elemix-root] b')?.textContent).toBe('fresh');
+        expect(root.querySelector('[data-elemix-root] b')?.textContent).toBe(
+            'fresh',
+        );
     });
 
     test('falls back to document.body when #storybook-root is absent', () => {

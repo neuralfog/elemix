@@ -25,9 +25,8 @@ const tableTemplate = (s: State, useKey: boolean) =>
               (item: Row) => row(item, s.selected),
               (item: Row) => String(item.id),
           )}</tbody></table>`
-        : html`<table><tbody>${repeat(
-              s.data,
-              (item: Row) => row(item, s.selected),
+        : html`<table><tbody>${repeat(s.data, (item: Row) =>
+              row(item, s.selected),
           )}</tbody></table>`;
 
 class ListAppPlain extends Component {

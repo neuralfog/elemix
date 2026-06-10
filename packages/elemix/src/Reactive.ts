@@ -148,12 +148,18 @@ export class Reactive<State> {
                 writable: true,
                 value(...args: any[]): unknown {
                     const oldLen = store.length;
-                    if (name === 'push' || name === 'unshift') {
-                        args = args.map((a) => self.observe(a));
-                    } else if (name === 'splice') {
-                        args = args.map((a, i) => (i >= 2 ? self.observe(a) : a));
-                    }
-                    const result = (Array.prototype[name] as any).apply(store, args);
+                    const items =
+                        name === 'push' || name === 'unshift'
+                            ? args.map((a) => self.observe(a))
+                            : name === 'splice'
+                              ? args.map((a, i) =>
+                                    i >= 2 ? self.observe(a) : a,
+                                )
+                              : args;
+                    const result = (Array.prototype[name] as any).apply(
+                        store,
+                        items,
+                    );
                     self.syncIndices(arr, store, oldLen);
                     self.fire(arr);
                     return result;

@@ -40,7 +40,6 @@ describe('queryAll', () => {
         const presenter = present().screen(html`<styled-host></styled-host>`);
         await new Promise((r) => setTimeout(r, 0));
         const host = presenter.root<HTMLElement>();
-        // biome-ignore lint/style/noNonNullAssertion: shadow root is always attached by Component
         const shadow = host.shadowRoot!;
         const results = queryAll(shadow, 'div.styled-host');
         expect(results).toHaveLength(1);

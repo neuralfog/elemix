@@ -26,18 +26,8 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
     public internals?: ElementInternals;
 
-    /**
-     * Signals auto-subscribed during template() execution via the
-     * renderTracking mechanism. Cleared and rebuilt on every render so
-     * conditional reads correctly add and remove subscriptions.
-     */
     public tracked = new Set<Trackable>();
 
-    /**
-     * Per-object dependency versions captured during the last render. Lets the
-     * renderer skip a re-render when nothing the component actually read has
-     * changed, instead of re-rendering on every notify().
-     */
     public deps = new Map<object, number>();
 
     public isDirty(): boolean {
@@ -106,7 +96,6 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         this.$renderer.schedule(isConnectedCallback);
     }
 
-    // :thinking: - still like the concept, it may change!
     public setControlStyles(styles: CSSStyleSheet[]): void {
         this.$controlStyles = styles;
     }
