@@ -139,6 +139,19 @@ export class Reactive<State> {
         }
     }
 
+    private reconcile(arr: any[], store: any[]): void {
+        const len = arr.length;
+        if (len === store.length) return;
+        if (len < store.length) {
+            store.length = len;
+        } else {
+            for (let i = store.length; i < len; i++) {
+                store[i] = this.observe(arr[i]);
+                this.defineIndex(arr, store, i);
+            }
+        }
+    }
+
     private patchMutators(arr: any[], store: any[]): void {
         const self = this;
         for (const name of ARRAY_MUTATORS) {
@@ -147,6 +160,7 @@ export class Reactive<State> {
                 configurable: true,
                 writable: true,
                 value(...args: any[]): unknown {
+                    self.reconcile(arr, store);
                     const oldLen = store.length;
                     const items =
                         name === 'push' || name === 'unshift'

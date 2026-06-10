@@ -186,4 +186,36 @@ describe('array reactivity', () => {
         await render();
         expect(text()).toEqual(['1:1:b']);
     });
+
+    test('external length = 0 then push does not corrupt rows', async () => {
+        cmp.state.items = [mk(1, 1), mk(2, 2), mk(3, 3)];
+        await render();
+        cmp.state.items.length = 0;
+        cmp.state.items.push(mk(4, 4));
+        await render();
+        expect(ids()).toEqual(['4']);
+        expect(len()).toBe('1');
+    });
+
+    test('external length shrink then push reconciles the backing store', async () => {
+        cmp.state.items = [mk(1, 1), mk(2, 2), mk(3, 3)];
+        await render();
+        cmp.state.items.length = 1;
+        cmp.state.items.push(mk(5, 5));
+        await render();
+        expect(ids()).toEqual(['1', '5']);
+        expect(len()).toBe('2');
+    });
+
+    test('item pushed after an external length = 0 is reactive', async () => {
+        cmp.state.items = [mk(1, 1), mk(2, 2)];
+        await render();
+        cmp.state.items.length = 0;
+        cmp.state.items.push(mk(7, 7));
+        await render();
+        expect(text()).toEqual(['7:7']);
+        cmp.state.items[0].n = 70;
+        await render();
+        expect(text()).toEqual(['7:70']);
+    });
 });
