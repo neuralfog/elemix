@@ -1,6 +1,6 @@
 {
     "name": "@neuralfog/elemix-storybook",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "license": "MIT",
     "author": "brownhounds",
     "main": "dist/index.js",
