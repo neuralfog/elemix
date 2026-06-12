@@ -86,6 +86,8 @@ What went well:
  
 ## TODOS
 
+- [] Semantics polish: state and signal are both functions now, conceptually there is no difference between the two.
+  Stick with one or the other most likely `state()`, signals are a Solid thing...
 - [] All the tests are broken at the moment while migrating, they will be invaluable as a final boss to make
   sure there is no regression.
 - [] At the moment reactivity primitive is running of `defineProperty`, maybe better to swap to proxy.
