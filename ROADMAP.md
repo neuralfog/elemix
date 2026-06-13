@@ -62,6 +62,8 @@ Target release of fully compiled framework is `v0.9.0`
 
 ## TODOS
 
+- [] `onMutation` - Hmmm... Added for one specific reason, detect DOM mutations in async context, do I still need this ??
+    Renderer is fully sync now, what it should be, no `ticking`, no waiting 🤔
 - [] Design `compiler hints`
 - [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
 - [] I am using `Reflect` purely as a stylistic choice, may add a few nanoseconds as it is an additional function call.
