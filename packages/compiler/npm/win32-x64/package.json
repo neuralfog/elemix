@@ -4,6 +4,10 @@
   "description": "Prebuilt elemix-compiler binary for Windows x64.",
   "license": "MIT",
   "author": "brownhounds",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neuralfog/elemix.git"
+  },
   "os": [
     "win32"
   ],

@@ -4,6 +4,10 @@
   "description": "Prebuilt elemix-compiler binary for linux x64 (static musl).",
   "license": "MIT",
   "author": "brownhounds",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neuralfog/elemix.git"
+  },
   "os": [
     "linux"
   ],
