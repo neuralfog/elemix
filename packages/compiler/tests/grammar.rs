@@ -55,8 +55,14 @@ fn model_and_onmodel() {
 
 #[test]
 fn class_and_style_are_reserved_names() {
-    assert_eq!(classify(&attr("class", "{ on: x }")).kind, BindingKind::Class);
-    assert_eq!(classify(&attr("style", "{ color: c }")).kind, BindingKind::Style);
+    assert_eq!(
+        classify(&attr("class", "{ on: x }")).kind,
+        BindingKind::Class
+    );
+    assert_eq!(
+        classify(&attr("style", "{ color: c }")).kind,
+        BindingKind::Style
+    );
     assert_eq!(classify(&attr("class", "{}")).name, None);
 }
 
@@ -86,7 +92,10 @@ fn path_and_expr_pass_through() {
 
 #[test]
 fn plain_value_is_text() {
-    assert_eq!(classify(&content("this.state.count")).kind, BindingKind::Text);
+    assert_eq!(
+        classify(&content("this.state.count")).kind,
+        BindingKind::Text
+    );
     assert_eq!(classify(&content("row.label")).kind, BindingKind::Text);
     assert_eq!(classify(&content("this.state.n")).kind, BindingKind::Text);
 }
@@ -119,7 +128,9 @@ fn when_and_choose_are_child() {
 
 #[test]
 fn template_ternary_is_child() {
-    let b = classify(&content("this.state.loggedIn ? tpl`<a></a>` : tpl`<b></b>`"));
+    let b = classify(&content(
+        "this.state.loggedIn ? tpl`<a></a>` : tpl`<b></b>`",
+    ));
     assert_eq!(b.kind, BindingKind::Child);
 }
 

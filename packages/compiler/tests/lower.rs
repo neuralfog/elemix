@@ -21,7 +21,11 @@ fn splits_a_plain_ternary() {
 fn splits_a_repeat_ternary() {
     assert_eq!(
         tern("cond ? repeat(x, f, k) : tpl`<div/>`"),
-        Some(("cond".into(), "repeat(x, f, k)".into(), "tpl`<div/>`".into()))
+        Some((
+            "cond".into(),
+            "repeat(x, f, k)".into(),
+            "tpl`<div/>`".into()
+        ))
     );
 }
 
@@ -69,8 +73,7 @@ fn splits_adjacent_holes() {
 
 #[test]
 fn keeps_a_nested_template_inside_a_hole_intact() {
-    let (statics, holes) =
-        split_template_literal("tpl`<a>${cond ? tpl`<b/>` : ''}</a>`");
+    let (statics, holes) = split_template_literal("tpl`<a>${cond ? tpl`<b/>` : ''}</a>`");
     assert_eq!(statics, vec!["<a>", "</a>"]);
     assert_eq!(holes, vec!["cond ? tpl`<b/>` : ''"]);
 }
@@ -83,15 +86,10 @@ fn splits_call_args_at_top_level_only() {
 
 #[test]
 fn call_args_ignore_commas_inside_nested_constructs() {
-    let args =
-        split_call_args("repeat(this.x, (r) => tpl`<a>${f(r, 1)}</a>`, (r) => r.id)");
+    let args = split_call_args("repeat(this.x, (r) => tpl`<a>${f(r, 1)}</a>`, (r) => r.id)");
     assert_eq!(
         args,
-        vec![
-            "this.x",
-            "(r) => tpl`<a>${f(r, 1)}</a>`",
-            "(r) => r.id",
-        ]
+        vec!["this.x", "(r) => tpl`<a>${f(r, 1)}</a>`", "(r) => r.id",]
     );
 }
 

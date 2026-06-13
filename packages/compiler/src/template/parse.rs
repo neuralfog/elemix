@@ -27,8 +27,8 @@ pub struct ParsedTemplate {
 /// must be expanded to an explicit close or HTML parses the next sibling as its
 /// child (the `fixSelfClosing` rule, applied here at serialize time).
 const VOID: &[&str] = &[
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
-    "source", "track", "wbr",
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track",
+    "wbr",
 ];
 
 /// A piece of an attribute value: literal text or an interpolated expression.
@@ -46,7 +46,7 @@ enum Child {
 
 struct El {
     tag: String,
-    static_attrs: String,              // serialized, e.g. ` class="x" type="text"`
+    static_attrs: String, // serialized, e.g. ` class="x" type="text"`
     attr_holes: Vec<(String, String)>, // (name-with-sigil, reconstructed expr)
     children: Vec<Child>,
     self_closing: bool,
@@ -140,7 +140,8 @@ impl Parser {
             self.cur.static_attrs.push_str(&self.a_name);
         } else if self.a_has_hole {
             if !self.a_val.is_empty() {
-                self.a_parts.push(Part::Static(std::mem::take(&mut self.a_val)));
+                self.a_parts
+                    .push(Part::Static(std::mem::take(&mut self.a_val)));
             }
             let expr = reconstruct(&self.a_parts);
             let name = self.a_name.clone();
@@ -315,8 +316,7 @@ impl Parser {
                 }
                 St::Comment => {
                     // drop everything up to and including `-->`
-                    if c == '>' && i >= 2 && chars[i - 1] == '-' && chars[i - 2] == '-'
-                    {
+                    if c == '>' && i >= 2 && chars[i - 1] == '-' && chars[i - 2] == '-' {
                         self.st = St::Text;
                     }
                     i += 1;
@@ -448,12 +448,7 @@ fn collapse_ws(s: &str) -> String {
 }
 
 /// Walk the tree producing markup + holes positioned by path.
-fn serialize(
-    children: &[Child],
-    path: &NodePath,
-    markup: &mut String,
-    holes: &mut Vec<Hole>,
-) {
+fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &mut Vec<Hole>) {
     let mut child_count = 0usize; // element index (.children[i])
     let mut node_count = 0usize; // node index (.childNodes[i])
     for child in children {
@@ -531,4 +526,3 @@ pub fn parse(statics: &[String], holes: &[String]) -> ParsedTemplate {
         holes: out_holes,
     }
 }
-

@@ -91,7 +91,10 @@ fn event_handler_is_raw() {
 
 #[test]
 fn onmodel_is_raw_and_cast() {
-    let out = gen(&["<input ~model=", " ~onmodel=", " />"], &["this.r", "clamp"]);
+    let out = gen(
+        &["<input ~model=", " ~onmodel=", " />"],
+        &["this.r", "clamp"],
+    );
     assert!(out.contains("_onmodel(_n1 as HTMLInputElement, clamp);"));
 }
 
@@ -170,7 +173,10 @@ fn ternary_with_empty_branch_is_preserved() {
 
 #[test]
 fn when_lowers_to_child_without_a_double_iife() {
-    let out = gen(&["<div>", "</div>"], &["when(this.show, () => tpl`<a></a>`)"]);
+    let out = gen(
+        &["<div>", "</div>"],
+        &["when(this.show, () => tpl`<a></a>`)"],
+    );
     assert!(out.contains("_child(_n1, () => (this.show ? (() => {"));
     assert!(out.contains(": ''));"));
     assert!(!out.contains("(() => (() =>"));

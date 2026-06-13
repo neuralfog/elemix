@@ -52,7 +52,6 @@ Target release of fully compiled framework is `v0.9.0`
 
 ### Phase 3 - Packaging and Tooling 🛠️
 
-- [] `ec-wasm` needs to be able to transpile on `playground`
 - [] Most likely `ec-vite` plugin, got to find a way to make compilation as painless and invisible as possible
     vite plugin is a good candidate here, we can hook into the `vite` compilation process, I did it before
 - [] Compiler `cli` may change based on two requirements above
@@ -60,16 +59,33 @@ Target release of fully compiled framework is `v0.9.0`
 
 ## TODOS
 
-- [] Render Cost Table looks suspicious — 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
+- [] Render Cost Table looks suspicious - 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
 - [] Add changelogs, refer to `https://github.com/brownhounds/migoro` for a full implementation with releases and workflows
 - [] Streamline release with tags - slowly migrating
 - [] `onMutation` - Hmmm... Added for one specific reason, detect DOM mutations in an async context, do I still need this ??
     Renderer is fully sync now, what it should be, no `ticking`, no waiting 🤔
 - [] Design `compiler hints`
 - [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
-- [ ] Rust compiles to wasm - first class support - can still use it in playground
 
 ### Phase 3 - Why would you use a fork for eating soup 🍴
+
+***Compiler as WASM ⚙️⚙️⚙️***
+
+- The whole `compalerino` now compiles straight in the browser via WASM 🕸️🦀 playground can transpile on every keystroke 🤯
+- Went single crate, feature gated - no crate split shenanigans, simplicity wins 🧈
+- `compile()` is pure `oxc`, zero IO, so it crosses the wasm boundary squeaky clean - only the filesystem/CLI
+  bits (`clap`, `glob`, file scanning) get gated out behind a feature 🚪
+- `wasm-pack` + `wasm-opt` spit out a tidy `--target web` package, squashed down to `~697kb` from a chunky 32MB debug blob 🪓🔥
+- Ships as its own npm module `@neuralfog/elemix-compiler-wasm` 📦
+- WASM output is BYTE for BYTE identical to native across all 37 fixtures 🧬 if it ever drifts the snapshots will scream 😲🔫
+- Panic free on half typed garbage - `oxc` just shrugs and passes the source through, the module never dies 🛡️
+  exactly what I need when the playground hammers it per keystroke ⌨️
+- Final boss 🐉 a storybook story compiles a component INSIDE a real browser, compiled output rendered live on screen - wasm proven
+  in its natural habitat 🦇
+- Hooked into the test pipeline + CI, and publishes on the same `tag`
+- Testing pipeline mapped in `COMPILER-TESTING-PIPELINE.md` 🗺️
+- Channel delivery proven end to end via the throwaway repo `https://github.com/neuralfog/test-compiler` 🗑️
+- Rust finally gets linted 🦀💈 The audacity 🙈
 
 ***Compiler Packaging 📦📦📦***
 
@@ -117,7 +133,7 @@ This went better than I expected:
 - All marker nodes have been dropped, on a 10k list this will have a big impact - 2 holes per row 20k redundant DOM nodes 💥💥💥
 - Further tightening of public facing API
 - Unified concept of state single `state()` for internal and global state definition
-- Divorced from `html` notation for templates — that's Lit; this is not Lit, so `tpl` 🚀
+- Divorced from `html` notation for templates - that's Lit; this is not Lit, so `tpl` 🚀
 - Bundle size down to `2.56kb` - not bad at all 😎😎😎
 - Will the prerelease need a convention like `alpha` or `experimental`?
 
@@ -188,7 +204,7 @@ class UserCard extends Component {
 defineComponent('user-card', UserCard);
 ```
 
-Most likely will need to handle context reference rewrites — `this` is not an issue.
+Most likely will need to handle context reference rewrites - `this` is not an issue.
 Have to be aware of module scope and external scopes so as not to mangle references 🤔
 
 This is just an idea, but do I even need to transpile to a class ?? Maybe not...
@@ -269,3 +285,6 @@ This will be a headache if I get there 😂❤️😂
 - [x] Tag management
 
 - [x] Approve compiler packaging for `main` landing 🚀
+
+- [x] `ec-wasm` needs to be able to transpile on `playground`
+- [x] Rust compiles to wasm - first class support - can still use it in playground

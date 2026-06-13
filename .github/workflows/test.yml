@@ -20,8 +20,16 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      # Rust toolchain — the compiler builds with cargo and `pnpm test` runs `cargo test`.
+      # Rust toolchain — the compiler builds with cargo and `pnpm test` runs
+      # `cargo test`; the wasm32 target + wasm-pack drive the wasm conformance gate;
+      # clippy + rustfmt back `pnpm lint`.
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: clippy, rustfmt
+
+      - name: Install wasm-pack
+        run: curl -sSf https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
 
       - uses: Swatinem/rust-cache@v2
         with:

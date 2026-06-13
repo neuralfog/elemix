@@ -32,9 +32,7 @@ impl Emitter for TsEmitter {
     }
 
     fn text_anchor(&self, var: &str, anchor: &str) -> String {
-        format!(
-            "const {var} = document.createTextNode('');\n{anchor}.replaceWith({var});"
-        )
+        format!("const {var} = document.createTextNode('');\n{anchor}.replaceWith({var});")
     }
 
     fn comment_anchor(&self, var: &str, sibling: &str) -> String {

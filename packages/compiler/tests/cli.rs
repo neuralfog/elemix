@@ -61,7 +61,10 @@ fn compiles_a_directory_of_fixtures() {
         .unwrap();
     assert!(status.success());
 
-    let files: Vec<_> = std::fs::read_dir(&dir).unwrap().filter_map(Result::ok).collect();
+    let files: Vec<_> = std::fs::read_dir(&dir)
+        .unwrap()
+        .filter_map(Result::ok)
+        .collect();
     assert_eq!(files.len(), 37);
 
     // no compiled file in the whole corpus leaks the html intrinsic or a directive

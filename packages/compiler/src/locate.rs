@@ -5,6 +5,7 @@ use oxc_ast::ast::{Expression, TaggedTemplateExpression};
 use oxc_ast_visit::{walk, Visit};
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
+#[cfg(feature = "cli")]
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, PartialEq)]
@@ -59,6 +60,7 @@ impl<'a> Visit<'a> for Finder<'_> {
 }
 
 /// Expand directories/globs into a sorted, de-duplicated list of `.ts` files.
+#[cfg(feature = "cli")]
 pub fn collect_ts_files(patterns: &[String]) -> Vec<PathBuf> {
     let mut files = Vec::new();
     for pattern in patterns {

@@ -77,7 +77,8 @@ fn gen_template(
         Some(id) => id.clone(),
         None => {
             let id = ctx.tpl();
-            ctx.decls.push_str(&emitter.template_decl(&id, &parsed.markup));
+            ctx.decls
+                .push_str(&emitter.template_decl(&id, &parsed.markup));
             ctx.decls.push('\n');
             ctx.seen.insert(parsed.markup.clone(), id.clone());
             id
@@ -100,9 +101,9 @@ fn gen_template(
     for (b, node) in bindings.iter().zip(&nodes) {
         let name = b.name.as_deref().unwrap_or("");
         match b.kind {
-            BindingKind::Splice => lines.push(emitter.pending(
-                "Splice content binding — symbol resolution pending",
-            )),
+            BindingKind::Splice => {
+                lines.push(emitter.pending("Splice content binding — symbol resolution pending"))
+            }
             BindingKind::List => lines.push(lower_list(&b.expr, node, ctx, emitter)),
             BindingKind::Child => lines.extend(lower_child(&b.expr, node, ctx, emitter)),
             BindingKind::Text => {
@@ -153,7 +154,10 @@ fn lower_list(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) ->
         return emitter.pending("List: repeat() with unexpected arity");
     }
     let render = substitute_html(&args[1], ctx, emitter);
-    let key = args.get(2).cloned().unwrap_or_else(|| "(_: unknown, i: number) => i".into());
+    let key = args
+        .get(2)
+        .cloned()
+        .unwrap_or_else(|| "(_: unknown, i: number) => i".into());
     emitter.list(anchor, &args[0], &key, &render)
 }
 
@@ -198,14 +202,21 @@ fn lower_repeat_ternary(
     emitter: &dyn Emitter,
 ) -> Vec<String> {
     let then_is_repeat = is_repeat(then);
-    let (repeat_src, other_src) = if then_is_repeat { (then, els) } else { (els, then) };
+    let (repeat_src, other_src) = if then_is_repeat {
+        (then, els)
+    } else {
+        (els, then)
+    };
 
     let args = split_call_args(repeat_src);
     if args.len() < 2 {
         return vec![emitter.pending("repeat-in-ternary: repeat() with unexpected arity")];
     }
     let render = substitute_html(&args[1], ctx, emitter);
-    let key = args.get(2).cloned().unwrap_or_else(|| "(_: unknown, i: number) => i".into());
+    let key = args
+        .get(2)
+        .cloned()
+        .unwrap_or_else(|| "(_: unknown, i: number) => i".into());
     let other = substitute_html(other_src, ctx, emitter);
 
     let list_anchor = ctx.var("a");
