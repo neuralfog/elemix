@@ -153,3 +153,60 @@ jobs:
             npm publish "./$pkg" --access public --provenance --tag "$TAG"
           done
           npm publish ./elemix-compiler --access public --provenance --tag "$TAG"
+
+  # The wasm build is platform-independent — one job, no matrix. Independent of
+  # the binary build/publish above (separate package, same tag + version).
+  publish-wasm:
+    name: publish wasm to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/compiler
+          key: wasm
+
+      - name: Install wasm-pack
+        run: curl -sSf https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME#elemix-compiler-v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build wasm package
+        working-directory: packages/compiler
+        run: wasm-pack build --target web --out-dir pkg --no-default-features --features wasm
+
+      # Set the published name + stamp the version from the tag (like the binaries).
+      - name: Finalize package
+        working-directory: packages/compiler
+        run: node scripts/wasm-pkg.mjs "${{ steps.version.outputs.value }}"
+
+      - name: Publish
+        working-directory: packages/compiler/pkg
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing wasm $VERSION under dist-tag: $TAG"
+          npm publish --access public --provenance --tag "$TAG"

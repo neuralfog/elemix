@@ -12,8 +12,8 @@
         "compile:stories": "rm -rf stories/compiled/.emited && cargo build && ./target/debug/elemix-compiler --dirs tests/fixtures --out stories/compiled/.emited",
         "build:wasm": "wasm-pack build --target web --out-dir pkg --no-default-features --features wasm && node scripts/wasm-pkg.mjs",
         "test:wasm": "pnpm run build:wasm && node tests/wasm-conformance.mjs && node tests/wasm-robustness.mjs",
-        "storybook": "pnpm run compile:stories && storybook dev -p 6006",
-        "build-storybook": "pnpm run compile:stories && storybook build"
+        "storybook": "pnpm run build:wasm && pnpm run compile:stories && storybook dev -p 6006",
+        "build-storybook": "pnpm run build:wasm && pnpm run compile:stories && storybook build"
     },
     "devDependencies": {
         "@neuralfog/elemix": "workspace:*",
