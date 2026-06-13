@@ -18,6 +18,11 @@ defaults:
   run:
     shell: bash
 
+env:
+  # Run GitHub's JS actions (checkout, upload-artifact, setup-zig) on Node 24
+  # instead of the deprecated Node 20 — matches the local toolchain.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: build ${{ matrix.pkg }}
@@ -34,9 +39,11 @@ jobs:
             target: aarch64-unknown-linux-musl
             os: ubuntu-latest
             zig: true
+          # Cross-compiled on Apple Silicon (the macOS SDK is universal) so we
+          # don't depend on the deprecated, often-queued Intel macos-13 runner.
           - pkg: darwin-x64
             target: x86_64-apple-darwin
-            os: macos-13
+            os: macos-latest
           - pkg: darwin-arm64
             target: aarch64-apple-darwin
             os: macos-latest
