@@ -5,11 +5,13 @@
     "type": "module",
     "scripts": {
         "build": "cargo build --release",
-        "test": "pnpm run test:rust && pnpm run test:types && pnpm run test:storybook",
+        "test": "pnpm run test:rust && pnpm run test:wasm && pnpm run test:types && pnpm run test:storybook",
         "test:rust": "cargo test",
         "test:types": "tsc --noEmit -p tsconfig.fixtures.json",
         "test:storybook": "pnpm run compile:stories && vitest run",
         "compile:stories": "rm -rf stories/compiled/.emited && cargo build && ./target/debug/elemix-compiler --dirs tests/fixtures --out stories/compiled/.emited",
+        "build:wasm": "wasm-pack build --target web --out-dir pkg --no-default-features --features wasm && node scripts/wasm-pkg.mjs",
+        "test:wasm": "pnpm run build:wasm && node tests/wasm-conformance.mjs && node tests/wasm-robustness.mjs",
         "storybook": "pnpm run compile:stories && storybook dev -p 6006",
         "build-storybook": "pnpm run compile:stories && storybook build"
     },

@@ -3,23 +3,35 @@ name = "elemix-compiler"
 version = "0.0.0"
 edition = "2021"
 publish = false
+description = "Ahead-of-time compiler for Elemix tpl templates."
+license = "MIT"
+repository = "https://github.com/neuralfog/elemix"
 
 [lib]
 name = "elemix_compiler"
 path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
 
 [[bin]]
 name = "elemix-compiler"
 path = "src/main.rs"
+required-features = ["cli"]
+
+[features]
+default = ["cli"]
+cli = ["dep:clap", "dep:glob"]
+wasm = ["dep:wasm-bindgen", "dep:console_error_panic_hook"]
 
 [dependencies]
-clap = { version = "4.6.1", features = ["derive"] }
-glob = "0.3.3"
+clap = { version = "4.6.1", features = ["derive"], optional = true }
+glob = { version = "0.3.3", optional = true }
 oxc_allocator = "0.135.0"
 oxc_ast = "0.135.0"
 oxc_ast_visit = "0.135.0"
 oxc_parser = "0.135.0"
 oxc_span = "0.135.0"
+wasm-bindgen = { version = "0.2", optional = true }
+console_error_panic_hook = { version = "0.1", optional = true }
 
 [dev-dependencies]
 insta = { version = "1", features = ["glob"] }

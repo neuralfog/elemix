@@ -67,7 +67,7 @@ Target release of fully compiled framework is `v0.9.0`
     Renderer is fully sync now, what it should be, no `ticking`, no waiting 🤔
 - [] Design `compiler hints`
 - [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
-- [ ] Rust compiles to wasm - first class support - can still use it in playground
+- [] Rust compiles to wasm - first class support - can still use it in playground
 
 ### Phase 3 - Why would you use a fork for eating soup 🍴
 
