@@ -7,9 +7,8 @@ if (!version) {
     process.exit(1);
 }
 
-// Lockstep release tags: the overall marker + the compiler-publish trigger
-// (release-compiler.yml fires on `elemix-compiler-v*`).
-const tags = [`v${version}`, `elemix-compiler-v${version}`];
+// One release tag — both release-compiler.yml and release-vite.yml fire on `v*`.
+const tags = [`v${version}`];
 
 const git = (args) => execFileSync('git', args, { stdio: 'inherit' });
 const tagExists = (tag) => {

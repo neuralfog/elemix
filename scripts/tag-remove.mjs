@@ -7,8 +7,8 @@ if (!version) {
     process.exit(1);
 }
 
-// Same lockstep tags `tag.mjs` creates — removed locally and on the remote.
-const tags = [`v${version}`, `elemix-compiler-v${version}`];
+// The release tag `tag.mjs` creates — removed locally and on the remote.
+const tags = [`v${version}`];
 
 const tryGit = (args, label) => {
     try {

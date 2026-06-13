@@ -3,11 +3,12 @@ name: release-compiler
 # Build the Rust compiler for every target, drop each binary into its platform
 # package, and publish the platform packages + the JS launcher to npm.
 #
-# Trigger by pushing a tag `elemix-compiler-v1.2.3`, or run manually and pass the
-# version. The version is stamped into every npm manifest at publish time.
+# Trigger by pushing a tag `v1.2.3`, or run manually and pass the version.
+# The version is stamped into every npm manifest at publish time. One tag
+# releases everything — the vite plugin's workflow fires on the same `v*` tag.
 on:
   push:
-    tags: ['elemix-compiler-v*']
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       version:
@@ -131,7 +132,7 @@ jobs:
           if [ -n "${{ inputs.version }}" ]; then
             echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           else
-            echo "value=${GITHUB_REF_NAME#elemix-compiler-v}" >> "$GITHUB_OUTPUT"
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Stamp version
@@ -188,7 +189,7 @@ jobs:
           if [ -n "${{ inputs.version }}" ]; then
             echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           else
-            echo "value=${GITHUB_REF_NAME#elemix-compiler-v}" >> "$GITHUB_OUTPUT"
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build wasm package

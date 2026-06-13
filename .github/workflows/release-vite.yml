@@ -1,9 +1,9 @@
 name: release-vite
 
-# Publish @neuralfog/elemix-vite on a `v<version>` tag — the JS release marker
-# `pnpm tag` pushes alongside `elemix-compiler-v<version>` (same <version>). The
-# version comes from the tag, and the plugin's pin on the native compiler is
-# stamped to that same version so it always depends on the build it ships with.
+# Publish @neuralfog/elemix-vite on a `v<version>` tag — the same tag that fires
+# release-compiler.yml (one tag releases everything). The version comes from the
+# tag, and the plugin's pin on the native compiler is stamped to that same
+# version so it always depends on the build it ships with.
 on:
   push:
     tags: ['v*']
