@@ -121,6 +121,9 @@ jobs:
             pkg="${dir#artifacts/npm-}"
             cp -r "$dir/." "packages/compiler/npm/$pkg/"
           done
+          # upload-artifact zips files and drops the Unix exec bit — restore it so
+          # the published tarball ships an executable binary (npm preserves modes).
+          chmod +x packages/compiler/npm/*/elemix-compiler 2>/dev/null || true
 
       - name: Resolve version
         id: version
