@@ -1,0 +1,71 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/ProfileApp.ts
+---
+import { template, clone, _event, _prop, _model } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
+import type { Ref } from '@neuralfog/elemix/types';
+
+import './ProfileCard';
+
+type State = {
+    name: Ref<string>;
+    role: Ref<string>;
+    likes: number;
+};
+
+const css = `
+    :host { --accent: #6366f1; display: block; font-family: system-ui, sans-serif; }
+    .controls {
+        display: flex; flex-wrap: wrap; gap: 12px;
+        align-items: flex-end; margin-bottom: 20px;
+    }
+    label {
+        display: flex; flex-direction: column; gap: 4px;
+        font-size: 12px; color: #64748b;
+    }
+    input {
+        font: inherit; font-size: 14px; padding: 7px 10px;
+        border: 1px solid #cbd5e1; border-radius: 8px; outline: none;
+    }
+    input:focus { border-color: var(--accent); }
+    button {
+        font: inherit; padding: 8px 14px; border: none; border-radius: 8px;
+        background: var(--accent); color: white; cursor: pointer;
+    }
+    button:hover { background: #4f46e5; }
+`;
+
+const _t0 = template('<div class="controls"><label>Name <input type="text"/></label><label>Role <input type="text"/></label><button>👍 Like</button></div><profile-card></profile-card>');
+
+export class ProfileApp extends Component {
+    static styles = [css];
+
+    state = state<State>({
+        name: ref('Ada Lovelace'),
+        role: ref('Engineer'),
+        likes: 0,
+    });
+
+    like = (): void => {
+        this.state.likes++;
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[0].children[0].children[0];
+const _n2 = _r0.children[0].children[1].children[0];
+const _n3 = _r0.children[0].children[2];
+const _n4 = _r0.children[1];
+_model(_n1 as HTMLInputElement, () => (this.state.name));
+_model(_n2 as HTMLInputElement, () => (this.state.role));
+_event(_n3, 'click', this.like);
+_prop(_n4, 'name', () => (this.state.name.value));
+_prop(_n4, 'role', () => (this.state.role.value));
+_prop(_n4, 'likes', () => (this.state.likes));
+return _r0;
+}
+}
+
+defineComponent('profile-app', ProfileApp);

@@ -1,4 +1,4 @@
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { Component, defineComponent, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import './AppCard';

@@ -1,4 +1,4 @@
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {

@@ -1,0 +1,110 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/PanelApp.ts
+---
+import { template, clone, _text, _event, _child } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, state } from '@neuralfog/elemix';
+
+type State = {
+    title: string;
+    count: number;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 18px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+    .panel {
+        padding: 18px 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+    h2 { margin: 0 0 6px; font-size: 20px; }
+    .stat { margin: 0 0 14px; font-size: 14px; color: #475569; }
+    button {
+        font: inherit;
+        font-size: 13px;
+        padding: 6px 12px;
+        margin-right: 8px;
+        border: none;
+        border-radius: 8px;
+        background: #e2e8f0;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    button:hover { background: #cbd5e1; }
+`;
+
+const _t0 = template('<p class="note">Sub-templates pulled out as <code>class members</code> — the natural way to organize a component. The main template composes them with member calls; each stays independently reactive.</p><div class="panel"><!----> <!----> <button>add</button><button>rename</button></div>');
+const _t1 = template('<h2><!----></h2>');
+const _t2 = template('<p class="stat"><!----> open</p>');
+
+export class PanelApp extends Component {
+    static styles = [css];
+
+    state = state<State>({
+        title: 'Inbox',
+        count: 3,
+    });
+
+    add = (): void => {
+        this.state.count++;
+    };
+
+    rename = (): void => {
+        this.state.title = this.state.title === 'Inbox' ? 'Archive' : 'Inbox';
+    };
+
+    
+    
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[1].childNodes[0];
+const _n2 = _r0.children[1].childNodes[2];
+const _n3 = _r0.children[1].children[0];
+const _n4 = _r0.children[1].children[1];
+_child(_n1, () => ((() => {
+const _r5 = clone(_t1);
+const _n6 = _r5.children[0].childNodes[0];
+const _x7 = document.createTextNode('');
+_n6.replaceWith(_x7);
+_text(_x7, () => (this.state.title));
+return _r5.firstChild!;
+})()));
+_child(_n2, () => ((() => {
+const _r8 = clone(_t2);
+const _n9 = _r8.children[0].childNodes[0];
+const _x10 = document.createTextNode('');
+_n9.replaceWith(_x10);
+_text(_x10, () => (this.state.count));
+return _r8.firstChild!;
+})()));
+_event(_n3, 'click', this.add);
+_event(_n4, 'click', this.rename);
+return _r0;
+}
+}
+
+defineComponent('panel-app', PanelApp);

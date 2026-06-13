@@ -1,4 +1,4 @@
-import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
+import { Component, defineComponent, ref, state, tpl } from '@neuralfog/elemix';
 import type { Ref, Template } from '@neuralfog/elemix/types';
 
 import './ProfileCard';

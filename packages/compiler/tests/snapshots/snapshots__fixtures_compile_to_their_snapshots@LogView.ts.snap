@@ -1,0 +1,72 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/LogView.ts
+---
+import { template, clone, _text, _class, _child, _list } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent } from '@neuralfog/elemix';
+
+import { log } from './LifecycleStore';
+
+const css = `
+    :host { display: block; }
+    .log {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        max-height: 180px;
+        overflow-y: auto;
+        padding: 8px;
+        background: #0f172a;
+        border-radius: 10px;
+    }
+    .entry {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        color: #e2e8f0;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .entry .n { color: #64748b; margin-right: 8px; }
+    .beforeMount { color: #fbbf24; }
+    .onMount { color: #34d399; }
+    .onMutation { color: #60a5fa; }
+    .onDispose { color: #f87171; }
+    .empty { font-size: 12px; color: #64748b; padding: 2px 6px; }
+`;
+
+const _t0 = template('<div class="log"><!----></div>');
+const _t1 = template('<div><span class="n"><!----></span><!---->()</div>');
+const _t2 = template('<div class="empty">No events yet — mount the child.</div>');
+
+export class LogView extends Component {
+    static styles = [css];
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[0].childNodes[0];
+const _a9 = document.createComment('');
+_n1.before(_a9);
+_list(_a9, () => (log.entries.length ? log.entries : []), (e) => String(e.id), (e) => (() => {
+const _r2 = clone(_t1);
+const _n3 = _r2.children[0];
+const _n4 = _r2.children[0].children[0].childNodes[0];
+const _n5 = _r2.children[0].childNodes[1];
+_class(_n3, () => ({ entry: true, [e.event]: true }));
+const _x6 = document.createTextNode('');
+_n4.replaceWith(_x6);
+_text(_x6, () => (e.id));
+const _x7 = document.createTextNode('');
+_n5.replaceWith(_x7);
+_text(_x7, () => (e.event));
+return _r2.firstChild!;
+})());
+_child(_n1, () => (log.entries.length ? '' : (() => {
+const _r8 = clone(_t2);
+return _r8.firstChild!;
+})()));
+return _r0;
+}
+}
+
+defineComponent('log-view', LogView);

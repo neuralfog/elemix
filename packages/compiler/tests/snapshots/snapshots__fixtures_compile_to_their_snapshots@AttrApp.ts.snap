@@ -1,0 +1,120 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/AttrApp.ts
+---
+import { template, clone, _text, _attr, _event } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, state } from '@neuralfog/elemix';
+
+type State = {
+    userId: number;
+    label: string;
+    collapsed: boolean;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 18px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+    .link { color: var(--accent); display: inline-block; margin-bottom: 10px; }
+    .badge {
+        display: inline-block;
+        padding: 2px 10px;
+        margin-bottom: 12px;
+        font-size: 13px;
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+    .secret {
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        background: #fef3c7;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+    button {
+        font: inherit;
+        font-size: 13px;
+        padding: 6px 12px;
+        margin-right: 8px;
+        border: none;
+        border-radius: 8px;
+        background: #e2e8f0;
+        cursor: pointer;
+    }
+    button:hover { background: #cbd5e1; }
+`;
+
+const _t0 = template('<p class="note">Everything in a template is an attribute. <code>_attr</code> handles interpolated values (<code>href</code>), <code>data-*</code>/<code>aria-*</code>, and boolean attributes that toggle their presence (<code>hidden</code>).</p><a class="link">Open profile #<!----></a><span class="badge"><!----></span><div class="secret">Secret content</div><button>next user</button><button>rename</button><button>toggle secret</button>');
+
+export class AttrApp extends Component {
+    static styles = [css];
+
+    state = state<State>({
+        userId: 1,
+        label: 'Ada',
+        collapsed: false,
+    });
+
+    next = (): void => {
+        this.state.userId++;
+    };
+
+    rename = (): void => {
+        this.state.label = this.state.label === 'Ada' ? 'Grace' : 'Ada';
+    };
+
+    toggle = (): void => {
+        this.state.collapsed = !this.state.collapsed;
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[1];
+const _n2 = _r0.children[1].childNodes[1];
+const _n3 = _r0.children[2];
+const _n4 = _r0.children[2].childNodes[0];
+const _n5 = _r0.children[3];
+const _n6 = _r0.children[4];
+const _n7 = _r0.children[5];
+const _n8 = _r0.children[6];
+_attr(_n1, 'href', () => (`/users/${this.state.userId}`));
+_attr(_n1, 'title', () => (this.state.label));
+const _x9 = document.createTextNode('');
+_n2.replaceWith(_x9);
+_text(_x9, () => (this.state.userId));
+_attr(_n3, 'data-count', () => (this.state.userId));
+_attr(_n3, 'aria-label', () => (this.state.label));
+const _x10 = document.createTextNode('');
+_n4.replaceWith(_x10);
+_text(_x10, () => (this.state.label));
+_attr(_n5, 'hidden', () => (this.state.collapsed));
+_event(_n6, 'click', this.next);
+_event(_n7, 'click', this.rename);
+_event(_n8, 'click', this.toggle);
+return _r0;
+}
+}
+
+defineComponent('attr-app', AttrApp);

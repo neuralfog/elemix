@@ -1,4 +1,4 @@
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -73,7 +73,7 @@ export class CardListApp extends Component {
         if (user) user.role = 'Lead';
     };
 
-    remove = (id: number): void => {
+    removeUser = (id: number): void => {
         const i = this.state.users.findIndex((u) => u.id === id);
         if (i !== -1) this.state.users.splice(i, 1);
     };
@@ -91,7 +91,7 @@ export class CardListApp extends Component {
                 (user) => tpl`<div class="row">
                     <user-card :name=${user.name} :role=${user.role} />
                     <button class="promote" @click=${() => this.promote(user.id)}>promote</button>
-                    <button class="drop" @click=${() => this.remove(user.id)}>×</button>
+                    <button class="drop" @click=${() => this.removeUser(user.id)}>×</button>
                 </div>`,
                 (user) => user.id,
             )}

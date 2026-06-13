@@ -1,4 +1,4 @@
-import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
+import { Component, defineComponent, ref, state, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Ref, Template } from '@neuralfog/elemix/types';
 
@@ -95,8 +95,8 @@ export class ChatApp extends Component {
         ],
     });
 
-    private id = 0;
-    private nextId = (): string => `m${++this.id}`;
+    private seq = 0;
+    private nextId = (): string => `m${++this.seq}`;
 
     send = (): void => {
         const text = this.state.draft.value.trim();

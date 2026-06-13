@@ -134,7 +134,7 @@ export const _event = (
     name: string,
     handler: EventListener,
 ): void => {
-    Reflect.set(el, `on${name}`, handler);
+    (el as unknown as Record<string, EventListener>)[`on${name}`] = handler;
 };
 
 export const _ref = (el: Element, ref: { value: unknown }): void => {

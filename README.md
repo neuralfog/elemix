@@ -16,25 +16,25 @@ Live playground: **[playground.elemix.dev](https://playground.elemix.dev/)**
 
 ## Releasing
 
-Every package shares a single version, bumped in lockstep by `scripts/bump.mjs`.
+Every package shares a single version, bumped in lockstep by `scripts/bump.mjs` —
+`pnpm bump` syncs it across the whole repo: every `package.json`, the compiler's
+published npm packages (launcher + per-platform binaries), and the Rust `Cargo.toml`.
 
-One-time setup:
-
-```bash
-npm login           # must have publish rights to the @neuralfog org
-```
-
-Normal flow:
+Release cycle:
 
 ```bash
-pnpm bump <version | major | minor | patch>   # rewrite the version line in every package.json + root
-git add -A && git commit -m "version packages"
-pnpm release                                   # = pnpm build && pnpm -r publish
+pnpm bump <version | major | minor | patch>   # sync the version everywhere
+git commit -am "release: v<version>"
+pnpm tag                                       # push v<version> + elemix-compiler-v<version>
 ```
 
-`pnpm -r publish` publishes each public package in dependency order and rewrites `workspace:*` to the concrete version in the published manifest. It is idempotent — only versions not already on the registry are pushed.
+The `elemix-compiler-v<version>` tag triggers the `release-compiler` workflow, which
+cross-compiles the binary for every platform and publishes the compiler to npm — no
+local toolchain or login needed. `pnpm tag-remove` deletes both tags (local + remote)
+to re-trigger or clean up.
 
-Notes:
-
-- Always release from the **root** (`pnpm release`); don't run per-package publish scripts directly.
-- Commit before publishing.
+> **`pnpm release` is being sunset.** It still publishes `@neuralfog/elemix` and
+> `@neuralfog/elemix-storybook` from your machine (`pnpm build && pnpm -r publish`,
+> needs `npm login` with publish rights to the `@neuralfog` org). We're moving to a
+> fully tag-driven cycle where every package publishes from CI on its tag — the way the
+> compiler already does — so this manual step will go away.

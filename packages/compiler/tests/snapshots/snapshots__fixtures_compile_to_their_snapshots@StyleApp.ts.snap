@@ -1,0 +1,87 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/StyleApp.ts
+---
+import { template, clone, _style, _event } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, state } from '@neuralfog/elemix';
+
+type State = {
+    color: string;
+    size: number;
+    bg: string;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 18px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code { font-family: ui-monospace, monospace; font-size: 12px; background: #e2e8f0; padding: 1px 5px; border-radius: 4px; }
+    .box {
+        padding: 24px;
+        margin-bottom: 14px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-align: center;
+        transition: all 0.15s ease;
+    }
+    button { font: inherit; font-size: 13px; padding: 6px 12px; margin-right: 8px; border: none; border-radius: 8px; background: #e2e8f0; cursor: pointer; }
+    button:hover { background: #cbd5e1; }
+`;
+
+const _t0 = template('<p class="note"><code>style</code> binds an object of CSS properties (or a string). Each change re-applies only the style declaration.</p><div class="box">Styled box</div><button>color</button><button>size</button><button>background</button>');
+
+export class StyleApp extends Component {
+    static styles = [css];
+
+    state = state<State>({
+        color: '#1e293b',
+        size: 18,
+        bg: '#e0e7ff',
+    });
+
+    recolor = (): void => {
+        this.state.color = this.state.color === '#1e293b' ? '#ffffff' : '#1e293b';
+    };
+
+    resize = (): void => {
+        this.state.size = this.state.size >= 30 ? 14 : this.state.size + 4;
+    };
+
+    shade = (): void => {
+        this.state.bg = this.state.bg === '#e0e7ff' ? '#6366f1' : '#e0e7ff';
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[1];
+const _n2 = _r0.children[2];
+const _n3 = _r0.children[3];
+const _n4 = _r0.children[4];
+_style(_n1 as HTMLElement, () => ({
+                color: this.state.color,
+                'font-size': `${this.state.size}px`,
+                background: this.state.bg,
+            }));
+_event(_n2, 'click', this.recolor);
+_event(_n3, 'click', this.resize);
+_event(_n4, 'click', this.shade);
+return _r0;
+}
+}
+
+defineComponent('style-app', StyleApp);

@@ -1,0 +1,48 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/UserCard.ts
+---
+import { template, clone, _text } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent } from '@neuralfog/elemix';
+
+type Props = {
+    name: string;
+    role: string;
+};
+
+const css = `
+    :host { display: block; }
+    .card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+    .name { font-weight: 700; }
+    .role { font-size: 12px; color: #64748b; }
+`;
+
+const _t0 = template('<div class="card"><span class="name"><!----></span><span class="role"><!----></span></div>');
+
+export class UserCard extends Component<Props> {
+    static styles = [css];
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[0].children[0].childNodes[0];
+const _n2 = _r0.children[0].children[1].childNodes[0];
+const _x3 = document.createTextNode('');
+_n1.replaceWith(_x3);
+_text(_x3, () => (this.props.name));
+const _x4 = document.createTextNode('');
+_n2.replaceWith(_x4);
+_text(_x4, () => (this.props.role));
+return _r0;
+}
+}
+
+defineComponent('user-card', UserCard);

@@ -5,8 +5,9 @@
     "type": "module",
     "scripts": {
         "build": "cargo build --release",
-        "test": "pnpm run test:rust && pnpm run test:storybook",
+        "test": "pnpm run test:rust && pnpm run test:types && pnpm run test:storybook",
         "test:rust": "cargo test",
+        "test:types": "tsc --noEmit -p tsconfig.fixtures.json",
         "test:storybook": "pnpm run compile:stories && vitest run",
         "compile:stories": "rm -rf stories/compiled/.emited && cargo build && ./target/debug/elemix-compiler --dirs tests/fixtures --out stories/compiled/.emited",
         "storybook": "pnpm run compile:stories && storybook dev -p 6006",
@@ -19,6 +20,7 @@
         "@vitest/browser-playwright": "4.1.8",
         "playwright": "1.60.0",
         "storybook": "10.4.1",
+        "typescript": "6.0.3",
         "vite": "8.0.14",
         "vitest": "4.1.8"
     }

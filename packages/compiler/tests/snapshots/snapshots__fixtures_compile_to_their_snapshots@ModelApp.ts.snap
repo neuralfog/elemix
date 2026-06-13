@@ -1,0 +1,100 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/ModelApp.ts
+---
+import { template, clone, _text, _model, _onmodel } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
+import type { Ref } from '@neuralfog/elemix/types';
+
+const clamp = (v: string): string => {
+    const n = Number(v);
+    return String(Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0);
+};
+
+type State = {
+    name: Ref<string>;
+    volume: Ref<string>;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 420px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 20px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+    label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: #475569;
+    }
+    input {
+        font: inherit;
+        font-size: 15px;
+        padding: 9px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        outline: none;
+    }
+    input:focus { border-color: var(--accent); }
+    .out {
+        margin-bottom: 20px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--accent);
+    }
+    .out:last-child { margin-bottom: 0; }
+`;
+
+const _t0 = template('<p class="note"><code>~model</code> two-way binds an input to a ref. <code>~onmodel</code> runs a transform on every keystroke before the value is stored — here it clamps the number to 0–100.</p><label>Name (<code>~model</code>) <input type="text"/></label><div class="out">Hello, <!----></div><label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"/></label><div class="out">Volume: <!----></div>');
+
+export class ModelApp extends Component {
+    static styles = [css];
+
+    state = state<State>({
+        name: ref('Ada'),
+        volume: ref('50'),
+    });
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[1].children[1];
+const _n2 = _r0.children[2].childNodes[1];
+const _n3 = _r0.children[3].children[2];
+const _n4 = _r0.children[4].childNodes[1];
+_model(_n1 as HTMLInputElement, () => (this.state.name));
+const _x5 = document.createTextNode('');
+_n2.replaceWith(_x5);
+_text(_x5, () => (this.state.name.value || '…'));
+_model(_n3 as HTMLInputElement, () => (this.state.volume));
+_onmodel(_n3 as HTMLInputElement, clamp);
+const _x6 = document.createTextNode('');
+_n4.replaceWith(_x6);
+_text(_x6, () => (this.state.volume.value));
+return _r0;
+}
+}
+
+defineComponent('model-app', ModelApp);
