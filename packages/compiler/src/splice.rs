@@ -12,8 +12,8 @@
 use crate::locate::find_html_templates;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
-    ArrowFunctionExpression, Class, ClassElement, Declaration, Expression, PropertyKey,
-    Statement, TaggedTemplateExpression,
+    ArrowFunctionExpression, Class, ClassElement, Declaration, Expression, PropertyKey, Statement,
+    TaggedTemplateExpression,
 };
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType};
@@ -67,7 +67,7 @@ pub fn inline_helpers(source: &str) -> String {
         let e = e + trailing_newline(source, e);
         edits.push((s, e, String::new()));
     }
-    edits.sort_by(|a, b| b.0.cmp(&a.0));
+    edits.sort_by_key(|e| std::cmp::Reverse(e.0));
     let mut out = source.to_string();
     for (start, end, repl) in edits {
         out.replace_range(start..end, &repl);
@@ -107,8 +107,7 @@ fn analyze_main(arrow: &ArrowFunctionExpression, source: &str) -> Option<MainTem
                         (d.id.get_identifier_name(), &d.init)
                     {
                         if is_html(html, source) {
-                            local_helpers
-                                .insert(name.to_string(), slice(source, html.span()));
+                            local_helpers.insert(name.to_string(), slice(source, html.span()));
                         }
                     }
                 }
@@ -156,7 +155,12 @@ fn is_html(html: &TaggedTemplateExpression, source: &str) -> bool {
 
 /// Statics + hole expressions of a template, sliced from source.
 fn extract(html: &TaggedTemplateExpression, source: &str) -> (Vec<String>, Vec<String>) {
-    let statics = html.quasi.quasis.iter().map(|q| slice(source, q.span)).collect();
+    let statics = html
+        .quasi
+        .quasis
+        .iter()
+        .map(|q| slice(source, q.span))
+        .collect();
     let holes = html
         .quasi
         .expressions
@@ -168,11 +172,7 @@ fn extract(html: &TaggedTemplateExpression, source: &str) -> (Vec<String>, Vec<S
 
 /// Rebuild a `tpl`...`` literal, substituting helper-reference holes with the
 /// referenced template's source.
-fn reconstruct(
-    statics: &[String],
-    holes: &[String],
-    helpers: &HashMap<String, String>,
-) -> String {
+fn reconstruct(statics: &[String], holes: &[String], helpers: &HashMap<String, String>) -> String {
     let mut out = String::from("tpl`");
     for (i, s) in statics.iter().enumerate() {
         out.push_str(s);

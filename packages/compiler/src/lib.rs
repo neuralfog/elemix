@@ -11,8 +11,12 @@ pub mod lower;
 pub mod rewrite;
 pub mod splice;
 pub mod template;
+#[cfg(feature = "wasm")]
+pub mod wasm;
 
-pub use locate::{collect_ts_files, find_html_templates, FoundTemplate};
+#[cfg(feature = "cli")]
+pub use locate::collect_ts_files;
+pub use locate::{find_html_templates, FoundTemplate};
 
 /// Compile one source file: inline helper templates (Splice), then rewrite the
 /// `template` member into a compiled `view()`, hoisting the `template(...)`

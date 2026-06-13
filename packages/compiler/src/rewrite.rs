@@ -19,8 +19,8 @@ use oxc_parser::Parser;
 use oxc_span::SourceType;
 
 const PRIMITIVES: &[&str] = &[
-    "template", "clone", "_text", "_attr", "_class", "_style", "_event", "_prop",
-    "_model", "_onmodel", "_ref", "_child", "_list",
+    "template", "clone", "_text", "_attr", "_class", "_style", "_event", "_prop", "_model",
+    "_onmodel", "_ref", "_child", "_list",
 ];
 
 /// Where the edits land in the source.
@@ -126,8 +126,7 @@ fn plan(source: &str) -> Option<Plan> {
                     "@neuralfog/elemix/types" => {
                         let names = import_names(import);
                         if names.iter().any(|n| n == "Template") {
-                            let remaining =
-                                names.into_iter().filter(|n| n != "Template").collect();
+                            let remaining = names.into_iter().filter(|n| n != "Template").collect();
                             types_import = Some((span.0, span.1, remaining));
                         }
                     }

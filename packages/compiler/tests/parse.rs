@@ -159,7 +159,10 @@ fn colon_and_tilde_sigils_are_preserved() {
 
 #[test]
 fn multiple_attr_holes_share_the_element_path() {
-    let r = parse(&s(&["<input ~model=", " @keydown=", " />"]), &s(&["m", "k"]));
+    let r = parse(
+        &s(&["<input ~model=", " @keydown=", " />"]),
+        &s(&["m", "k"]),
+    );
     assert_eq!(r.markup, "<input/>");
     assert_eq!(r.holes.len(), 2);
     assert_eq!(r.holes[0].slot, Slot::Attr("~model".into()));
@@ -247,7 +250,10 @@ fn attr_value_internal_spaces_are_preserved() {
 
 #[test]
 fn object_literal_attr_expr_is_stored_verbatim() {
-    let r = parse(&s(&["<tr class=", "></tr>"]), &s(&["{ danger: sel === id }"]));
+    let r = parse(
+        &s(&["<tr class=", "></tr>"]),
+        &s(&["{ danger: sel === id }"]),
+    );
     assert_eq!(r.markup, "<tr></tr>");
     assert_eq!(r.holes[0].slot, Slot::Attr("class".into()));
     assert_eq!(r.holes[0].expr, "{ danger: sel === id }");
@@ -275,7 +281,10 @@ fn backticks_in_attr_expr_survive() {
 
 #[test]
 fn whitespace_between_tags_is_dropped_but_kept_at_holes() {
-    let r = parse(&s(&["<div>\n  <span>a</span>\n  <span>b</span>\n</div>"]), &[]);
+    let r = parse(
+        &s(&["<div>\n  <span>a</span>\n  <span>b</span>\n</div>"]),
+        &[],
+    );
     assert_eq!(r.markup, "<div><span>a</span><span>b</span></div>");
 
     let r2 = parse(&s(&["<p><b>full:</b> ", "</p>"]), &s(&["name"]));

@@ -52,7 +52,6 @@ Target release of fully compiled framework is `v0.9.0`
 
 ### Phase 3 - Packaging and Tooling 🛠️
 
-- [] `ec-wasm` needs to be able to transpile on `playground`
 - [] Most likely `ec-vite` plugin, got to find a way to make compilation as painless and invisible as possible
     vite plugin is a good candidate here, we can hook into the `vite` compilation process, I did it before
 - [] Compiler `cli` may change based on two requirements above
@@ -67,9 +66,28 @@ Target release of fully compiled framework is `v0.9.0`
     Renderer is fully sync now, what it should be, no `ticking`, no waiting 🤔
 - [] Design `compiler hints`
 - [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
-- [ ] Rust compiles to wasm - first class support - can still use it in playground
 
 ### Phase 3 - Why would you use a fork for eating soup 🍴
+
+***Compiler as WASM ⚙️⚙️⚙️***
+
+- The whole `compalerino` now compiles straight in the browser via WASM 🕸️🦀 playground can transpile on every keystroke 🤯
+- Went single crate, feature gated - no crate split shenanigans, simplicity wins 🧈 native build stays EXACTLY
+  as it was, not a scratch on it 🤝
+- `compile()` is pure `oxc`, zero IO, so it crosses the wasm boundary squeaky clean - only the filesystem/CLI
+  bits (`clap`, `glob`, file scanning) get gated out behind a feature 🚪
+- `wasm-pack` + `wasm-opt` spit out a tidy `--target web` package, squashed down to `~697kb` from a chunky 32MB debug blob 🪓🔥
+- Ships as its own npm module `@neuralfog/elemix-compiler-wasm` 📦 separate from the native launcher so no name clash 🙅
+- WASM output is BYTE for BYTE identical to native across all 37 fixtures 🧬 if it ever drifts the snapshots will scream 😲🔫
+- Panic free on half typed garbage — `oxc` just shrugs and passes the source through, the module never dies 🛡️
+  exactly what you want when the playground hammers it per keystroke ⌨️
+- Final boss 🐉 a storybook story compiles a component INSIDE a real browser (chromium), compiled output rendered live on
+  screen - wasm proven in its natural habitat 🦇
+- Hooked into the test pipeline + CI, and publishes on the same `tag` push as the binaries, all locked to one version 🚀🚀🚀
+- Mapped the whole thing out in `COMPILER-TESTING-PIPELINE.md` 🗺️ four gates on a single `pnpm test` — rust → wasm → types → real browser
+  each one hunts a different gremlin 👹
+- Channel delivery proven end to end via the throwaway repo `https://github.com/neuralfog/test-compiler` 🗑️
+- Rust finally gets linted 🦀💈 The audacity 🙈 now it screams on every warning 📢
 
 ***Compiler Packaging 📦📦📦***
 
@@ -269,3 +287,6 @@ This will be a headache if I get there 😂❤️😂
 - [x] Tag management
 
 - [x] Approve compiler packaging for `main` landing 🚀
+
+- [x] `ec-wasm` needs to be able to transpile on `playground`
+- [x] Rust compiles to wasm - first class support - can still use it in playground
