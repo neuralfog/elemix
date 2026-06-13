@@ -1,0 +1,97 @@
+name: release-vite
+
+# Publish @neuralfog/elemix-vite on a `v<version>` tag — the JS release marker
+# `pnpm tag` pushes alongside `elemix-compiler-v<version>` (same <version>). The
+# version comes from the tag, and the plugin's pin on the native compiler is
+# stamped to that same version so it always depends on the build it ships with.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 0.1.0)'
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish:
+    name: publish @neuralfog/elemix-vite
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm --filter @neuralfog/elemix-vite build
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Stamp the published version AND pin the native compiler dependency to it
+      # (this release's compiler version), overriding whatever was committed.
+      - name: Stamp version + compiler pin
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const f = "packages/vite/package.json";
+            const p = JSON.parse(fs.readFileSync(f, "utf8"));
+            const v = process.env.VERSION;
+            p.version = v;
+            p.dependencies["@neuralfog/elemix-compiler"] = v;
+            fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            console.log(`elemix-vite@${v} (compiler dep ${v})`);
+          '
+
+      # Wait until that exact compiler version is on npm (released by
+      # release-compiler.yml on the sibling tag) so an installer never sees a
+      # missing dependency.
+      - name: Wait for the compiler dependency
+        run: |
+          DEP="${{ steps.version.outputs.value }}"
+          echo "waiting for @neuralfog/elemix-compiler@$DEP on npm..."
+          for i in $(seq 1 90); do
+            if npm view "@neuralfog/elemix-compiler@$DEP" version >/dev/null 2>&1; then
+              echo "✓ @neuralfog/elemix-compiler@$DEP is published"
+              exit 0
+            fi
+            echo "  not yet ($i/90)..."; sleep 10
+          done
+          echo "::error::@neuralfog/elemix-compiler@$DEP was not published in time"
+          exit 1
+
+      - name: Publish
+        working-directory: packages/vite
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/elemix-vite@$VERSION under dist-tag: $TAG"
+          npm publish --access public --provenance --tag "$TAG"

@@ -10,6 +10,7 @@ Live playground: **[playground.elemix.dev](https://playground.elemix.dev/)**
 | --- | --- | --- |
 | `@neuralfog/elemix` | Reactive elements (CustomElements). | [README](packages/elemix/README.md) |
 | `@neuralfog/elemix-compiler` | Rust Compiler. | [README](packages/compiler/README.md) |
+| `@neuralfog/elemix-vite` | Vite plugin — compiles `tpl` templates on the fly. | [README](packages/vite/README.md) |
 | `@neuralfog/elemix-storybook` | Storybook integration for Elemix. | [README](packages/storybook/README.md) |
 
 `@neuralfog/elemix-storybook` depends on `@neuralfog/elemix` via `workspace:*`, so the workspace always builds/tests against the local source.

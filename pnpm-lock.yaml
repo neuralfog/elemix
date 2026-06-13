@@ -110,6 +110,34 @@ importers:
         specifier: 4.1.8
         version: 4.1.8(@types/node@25.9.1)(@vitest/browser-playwright@4.1.8)(@vitest/coverage-v8@4.1.8)(jsdom@29.1.1)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.1))
 
+  packages/vite:
+    dependencies:
+      '@neuralfog/elemix-compiler':
+        specifier: 0.0.0-dev.2
+        version: 0.0.0-dev.2
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.9.4
+        version: 1.9.4
+      '@neuralfog/biome-config':
+        specifier: 0.1.2
+        version: 0.1.2(@biomejs/biome@1.9.4)
+      '@neuralfog/ts-config':
+        specifier: 0.1.2
+        version: 0.1.2
+      '@types/node':
+        specifier: 25.9.1
+        version: 25.9.1
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vite:
+        specifier: 8.0.14
+        version: 8.0.14(@types/node@25.9.1)(esbuild@0.28.1)
+      vitest:
+        specifier: 4.1.8
+        version: 4.1.8(@types/node@25.9.1)(@vitest/browser-playwright@4.1.8)(@vitest/coverage-v8@4.1.8)(jsdom@29.1.1)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.1))
+
 packages:
 
   '@adobe/css-tools@4.5.0':
@@ -471,6 +499,40 @@ packages:
     resolution: {integrity: sha512-9co/oFoF7uXGYZooI0PuRcSDme9xEkJOYMB+eUDdL7K6rNvu5xqeYpmpvLcYf2WlbQC6PS6ZxiufOe4MkxMQUA==}
     peerDependencies:
       '@biomejs/biome': 1.9.4
+
+  '@neuralfog/elemix-compiler-darwin-arm64@0.0.0-dev.2':
+    resolution: {integrity: sha512-YzgNySe5lgKmLp23VicAfqj4j17fYNuhKDYih5HiwmHsyElz8MaR0iLY5kQ8RP30sSXvJpKVco6VFaPpOh5f6g==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@neuralfog/elemix-compiler-darwin-x64@0.0.0-dev.2':
+    resolution: {integrity: sha512-o8Mm/7vuCMyJNYo4r/Oe0PA7ehshB+Hz6KzQI+n6qm9wUcCKqwgSISN74hJRMIbeGgWaRjadctfEbO2bZMkA/g==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@neuralfog/elemix-compiler-linux-arm64@0.0.0-dev.2':
+    resolution: {integrity: sha512-rJ0rx/Iw4Kq4VBWOkwqnV8IKBRyLhgi4QdFiNd7XKKzAefdrLcv0olFj0AsG/qVZdaDea5kXkCRMSldt9H+PVg==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@neuralfog/elemix-compiler-linux-x64@0.0.0-dev.2':
+    resolution: {integrity: sha512-eFh9b5dqpenixby5rbAPaKuC/SJ7G/ZdC+dkkTm6ZBNVbU2mxCeQ/Ml1u/8MCu8XG4F0fTl168zN08NpakUI8Q==}
+    cpu: [x64]
+    os: [linux]
+
+  '@neuralfog/elemix-compiler-win32-arm64@0.0.0-dev.2':
+    resolution: {integrity: sha512-UfUa9GMBJ+JNOeKprUWzuWi2IZG9ugBy0KMC5ORwiCSz12PJ8+zNfqgq9XaoUglTnWM2EykURddUO78A1pY+qA==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@neuralfog/elemix-compiler-win32-x64@0.0.0-dev.2':
+    resolution: {integrity: sha512-RNdbHtX6HFyyTaruW5PYdirwHkFKwhtq0lN1nxWIAydYpJL+DVjck+32Fa78q5IGb+OSRTQSdHZUkyUqLktpDA==}
+    cpu: [x64]
+    os: [win32]
+
+  '@neuralfog/elemix-compiler@0.0.0-dev.2':
+    resolution: {integrity: sha512-UeEv35FMRL5c6SEr59KEfEA+Lfxl2D1vs7CodfC5iBsD5ErNwaJX3UGTR0dWHETiUZD22OTxTFtANu/Dmt2i0A==}
+    hasBin: true
 
   '@neuralfog/ts-config@0.1.2':
     resolution: {integrity: sha512-Vt8osvkLnNlDenIihrCGDl6IVB58796Ds16h8MqkgN7SzKV6yhAJRyLyRl0YYrW7dgQaxlyWMtMu3LezyfhRzA==}
@@ -2012,6 +2074,33 @@ snapshots:
   '@neuralfog/biome-config@0.1.2(@biomejs/biome@1.9.4)':
     dependencies:
       '@biomejs/biome': 1.9.4
+
+  '@neuralfog/elemix-compiler-darwin-arm64@0.0.0-dev.2':
+    optional: true
+
+  '@neuralfog/elemix-compiler-darwin-x64@0.0.0-dev.2':
+    optional: true
+
+  '@neuralfog/elemix-compiler-linux-arm64@0.0.0-dev.2':
+    optional: true
+
+  '@neuralfog/elemix-compiler-linux-x64@0.0.0-dev.2':
+    optional: true
+
+  '@neuralfog/elemix-compiler-win32-arm64@0.0.0-dev.2':
+    optional: true
+
+  '@neuralfog/elemix-compiler-win32-x64@0.0.0-dev.2':
+    optional: true
+
+  '@neuralfog/elemix-compiler@0.0.0-dev.2':
+    optionalDependencies:
+      '@neuralfog/elemix-compiler-darwin-arm64': 0.0.0-dev.2
+      '@neuralfog/elemix-compiler-darwin-x64': 0.0.0-dev.2
+      '@neuralfog/elemix-compiler-linux-arm64': 0.0.0-dev.2
+      '@neuralfog/elemix-compiler-linux-x64': 0.0.0-dev.2
+      '@neuralfog/elemix-compiler-win32-arm64': 0.0.0-dev.2
+      '@neuralfog/elemix-compiler-win32-x64': 0.0.0-dev.2
 
   '@neuralfog/ts-config@0.1.2': {}
 
