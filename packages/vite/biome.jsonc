@@ -1,0 +1,21 @@
+{
+    "extends": ["@neuralfog/biome-config/biome"],
+    "files": {
+        "ignore": ["node_modules/**/*", "dist/**/*"]
+    },
+    "formatter": {
+        "ignore": ["node_modules/**/*", "dist/**/*"]
+    },
+    "overrides": [
+        {
+            "include": ["**/*.test.ts"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "noNonNullAssertion": "off"
+                    }
+                }
+            }
+        }
+    ]
+}

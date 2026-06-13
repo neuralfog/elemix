@@ -6,3 +6,7 @@ overrides:
 allowBuilds:
   '@biomejs/biome': true
   esbuild: true
+# We publish the @neuralfog scope ourselves — exempt it from the release-age
+# cooldown so the vite plugin can depend on our own just-published builds.
+minimumReleaseAgeExclude:
+  - '@neuralfog/*'

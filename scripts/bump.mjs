@@ -30,10 +30,15 @@ const next = (() => {
 
 // Text replace so only the version line changes — no reformatting churn.
 for (const file of files) {
-    const text = readFileSync(file, 'utf8').replace(
-        /("version":\s*")[^"]+(")/,
-        `$1${next}$2`,
-    );
+    const text = readFileSync(file, 'utf8')
+        .replace(/("version":\s*")[^"]+(")/, `$1${next}$2`)
+        // Lockstep any pinned @neuralfog/elemix-compiler[-wasm] cross-dependency
+        // (e.g. the vite plugin's pin on the native compiler it drives).
+        // `workspace:*` specs are left alone.
+        .replace(
+            /("@neuralfog\/elemix-compiler(?:-wasm)?":\s*")(?!workspace:)[^"]+(")/g,
+            `$1${next}$2`,
+        );
     writeFileSync(file, text);
     console.log(`${file} -> ${next}`);
 }

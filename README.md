@@ -8,33 +8,27 @@ Live playground: **[playground.elemix.dev](https://playground.elemix.dev/)**
 
 | Package | Description | Docs |
 | --- | --- | --- |
-| `@neuralfog/elemix` | Reactive elements (CustomElements). | [README](packages/elemix/README.md) |
+| `@neuralfog/elemix` | Reactive Elements (CustomElements). | [README](packages/elemix/README.md) |
 | `@neuralfog/elemix-compiler` | Rust Compiler. | [README](packages/compiler/README.md) |
-| `@neuralfog/elemix-storybook` | Storybook integration for Elemix. | [README](packages/storybook/README.md) |
+| `@neuralfog/elemix-vite` | Vite Compiler plugin. | [README](packages/vite/README.md) |
+| `@neuralfog/elemix-storybook` | Storybook Integration For Elemix. | [README](packages/storybook/README.md) |
 
 `@neuralfog/elemix-storybook` depends on `@neuralfog/elemix` via `workspace:*`, so the workspace always builds/tests against the local source.
 
 ## Releasing
 
-Every package shares a single version, bumped in lockstep by `scripts/bump.mjs` —
-`pnpm bump` syncs it across the whole repo: every `package.json`, the compiler's
-published npm packages (launcher + per-platform binaries), and the Rust `Cargo.toml`.
-
-Release cycle:
+One version, one tag. `pnpm bump` locksteps every version across the repo, `pnpm tag`
+pushes a single `v<version>` tag, and CI publishes the whole toolchain — the compiler
+binaries, the wasm build, and the Vite plugin — to npm.
 
 ```bash
 pnpm bump <version | major | minor | patch>   # sync the version everywhere
 git commit -am "release: v<version>"
-pnpm tag                                       # push v<version> + elemix-compiler-v<version>
+pnpm tag                                       # push v<version> → CI publishes everything
 ```
 
-The `elemix-compiler-v<version>` tag triggers the `release-compiler` workflow, which
-cross-compiles the binary for every platform and publishes the compiler to npm — no
-local toolchain or login needed. `pnpm tag-remove` deletes both tags (local + remote)
-to re-trigger or clean up.
+See **[RELEASE-PIPELINE.md](RELEASE-PIPELINE.md)** for the full picture — the bump
+fan-out, both CI workflows, ordering, dist-tags, and provenance.
 
-> **`pnpm release` is being sunset.** It still publishes `@neuralfog/elemix` and
-> `@neuralfog/elemix-storybook` from your machine (`pnpm build && pnpm -r publish`,
-> needs `npm login` with publish rights to the `@neuralfog` org). We're moving to a
-> fully tag-driven cycle where every package publishes from CI on its tag — the way the
-> compiler already does — so this manual step will go away.
+> **`pnpm release` is being sunset** — it still publishes `@neuralfog/elemix` and
+> `@neuralfog/elemix-storybook` from your machine; moving to the same `v*` tag flow.

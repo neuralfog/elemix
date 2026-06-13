@@ -1,0 +1,43 @@
+{
+    "name": "@neuralfog/elemix-vite",
+    "version": "0.8.2",
+    "license": "MIT",
+    "author": "brownhounds",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/neuralfog/elemix.git",
+        "directory": "packages/vite"
+    },
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": ["./dist/**/*"],
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "clean": "rm -rf ./dist",
+        "build": "npm run clean && tsc -p tsconfig.build.json",
+        "lint": "tsc --noEmit && biome format && biome lint",
+        "lint:fix": "biome format --write . && biome lint --write . && tsc --noEmit",
+        "test": "cargo build --manifest-path ../compiler/Cargo.toml --quiet && vitest run"
+    },
+    "peerDependencies": {
+        "vite": ">=5"
+    },
+    "dependencies": {
+        "@neuralfog/elemix-compiler": "0.0.0-dev.2"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "1.9.4",
+        "@neuralfog/biome-config": "0.1.2",
+        "@neuralfog/ts-config": "0.1.2",
+        "@types/node": "25.9.1",
+        "typescript": "6.0.3",
+        "vite": "8.0.14",
+        "vitest": "4.1.8"
+    }
+}

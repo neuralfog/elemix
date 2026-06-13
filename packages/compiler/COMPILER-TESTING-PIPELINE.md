@@ -10,41 +10,41 @@ run means the compiler is correct, its output runs, and the fixtures are valid.
                                   │
                                   ▼
    ┌──────────────────────────────────────────────────────────────────────┐
-   │ ① test:rust                                            cargo test      │
-   │ ---------------------------------------------------------------------- │
-   │   94 tests / 11 binaries                                               │
-   │   parse · grammar · lower · codegen · splice · rewrite · cli           │
-   │   + snapshots (insta) — locks the emitted output of all 37 fixtures    │
-   │   CATCHES → codegen drift, stage-level correctness                     │
+   │ ① test:rust                                            cargo test    │
+   │ ---------------------------------------------------------------------│
+   │   94 tests / 11 binaries                                             │
+   │   parse · grammar · lower · codegen · splice · rewrite · cli         │
+   │   + snapshots (insta) — locks the emitted output of all 37 fixtures  │
+   │   CATCHES → codegen drift, stage-level correctness                   │
    └──────────────────────────────────────────────────────────────────────┘
                                   │ &&
                                   ▼
    ┌──────────────────────────────────────────────────────────────────────┐
-   │ ② test:wasm                          build:wasm + node harnesses       │
-   │ ---------------------------------------------------------------------- │
-   │   build:wasm   wasm-pack --target web → pkg (~697kb, wasm-opt)         │
-   │   conformance  wasm compile() == native, 37/37 byte-match (vs snaps)   │
-   │   robustness   10 malformed inputs → graceful passthrough, 0 crashes   │
-   │   CATCHES → wasm diverging from native, panics on half-typed input     │
+   │ ② test:wasm                          build:wasm + node harnesses     │
+   │ ---------------------------------------------------------------------│
+   │   build:wasm   wasm-pack --target web → pkg (~697kb, wasm-opt)       │
+   │   conformance  wasm compile() == native, 37/37 byte-match (vs snaps) │
+   │   robustness   10 malformed inputs → graceful passthrough, 0 crashes │
+   │   CATCHES → wasm diverging from native, panics on half-typed input   │
    └──────────────────────────────────────────────────────────────────────┘
                                   │ &&
                                   ▼
-   ┌──────────────────────────────────────────────────────────────────────┐
-   │ ③ test:types               tsc --noEmit -p tsconfig.fixtures.json      │
-   │ ---------------------------------------------------------------------- │
-   │   typecheck all 37 fixtures (real user-facing component source)        │
-   │   CATCHES → invalid TypeScript in a fixture BEFORE it is ever compiled │
-   └──────────────────────────────────────────────────────────────────────┘
+   ┌───────────────────────────────────────────────────────────────────────┐
+   │ ③ test:types               tsc --noEmit -p tsconfig.fixtures.json     │
+   │ --------------------------------------------------------------------- │
+   │   typecheck all 37 fixtures (real user-facing component source)       │
+   │   CATCHES → invalid TypeScript in a fixture BEFORE it is ever compiled│
+   └───────────────────────────────────────────────────────────────────────┘
                                   │ &&
                                   ▼
    ┌──────────────────────────────────────────────────────────────────────┐
-   │ ④ test:storybook          compile:stories + vitest (real chromium)     │
-   │ ---------------------------------------------------------------------- │
-   │   compile:stories  native binary compiles 37 fixtures → .emited        │
-   │   25 component plays  mount compiled custom elements, drive every      │
-   │                       button/model/state, assert across shadow roots   │
-   │   wasm story          compiles a component INSIDE the browser          │
-   │   CATCHES → compiled output that emits fine but doesn't RUN / react    │
+   │ ④ test:storybook          compile:stories + vitest (real chromium)   │
+   │ ---------------------------------------------------------------------│
+   │   compile:stories  native binary compiles 37 fixtures → .emited      │
+   │   25 component plays  mount compiled custom elements, drive every    │
+   │                       button/model/state, assert across shadow roots │
+   │   wasm story          compiles a component INSIDE the browser        │
+   │   CATCHES → compiled output that emits fine but doesn't RUN / react  │
    └──────────────────────────────────────────────────────────────────────┘
                                   │
                                   ▼

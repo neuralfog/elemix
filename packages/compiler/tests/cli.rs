@@ -52,6 +52,33 @@ fn compiles_a_single_file_to_the_out_dir() {
 }
 
 #[test]
+fn stdin_mode_pipes_compiled_source_to_stdout() {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let source = std::fs::read_to_string("tests/fixtures/CounterApp.ts").unwrap();
+    let mut child = Command::new(bin())
+        .arg("--stdin")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(source.as_bytes())
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert!(out.status.success());
+
+    let compiled = String::from_utf8(out.stdout).unwrap();
+    assert!(compiled.contains("view(): DocumentFragment"));
+    assert!(compiled.contains("from '@neuralfog/elemix/runtime'"));
+    assert!(!compiled.contains("tpl`"));
+}
+
+#[test]
 fn compiles_a_directory_of_fixtures() {
     let dir = out_dir("dir");
     let status = Command::new(bin())

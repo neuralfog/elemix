@@ -52,13 +52,9 @@ Target release of fully compiled framework is `v0.9.0`
 
 ### Phase 3 - Packaging and Tooling 🛠️
 
-- [] Most likely `ec-vite` plugin, got to find a way to make compilation as painless and invisible as possible
-    vite plugin is a good candidate here, we can hook into the `vite` compilation process, I did it before
-- [] Compiler `cli` may change based on two requirements above
-- [] In theory this should be the easiest part, hard work is done!! 🚀🚀🚀
-
 ## TODOS
 
+- [] Poke at sourcemaps at some point ⏰️⏰️
 - [] Render Cost Table looks suspicious - 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
 - [] Add changelogs, refer to `https://github.com/brownhounds/migoro` for a full implementation with releases and workflows
 - [] Streamline release with tags - slowly migrating
@@ -68,6 +64,22 @@ Target release of fully compiled framework is `v0.9.0`
 - [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
 
 ### Phase 3 - Why would you use a fork for eating soup 🍴
+
+***Compiler As Vite Plugin 🛠️🛠️🛠️***
+
+- Closes the tooling chain 🔗 write `tpl` templates, vite compiles them on the fly as it loads each module - compile step invisible 🥷
+- Drives the NATIVE binary 🚤🚤🚤
+- Native CLI got a new `--stdin` mode 🚰 pipe source in 🪠🪠🪠
+- Ships as `@neuralfog/elemix-vite` 📦 native compiler a dependency, `vite` a peer
+- One tag rules them all 💍 a single `v*` tag fires BOTH the compiler + vite releases; vite waits for the compiler to land on npm
+  first so an installer never sees a missing dependency ⏳
+- The compiler dependency is auto-stamped to the release version during the workflow run 🤖 the plugin always pins the exact
+  compiler build it ships with
+- Release pipeline mapped in `RELEASE-PIPELINE.md` 🗺️
+- Proven end to end via the throwaway repo `https://github.com/neuralfog/test-compiler` 🗑️ `pnpm prove:vite` builds a real component
+  through the published
+- No source maps yet 🗺️❌ compiled output maps to `view()`, not the original `tpl`
+- HMR not explicitly tested 🤔 transform re-runs per load so it should work, just unverified
 
 ***Compiler as WASM ⚙️⚙️⚙️***
 
@@ -226,65 +238,55 @@ This will be a headache if I get there 😂❤️😂
 - [x] (Not relevant anymore - gone with new architecture) Why the hell do I need direct props 🤔 What's the difference between `.value=${}` and `value=${}` - none
   - [x] Kill this thing with fire 🔥🔥🔥
   - [x] Unnecessary dance with virtual attr and holes `value=${}` assignment just works in a reactive manner 🤔
-
 - [x] Rust 🤮 + OXC the javascript toolchain - battle tested, there is no better alternative
   - [x] Unless I go my own way and write it from scratch in Zig, Odin or Ocaml 😂
   - [x] Not sure if it's worth the pain though when I have a toolchain that I can use off the shelf
   - [x] Dependency chain is not an issue as I can freeze version by compiled executable
-
 - [x] Api has to stay unchanged - this is a must!!
   - [x] Manual render `this.render()`
   - [x] State, signals, and props
   - [x] Apart from small changes like removing virtual attributes and moving statics!
-
 - [x] Main goals
    - [x] Can we increase speed, although we are close to the limitations of native DOM operations 🎉
    - [x] Literal milliseconds do not matter on row swaps etc. This is faster than it has to be!!
    - [x] Freedom and api is what matters
-
 - [x] Memory usage, this is a clear win
 - [x] Initial bundle size should drop, I would want to be in the range of 3 - 4kb ideally not 6.7kb 😬
 - [x] Generated code will add some weight, but this will be application code, reused by component instances...
 - [x] Downside, a build step, although this is not an issue at all as it already goes through typescript
 - [x] Compiler first architecture opens some crazy opportunities later down the line ❤️
-
 - [x] Code is kinda shite right now... 💩 This is clearly going in the direction of an effect (FP, OCaml, Solid) λ λ λ λ λ λ
   - [x] Using generated code spat out from the compiler should make code a lot more readable and maintainable
   - [x] Most likely all runtime code responsible for template evaluation will be gone or most of it
   - [x] Same will apply to state, right now it is a hybrid between coarse rendering and granular observables with
     versioning and dirty flags - big mountain of crap in the middle of a clean room 🤮😂 It works though...
-
 - [x] Evaluate the compiler, otherwise kill it with fire 🔥🔥🔥 Entire thing!! - Yeah it will work...
-
 - [x] Need to define `tpl` type for user to define templates
 - [x] The whitespace rule has not been exercised yet...
 - [x] All the tests are broken at the moment while migrating, they will be invaluable as a final boss to make sure there is no regression.
 - [x] Semantics polish: state and signal are both functions now, conceptually there is no difference between the two.
   Stick with one or the other most likely `state()`, signals are a Solid thing...
-  
 - [x] Package compiler with multi-arch support via npm
 - [x] Most likely need another two packages derived from compiler
-
 - [x] Exe shipped as npm module
   - [x] Same as tsc, accepts params and configs etc
   - [x] Delivery of different CPU architectures should not be an issue
   - [x] Where do I spit the files, do I augment the original files and spit them out to the `.cache`
     directory ?? 🤔
   - [x] 2-pass compilation process, `elemix compiler` => tsc => js 
-
 - [x] Turn `tpl` and directives into noop macros!
 - [x] `tpl` needs to be exportable from the `elemix` package for proper typechecking
 - [x] Typecheck fixtures as part of test
 - [x] `tpl` import needs to be stripped once post-processed
 - [x] Lock the emitted output of components with fixtures
-
 - [x] I am using `Reflect` purely as a stylistic choice, may add a few nanoseconds as it is an additional function call.
   Most likely not an issue... - Killed with fire 🔥🔥🔥
-
 - [x] Automate version management for the compiler
 - [x] Tag management
-
 - [x] Approve compiler packaging for `main` landing 🚀
-
 - [x] `ec-wasm` needs to be able to transpile on `playground`
 - [x] Rust compiles to wasm - first class support - can still use it in playground
+- [x] Most likely `ec-vite` plugin, got to find a way to make compilation as painless and invisible as possible
+    vite plugin is a good candidate here, we can hook into the `vite` compilation process, I did it before
+- [x] Compiler `cli` may change based on two requirements above - Yes it did 😂
+- [x] In theory this should be the easiest part, hard work is done!! 🚀🚀🚀 EZ just ton shite of work 💩💩💩

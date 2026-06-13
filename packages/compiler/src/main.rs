@@ -5,6 +5,7 @@ use elemix_compiler::codegen::codegen;
 use elemix_compiler::emit::TsEmitter;
 use elemix_compiler::{collect_ts_files, compile, find_html_templates, FoundTemplate};
 use std::fs;
+use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
@@ -21,13 +22,28 @@ struct Cli {
     /// Emit compiled files into this directory. When unset, prints instead.
     #[arg(long)]
     out: Option<PathBuf>,
+
+    /// Read source from stdin and write the compiled `.ts` to stdout.
+    #[arg(long)]
+    stdin: bool,
 }
 
 fn main() {
     let cli = Cli::parse();
 
+    // Pipe mode: source in on stdin, compiled `.ts` out on stdout. Drives the
+    // Vite plugin — one compile per module, no temp files.
+    if cli.stdin {
+        let mut source = String::new();
+        io::stdin().read_to_string(&mut source).expect("read stdin");
+        io::stdout()
+            .write_all(compile(&source).as_bytes())
+            .expect("write stdout");
+        return;
+    }
+
     if cli.dirs.is_empty() && cli.file.is_none() {
-        eprintln!("error: pass --file <path> or --dirs <dir|glob>...");
+        eprintln!("error: pass --file <path>, --dirs <dir|glob>..., or --stdin");
         std::process::exit(2);
     }
 
