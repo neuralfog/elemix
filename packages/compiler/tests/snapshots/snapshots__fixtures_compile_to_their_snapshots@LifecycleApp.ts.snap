@@ -1,0 +1,117 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/LifecycleApp.ts
+---
+import { template, clone, _text, _attr, _event, _prop, _child } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, state } from '@neuralfog/elemix';
+
+import './LifecycleChild';
+import './LogView';
+import { clearLog } from './LifecycleStore';
+
+type State = { mounted: boolean; tick: number };
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 460px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 20px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+    .stage {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 56px;
+        margin-bottom: 14px;
+        padding: 12px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+    }
+    .stage .empty { font-size: 13px; color: #94a3b8; }
+    .buttons { display: flex; gap: 10px; margin-bottom: 16px; }
+    button {
+        font: inherit;
+        padding: 9px 14px;
+        border: none;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: #4f46e5; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.ghost { background: #e2e8f0; color: #475569; }
+    button.ghost:hover { background: #cbd5e1; }
+`;
+
+const _t0 = template('<p class="note">Mounting and unmounting the child fires <code>beforeMount</code>, <code>onMount</code> and <code>onDispose</code>. Updating it re-renders and fires <code>onMutation</code>. Each hook appends to the log below.</p><div class="stage"><!----></div><div class="buttons"><button><!----></button><button>Update child</button><button class="ghost">Clear log</button></div><log-view></log-view>');
+const _t1 = template('<lifecycle-child></lifecycle-child>');
+const _t2 = template('<div class="empty">child unmounted</div>');
+
+export class LifecycleApp extends Component {
+    static styles = [css];
+
+    state = state<State>({ mounted: false, tick: 0 });
+
+    toggleMount = (): void => {
+        this.state.mounted = !this.state.mounted;
+    };
+
+    update = (): void => {
+        this.state.tick++;
+    };
+
+    clear = (): void => {
+        clearLog();
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[1].childNodes[0];
+const _n2 = _r0.children[2].children[0];
+const _n3 = _r0.children[2].children[0].childNodes[0];
+const _n4 = _r0.children[2].children[1];
+const _n5 = _r0.children[2].children[2];
+_child(_n1, () => (this.state.mounted
+                    ? (() => {
+const _r6 = clone(_t1);
+const _n7 = _r6.children[0];
+_prop(_n7, 'tick', () => (this.state.tick));
+return _r6.firstChild!;
+})()
+                    : (() => {
+const _r8 = clone(_t2);
+return _r8.firstChild!;
+})()));
+_event(_n2, 'click', this.toggleMount);
+const _x9 = document.createTextNode('');
+_n3.replaceWith(_x9);
+_text(_x9, () => (this.state.mounted ? 'Unmount' : 'Mount'));
+_event(_n4, 'click', this.update);
+_attr(_n4, 'disabled', () => (!this.state.mounted));
+_event(_n5, 'click', this.clear);
+return _r0;
+}
+}
+
+defineComponent('lifecycle-app', LifecycleApp);

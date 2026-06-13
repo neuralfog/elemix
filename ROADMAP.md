@@ -36,7 +36,7 @@
   - [] Now we are going after the rest of the party!!
   - [] Benchmark is purely focused on hyper optimisation for list rendering, so yeah, tuff!! 😂😂😂
 
-**If goals can not be achieved, further work will be terminated as there is no point working on slop**
+**If goals cannot be achieved, further work will be terminated as there is no point working on slop**
 
 ## Compiler - We don't React. We compile. 😂😂😂
 
@@ -46,59 +46,72 @@ This just works 🥸
 
 Target release of fully compiled framework is `v0.9.0`
 
-### Phase 4 - Put it through the paces - BENCH Round 2 🔔🔔🔔
+### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
 - [] 🤷🤷🤷
 
 ### Phase 3 - Packaging and Tooling 🛠️
 
-- [] Package compiler with multi-arch support via npm
-- [] Most likely need another two packages derived from compiler
 - [] `ec-wasm` needs to be able to transpile on `playground`
 - [] Most likely `ec-vite` plugin, got to find a way to make compilation as painless and invisible as possible
-    vite plugin is a good candidate here, we can hook up into the `vite` compilation process, I did it before
+    vite plugin is a good candidate here, we can hook into the `vite` compilation process, I did it before
 - [] Compiler `cli` may change based on two requirements above
 - [] In theory this should be the easiest part, hard work is done!! 🚀🚀🚀
 
 ## TODOS
 
-- [] `onMutation` - Hmmm... Added for one specific reason, detect DOM mutations in async context, do I still need this ??
+- [] Render Cost Table looks suspicious — 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
+- [] Add changelogs, refer to `https://github.com/brownhounds/migoro` for a full implementation with releases and workflows
+- [] Streamline release with tags - slowly migrating
+- [] `onMutation` - Hmmm... Added for one specific reason, detect DOM mutations in an async context, do I still need this ??
     Renderer is fully sync now, what it should be, no `ticking`, no waiting 🤔
 - [] Design `compiler hints`
 - [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
-- [] I am using `Reflect` purely as a stylistic choice, may add a few nanoseconds as it is an additional function call.
-  Most likely not an issue...
+- [ ] Rust compiles to wasm - first class support - can still use it in playground
 
-- [ ] Exe shipped as npm module
-  - [ ] Same as tsc, accepts params and configs etc
-  - [ ] Delivery of different CPU architectures should not be an issue
-  - [ ] Rust compiles to wasm - first class support - can still use it in playground
-  - [ ] Where do I spit the files, do I augment original files and spit them out to `.cache`
-    directory ?? 🤔
-  - [ ] 2 pass compilation process, `elemix compiler` => tsc => js 
+### Phase 3 - Why would you use a fork for eating soup 🍴
+
+***Compiler Packaging 📦📦📦***
+
+- Compiler now ships as an npm module `https://www.npmjs.com/package/@neuralfog/elemix-compiler` 📦
+- Tightening the release process as we go, moving to `tag`-based releases 🏃🏾‍♂️🏃
+- Compiler ships as an executable across the entire matrix of operating systems and CPU architectures 🤓
+- Directives and the template definition `tpl` tag have been turned into compiler-only macros ✨
+  JS will throw if any bleed into post-compiled sources 🥷🥷🥷
+- Removed any traces of reflection from the codebase 🔥🔥🔥 What's the point in this case ⁉️
+- Dropped `changeset` package 🤢 in favour of a few scripts
+- Further defining the testing pipeline, now typechecking happens on fixtures which are user-defined
+  components that still need to pass `Typescript` typechecking for correctness. Additionally I locked
+  the output of `emitted` files with snapshots for further resilience. If anything changes, I need
+  to know about it 😲🔫
+- Fully tested `dev` version of compiler delivered via the `npm` channel on different OSes and CPUs via
+  a temporary repo: `https://github.com/neuralfog/test-compiler` 🚅🚅
+- Fixed an issue with imports for `tpl` during the rewrite stage in compalerino 🎯
+- Bundle size back to `2.67kb`
+- Minion has been invaluable, it earns its keep 💰
 
 ### Phase 2 - Compiler Implementation 🦀🦀🦀
 
 This went better than I expected:
 - Almost all tests in elemix have been removed now, decided to keep only tests related to package orchestration
-  and render cost, old tests got me here but, they were only transient. So smash that delete button big time.
+  and render cost, old tests got me here, but they were only transient. So smash that delete button big time.
   Deleting code my favourite activity.
 - Full integration testing happens in the compiler package, rust unit tests, compiler output. Compiled components
   passed through `typescript` and exhaustively tested for interaction with storybook.
-- Idea of snapshotting was kinda cute, well it did not work. I caught 3 different bugs related to emitted code by running
+- The idea of snapshotting was kinda cute, well, it did not work. I caught 3 different bugs related to emitted code by running
   components in real browser environment 💪💪💪
-- Treat it as a first unoptimised pass - we will see what benchmarks will say, not getting my hopes up 🙈
+- Treat it as a first unoptimised pass - we will see what the benchmarks say, not getting my hopes up 🙈
 - Entire runtime has been dropped 🌟
 - Open for possibilities of custom `pragma like` hints that will be trivial to implement ❤️
 - Best example I can think of replacing freaking decorators with custom compiler hints (in the end I get what I want
   just better and no coupling to typescript 🤮❤️)
-- OXC does all the heavy lifting for me - tooling is absolutely amazing to work with in opposition trying to hook up into
-  typescript compiler workflow with some shitty plugins that break on every release - what a joke!! 💩💩💩 Saying that
+- OXC does all the heavy lifting for me - tooling is absolutely amazing to work with, in opposition to trying to hook into
+  the `typescript` compiler workflow with some shitty plugins that break on every release - what a joke!! 💩💩💩 Saying that
   I most likely will have to poke at that shite again... 💀🔫 FML
 - Removed testing package 🥹 That stuff did some real heavy lifting 💪
 - Repository is in an approved state to be merged to the main branch 🚀🚀🚀
-- All work done in the past is not lost (interpreted renderer). If not for that I would not be able to move to a compiled workflow
-  not mentioning benefits like establishing an almost final api and battle testing the concept 🥹🪦
+- All work done in the past is not lost (interpreted renderer). If not for that, I would not be able to move to a compiled workflow,
+  not to mention benefits like establishing an almost-final api and battle testing the concept 🥹🪦
 - Most of the work that the compiler does is derived from the old `renderer` ❤️ The only reason why this happened so quickly ⚡
 - Prototype => Proof => Compiler 🚀🚀
 - All marker nodes have been dropped, on a 10k list this will have a big impact - 2 holes per row 20k redundant DOM nodes 💥💥💥
@@ -106,7 +119,7 @@ This went better than I expected:
 - Unified concept of state single `state()` for internal and global state definition
 - Divorced from `html` notation for templates — that's Lit; this is not Lit, so `tpl` 🚀
 - Bundle size down to `2.56kb` - not bad at all 😎😎😎
-- Will prerelease need a convention like `alpha` or `experimental`
+- Will the prerelease need a convention like `alpha` or `experimental`?
 
 ### Phase 1 - Get ready before fun starts
 
@@ -126,15 +139,15 @@ What went well:
 - All the render code has been eliminated - no more baggage
 - All reactivity code has been replaced with simplified model based on concept of the `effect`
 - By deleting all the code final bundle size dropped to `2.67kb` without any feature loss 🌟
-- Reduced amount of classes to 1, can't get away from that... I need super daddy to extend from.
+- Reduced number of classes to 1, can't get away from that... I need super daddy to extend from.
 - Readability and maintainability of the codebase are incomparable, code is crystal clear 💎
 - Reactivity primitive and `effect` system already tested and validated by reproducing playground
   apps and a few more to get a wider surface for compiler implementation.
 - Hand rolling compiled components surfacing the final output created a contract that the compiler has to
   conform to.
-- Directives will become noop macros just for compiler, will not be shipped in final bundle.
-- No more messing with template literals, `tpl` becomes a template for compiler only, no more
-  template literals during run time ❤️
+- Directives will become noop macros just for the compiler, and will not be shipped in the final bundle.
+- No more messing with template literals, `tpl` becomes a template for the compiler only, no more
+  template literals at runtime ❤️
 - LLM has been invaluable here with proper instrumentation I have generated implementation surface
   very quickly, would take me ages to type it all in ☠️ That includes `golden` components and
   stories running in real browser within storybook to assert behaviour
@@ -175,8 +188,8 @@ class UserCard extends Component {
 defineComponent('user-card', UserCard);
 ```
 
-Most likely will need to handle context reference rewrite `this` not an issue.
-Have to be aware of module scope and external scopes not to mangle references 🤔
+Most likely will need to handle context reference rewrites — `this` is not an issue.
+Have to be aware of module scope and external scopes so as not to mangle references 🤔
 
 This is just an idea, but do I even need to transpile to a class ?? Maybe not...
 One thing I will not compromise on, target data structure has to be `customElement`!!
@@ -229,7 +242,30 @@ This will be a headache if I get there 😂❤️😂
 
 - [x] Need to define `tpl` type for user to define templates
 - [x] The whitespace rule has not been exercised yet...
-- [x] All the tests are broken at the moment while migrating, they will be invaluable as a final boss to make
+- [x] All the tests are broken at the moment while migrating, they will be invaluable as a final boss to make sure there is no regression.
 - [x] Semantics polish: state and signal are both functions now, conceptually there is no difference between the two.
   Stick with one or the other most likely `state()`, signals are a Solid thing...
-  sure there is no regression.
+  
+- [x] Package compiler with multi-arch support via npm
+- [x] Most likely need another two packages derived from compiler
+
+- [x] Exe shipped as npm module
+  - [x] Same as tsc, accepts params and configs etc
+  - [x] Delivery of different CPU architectures should not be an issue
+  - [x] Where do I spit the files, do I augment the original files and spit them out to the `.cache`
+    directory ?? 🤔
+  - [x] 2-pass compilation process, `elemix compiler` => tsc => js 
+
+- [x] Turn `tpl` and directives into noop macros!
+- [x] `tpl` needs to be exportable from the `elemix` package for proper typechecking
+- [x] Typecheck fixtures as part of test
+- [x] `tpl` import needs to be stripped once post-processed
+- [x] Lock the emitted output of components with fixtures
+
+- [x] I am using `Reflect` purely as a stylistic choice, may add a few nanoseconds as it is an additional function call.
+  Most likely not an issue... - Killed with fire 🔥🔥🔥
+
+- [x] Automate version management for the compiler
+- [x] Tag management
+
+- [x] Approve compiler packaging for `main` landing 🚀

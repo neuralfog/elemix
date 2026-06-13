@@ -1,0 +1,103 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/InterpApp.ts
+---
+import { template, clone, _text, _event } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, state } from '@neuralfog/elemix';
+
+type State = {
+    first: string;
+    last: string;
+    middle: string | null;
+    n: number;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 18px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code { font-family: ui-monospace, monospace; font-size: 12px; background: #e2e8f0; padding: 1px 5px; border-radius: 4px; }
+    p { margin: 0 0 8px; font-size: 15px; }
+    .k { color: #94a3b8; }
+    button { font: inherit; font-size: 13px; padding: 6px 12px; margin: 12px 8px 0 0; border: none; border-radius: 8px; background: #e2e8f0; cursor: pointer; }
+    button:hover { background: #cbd5e1; }
+`;
+
+const _t0 = template('<p class="note">Interpolation edge cases: adjacent holes with no static text between, holes separated by static text, a <code>null</code> value (renders empty), and a numeric hole.</p><p class="full"><span class="k">full:</span> <!----><!----></p><p class="dash"><span class="k">dash:</span> <!---->-<!----></p><p class="middle"><span class="k">middle:</span> [<!---->]</p><p class="num"><span class="k">num:</span> <!----></p><button>swap</button><button>set middle</button><button>inc</button>');
+
+export class InterpApp extends Component {
+    static styles = [css];
+
+    state = state<State>({
+        first: 'Ada',
+        last: 'Lovelace',
+        middle: null,
+        n: 0,
+    });
+
+    swap = (): void => {
+        const f = this.state.first;
+        this.state.first = this.state.last;
+        this.state.last = f;
+    };
+
+    clearMiddle = (): void => {
+        this.state.middle = this.state.middle ? null : 'M';
+    };
+
+    inc = (): void => {
+        this.state.n++;
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[1].childNodes[2];
+const _n2 = _r0.children[1].childNodes[3];
+const _n3 = _r0.children[2].childNodes[2];
+const _n4 = _r0.children[2].childNodes[4];
+const _n5 = _r0.children[3].childNodes[2];
+const _n6 = _r0.children[4].childNodes[2];
+const _n7 = _r0.children[5];
+const _n8 = _r0.children[6];
+const _n9 = _r0.children[7];
+const _x10 = document.createTextNode('');
+_n1.replaceWith(_x10);
+_text(_x10, () => (this.state.first));
+const _x11 = document.createTextNode('');
+_n2.replaceWith(_x11);
+_text(_x11, () => (this.state.last));
+const _x12 = document.createTextNode('');
+_n3.replaceWith(_x12);
+_text(_x12, () => (this.state.first));
+const _x13 = document.createTextNode('');
+_n4.replaceWith(_x13);
+_text(_x13, () => (this.state.last));
+const _x14 = document.createTextNode('');
+_n5.replaceWith(_x14);
+_text(_x14, () => (this.state.middle));
+const _x15 = document.createTextNode('');
+_n6.replaceWith(_x15);
+_text(_x15, () => (this.state.n));
+_event(_n7, 'click', this.swap);
+_event(_n8, 'click', this.clearMiddle);
+_event(_n9, 'click', this.inc);
+return _r0;
+}
+}
+
+defineComponent('interp-app', InterpApp);

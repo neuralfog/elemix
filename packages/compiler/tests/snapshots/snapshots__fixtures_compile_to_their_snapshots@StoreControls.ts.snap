@@ -1,0 +1,76 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/StoreControls.ts
+---
+import { template, clone, _text, _event } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent } from '@neuralfog/elemix';
+
+type Props = {
+    counter: { value: number };
+};
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 16px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+    }
+    .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+    }
+    .buttons { display: flex; align-items: center; gap: 14px; }
+    button {
+        width: 38px;
+        height: 38px;
+        font-size: 20px;
+        border: none;
+        border-radius: 10px;
+        background: var(--accent, #6366f1);
+        color: white;
+        cursor: pointer;
+    }
+    button:hover { background: #4f46e5; }
+    .value {
+        min-width: 32px;
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+    }
+`;
+
+const _t0 = template('<div class="panel"><span class="label">Child controls</span><div class="buttons"><button>−</button><span class="value"><!----></span><button>+</button></div></div>');
+
+export class StoreControls extends Component<Props> {
+    static styles = [css];
+
+    dec = (): void => {
+        this.props.counter.value--;
+    };
+
+    inc = (): void => {
+        this.props.counter.value++;
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[0].children[1].children[0];
+const _n2 = _r0.children[0].children[1].children[1].childNodes[0];
+const _n3 = _r0.children[0].children[1].children[2];
+_event(_n1, 'click', this.dec);
+const _x4 = document.createTextNode('');
+_n2.replaceWith(_x4);
+_text(_x4, () => (this.props.counter.value));
+_event(_n3, 'click', this.inc);
+return _r0;
+}
+}
+
+defineComponent('store-controls', StoreControls);

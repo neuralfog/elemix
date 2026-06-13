@@ -1,0 +1,133 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/ConditionalApp.ts
+---
+import { template, clone, _text, _event, _child } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, state } from '@neuralfog/elemix';
+
+type State = {
+    loggedIn: boolean;
+    showTip: boolean;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 20px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+    .panel { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+    .card {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px;
+        border-radius: 12px;
+    }
+    .card strong { font-size: 16px; }
+    .card span { font-size: 13px; opacity: 0.9; }
+    .card.welcome {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+    }
+    .card.guest { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .tip {
+        padding: 10px 12px;
+        font-size: 13px;
+        color: #92400e;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+    }
+    .buttons { display: flex; gap: 10px; }
+    button {
+        font: inherit;
+        padding: 9px 16px;
+        border: none;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+    }
+    button:hover { background: #4f46e5; }
+    button.ghost { background: #e2e8f0; color: #475569; }
+    button.ghost:hover { background: #cbd5e1; }
+`;
+
+const _t0 = template('<p class="note">Conditionals are just JavaScript in the template. A ternary swaps between two templates; a ternary with an empty branch (<code>: \'\'</code>) renders nothing.</p><div class="panel"><!----> <!----></div><div class="buttons"><button><!----></button><button class="ghost"><!----></button></div>');
+const _t1 = template('<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>');
+const _t2 = template('<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>');
+const _t3 = template('<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>');
+
+export class ConditionalApp extends Component {
+    static styles = [css];
+
+    state = state<State>({
+        loggedIn: false,
+        showTip: true,
+    });
+
+    toggleLogin = (): void => {
+        this.state.loggedIn = !this.state.loggedIn;
+    };
+
+    toggleTip = (): void => {
+        this.state.showTip = !this.state.showTip;
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[1].childNodes[0];
+const _n2 = _r0.children[1].childNodes[2];
+const _n3 = _r0.children[2].children[0];
+const _n4 = _r0.children[2].children[0].childNodes[0];
+const _n5 = _r0.children[2].children[1];
+const _n6 = _r0.children[2].children[1].childNodes[0];
+_child(_n1, () => (this.state.loggedIn
+                    ? (() => {
+const _r7 = clone(_t1);
+return _r7.firstChild!;
+})()
+                    : (() => {
+const _r8 = clone(_t2);
+return _r8.firstChild!;
+})()));
+_child(_n2, () => (this.state.showTip
+                    ? (() => {
+const _r9 = clone(_t3);
+return _r9.firstChild!;
+})()
+                    : ''));
+_event(_n3, 'click', this.toggleLogin);
+const _x10 = document.createTextNode('');
+_n4.replaceWith(_x10);
+_text(_x10, () => (this.state.loggedIn ? 'Sign out' : 'Sign in'));
+_event(_n5, 'click', this.toggleTip);
+const _x11 = document.createTextNode('');
+_n6.replaceWith(_x11);
+_text(_x11, () => (this.state.showTip ? 'Hide tip' : 'Show tip'));
+return _r0;
+}
+}
+
+defineComponent('conditional-app', ConditionalApp);

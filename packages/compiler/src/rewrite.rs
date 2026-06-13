@@ -2,7 +2,8 @@
 //!
 //! Replaces the `template = () => tpl`...`` class member with a compiled
 //! `view()`, hoists the `template(...)` consts to module scope, adds the runtime
-//! import, and drops the erased `/directives` import. Only the canonical
+//! import, drops the erased `/directives` import, and strips the compile-time
+//! `tpl` tag from the main `@neuralfog/elemix` import. Only the canonical
 //! single-template component is rewritten; anything else (Splice cases) passes
 //! through untouched.
 
@@ -30,6 +31,9 @@ struct Plan {
     /// The `/types` import span + the specifier names left after dropping
     /// `Template` (which the rewritten `view()` no longer needs).
     types_import: Option<(usize, usize, Vec<String>)>,
+    /// The main `@neuralfog/elemix` import span + the names left after dropping
+    /// `tpl` (the compile-time tag, erased by the rewrite).
+    main_import: Option<(usize, usize, Vec<String>)>,
 }
 
 /// Compile one source file: rewrite the `template` member into `view()`.
@@ -74,8 +78,26 @@ pub fn rewrite(source: &str) -> String {
             ));
         }
     }
+    if let Some((s, e, remaining)) = plan.main_import {
+        if remaining.is_empty() {
+            let e = e + trailing_newline(source, e);
+            edits.push((s, e, String::new()));
+        } else {
+            edits.push((
+                s,
+                e,
+                format!(
+                    "import {{ {} }} from '@neuralfog/elemix';",
+                    remaining.join(", ")
+                ),
+            ));
+        }
+    }
 
-    edits.sort_by(|a, b| b.0.cmp(&a.0));
+    // Back-to-front by start; on a tie (the main-import replace at 0 vs. the
+    // runtime-import insert at 0) the wider replace must apply first, so the
+    // 0-width prepend lands cleanly in front of it.
+    edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
     let mut out = source.to_string();
     for (start, end, repl) in edits {
         out.replace_range(start..end, &repl);
@@ -93,6 +115,7 @@ fn plan(source: &str) -> Option<Plan> {
     let mut member = None;
     let mut directives_import = None;
     let mut types_import = None;
+    let mut main_import = None;
 
     for stmt in &ret.program.body {
         match stmt {
@@ -106,6 +129,13 @@ fn plan(source: &str) -> Option<Plan> {
                             let remaining =
                                 names.into_iter().filter(|n| n != "Template").collect();
                             types_import = Some((span.0, span.1, remaining));
+                        }
+                    }
+                    "@neuralfog/elemix" => {
+                        let names = import_names(import);
+                        if names.iter().any(|n| n == "tpl") {
+                            let remaining = names.into_iter().filter(|n| n != "tpl").collect();
+                            main_import = Some((span.0, span.1, remaining));
                         }
                     }
                     _ => {}
@@ -130,6 +160,7 @@ fn plan(source: &str) -> Option<Plan> {
         member: member?,
         directives_import,
         types_import,
+        main_import,
     })
 }
 

@@ -1,0 +1,61 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/AppCard.ts
+---
+import { template, clone, _child } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent } from '@neuralfog/elemix';
+
+const css = `
+    :host { display: block; margin-bottom: 14px; font-family: system-ui, sans-serif; }
+    .card {
+        overflow: hidden;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+    .header {
+        padding: 10px 16px;
+        font-weight: 700;
+        color: white;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+    .body { padding: 16px; color: #1e293b; }
+    .body p { margin: 0; }
+    .footer {
+        padding: 8px 16px;
+        font-size: 12px;
+        color: #64748b;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+    }
+`;
+
+const _t0 = template('<div class="card"><!----> <div class="body"><slot></slot></div> <!----></div>');
+const _t1 = template('<div class="header"><slot name="header"></slot></div>');
+const _t2 = template('<div class="footer"><slot name="footer"></slot></div>');
+
+export class AppCard extends Component {
+    static styles = [css];
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[0].childNodes[0];
+const _n2 = _r0.children[0].childNodes[4];
+_child(_n1, () => (this.hasSlot('header')
+                ? (() => {
+const _r3 = clone(_t1);
+return _r3.firstChild!;
+})()
+                : ''));
+_child(_n2, () => (this.hasSlot('footer')
+                ? (() => {
+const _r4 = clone(_t2);
+return _r4.firstChild!;
+})()
+                : ''));
+return _r0;
+}
+}
+
+defineComponent('app-card', AppCard);

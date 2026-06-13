@@ -14,7 +14,9 @@ Written in Rust on the [oxc](https://oxc.rs) parser. It rewrites each component'
 
 ## Usage
 
+Installed via npm, the compiler exposes two equivalent commands — `ec` (short) and `elemix-compiler`:
+
 ```sh
-elemix-compiler --dirs <dir|glob>... --out <dir>
-elemix-compiler --file <path>
+ec --dirs <dir|glob>... --out <dir>
+ec --file <path>
 ```

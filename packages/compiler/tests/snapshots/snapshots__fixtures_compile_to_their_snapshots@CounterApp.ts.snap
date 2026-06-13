@@ -1,0 +1,59 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/CounterApp.ts
+---
+import { template, clone, _text, _event } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent, state } from '@neuralfog/elemix';
+
+type State = {
+    count: number;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        --accent-hover: #4f46e5;
+        display: block;
+        margin-bottom: 24px;
+        font-family: system-ui, sans-serif;
+    }
+    button {
+        font: inherit;
+        padding: 8px 18px;
+        border-radius: 10px;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    button:hover {
+        background: var(--accent-hover);
+    }
+`;
+
+const _t0 = template('<button>count is <!----></button>');
+
+export class CounterApp extends Component {
+    static styles = [css];
+
+    state = state<State>({ count: 0 });
+
+    increment = (): void => {
+        this.state.count++;
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[0];
+const _n2 = _r0.children[0].childNodes[1];
+_event(_n1, 'click', this.increment);
+const _x3 = document.createTextNode('');
+_n2.replaceWith(_x3);
+_text(_x3, () => (this.state.count));
+return _r0;
+}
+}
+
+defineComponent('counter-app', CounterApp);

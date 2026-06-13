@@ -1,0 +1,38 @@
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+
+const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+if (!version) {
+    console.error('no version found in package.json');
+    process.exit(1);
+}
+
+// Lockstep release tags: the overall marker + the compiler-publish trigger
+// (release-compiler.yml fires on `elemix-compiler-v*`).
+const tags = [`v${version}`, `elemix-compiler-v${version}`];
+
+const git = (args) => execFileSync('git', args, { stdio: 'inherit' });
+const tagExists = (tag) => {
+    try {
+        execFileSync(
+            'git',
+            ['rev-parse', '-q', '--verify', `refs/tags/${tag}`],
+            { stdio: 'ignore' },
+        );
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+for (const tag of tags) {
+    if (tagExists(tag)) {
+        console.log(`skip ${tag} (already exists)`);
+    } else {
+        git(['tag', '-a', tag, '-m', `Release ${tag}`]);
+        console.log(`created ${tag}`);
+    }
+}
+
+git(['push', 'origin', ...tags]);
+console.log(`pushed: ${tags.join(', ')}`);

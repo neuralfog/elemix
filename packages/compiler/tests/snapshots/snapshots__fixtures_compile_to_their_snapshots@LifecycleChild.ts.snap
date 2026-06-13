@@ -1,0 +1,56 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/LifecycleChild.ts
+---
+import { template, clone, _text } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent } from '@neuralfog/elemix';
+
+import { record } from './LifecycleStore';
+
+type ChildProps = { tick: number };
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .child {
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 10px;
+    }
+`;
+
+const _t0 = template('<div class="child">Child · tick <!----></div>');
+
+export class LifecycleChild extends Component<ChildProps> {
+    static styles = [css];
+
+    beforeMount(): void {
+        record('beforeMount');
+    }
+
+    onMount(): void {
+        record('onMount');
+    }
+
+    onMutation(): void {
+        record('onMutation');
+    }
+
+    onDispose(): void {
+        record('onDispose');
+    }
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[0].childNodes[1];
+const _x2 = document.createTextNode('');
+_n1.replaceWith(_x2);
+_text(_x2, () => (this.props.tick));
+return _r0;
+}
+}
+
+defineComponent('lifecycle-child', LifecycleChild);

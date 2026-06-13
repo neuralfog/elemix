@@ -50,6 +50,8 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             'ref',
             'mergeClasses',
             'state',
+            // the compile-only template tag (erased by the compiler at build time)
+            'tpl',
             // runtime: reactive core
             'reactive',
             'effect',

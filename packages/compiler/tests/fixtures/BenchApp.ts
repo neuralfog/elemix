@@ -1,4 +1,4 @@
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -109,7 +109,7 @@ export class BenchApp extends Component {
         this.state.selected = id;
     };
 
-    remove = (id: number): void => {
+    removeRow = (id: number): void => {
         const rows = this.state.rows;
         const index = rows.findIndex((row) => row.id === id);
         if (index !== -1) rows.splice(index, 1);
@@ -131,7 +131,7 @@ export class BenchApp extends Component {
                     (row) => tpl`<tr class=${{ danger: this.state.selected === row.id }}>
                         <td class="col-id">${row.id}</td>
                         <td><a class="lbl" @click=${() => this.select(row.id)}>${row.label}</a></td>
-                        <td><a class="remove" @click=${() => this.remove(row.id)}>×</a></td>
+                        <td><a class="remove" @click=${() => this.removeRow(row.id)}>×</a></td>
                     </tr>`,
                     (row) => row.id,
                 )}

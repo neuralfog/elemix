@@ -1,0 +1,20 @@
+{
+  "name": "@neuralfog/elemix-compiler-linux-x64",
+  "version": "0.0.0",
+  "description": "Prebuilt elemix-compiler binary for linux x64 (static musl).",
+  "license": "MIT",
+  "author": "brownhounds",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neuralfog/elemix.git"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "elemix-compiler"
+  ]
+}

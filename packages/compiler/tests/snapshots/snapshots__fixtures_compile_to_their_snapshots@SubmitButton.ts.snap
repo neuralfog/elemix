@@ -1,0 +1,43 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/SubmitButton.ts
+---
+import { template, clone, _event } from '@neuralfog/elemix/runtime';
+import { Component, defineComponent } from '@neuralfog/elemix';
+
+const css = `
+    :host { display: inline-block; }
+    button {
+        font: inherit;
+        padding: 9px 18px;
+        border: none;
+        border-radius: 8px;
+        background: #6366f1;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover { background: #4f46e5; }
+`;
+
+const _t0 = template('<button type="button"><slot></slot></button>');
+
+export class SubmitButton extends Component {
+    static styles = [css];
+
+    static formAssociated = true;
+    declare internals: ElementInternals;
+
+    submit = (): void => {
+        this.internals.form?.requestSubmit();
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.children[0];
+_event(_n1, 'click', this.submit);
+return _r0;
+}
+}
+
+defineComponent('submit-button', SubmitButton);

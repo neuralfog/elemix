@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2021", "ES2021.String", "DOM", "DOM.Iterable"],
+    "types": [],
+    "useDefineForClassFields": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@neuralfog/elemix": ["../elemix/index.ts"],
+      "@neuralfog/elemix/runtime": ["../elemix/runtime.ts"],
+      "@neuralfog/elemix/directives": ["../elemix/directives.ts"],
+      "@neuralfog/elemix/types": ["../elemix/src/types.ts"]
+    }
+  },
+  "include": ["tests/fixtures/**/*.ts"]
+}

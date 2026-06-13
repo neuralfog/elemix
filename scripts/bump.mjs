@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 
 const arg = process.argv[2];
@@ -11,7 +12,9 @@ const files = [
     'package.json',
 ].filter(existsSync);
 
-const current = readFileSync(files[0], 'utf8').match(
+// Canonical current version is the root manifest — not packages[0], which may
+// be a private 0.0.0 package.
+const current = readFileSync('package.json', 'utf8').match(
     /"version":\s*"([^"]+)"/,
 )?.[1];
 
@@ -33,4 +36,23 @@ for (const file of files) {
     );
     writeFileSync(file, text);
     console.log(`${file} -> ${next}`);
+}
+
+// Sync the compiler's published npm packages (launcher + per-platform binaries,
+// cross-deps pinned) to the same version — reusing the stamper the release
+// workflow runs.
+const compilerStamp = 'packages/compiler/npm/version.mjs';
+if (existsSync(compilerStamp)) {
+    execFileSync('node', [compilerStamp, next], { stdio: 'inherit' });
+}
+
+// And the Rust crate's own version, so the binary metadata matches the release.
+const cargo = 'packages/compiler/Cargo.toml';
+if (existsSync(cargo)) {
+    const text = readFileSync(cargo, 'utf8').replace(
+        /^version = "[^"]+"/m,
+        `version = "${next}"`,
+    );
+    writeFileSync(cargo, text);
+    console.log(`${cargo} -> ${next}`);
 }
