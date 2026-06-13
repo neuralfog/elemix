@@ -1,3 +1,6 @@
 /target
 storybook-static
 stories/compiled/.emited
+# Prebuilt binaries are dropped into the platform packages by CI at release time.
+npm/*/elemix-compiler
+npm/*/elemix-compiler.exe

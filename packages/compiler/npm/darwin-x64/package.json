@@ -1,0 +1,16 @@
+{
+  "name": "@neuralfog/elemix-compiler-darwin-x64",
+  "version": "0.0.0",
+  "description": "Prebuilt elemix-compiler binary for macOS x64 (Intel).",
+  "license": "MIT",
+  "author": "brownhounds",
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "elemix-compiler"
+  ]
+}

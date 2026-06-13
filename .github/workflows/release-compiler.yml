@@ -1,0 +1,144 @@
+name: release-compiler
+
+# Build the Rust compiler for every target, drop each binary into its platform
+# package, and publish the platform packages + the JS launcher to npm.
+#
+# Trigger by pushing a tag `elemix-compiler-v1.2.3`, or run manually and pass the
+# version. The version is stamped into every npm manifest at publish time.
+on:
+  push:
+    tags: ['elemix-compiler-v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 0.1.0)'
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: build ${{ matrix.pkg }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pkg: linux-x64
+            target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          - pkg: linux-arm64
+            target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          - pkg: darwin-x64
+            target: x86_64-apple-darwin
+            os: macos-13
+          - pkg: darwin-arm64
+            target: aarch64-apple-darwin
+            os: macos-latest
+          - pkg: win32-x64
+            target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - pkg: win32-arm64
+            target: aarch64-pc-windows-msvc
+            os: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/compiler
+          key: ${{ matrix.target }}
+
+      # Linux musl (x64 + arm64) cross-compiles cleanly from one runner via zig.
+      - uses: mlugg/setup-zig@v2
+        if: ${{ matrix.zig }}
+      - name: Install cargo-zigbuild
+        if: ${{ matrix.zig }}
+        run: cargo install --locked cargo-zigbuild
+
+      - name: Build (zig)
+        if: ${{ matrix.zig }}
+        working-directory: packages/compiler
+        run: cargo zigbuild --release --target ${{ matrix.target }}
+
+      - name: Build (native)
+        if: ${{ !matrix.zig }}
+        working-directory: packages/compiler
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Stage binary into platform package
+        working-directory: packages/compiler
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp "target/${{ matrix.target }}/release/elemix-compiler.exe" "npm/${{ matrix.pkg }}/elemix-compiler.exe"
+          else
+            cp "target/${{ matrix.target }}/release/elemix-compiler" "npm/${{ matrix.pkg }}/elemix-compiler"
+            chmod +x "npm/${{ matrix.pkg }}/elemix-compiler"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-${{ matrix.pkg }}
+          path: packages/compiler/npm/${{ matrix.pkg }}
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    name: publish to npm
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      # Restore each platform package (now carrying its binary) over the scaffold.
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: npm-*
+          path: artifacts
+
+      - name: Place binaries
+        run: |
+          for dir in artifacts/npm-*; do
+            pkg="${dir#artifacts/npm-}"
+            cp -r "$dir/." "packages/compiler/npm/$pkg/"
+          done
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME#elemix-compiler-v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stamp version
+        run: node packages/compiler/npm/version.mjs "${{ steps.version.outputs.value }}"
+
+      # Platform packages first, then the launcher that depends on them.
+      - name: Publish
+        working-directory: packages/compiler/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          for pkg in linux-x64 linux-arm64 darwin-x64 darwin-arm64 win32-x64 win32-arm64; do
+            npm publish "$pkg" --access public --provenance
+          done
+          npm publish elemix-compiler --access public --provenance

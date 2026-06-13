@@ -1,0 +1,16 @@
+{
+  "name": "@neuralfog/elemix-compiler-win32-x64",
+  "version": "0.0.0",
+  "description": "Prebuilt elemix-compiler binary for Windows x64.",
+  "license": "MIT",
+  "author": "brownhounds",
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "elemix-compiler.exe"
+  ]
+}
