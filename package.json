@@ -12,9 +12,10 @@
         "lint": "pnpm -r lint",
         "lint:fix": "pnpm -r run lint:fix",
         "storybook": "pnpm --filter @neuralfog/elemix-compiler storybook",
+        "changelog:lint": "node scripts/changelog.mjs lint",
+        "changelog:check": "node scripts/changelog.mjs check",
         "bump": "node scripts/bump.mjs",
         "tag": "node scripts/tag.mjs",
-        "tag-remove": "node scripts/tag-remove.mjs",
-        "release": "pnpm build && pnpm -r publish --access public --no-git-checks"
+        "tag-remove": "node scripts/tag-remove.mjs"
     }
 }

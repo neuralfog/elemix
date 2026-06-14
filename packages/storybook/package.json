@@ -3,9 +3,14 @@
     "version": "0.8.2",
     "license": "MIT",
     "author": "brownhounds",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/neuralfog/elemix.git",
+        "directory": "packages/storybook"
+    },
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
-    "files": ["./dist/**/*"],
+    "files": ["./dist/**/*", "CHANGELOG.md"],
     "exports": {
         ".": "./dist/index.js"
     },

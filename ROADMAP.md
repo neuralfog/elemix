@@ -40,31 +40,30 @@
 
 ## Compiler - We don't React. We compile. 😂😂😂
 
-WIP - it just happened
-
-This just works 🥸
+☄️ It just happened. This just works 🥸
 
 Target release of fully compiled framework is `v0.9.0`
 
-### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
-
-- [] Run benchamrks and 👀👀
-
 ## TODOS
 
-- [] Update perf repo with new toolchain and compiled version of framework ⚡️⚡️
+- [] WASM package needs it's own readme 🤔
 - [] Poke at sourcemaps at some point ⏰️⏰️
-- [] Render Cost Table looks suspicious - 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
-- [] Add changelogs, refer to `https://github.com/brownhounds/migoro` for a full implementation with releases and workflows
-- [] Streamline release with tags - slowly migrating
 - [] `onMutation` - Hmmm... Added for one specific reason, detect DOM mutations in an async context, do I still need this ??
     Renderer is fully sync now, what it should be, no `ticking`, no waiting 🤔
 - [] Design `compiler hints`
 - [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
 
+### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
+
+- [] Release v0.9.0-dev.0
+- [] Update `perf` peronal repo with new toolchain and compiled version of framework ⚡️⚡️
+- [] Got to check behaviour of vite plugin on more complicated projects - many files etc
+- [] Render Cost Table looks suspicious - 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
+- [] Run official benchamrks and 👀👀
+
 ### Phase 3 - Why would you use a fork for eating soup 🍴 Packaging and Tooling 🛠️
 
-***Compiler As Vite Plugin 🛠️🛠️🛠️***
+***Compiler As Vite Plugin 🥷🥷🥷***
 
 - Closes the tooling chain 🔗 write `tpl` templates, vite compiles them on the fly as it loads each module - compile step invisible 🥷
 - Drives the NATIVE binary 🚤🚤🚤
@@ -82,7 +81,7 @@ Target release of fully compiled framework is `v0.9.0`
 
 ***Compiler as WASM ⚙️⚙️⚙️***
 
-- The whole `compalerino` now compiles straight in the browser via WASM 🕸️🦀 playground can transpile on every keystroke 🤯
+- The whole `compalerino` served as WASM module 🕸️🦀 playground can transpile on every keystroke 🤯
 - Went single crate, feature gated - no crate split shenanigans, simplicity wins 🧈
 - `compile()` is pure `oxc`, zero IO, so it crosses the wasm boundary squeaky clean - only the filesystem/CLI
   bits (`clap`, `glob`, file scanning) get gated out behind a feature 🚪
@@ -289,3 +288,6 @@ This will be a headache if I get there 😂❤️😂
     vite plugin is a good candidate here, we can hook into the `vite` compilation process, I did it before
 - [x] Compiler `cli` may change based on two requirements above - Yes it did 😂
 - [x] In theory this should be the easiest part, hard work is done!! 🚀🚀🚀 EZ just ton shite of work 💩💩💩
+- [x] Streamline release with tags ✅
+- [x] Finish single tag release for all packages, automated publishing via github actions
+- [x] Add changelogs, refer to `https://github.com/brownhounds/migoro` for a full implementation with releases and workflows
