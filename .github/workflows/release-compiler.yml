@@ -138,6 +138,10 @@ jobs:
       - name: Stamp version
         run: node packages/compiler/npm/version.mjs "${{ steps.version.outputs.value }}"
 
+      # Ship the changelog inside the launcher package (its `files` lists it).
+      - name: Stage changelog into launcher
+        run: cp packages/compiler/CHANGELOG.md packages/compiler/npm/elemix-compiler/CHANGELOG.md
+
       # Platform packages first, then the launcher that depends on them.
       - name: Publish
         working-directory: packages/compiler/npm

@@ -15,7 +15,8 @@
   },
   "files": [
     "bin/elemix-compiler.mjs",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "optionalDependencies": {
     "@neuralfog/elemix-compiler-linux-x64": "0.0.0",

@@ -37,6 +37,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Lint changelogs
+        run: node scripts/changelog.mjs lint
+
       # Browser for the compiler's Storybook conformance plays (headless chromium).
       - name: Install Playwright chromium
         run: pnpm --filter @neuralfog/elemix-compiler exec playwright install --with-deps chromium

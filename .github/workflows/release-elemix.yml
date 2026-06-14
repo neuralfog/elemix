@@ -1,0 +1,158 @@
+name: release-elemix
+
+# Publish the library + its Storybook integration on a `v<version>` tag — the
+# same tag that fires release-compiler.yml and release-vite.yml (one tag releases
+# everything). The version comes from the tag. Storybook peer-depends on elemix,
+# so it publishes second, after elemix is live on npm.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 0.1.0)'
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish-elemix:
+    name: publish @neuralfog/elemix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stamp version
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const f = "packages/elemix/package.json";
+            const p = JSON.parse(fs.readFileSync(f, "utf8"));
+            p.version = process.env.VERSION;
+            fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            console.log(`elemix@${process.env.VERSION}`);
+          '
+
+      - name: Build
+        run: pnpm --filter @neuralfog/elemix build
+
+      - name: Publish
+        working-directory: packages/elemix
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/elemix@$VERSION under dist-tag: $TAG"
+          pnpm publish --access public --provenance --no-git-checks --tag "$TAG"
+
+  publish-storybook:
+    name: publish @neuralfog/elemix-storybook
+    needs: publish-elemix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Stamp BOTH manifests: storybook's own version, and elemix's — pnpm
+      # rewrites storybook's `workspace:*` peer-dep to whatever elemix's version
+      # field says at publish time, so it must read the released version.
+      - name: Stamp version + elemix peer-dep
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = process.env.VERSION;
+            for (const f of ["packages/elemix/package.json", "packages/storybook/package.json"]) {
+              const p = JSON.parse(fs.readFileSync(f, "utf8"));
+              p.version = v;
+              fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            }
+            console.log(`elemix-storybook@${v} (peer @neuralfog/elemix ${v})`);
+          '
+
+      # Storybook builds against elemix's types — build the library first.
+      - name: Build
+        run: |
+          pnpm --filter @neuralfog/elemix build
+          pnpm --filter @neuralfog/elemix-storybook build
+
+      # Wait until elemix@<version> is on npm (published by the sibling job) so an
+      # installer never sees a missing peer.
+      - name: Wait for the elemix peer dependency
+        run: |
+          DEP="${{ steps.version.outputs.value }}"
+          echo "waiting for @neuralfog/elemix@$DEP on npm..."
+          for i in $(seq 1 90); do
+            if npm view "@neuralfog/elemix@$DEP" version >/dev/null 2>&1; then
+              echo "✓ @neuralfog/elemix@$DEP is published"
+              exit 0
+            fi
+            echo "  not yet ($i/90)..."; sleep 10
+          done
+          echo "::error::@neuralfog/elemix@$DEP was not published in time"
+          exit 1
+
+      - name: Publish
+        working-directory: packages/storybook
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/elemix-storybook@$VERSION under dist-tag: $TAG"
+          pnpm publish --access public --provenance --no-git-checks --tag "$TAG"

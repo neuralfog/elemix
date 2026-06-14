@@ -5,3 +5,5 @@ stories/compiled/.emited
 # Prebuilt binaries are dropped into the platform packages by CI at release time.
 npm/*/elemix-compiler
 npm/*/elemix-compiler.exe
+# The launcher's changelog is copied in from packages/compiler/CHANGELOG.md at release.
+npm/elemix-compiler/CHANGELOG.md
