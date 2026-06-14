@@ -11,12 +11,20 @@
  */
 import { test } from 'vitest';
 import { Component, defineComponent } from './src/component/Component';
-import { _attr, _class, _list, _text, clone, template } from './src/runtime';
+import {
+    _list,
+    _setAttr,
+    _setClass,
+    _setText,
+    clone,
+    effect,
+    template,
+} from './src/runtime';
 import { state } from './src/runtime/state';
 
 type Item = { id: number; label: string; selected: boolean };
 
-const c = { rebuilt: 0, textW: 0, attrW: 0, nodeOps: 0 };
+const c = { rebuilt: 0, textW: 0, attrW: 0 };
 
 let nid = 1;
 const build = (n: number): Item[] =>
@@ -36,10 +44,14 @@ const buildRow = (item: Item): HTMLElement => {
     const a = (tr.children[1] as HTMLElement).firstChild as HTMLElement;
     const idText = td0.appendChild(document.createTextNode(''));
     const labelText = a.appendChild(document.createTextNode(''));
-    _class(tr, () => (item.selected ? 'danger' : ''));
-    _text(idText, () => item.id);
-    _attr(a, 'data-id', () => item.id);
-    _text(labelText, () => item.label);
+    const ci = tr.getAttribute('class') ?? '';
+    // One grouped effect per row — exactly what the compiler now emits.
+    effect(() => {
+        _setClass(tr, ci, item.selected ? 'danger' : '');
+        _setText(idText, item.id);
+        _setAttr(a, 'data-id', item.id);
+        _setText(labelText, item.label);
+    });
     return tr;
 };
 
@@ -68,16 +80,23 @@ const measureComponent = (tag: string): Result[] => {
     document.body.innerHTML = `<${tag}></${tag}>`;
     const cmp = document.querySelector(tag) as unknown as CostList;
 
+    // A keyed move is one insertBefore, but the observer reports it as a removal
+    // from the old slot AND an addition at the new slot. Dedupe by node identity
+    // so a moved row counts once: "nodes touched" = distinct nodes added/removed.
+    const touched = new Set<Node>();
     const countNodes = (records: MutationRecord[]) => {
-        for (const r of records)
-            c.nodeOps += r.addedNodes.length + r.removedNodes.length;
+        for (const r of records) {
+            for (const n of r.addedNodes) touched.add(n);
+            for (const n of r.removedNodes) touched.add(n);
+        }
     };
     const mo = new MutationObserver(countNodes);
     mo.observe(cmp.root as Node, { childList: true, subtree: true });
 
     const results: Result[] = [];
     const measure = (label: string, mutate: () => void): void => {
-        c.rebuilt = c.textW = c.attrW = c.nodeOps = 0;
+        c.rebuilt = c.textW = c.attrW = 0;
+        touched.clear();
         mutate(); // reactive effects re-run synchronously
         countNodes(mo.takeRecords());
         results.push({
@@ -85,7 +104,7 @@ const measureComponent = (tag: string): Result[] => {
             rebuilt: c.rebuilt,
             'text writes': c.textW,
             'attr writes': c.attrW,
-            'node ops': c.nodeOps,
+            'nodes touched': touched.size,
         });
     };
 
@@ -125,7 +144,7 @@ const table = (title: string, results: Result[]): string => {
         'rebuilt',
         'text writes',
         'attr writes',
-        'node ops',
+        'nodes touched',
     ];
     const width = cols.map((col) =>
         Math.max(col.length, ...results.map((r) => String(r[col]).length)),
@@ -187,7 +206,8 @@ test('render cost', { timeout: 60_000 }, ({ expect }) => {
     expect(byOp['create 1k'].rebuilt).toBe(1000);
     expect(byOp['update 10th'].rebuilt).toBe(0);
     expect(byOp.select.rebuilt).toBe(0);
-    expect(byOp.select['node ops']).toBe(0);
+    expect(byOp.select['nodes touched']).toBe(0);
     expect(byOp.swap.rebuilt).toBe(0);
+    expect(byOp.swap['nodes touched']).toBe(2);
     expect(byOp['remove 1'].rebuilt).toBe(0);
 });

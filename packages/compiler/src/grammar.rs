@@ -24,28 +24,44 @@ pub enum BindingKind {
     Splice,  // `${nestedTemplate}`  → anchor.replaceWith(builder())
 }
 
-/// A classified hole: where, what, the binding name (attr/event/prop), and the
-/// verbatim expression.
+/// A classified hole: where, what, the binding name (attr/event/prop), the
+/// verbatim expression, and whether its text node is pre-baked into the markup.
 #[derive(Debug)]
 pub struct Binding {
     pub path: NodePath,
     pub kind: BindingKind,
     pub name: Option<String>,
     pub expr: String,
+    /// Text binding whose node is baked into the markup (`Slot::Text`): grab and
+    /// write directly, skipping the `createTextNode`/`replaceWith` anchor swap.
+    pub baked: bool,
 }
 
 /// Classify a parsed hole into a binding via (Slot × sigil × value-shape).
 pub fn classify(hole: &Hole) -> Binding {
-    let (kind, name) = match &hole.slot {
-        Slot::Attr(name) => classify_attr(name),
-        Slot::Content => (classify_content(&hole.expr), None),
+    let (kind, name, baked) = match &hole.slot {
+        Slot::Attr(name) => {
+            let (kind, name) = classify_attr(name);
+            (kind, name, false)
+        }
+        Slot::Content => (classify_content(&hole.expr), None, false),
+        Slot::Text => (BindingKind::Text, None, true),
     };
     Binding {
         path: hole.path.clone(),
         kind,
         name,
         expr: hole.expr.clone(),
+        baked,
     }
+}
+
+/// Whether a content hole is a plain text value (not `repeat`/`when`/`choose` or
+/// a nested template) — i.e. it can be backed by a baked text node instead of a
+/// comment anchor. The parser uses this to pick the placeholder for a sole-child
+/// content hole.
+pub(crate) fn is_text_content(expr: &str) -> bool {
+    matches!(classify_content(expr), BindingKind::Text)
 }
 
 /// Attribute holes classify by the name's sigil (`@`/`:`/`~`) and reserved

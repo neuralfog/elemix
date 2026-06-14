@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ProfileApp.ts
 ---
-import { template, clone, _event, _prop, _model } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, _model, effect, _setProp } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
@@ -54,16 +54,18 @@ export class ProfileApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[0].children[0].children[0];
-const _n2 = _r0.children[0].children[1].children[0];
-const _n3 = _r0.children[0].children[2];
-const _n4 = _r0.children[1];
+const _n1 = _r0.firstElementChild!.firstElementChild!.firstElementChild!;
+const _n2 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!;
+const _n3 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!;
+const _n4 = _r0.firstElementChild!.nextElementSibling!;
 _model(_n1 as HTMLInputElement, () => (this.state.name));
 _model(_n2 as HTMLInputElement, () => (this.state.role));
 _event(_n3, 'click', this.like);
-_prop(_n4, 'name', () => (this.state.name.value));
-_prop(_n4, 'role', () => (this.state.role.value));
-_prop(_n4, 'likes', () => (this.state.likes));
+effect(() => {
+_setProp(_n4, 'name', (this.state.name.value));
+_setProp(_n4, 'role', (this.state.role.value));
+_setProp(_n4, 'likes', (this.state.likes));
+});
 return _r0;
 }
 }

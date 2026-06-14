@@ -28,10 +28,6 @@ export class LifecycleChild extends Component<ChildProps> {
         record('onMount');
     }
 
-    onMutation(): void {
-        record('onMutation');
-    }
-
     onDispose(): void {
         record('onDispose');
     }

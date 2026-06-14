@@ -29,15 +29,21 @@ pub trait Emitter {
     /// A marker for a binding the codegen cannot yet lower.
     fn pending(&self, note: &str) -> String;
 
-    fn text(&self, node: &str, expr: &str) -> String;
-    fn attr(&self, node: &str, name: &str, expr: &str) -> String;
-    fn class(&self, node: &str, expr: &str) -> String;
-    fn style(&self, node: &str, expr: &str) -> String;
     fn event(&self, node: &str, name: &str, handler: &str) -> String;
-    fn prop(&self, node: &str, name: &str, expr: &str) -> String;
     fn model(&self, node: &str, expr: &str) -> String;
     fn onmodel(&self, node: &str, transform: &str) -> String;
     fn reference(&self, node: &str, target: &str) -> String;
     fn child(&self, anchor: &str, getter: &str) -> String;
     fn list(&self, anchor: &str, items: &str, key: &str, render: &str) -> String;
+
+    // Grouped value writes: the per-binding write with no effect of its own. The
+    // codegen collects these and wraps them in one `effect` per template instance
+    // via `bind_group`, so a row costs one Scope/Set instead of one per binding.
+    fn set_text(&self, node: &str, expr: &str) -> String;
+    fn set_attr(&self, node: &str, name: &str, expr: &str) -> String;
+    fn set_class(&self, node: &str, initial: &str, expr: &str) -> String;
+    fn set_style(&self, node: &str, expr: &str) -> String;
+    fn set_prop(&self, node: &str, name: &str, expr: &str) -> String;
+    /// Wrap the collected grouped writes in a single `effect(() => { ... })`.
+    fn bind_group(&self, writes: &[String]) -> String;
 }

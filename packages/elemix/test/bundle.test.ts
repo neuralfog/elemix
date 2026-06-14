@@ -56,24 +56,21 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             'reactive',
             'effect',
             'untrack',
-            // runtime: mutation/owner plumbing the codegen targets
-            'withOwner',
-            'currentOwner',
-            'markMutation',
             // runtime: DOM-wiring primitives (the codegen contract)
             'template',
             'clone',
-            '_text',
-            '_attr',
-            '_class',
-            '_style',
             '_event',
-            '_prop',
             '_model',
             '_onmodel',
             '_ref',
             '_child',
             '_list',
+            // grouped-write binders (one effect per template instance)
+            '_setText',
+            '_setAttr',
+            '_setClass',
+            '_setStyle',
+            '_setProp',
         ];
 
         for (const name of required) {

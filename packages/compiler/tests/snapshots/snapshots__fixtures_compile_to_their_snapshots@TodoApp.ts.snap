@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/TodoApp.ts
 ---
-import { template, clone, _text, _event, _model, _list } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, _model, _list, effect, _setText } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
@@ -71,7 +71,7 @@ const css = `
 `;
 
 const _t0 = template('<h3>Todos</h3><div class="row"><input type="text" placeholder="What needs doing?"/><button class="add">Add</button></div><ul><!----></ul>');
-const _t1 = template('<li><span><!----></span><button class="remove">×</button></li>');
+const _t1 = template('<li><span> </span><button class="remove">×</button></li>');
 
 export class TodoApp extends Component {
     static styles = [css];
@@ -97,9 +97,9 @@ export class TodoApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1].children[0];
-const _n2 = _r0.children[1].children[1];
-const _n3 = _r0.children[2].childNodes[0];
+const _n1 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstChild!;
 _model(_n1 as HTMLInputElement, () => (this.state.draft));
 _event(_n1, 'keydown', (e: KeyboardEvent) => {
                     if (e.key === 'Enter') this.addItem();
@@ -107,12 +107,12 @@ _event(_n1, 'keydown', (e: KeyboardEvent) => {
 _event(_n2, 'click', this.addItem);
 _list(_n3, () => (this.state.todos), (todo) => todo.id, (todo) => (() => {
 const _r4 = clone(_t1);
-const _n5 = _r4.children[0].children[0].childNodes[0];
-const _n6 = _r4.children[0].children[1];
-const _x7 = document.createTextNode('');
-_n5.replaceWith(_x7);
-_text(_x7, () => (todo.text));
+const _n5 = _r4.firstElementChild!.firstElementChild!.firstChild!;
+const _n6 = _r4.firstElementChild!.firstElementChild!.nextElementSibling!;
 _event(_n6, 'click', () => this.removeItem(todo.id));
+effect(() => {
+_setText(_n5, (todo.text));
+});
 return _r4.firstChild!;
 })());
 return _r0;

@@ -449,6 +449,9 @@ fn collapse_ws(s: &str) -> String {
 
 /// Walk the tree producing markup + holes positioned by path.
 fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &mut Vec<Hole>) {
+    // A lone content hole has no sibling text node to merge with, so a plain text
+    // value can be baked as a real text node instead of a `<!---->` swap.
+    let sole = children.len() == 1;
     let mut child_count = 0usize; // element index (.children[i])
     let mut node_count = 0usize; // node index (.childNodes[i])
     for child in children {
@@ -458,14 +461,23 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                 node_count += 1;
             }
             Child::Anchor(expr) => {
-                markup.push_str("<!---->");
                 let mut p = path.clone();
                 p.push(Step::ChildNode(node_count));
-                holes.push(Hole {
-                    path: p,
-                    slot: Slot::Content,
-                    expr: expr.clone(),
-                });
+                if sole && crate::grammar::is_text_content(expr) {
+                    markup.push(' ');
+                    holes.push(Hole {
+                        path: p,
+                        slot: Slot::Text,
+                        expr: expr.clone(),
+                    });
+                } else {
+                    markup.push_str("<!---->");
+                    holes.push(Hole {
+                        path: p,
+                        slot: Slot::Content,
+                        expr: expr.clone(),
+                    });
+                }
                 node_count += 1;
             }
             Child::Elem(el) => {

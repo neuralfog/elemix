@@ -32,8 +32,8 @@ fn markup_is_escaped_as_a_js_string() {
 #[test]
 fn nested_path_renders_member_accessors() {
     let out = gen(&["<div><span><b>", "</b></span></div>"], &["x"]);
-    // div > span > b > anchor
-    assert!(out.contains(".children[0].children[0].children[0].childNodes[0];"));
+    // div > span > b > baked text node, via direct-pointer navigation
+    assert!(out.contains(".firstElementChild!.firstElementChild!.firstElementChild!.firstChild!;"));
 }
 
 // ---------------------------------------------------------------------------
@@ -41,35 +41,50 @@ fn nested_path_renders_member_accessors() {
 // ---------------------------------------------------------------------------
 
 #[test]
-fn text_replaces_anchor_with_a_text_node() {
+fn text_bakes_a_node_for_a_sole_content_hole() {
     let out = gen(&["<div>", "</div>"], &["this.state.count"]);
+    // a lone text hole bakes a real text node into the markup — no anchor swap
+    assert!(out.contains("template('<div> </div>')"));
+    assert!(!out.contains("document.createTextNode('');"));
+    assert!(!out.contains(".replaceWith("));
+    assert!(out.contains("_setText("));
+    assert!(out.contains("(this.state.count));"));
+}
+
+#[test]
+fn text_swaps_anchor_when_not_a_sole_hole() {
+    // a hole sharing its element with static text cannot bake (it would merge),
+    // so it keeps the comment anchor + createTextNode/replaceWith swap
+    let out = gen(&["<div>n: ", "</div>"], &["this.state.count"]);
+    assert!(out.contains("<!---->"));
     assert!(out.contains("document.createTextNode('');"));
     assert!(out.contains(".replaceWith("));
-    assert!(out.contains("() => (this.state.count));"));
+    assert!(out.contains("_setText("));
 }
 
 #[test]
 fn attr_template_literal_is_reactive() {
     let out = gen(&["<a href=\"/users/", "\">x</a>"], &["this.state.userId"]);
-    assert!(out.contains("'href', () => (`/users/${this.state.userId}`));"));
+    assert!(out.contains("_setAttr(_n1, 'href', (`/users/${this.state.userId}`));"));
 }
 
 #[test]
 fn class_object_literal_is_parenthesized() {
     let out = gen(&["<tr class=", "></tr>"], &["{ danger: x }"]);
-    assert!(out.contains("_class(_n1, () => ({ danger: x }));"));
+    assert!(out.contains("_setClass(_n1, "));
+    assert!(out.contains("({ danger: x }));"));
 }
 
 #[test]
 fn style_casts_to_html_element() {
     let out = gen(&["<div style=", "></div>"], &["{ color: c }"]);
-    assert!(out.contains("_style(_n1 as HTMLElement, () => ({ color: c }));"));
+    assert!(out.contains("_setStyle(_n1 as HTMLElement, ({ color: c }));"));
 }
 
 #[test]
 fn prop_keeps_name_and_thunk() {
     let out = gen(&["<x :counter=", " />"], &["this.c"]);
-    assert!(out.contains("_prop(_n1, 'counter', () => (this.c));"));
+    assert!(out.contains("_setProp(_n1, 'counter', (this.c));"));
 }
 
 #[test]
@@ -111,8 +126,8 @@ fn ref_is_raw() {
 #[test]
 fn bindings_on_one_element_grab_it_once() {
     let out = gen(&["<a href=", " @click=", ">x</a>"], &["u", "this.go"]);
-    assert_eq!(out.matches("= _r0.children[0];").count(), 1);
-    assert!(out.contains("_attr(_n1, 'href', () => (u));"));
+    assert_eq!(out.matches("= _r0.firstElementChild!;").count(), 1);
+    assert!(out.contains("_setAttr(_n1, 'href', (u));"));
     assert!(out.contains("_event(_n1, 'click', this.go);"));
 }
 
@@ -126,13 +141,14 @@ fn repeat_lowers_to_list_with_an_iife_builder() {
         &["<ul>", "</ul>"],
         &["repeat(this.rows, (r) => tpl`<li>${r.t}</li>`, (r) => r.id)"],
     );
-    // the row template is hoisted to module scope
-    assert!(out.contains("const _t1 = template('<li><!----></li>');"));
+    // the row template is hoisted to module scope; the lone text hole bakes a node
+    assert!(out.contains("const _t1 = template('<li> </li>');"));
     // args reordered: _list(anchor, () => (items), key, render)
     assert!(out.contains("_list(_n1, () => (this.rows), (r) => r.id, (r) => (() => {"));
     // the builder clones the row template, binds, and returns its first node
     assert!(out.contains("clone(_t1)"));
-    assert!(out.contains("() => (r.t));"));
+    assert!(out.contains("_setText("));
+    assert!(out.contains("(r.t));"));
     assert!(out.contains(".firstChild!;"));
 }
 

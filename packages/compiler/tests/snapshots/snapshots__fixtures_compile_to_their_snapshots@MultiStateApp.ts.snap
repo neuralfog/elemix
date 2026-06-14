@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/MultiStateApp.ts
 ---
-import { template, clone, _text, _event } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, effect, _setText } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 type CounterState = { count: number };
@@ -65,7 +65,7 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _t0 = template('<p class="note">A component can hold several independent <code>state()</code> slices. Each is deeply reactive on its own — mutating <code>counter</code> re-renders only the count, never the user card, and vice versa.</p><div class="slice"><span class="count"><!----></span><button>+1</button><button>reset</button></div><div class="slice"><strong class="name"><!----></strong><span class="status"><!----></span><button>toggle status</button><button>rename</button></div>');
+const _t0 = template('<p class="note">A component can hold several independent <code>state()</code> slices. Each is deeply reactive on its own — mutating <code>counter</code> re-renders only the count, never the user card, and vice versa.</p><div class="slice"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="slice"><strong class="name"> </strong><span class="status"> </span><button>toggle status</button><button>rename</button></div>');
 
 export class MultiStateApp extends Component {
     static styles = [css];
@@ -91,26 +91,22 @@ export class MultiStateApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1].children[0].childNodes[0];
-const _n2 = _r0.children[1].children[1];
-const _n3 = _r0.children[1].children[2];
-const _n4 = _r0.children[2].children[0].childNodes[0];
-const _n5 = _r0.children[2].children[1].childNodes[0];
-const _n6 = _r0.children[2].children[2];
-const _n7 = _r0.children[2].children[3];
-const _x8 = document.createTextNode('');
-_n1.replaceWith(_x8);
-_text(_x8, () => (this.counter.count));
+const _n1 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.firstChild!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!;
+const _n4 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.firstChild!;
+const _n5 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.firstChild!;
+const _n6 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!;
+const _n7 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
 _event(_n2, 'click', this.inc);
 _event(_n3, 'click', this.reset);
-const _x9 = document.createTextNode('');
-_n4.replaceWith(_x9);
-_text(_x9, () => (this.user.name));
-const _x10 = document.createTextNode('');
-_n5.replaceWith(_x10);
-_text(_x10, () => (this.user.online ? 'online' : 'offline'));
 _event(_n6, 'click', this.toggle);
 _event(_n7, 'click', this.rename);
+effect(() => {
+_setText(_n1, (this.counter.count));
+_setText(_n4, (this.user.name));
+_setText(_n5, (this.user.online ? 'online' : 'offline'));
+});
 return _r0;
 }
 }

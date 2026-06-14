@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/NestedTemplateApp.ts
 ---
-import { template, clone, _text, _event, _child } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, _child, effect, _setText } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 type State = {
@@ -61,8 +61,8 @@ const css = `
 `;
 
 const _t0 = template('<p class="note">A nested template can be assigned to a variable and embedded in another. Each embed builds a fresh, independently-reactive fragment — the same <code>chip</code> template is reused twice and both update from one shared cell.</p><section><!----> <div class="chips"><!----> and again <!----></div><button>change title</button><button>change tag</button></section>');
-const _t1 = template('<h2><!----></h2>');
-const _t2 = template('<span class="chip"><!----></span>');
+const _t1 = template('<h2> </h2>');
+const _t2 = template('<span class="chip"> </span>');
 
 export class NestedTemplateApp extends Component {
     static styles = [css];
@@ -83,34 +83,34 @@ export class NestedTemplateApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1].childNodes[0];
-const _n2 = _r0.children[1].children[0].childNodes[0];
-const _n3 = _r0.children[1].children[0].childNodes[2];
-const _n4 = _r0.children[1].children[1];
-const _n5 = _r0.children[1].children[2];
+const _n1 = _r0.firstElementChild!.nextElementSibling!.firstChild!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.firstChild!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!;
+const _n5 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!;
 _child(_n1, () => ((() => {
 const _r6 = clone(_t1);
-const _n7 = _r6.children[0].childNodes[0];
-const _x8 = document.createTextNode('');
-_n7.replaceWith(_x8);
-_text(_x8, () => (this.state.title));
+const _n7 = _r6.firstElementChild!.firstChild!;
+effect(() => {
+_setText(_n7, (this.state.title));
+});
 return _r6.firstChild!;
 })()));
 _child(_n2, () => ((() => {
-const _r9 = clone(_t2);
-const _n10 = _r9.children[0].childNodes[0];
-const _x11 = document.createTextNode('');
-_n10.replaceWith(_x11);
-_text(_x11, () => (this.state.tag));
-return _r9.firstChild!;
+const _r8 = clone(_t2);
+const _n9 = _r8.firstElementChild!.firstChild!;
+effect(() => {
+_setText(_n9, (this.state.tag));
+});
+return _r8.firstChild!;
 })()));
 _child(_n3, () => ((() => {
-const _r12 = clone(_t2);
-const _n13 = _r12.children[0].childNodes[0];
-const _x14 = document.createTextNode('');
-_n13.replaceWith(_x14);
-_text(_x14, () => (this.state.tag));
-return _r12.firstChild!;
+const _r10 = clone(_t2);
+const _n11 = _r10.firstElementChild!.firstChild!;
+effect(() => {
+_setText(_n11, (this.state.tag));
+});
+return _r10.firstChild!;
 })()));
 _event(_n4, 'click', this.changeTitle);
 _event(_n5, 'click', this.changeTag);

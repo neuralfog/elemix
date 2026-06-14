@@ -6,7 +6,6 @@ import {
     untrack,
     type Scope,
 } from '../runtime/reactive';
-import { withOwner, type MutationTarget } from '../runtime/mutation';
 import type { Template } from '../types';
 
 export const defineComponent = (
@@ -53,7 +52,6 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     public template?(): Template;
     public view?(): DocumentFragment;
 
-    public onMutation?(): void;
     public beforeMount?(): void;
     public onMount?(): void;
     public onDispose?(): void;
@@ -70,13 +68,8 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
             if (this.view) {
                 const view = this.view;
-                const owner: MutationTarget | null = this.onMutation
-                    ? this
-                    : null;
                 this.shadowRoot?.appendChild(
-                    collect(this.scopes, () =>
-                        withOwner(owner, () => view.call(this)),
-                    ),
+                    collect(this.scopes, () => view.call(this)),
                 );
             }
 

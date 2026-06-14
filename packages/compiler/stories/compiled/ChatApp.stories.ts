@@ -60,7 +60,7 @@ export const Default = {
         expect(input.value).toBe('');
 
         // with five messages the log overflows its fixed 180px viewport — the
-        // precondition for onMutation's scroll-to-bottom. (The exact scrollTop
+        // precondition for the send-handler's scroll-to-bottom. (The exact scrollTop
         // is layout-timing-dependent under the headless runner, so assert the
         // stable invariant that the content is scrollable.)
         expect(log.scrollHeight).toBeGreaterThan(log.clientHeight);

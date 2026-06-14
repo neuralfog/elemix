@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ChatApp.ts
 ---
-import { template, clone, _text, _class, _event, _model, _list } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, _model, _list, effect, _setText, _setClass } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
@@ -88,8 +88,8 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
-const _t0 = template('<p class="note">Elemix batches renders asynchronously, so a new message is not in the DOM yet inside <code>send()</code>. <code>onMutation()</code> fires right after the DOM is written, making it the correct place to scroll this log to the bottom.</p><div class="log"><!----></div><div class="composer"><input type="text" placeholder="Type a message…"/><button>Send</button></div>');
-const _t1 = template('<div><!----></div>');
+const _t0 = template('<p class="note">Renders are synchronous, so a new message is in the DOM as soon as <code>send()</code> pushes it — the same handler scrolls this log to the bottom.</p><div class="log"><!----></div><div class="composer"><input type="text" placeholder="Type a message…"/><button>Send</button></div>');
+const _t1 = template('<div> </div>');
 
 export class ChatApp extends Component {
     static styles = [css];
@@ -111,26 +111,25 @@ export class ChatApp extends Component {
         if (!text) return;
         this.state.messages.push({ id: this.nextId(), text, me: true });
         this.state.draft.value = '';
-    };
-
-    onMutation(): void {
+        // Renders are synchronous, so the new message is already in the DOM here —
+        // scroll the log to the bottom right after sending, no lifecycle hook needed.
         const log = this.root?.querySelector('.log');
         if (log) log.scrollTop = log.scrollHeight;
-    }
+    };
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1].childNodes[0];
-const _n2 = _r0.children[2].children[0];
-const _n3 = _r0.children[2].children[1];
+const _n1 = _r0.firstElementChild!.nextElementSibling!.firstChild!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!;
 _list(_n1, () => (this.state.messages), (m) => m.id, (m) => (() => {
 const _r4 = clone(_t1);
-const _n5 = _r4.children[0];
-const _n6 = _r4.children[0].childNodes[0];
-_class(_n5, () => ({ msg: true, me: m.me }));
-const _x7 = document.createTextNode('');
-_n6.replaceWith(_x7);
-_text(_x7, () => (m.text));
+const _n5 = _r4.firstElementChild!;
+const _n6 = _n5.firstChild!;
+effect(() => {
+_setClass(_n5, '', ({ msg: true, me: m.me }));
+_setText(_n6, (m.text));
+});
 return _r4.firstChild!;
 })());
 _model(_n2 as HTMLInputElement, () => (this.state.draft));

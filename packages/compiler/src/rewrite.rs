@@ -19,8 +19,20 @@ use oxc_parser::Parser;
 use oxc_span::SourceType;
 
 const PRIMITIVES: &[&str] = &[
-    "template", "clone", "_text", "_attr", "_class", "_style", "_event", "_prop", "_model",
-    "_onmodel", "_ref", "_child", "_list",
+    "template",
+    "clone",
+    "_event",
+    "_model",
+    "_onmodel",
+    "_ref",
+    "_child",
+    "_list",
+    "effect",
+    "_setText",
+    "_setAttr",
+    "_setClass",
+    "_setStyle",
+    "_setProp",
 ];
 
 /// Where the edits land in the source.

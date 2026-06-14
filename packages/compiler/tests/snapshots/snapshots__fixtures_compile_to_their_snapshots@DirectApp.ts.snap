@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/DirectApp.ts
 ---
-import { template, clone, _attr, _class, _event } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, effect, _setAttr, _setClass } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 type Toggle = 'active' | 'rounded' | 'large' | 'disabled';
@@ -107,24 +107,26 @@ export class DirectApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1];
-const _n2 = _r0.children[2].children[0];
-const _n3 = _r0.children[2].children[1];
-const _n4 = _r0.children[2].children[2];
-const _n5 = _r0.children[3].children[0];
-const _n6 = _r0.children[4];
-_class(_n1, () => ({
+const _n1 = _r0.firstElementChild!.nextElementSibling!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!;
+const _n4 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!;
+const _n5 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.firstElementChild!;
+const _n6 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+_event(_n2, 'click', () => this.toggle('active'));
+_event(_n3, 'click', () => this.toggle('rounded'));
+_event(_n4, 'click', () => this.toggle('large'));
+_event(_n5, 'change', () => this.toggle('disabled'));
+effect(() => {
+_setClass(_n1, '', ({
                 box: true,
                 active: this.state.active,
                 rounded: this.state.rounded,
                 large: this.state.large,
             }));
-_event(_n2, 'click', () => this.toggle('active'));
-_event(_n3, 'click', () => this.toggle('rounded'));
-_event(_n4, 'click', () => this.toggle('large'));
-_attr(_n5, 'checked', () => (this.state.disabled));
-_event(_n5, 'change', () => this.toggle('disabled'));
-_attr(_n6, 'disabled', () => (this.state.disabled));
+_setAttr(_n5, 'checked', (this.state.disabled));
+_setAttr(_n6, 'disabled', (this.state.disabled));
+});
 return _r0;
 }
 }

@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/RefApp.ts
 ---
-import { template, clone, _text, _event, _ref, _child } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, _ref, _child, effect, _setText } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
 
 type State = {
@@ -83,20 +83,22 @@ export class RefApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1];
-const _n2 = _r0.children[2].children[0];
-const _n3 = _r0.children[2].children[1];
-const _n4 = _r0.childNodes[4];
+const _n1 = _r0.firstElementChild!.nextElementSibling!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 _ref(_n1, this.input);
 _event(_n2, 'click', this.focusInput);
 _event(_n3, 'click', this.measure);
 _child(_n4, () => (this.state.width
                 ? (() => {
 const _r5 = clone(_t1);
-const _n6 = _r5.children[0].childNodes[1];
+const _n6 = _r5.firstElementChild!.firstChild!.nextSibling!;
 const _x7 = document.createTextNode('');
 _n6.replaceWith(_x7);
-_text(_x7, () => (this.state.width));
+effect(() => {
+_setText(_x7, (this.state.width));
+});
 return _r5.firstChild!;
 })()
                 : ''));

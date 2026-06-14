@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StoreApp.ts
 ---
-import { template, clone, _text, _prop } from '@neuralfog/elemix/runtime';
+import { template, clone, effect, _setText, _setProp } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 import './StoreControls';
@@ -41,7 +41,7 @@ const css = `
     .readout strong { font-size: 22px; color: var(--accent); }
 `;
 
-const _t0 = template('<p class="note">The <code>counter</code> object lives in this parent\'s reactive state and is passed down as a prop. Objects are shared by reference, so when the child mutates <code>this.props.counter.value</code>, every component subscribed to that object re-renders — including this parent.</p><div class="readout">Parent reads: <strong><!----></strong></div><store-controls></store-controls>');
+const _t0 = template('<p class="note">The <code>counter</code> object lives in this parent\'s reactive state and is passed down as a prop. Objects are shared by reference, so when the child mutates <code>this.props.counter.value</code>, every component subscribed to that object re-renders — including this parent.</p><div class="readout">Parent reads: <strong> </strong></div><store-controls></store-controls>');
 
 export class StoreApp extends Component {
     static styles = [css];
@@ -52,12 +52,12 @@ export class StoreApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1].children[0].childNodes[0];
-const _n2 = _r0.children[2];
-const _x3 = document.createTextNode('');
-_n1.replaceWith(_x3);
-_text(_x3, () => (this.state.counter.value));
-_prop(_n2, 'counter', () => (this.state.counter));
+const _n1 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.firstChild!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!;
+effect(() => {
+_setText(_n1, (this.state.counter.value));
+_setProp(_n2, 'counter', (this.state.counter));
+});
 return _r0;
 }
 }

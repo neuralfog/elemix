@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/CardListApp.ts
 ---
-import { template, clone, _event, _prop, _list } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, _list, effect, _setProp } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 import './UserCard';
@@ -87,18 +87,20 @@ export class CardListApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1].children[0];
-const _n2 = _r0.children[2].childNodes[0];
+const _n1 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstChild!;
 _event(_n1, 'click', this.add);
 _list(_n2, () => (this.state.users), (user) => user.id, (user) => (() => {
 const _r3 = clone(_t1);
-const _n4 = _r3.children[0].children[0];
-const _n5 = _r3.children[0].children[1];
-const _n6 = _r3.children[0].children[2];
-_prop(_n4, 'name', () => (user.name));
-_prop(_n4, 'role', () => (user.role));
+const _n4 = _r3.firstElementChild!.firstElementChild!;
+const _n5 = _r3.firstElementChild!.firstElementChild!.nextElementSibling!;
+const _n6 = _r3.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!;
 _event(_n5, 'click', () => this.promote(user.id));
 _event(_n6, 'click', () => this.removeUser(user.id));
+effect(() => {
+_setProp(_n4, 'name', (user.name));
+_setProp(_n4, 'role', (user.role));
+});
 return _r3.firstChild!;
 })());
 return _r0;

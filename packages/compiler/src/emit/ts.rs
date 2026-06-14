@@ -51,28 +51,8 @@ impl Emitter for TsEmitter {
         format!("// TODO[ec]: {note}")
     }
 
-    fn text(&self, node: &str, expr: &str) -> String {
-        format!("_text({node}, () => ({expr}));")
-    }
-
-    fn attr(&self, node: &str, name: &str, expr: &str) -> String {
-        format!("_attr({node}, '{name}', () => ({expr}));")
-    }
-
-    fn class(&self, node: &str, expr: &str) -> String {
-        format!("_class({node}, () => ({expr}));")
-    }
-
-    fn style(&self, node: &str, expr: &str) -> String {
-        format!("_style({node} as HTMLElement, () => ({expr}));")
-    }
-
     fn event(&self, node: &str, name: &str, handler: &str) -> String {
         format!("_event({node}, '{name}', {handler});")
-    }
-
-    fn prop(&self, node: &str, name: &str, expr: &str) -> String {
-        format!("_prop({node}, '{name}', () => ({expr}));")
     }
 
     fn model(&self, node: &str, expr: &str) -> String {
@@ -94,17 +74,54 @@ impl Emitter for TsEmitter {
     fn list(&self, anchor: &str, items: &str, key: &str, render: &str) -> String {
         format!("_list({anchor}, () => ({items}), {key}, {render});")
     }
+
+    fn set_text(&self, node: &str, expr: &str) -> String {
+        format!("_setText({node}, ({expr}));")
+    }
+
+    fn set_attr(&self, node: &str, name: &str, expr: &str) -> String {
+        format!("_setAttr({node}, '{name}', ({expr}));")
+    }
+
+    fn set_class(&self, node: &str, initial: &str, expr: &str) -> String {
+        format!("_setClass({node}, {initial}, ({expr}));")
+    }
+
+    fn set_style(&self, node: &str, expr: &str) -> String {
+        format!("_setStyle({node} as HTMLElement, ({expr}));")
+    }
+
+    fn set_prop(&self, node: &str, name: &str, expr: &str) -> String {
+        format!("_setProp({node}, '{name}', ({expr}));")
+    }
+
+    fn bind_group(&self, writes: &[String]) -> String {
+        format!("effect(() => {{\n{}\n}});", writes.join("\n"))
+    }
 }
 
-/// Render a path as TS member accesses: `.children[i]` / `.childNodes[i]` /
-/// `.firstChild`.
+/// Render a path as TS member accesses using direct-pointer navigation —
+/// `firstElementChild`/`nextElementSibling` for element steps,
+/// `firstChild`/`nextSibling` for node steps. These are O(1) pointer reads;
+/// `.children[i]`/`.childNodes[i]` go through a live collection. `!` asserts the
+/// node exists (the path is derived from the known template shape).
 fn accessor(path: &NodePath) -> String {
     let mut s = String::new();
     for step in path {
         match step {
-            Step::Child(i) => s.push_str(&format!(".children[{i}]")),
-            Step::ChildNode(i) => s.push_str(&format!(".childNodes[{i}]")),
-            Step::FirstChild => s.push_str(".firstChild"),
+            Step::Child(i) => {
+                s.push_str(".firstElementChild!");
+                for _ in 0..*i {
+                    s.push_str(".nextElementSibling!");
+                }
+            }
+            Step::ChildNode(i) => {
+                s.push_str(".firstChild!");
+                for _ in 0..*i {
+                    s.push_str(".nextSibling!");
+                }
+            }
+            Step::FirstChild => s.push_str(".firstChild!"),
         }
     }
     s

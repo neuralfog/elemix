@@ -1,64 +1,67 @@
 # Roadmap
 
-## Goals
+Target release of compiled templates `v0.9.0`
 
-***Round 1***
+![elemix speed benchmark](.roadmap/speed.png)
 
-- [x] ✅ Competitive with React, Vue and Angular
-  - [x] Faster than React and Angular, very close to Vue benchmarks
-  - [x] Weighted Geometric Mean:
-    - vue                   1.23
-    - elemix                1.32
-    - angular               1.37
-    - react 19 with hooks   1.42
-  - [x] Beats all of them on byte transfer:
-    - elemix    6.7kb
-    - vue       22.8kb
-    - react     51.4kb
-    - angular   44.2kb
-  - [x] Beats all of them on first paint:
-    - elemix    60.6
-    - vue       97.7
-    - react     228.5
-    - angular   180.8
-  - [x] I was winning in the memory department by a mile, but
-    - proxy removal
-    - automatic memo for list rendering and identity keys
-    caused a massive memory spike, a lot of tracking and object retention 😬
+![elemix memory benchmark](.roadmap/memory-transfer.png)
 
-  - [x] Framework/Lib Api has been frozen - I don't want any more changes we are in a good spot
+***Round 2*** 🏆🏆🏆
 
-### I have beaten react to the ground!! My life work is complete!! 😂😂😂
+- Sitting very high on TOP - next to GREATEST `solid`, `ivi` and `svelte` 🙇🙇🙇
+- Honestly this was way too easy 😂😂😂 
+- Most commercial frameworks just got smoked big time 💨💨💨 React 🔫 - `gitgood` 🤓
+- Pulled nice distance from `vue 3` and `lit` ♥️🥹
+- No cheating, driving test fully via reactive state - no manual DOM operations 🙅🙅🙅
+- Very happy with overall matrix, no yellow or red on any fields 💚💚💚
+- Not the fastest, but incredibly consistent across the board 🏅
+- `remove row` - the fastest, faster than vanilla js ✅
+- `smallest bundle` - across the board ✅
+- `second` - on first paint ahead of vanilla js ✅
+- `lowest memory` after initial page load ✅
+- I have to be careful I may spend rest of my life optimising trying to pull ahead 😂😂😂 Too addictive 🚬
 
-***Round 2***
+- Only tested selected matrix, the full picture will be visible on full release after `PR` to official repo
 
-- [] I am bringing bigger guns this time
-  - [] Now we are going after the rest of the party!!
-  - [] Benchmark is purely focused on hyper optimisation for list rendering, so yeah, tuff!! 😂😂😂
+![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
-**If goals cannot be achieved, further work will be terminated as there is no point working on slop**
+🦇🦇🦇
 
-## Compiler - We don't React. We compile. 😂😂😂
-
-☄️ It just happened. This just works 🥸
-
-Target release of fully compiled framework is `v0.9.0`
+***Officially not a slop, satisfied with results so further work will continue***
 
 ## TODOS
 
-- [] WASM package needs it's own readme 🤔
+- [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
+- [] Add elemix to official benchmarks
+- [] WASM package needs its own readme 🤔
 - [] Poke at sourcemaps at some point ⏰️⏰️
-- [] `onMutation` - Hmmm... Added for one specific reason, detect DOM mutations in an async context, do I still need this ??
-    Renderer is fully sync now, what it should be, no `ticking`, no waiting 🤔
 - [] Design `compiler hints`
-- [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
+- [] Design a feature `analyzer` for templates `prop` typechecking `cli` only!!
+  I have a repo in graveyard already in `typescript` 🤔
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
-- [] Update `perf` peronal repo with new toolchain and compiled version of framework ⚡️⚡️
-- [] Got to check behaviour of vite plugin on more complicated projects - many files etc
-- [] Render Cost Table looks suspicious - 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
-- [] Run official benchamrks and 👀👀
+***Optimisation Phase ⚙️🔨🪛***
+
+- Bundle size `2.74kB` - most likely final form 😰
+- Optimised a lot, emitted code and some obvious things in runtime, but this gets to the point that is very hard
+  to move a needle and everything just becomes a trade off... I will park it here 🙂‍↕️🙂‍↕️
+
+***Update Personal Perf Repo 🏁🏁🏁***
+
+- All dependencies updated and there were no issues whatsoever with anything, shite 💩 just works 🤓
+- Compilation with vite plugin just works, no hiccups whatsoever ⚙️
+- HMR just works with `compalerino` 🙌😎
+- Single `state` instead of `signal` was a good choice, there is also no shitty 💩 `foo.value` all over the place, this
+  feels clean now ✨
+- Cleaned up export barrels, so much better 🏋
+- App feels way snappier than before, feels good!! 👌
+- Chrome performance, first paint dropped by a mile 🚗
+- Memory profile also looks better at a glance 🕵 Will do more digging later 🧠🧠🧠
+- Ticks are a tad slower on 10k compared to the old renderer, but hey who the hell renders 10k components with ticking state
+  (`animationFrame`) on every component coming from 3 different sources 😂 Yeah try having that in React - good luck 🍀
+
+## Compiler - We don't React. We compile. 😂😂😂
 
 ### Phase 3 - Why would you use a fork for eating soup 🍴 Packaging and Tooling 🛠️
 
@@ -80,7 +83,7 @@ Target release of fully compiled framework is `v0.9.0`
 
 ***Compiler as WASM ⚙️⚙️⚙️***
 
-- The whole `compalerino` served as WASM module 🕸️🦀 playground can transpile on every keystroke 🤯
+- The whole `compalerino` served as a WASM module 🕸️🦀 playground can transpile on every keystroke 🤯
 - Went single crate, feature gated - no crate split shenanigans, simplicity wins 🧈
 - `compile()` is pure `oxc`, zero IO, so it crosses the wasm boundary squeaky clean - only the filesystem/CLI
   bits (`clap`, `glob`, file scanning) get gated out behind a feature 🚪
@@ -120,11 +123,11 @@ Target release of fully compiled framework is `v0.9.0`
 This went better than I expected:
 - Almost all tests in elemix have been removed now, decided to keep only tests related to package orchestration
   and render cost, old tests got me here, but they were only transient. So smash that delete button big time.
-  Deleting code my favourite activity.
+  Deleting code is my favourite activity.
 - Full integration testing happens in the compiler package, rust unit tests, compiler output. Compiled components
   passed through `typescript` and exhaustively tested for interaction with storybook.
 - The idea of snapshotting was kinda cute, well, it did not work. I caught 3 different bugs related to emitted code by running
-  components in real browser environment 💪💪💪
+  components in a real browser environment 💪💪💪
 - Treat it as a first unoptimised pass - we will see what the benchmarks say, not getting my hopes up 🙈
 - Entire runtime has been dropped 🌟
 - Open for possibilities of custom `pragma like` hints that will be trivial to implement ❤️
@@ -153,7 +156,7 @@ What went well:
   created a nice contract that is hard to break
 - Runtime layer was a good idea - exposing a minimal integration layer that generated code
   can call into, this will simplify code generation as the contract is already established
-- Rewritten reactivity model heavily inspired by solid that just works. Channeling Ryan Carniato.
+- Rewritten reactivity model heavily inspired by Solid that just works. Channeling Ryan Carniato.
   There is no need to reinvent the wheel.
 - I had a completely different idea of how to handle generated code, it was supposed to be a bolt on
   for existing instances... Well rewrite in place - basically trying to do zero cost abstraction here.
@@ -236,7 +239,7 @@ This will be a headache if I get there 😂❤️😂
   - [x] Kill this thing with fire 🔥🔥🔥
   - [x] Unnecessary dance with virtual attr and holes `value=${}` assignment just works in a reactive manner 🤔
 - [x] Rust 🤮 + OXC the javascript toolchain - battle tested, there is no better alternative
-  - [x] Unless I go my own way and write it from scratch in Zig, Odin or Ocaml 😂
+  - [x] Unless I go my own way and write it from scratch in Zig, Odin or OCaml 😂
   - [x] Not sure if it's worth the pain though when I have a toolchain that I can use off the shelf
   - [x] Dependency chain is not an issue as I can freeze version by compiled executable
 - [x] Api has to stay unchanged - this is a must!!
@@ -291,3 +294,39 @@ This will be a headache if I get there 😂❤️😂
 - [x] Finish single tag release for all packages, automated publishing via github actions
 - [x] Add changelogs, refer to `https://github.com/brownhounds/migoro` for a full implementation with releases and workflows
 - [x] Release v0.9.0-dev.0
+- [x] Update `perf` personal repo with new toolchain and compiled version of framework ⚡️⚡️
+- [x] Got to check behaviour of vite plugin on more complicated projects - many files etc - Just works!!
+- [x] Render Cost Table looks suspicious - 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
+  There was a bug!! 🐛🐛🐛
+- [x] `onMutation` - Hmmm... Added for one specific reason, detect DOM mutations in an async context, do I still need this ??
+    Renderer is fully sync now, what it should be, no `ticking`, no waiting 🤔 - has been removed, not needed anymore!
+- [x] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy. - Not an issue at all!! 🚝🚝🚝
+- [x] Run official benchmarks and 👀👀
+
+***Round 1***
+- [x] ✅ Competitive with React, Vue and Angular
+  - [x] Faster than React and Angular, very close to Vue benchmarks
+  - [x] Weighted Geometric Mean:
+    - vue                   1.23
+    - elemix                1.32
+    - angular               1.37
+    - react 19 with hooks   1.42
+  - [x] Beats all of them on byte transfer:
+    - elemix    6.7kb
+    - vue       22.8kb
+    - react     51.4kb
+    - angular   44.2kb
+  - [x] Beats all of them on first paint:
+    - elemix    60.6
+    - vue       97.7
+    - react     228.5
+    - angular   180.8
+  - [x] I was winning in the memory department by a mile, but
+    - proxy removal
+    - automatic memo for list rendering and identity keys
+    caused a massive memory spike, a lot of tracking and object retention 😬
+
+  - [x] Framework/Lib Api has been frozen - I don't want any more changes we are in a good spot
+  - [x] I am bringing bigger guns this time
+    - [x] Now we are going after the rest of the party!!
+    - [x] Benchmark is purely focused on hyper optimisation for list rendering, so yeah, tuff!! 😂😂😂

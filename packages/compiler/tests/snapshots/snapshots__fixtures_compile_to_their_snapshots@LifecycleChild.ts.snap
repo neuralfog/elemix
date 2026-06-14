@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/LifecycleChild.ts
 ---
-import { template, clone, _text } from '@neuralfog/elemix/runtime';
+import { template, clone, effect, _setText } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent } from '@neuralfog/elemix';
 
 import { record } from './LifecycleStore';
@@ -35,20 +35,18 @@ export class LifecycleChild extends Component<ChildProps> {
         record('onMount');
     }
 
-    onMutation(): void {
-        record('onMutation');
-    }
-
     onDispose(): void {
         record('onDispose');
     }
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[0].childNodes[1];
+const _n1 = _r0.firstElementChild!.firstChild!.nextSibling!;
 const _x2 = document.createTextNode('');
 _n1.replaceWith(_x2);
-_text(_x2, () => (this.props.tick));
+effect(() => {
+_setText(_x2, (this.props.tick));
+});
 return _r0;
 }
 }

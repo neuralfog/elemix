@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/AttrApp.ts
 ---
-import { template, clone, _text, _attr, _event } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, effect, _setText, _setAttr } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 type State = {
@@ -66,7 +66,7 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _t0 = template('<p class="note">Everything in a template is an attribute. <code>_attr</code> handles interpolated values (<code>href</code>), <code>data-*</code>/<code>aria-*</code>, and boolean attributes that toggle their presence (<code>hidden</code>).</p><a class="link">Open profile #<!----></a><span class="badge"><!----></span><div class="secret">Secret content</div><button>next user</button><button>rename</button><button>toggle secret</button>');
+const _t0 = template('<p class="note">Everything in a template is an attribute. <code>_attr</code> handles interpolated values (<code>href</code>), <code>data-*</code>/<code>aria-*</code>, and boolean attributes that toggle their presence (<code>hidden</code>).</p><a class="link">Open profile #<!----></a><span class="badge"> </span><div class="secret">Secret content</div><button>next user</button><button>rename</button><button>toggle secret</button>');
 
 export class AttrApp extends Component {
     static styles = [css];
@@ -91,28 +91,28 @@ export class AttrApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1];
-const _n2 = _r0.children[1].childNodes[1];
-const _n3 = _r0.children[2];
-const _n4 = _r0.children[2].childNodes[0];
-const _n5 = _r0.children[3];
-const _n6 = _r0.children[4];
-const _n7 = _r0.children[5];
-const _n8 = _r0.children[6];
-_attr(_n1, 'href', () => (`/users/${this.state.userId}`));
-_attr(_n1, 'title', () => (this.state.label));
+const _n1 = _r0.firstElementChild!.nextElementSibling!;
+const _n2 = _n1.firstChild!.nextSibling!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!;
+const _n4 = _n3.firstChild!;
+const _n5 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n6 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n7 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n8 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
 const _x9 = document.createTextNode('');
 _n2.replaceWith(_x9);
-_text(_x9, () => (this.state.userId));
-_attr(_n3, 'data-count', () => (this.state.userId));
-_attr(_n3, 'aria-label', () => (this.state.label));
-const _x10 = document.createTextNode('');
-_n4.replaceWith(_x10);
-_text(_x10, () => (this.state.label));
-_attr(_n5, 'hidden', () => (this.state.collapsed));
 _event(_n6, 'click', this.next);
 _event(_n7, 'click', this.rename);
 _event(_n8, 'click', this.toggle);
+effect(() => {
+_setAttr(_n1, 'href', (`/users/${this.state.userId}`));
+_setAttr(_n1, 'title', (this.state.label));
+_setText(_x9, (this.state.userId));
+_setAttr(_n3, 'data-count', (this.state.userId));
+_setAttr(_n3, 'aria-label', (this.state.label));
+_setText(_n4, (this.state.label));
+_setAttr(_n5, 'hidden', (this.state.collapsed));
+});
 return _r0;
 }
 }

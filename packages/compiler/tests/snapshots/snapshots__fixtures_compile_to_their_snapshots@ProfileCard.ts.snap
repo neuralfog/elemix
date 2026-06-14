@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ProfileCard.ts
 ---
-import { template, clone, _text } from '@neuralfog/elemix/runtime';
+import { template, clone, effect, _setText } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent } from '@neuralfog/elemix';
 
 type Props = {
@@ -31,29 +31,25 @@ const css = `
     .likes { margin-left: auto; font-size: 15px; font-weight: 600; }
 `;
 
-const _t0 = template('<div class="card"><div class="avatar"><!----></div><div class="info"><strong><!----></strong><span><!----></span></div><div class="likes">❤️ <!----></div></div>');
+const _t0 = template('<div class="card"><div class="avatar"> </div><div class="info"><strong> </strong><span> </span></div><div class="likes">❤️ <!----></div></div>');
 
 export class ProfileCard extends Component<Props> {
     static styles = [css];
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[0].children[0].childNodes[0];
-const _n2 = _r0.children[0].children[1].children[0].childNodes[0];
-const _n3 = _r0.children[0].children[1].children[1].childNodes[0];
-const _n4 = _r0.children[0].children[2].childNodes[1];
+const _n1 = _r0.firstElementChild!.firstElementChild!.firstChild!;
+const _n2 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!.firstChild!;
+const _n3 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!.firstChild!;
+const _n4 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.firstChild!.nextSibling!;
 const _x5 = document.createTextNode('');
-_n1.replaceWith(_x5);
-_text(_x5, () => (this.props.name.charAt(0)));
-const _x6 = document.createTextNode('');
-_n2.replaceWith(_x6);
-_text(_x6, () => (this.props.name));
-const _x7 = document.createTextNode('');
-_n3.replaceWith(_x7);
-_text(_x7, () => (this.props.role));
-const _x8 = document.createTextNode('');
-_n4.replaceWith(_x8);
-_text(_x8, () => (this.props.likes));
+_n4.replaceWith(_x5);
+effect(() => {
+_setText(_n1, (this.props.name.charAt(0)));
+_setText(_n2, (this.props.name));
+_setText(_n3, (this.props.role));
+_setText(_x5, (this.props.likes));
+});
 return _r0;
 }
 }

@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StoreControls.ts
 ---
-import { template, clone, _text, _event } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, effect, _setText } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent } from '@neuralfog/elemix';
 
 type Props = {
@@ -46,7 +46,7 @@ const css = `
     }
 `;
 
-const _t0 = template('<div class="panel"><span class="label">Child controls</span><div class="buttons"><button>−</button><span class="value"><!----></span><button>+</button></div></div>');
+const _t0 = template('<div class="panel"><span class="label">Child controls</span><div class="buttons"><button>−</button><span class="value"> </span><button>+</button></div></div>');
 
 export class StoreControls extends Component<Props> {
     static styles = [css];
@@ -61,14 +61,14 @@ export class StoreControls extends Component<Props> {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[0].children[1].children[0];
-const _n2 = _r0.children[0].children[1].children[1].childNodes[0];
-const _n3 = _r0.children[0].children[1].children[2];
+const _n1 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!;
+const _n2 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!.firstChild!;
+const _n3 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!;
 _event(_n1, 'click', this.dec);
-const _x4 = document.createTextNode('');
-_n2.replaceWith(_x4);
-_text(_x4, () => (this.props.counter.value));
 _event(_n3, 'click', this.inc);
+effect(() => {
+_setText(_n2, (this.props.counter.value));
+});
 return _r0;
 }
 }

@@ -1,5 +1,4 @@
-import { effect, collect, dispose, type Scope } from './reactive';
-import { currentOwner, markMutation, withOwner } from './mutation';
+import { effect, collect, dispose, untrack, type Scope } from './reactive';
 import { mergeClasses } from '../utilities';
 
 type Getter<T> = () => T;
@@ -34,68 +33,18 @@ const computeLIS = (arr: number[]): number[] => {
     return lis;
 };
 
-export const template = (markup: string): HTMLTemplateElement => {
+export const template = (markup: string): DocumentFragment => {
     const tpl = document.createElement('template');
     tpl.innerHTML = markup;
-    return tpl;
+    return document.importNode(tpl.content, true);
 };
 
-export const clone = (tpl: HTMLTemplateElement): DocumentFragment =>
-    tpl.content.cloneNode(true) as DocumentFragment;
-
-export const _text = (node: Text, get: Getter<unknown>): void => {
-    const owner = currentOwner();
-    effect(() => {
-        const next = toText(get());
-        if (node.data === next) return;
-        node.data = next;
-        markMutation(owner);
-    });
-};
-
-export const _attr = (
-    el: Element,
-    name: string,
-    get: Getter<unknown>,
-): void => {
-    const owner = currentOwner();
-    let last: string | null | undefined;
-    effect(() => {
-        const value = get();
-        const next =
-            value === false || value === null || value === undefined
-                ? null
-                : value === true
-                  ? ''
-                  : String(value);
-        if (next === last) return;
-        last = next;
-        if (next === null) el.removeAttribute(name);
-        else el.setAttribute(name, next);
-        markMutation(owner);
-    });
-};
+export const clone = (master: DocumentFragment): DocumentFragment =>
+    master.cloneNode(true) as DocumentFragment;
 
 type PropTarget = {
     props?: Record<string, unknown>;
     __pendingProps?: Record<string, unknown>;
-};
-
-export const _prop = (
-    el: Element,
-    name: string,
-    get: Getter<unknown>,
-): void => {
-    const target = el as unknown as PropTarget;
-    effect(() => {
-        const value = get();
-        if (target.props) {
-            target.props[name] = value;
-            return;
-        }
-        if (!target.__pendingProps) target.__pendingProps = {};
-        target.__pendingProps[name] = value;
-    });
 };
 
 type OnModelEl = HTMLInputElement & {
@@ -106,12 +55,10 @@ export const _model = (
     el: HTMLInputElement,
     get: Getter<{ value: string }>,
 ): void => {
-    const owner = currentOwner();
     effect(() => {
         const ref = get();
         if (el.value === ref.value) return;
         el.value = ref.value;
-        markMutation(owner);
     });
     el.oninput = (): void => {
         const ref = get();
@@ -142,14 +89,13 @@ export const _ref = (el: Element, ref: { value: unknown }): void => {
 };
 
 export const _child = (anchor: Node, get: Getter<unknown>): void => {
-    const owner = currentOwner();
     let current: Node | null = null;
     let scopes = new Set<Scope>();
     effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
         const sink = new Set<Scope>();
-        const value = collect(sink, () => withOwner(owner, () => get()));
+        const value = collect(sink, () => get());
         const next =
             value instanceof Node
                 ? value
@@ -166,7 +112,6 @@ export const _child = (anchor: Node, get: Getter<unknown>): void => {
             parent.insertBefore(next, anchor);
         }
         current = next;
-        markMutation(owner);
     });
 };
 
@@ -176,7 +121,6 @@ export const _list = <T>(
     keyFn: (item: T, index: number) => unknown,
     render: (item: T, index: number) => Node,
 ): void => {
-    const owner = currentOwner();
     let nodes = new Map<unknown, Node>();
     const rowScopes = new Map<unknown, Set<Scope>>();
     effect(() => {
@@ -185,34 +129,61 @@ export const _list = <T>(
         const list = items();
         const next = new Map<unknown, Node>();
         const keys: unknown[] = new Array(list.length);
-        let changed = false;
 
-        for (let i = 0; i < list.length; i++) {
-            const key = keyFn(list[i], i);
-            keys[i] = key;
-            let node = nodes.get(key);
-            if (!node) {
-                const sink = new Set<Scope>();
-                const item = list[i];
-                const index = i;
-                node = collect(sink, () =>
-                    withOwner(owner, () => render(item, index)),
-                );
-                rowScopes.set(key, sink);
-                changed = true;
+        untrack(() => {
+            for (let i = 0; i < list.length; i++) {
+                const key = keyFn(list[i], i);
+                keys[i] = key;
+                let node = nodes.get(key);
+                if (!node) {
+                    const sink = new Set<Scope>();
+                    const item = list[i];
+                    const index = i;
+                    node = collect(sink, () => render(item, index));
+                    rowScopes.set(key, sink);
+                }
+                next.set(key, node);
             }
-            next.set(key, node);
-        }
+        });
 
-        for (const [key, node] of nodes) {
-            if (!next.has(key)) {
-                (node as ChildNode).remove();
+        let survivors = 0;
+        for (const key of nodes.keys()) if (next.has(key)) survivors++;
+        if (nodes.size > 0 && survivors === 0) {
+            let first: Node | undefined;
+            let last: Node | undefined;
+            for (const node of nodes.values()) {
+                if (!first) first = node;
+                last = node;
+            }
+            if (
+                first === parent.firstChild &&
+                (last as Node).nextSibling === anchor &&
+                anchor.nextSibling === null
+            ) {
+                (parent as Element).replaceChildren(anchor);
+            } else {
+                const range = document.createRange();
+                range.setStartBefore(first as Node);
+                range.setEndAfter(last as Node);
+                range.deleteContents();
+            }
+            for (const key of nodes.keys()) {
                 const sink = rowScopes.get(key);
                 if (sink) {
                     for (const scope of sink) dispose(scope);
                     rowScopes.delete(key);
                 }
-                changed = true;
+            }
+        } else {
+            for (const [key, node] of nodes) {
+                if (!next.has(key)) {
+                    (node as ChildNode).remove();
+                    const sink = rowScopes.get(key);
+                    if (sink) {
+                        for (const scope of sink) dispose(scope);
+                        rowScopes.delete(key);
+                    }
+                }
             }
         }
 
@@ -237,66 +208,111 @@ export const _list = <T>(
         const lis = computeLIS(seq);
         for (let i = 0; i < lis.length; i++) keep[seqPos[lis[i]]] = 1;
 
-        for (let i = keys.length - 1; i >= 0; i--) {
-            if (!fresh[i] && keep[i]) continue;
-            const node = next.get(keys[i]) as Node;
+        let i = keys.length - 1;
+        while (i >= 0) {
+            if (!fresh[i] && keep[i]) {
+                i--;
+                continue;
+            }
             const ref =
                 i + 1 < keys.length ? (next.get(keys[i + 1]) as Node) : anchor;
-            if (node.nextSibling !== ref) {
-                parent.insertBefore(node, ref);
-                changed = true;
+            if (fresh[i]) {
+                let j = i;
+                while (j - 1 >= 0 && fresh[j - 1]) j--;
+                if (j === i) {
+                    parent.insertBefore(next.get(keys[i]) as Node, ref);
+                } else {
+                    const frag = document.createDocumentFragment();
+                    for (let k = j; k <= i; k++)
+                        frag.appendChild(next.get(keys[k]) as Node);
+                    parent.insertBefore(frag, ref);
+                }
+                i = j - 1;
+            } else {
+                const node = next.get(keys[i]) as Node;
+                if (node.nextSibling !== ref) {
+                    parent.insertBefore(node, ref);
+                }
+                i--;
             }
         }
 
         nodes = next;
-        if (changed) markMutation(owner);
     });
 };
 
-export const _class = (el: Element, get: Getter<unknown>): void => {
-    const owner = currentOwner();
-    const initial = el.getAttribute('class') ?? '';
-    let last: string | undefined;
-    effect(() => {
-        const value = get();
-        let dynamic = '';
-        if (typeof value === 'string') {
-            dynamic = value;
-        } else if (value !== null && typeof value === 'object') {
-            for (const [name, on] of Object.entries(
-                value as Record<string, unknown>,
-            )) {
-                if (on) dynamic += dynamic.length ? ` ${name}` : name;
-            }
-        }
-        const next = mergeClasses(initial, dynamic);
-        if (next === last) return;
-        last = next;
-        el.setAttribute('class', next);
-        markMutation(owner);
-    });
+type Cache = { __t?: string; __c?: string; __s?: string };
+
+export const _setText = (node: Text, value: unknown): void => {
+    const next = toText(value);
+    const n = node as Text & Cache;
+    if (n.__t === next) return;
+    n.__t = next;
+    node.data = next;
 };
 
-export const _style = (el: HTMLElement, get: Getter<unknown>): void => {
-    const owner = currentOwner();
-    let last: string | undefined;
-    effect(() => {
-        const value = get();
-        let css = '';
-        if (typeof value === 'string') {
-            css = value;
-        } else if (value !== null && typeof value === 'object') {
-            for (const [name, v] of Object.entries(
-                value as Record<string, unknown>,
-            )) {
-                if (v !== null && v !== undefined && v !== false) {
-                    css += `${name}:${String(v)};`;
-                }
+export const _setAttr = (el: Element, name: string, value: unknown): void => {
+    const next =
+        value === false || value === null || value === undefined
+            ? null
+            : value === true
+              ? ''
+              : String(value);
+    const cache = el as unknown as Record<string, string | null | undefined>;
+    const key = `__a_${name}`;
+    if (cache[key] === next) return;
+    cache[key] = next;
+    if (next === null) el.removeAttribute(name);
+    else el.setAttribute(name, next);
+};
+
+export const _setClass = (
+    el: Element,
+    initial: string,
+    value: unknown,
+): void => {
+    let dynamic = '';
+    if (typeof value === 'string') {
+        dynamic = value;
+    } else if (value !== null && typeof value === 'object') {
+        for (const [name, on] of Object.entries(
+            value as Record<string, unknown>,
+        )) {
+            if (on) dynamic += dynamic.length ? ` ${name}` : name;
+        }
+    }
+    const next = mergeClasses(initial, dynamic);
+    const e = el as Element & Cache;
+    if (e.__c === next) return;
+    e.__c = next;
+    el.setAttribute('class', next);
+};
+
+export const _setStyle = (el: HTMLElement, value: unknown): void => {
+    let css = '';
+    if (typeof value === 'string') {
+        css = value;
+    } else if (value !== null && typeof value === 'object') {
+        for (const [name, v] of Object.entries(
+            value as Record<string, unknown>,
+        )) {
+            if (v !== null && v !== undefined && v !== false) {
+                css += `${name}:${String(v)};`;
             }
         }
-        if (css === last) return;
-        last = css;
-        el.style.cssText = css;
-        markMutation(owner);
-    });
+    }
+    const e = el as HTMLElement & Cache;
+    if (e.__s === css) return;
+    e.__s = css;
+    el.style.cssText = css;
+};
+
+export const _setProp = (el: Element, name: string, value: unknown): void => {
+    const target = el as unknown as PropTarget;
+    if (target.props) {
+        target.props[name] = value;
+        return;
+    }
+    if (!target.__pendingProps) target.__pendingProps = {};
+    target.__pendingProps[name] = value;
 };

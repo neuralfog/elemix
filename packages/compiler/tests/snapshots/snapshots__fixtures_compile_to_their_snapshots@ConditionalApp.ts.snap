@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ConditionalApp.ts
 ---
-import { template, clone, _text, _event, _child } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, _child, effect, _setText } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 type State = {
@@ -74,7 +74,7 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
-const _t0 = template('<p class="note">Conditionals are just JavaScript in the template. A ternary swaps between two templates; a ternary with an empty branch (<code>: \'\'</code>) renders nothing.</p><div class="panel"><!----> <!----></div><div class="buttons"><button><!----></button><button class="ghost"><!----></button></div>');
+const _t0 = template('<p class="note">Conditionals are just JavaScript in the template. A ternary swaps between two templates; a ternary with an empty branch (<code>: \'\'</code>) renders nothing.</p><div class="panel"><!----> <!----></div><div class="buttons"><button> </button><button class="ghost"> </button></div>');
 const _t1 = template('<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>');
 const _t2 = template('<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>');
 const _t3 = template('<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>');
@@ -97,12 +97,12 @@ export class ConditionalApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1].childNodes[0];
-const _n2 = _r0.children[1].childNodes[2];
-const _n3 = _r0.children[2].children[0];
-const _n4 = _r0.children[2].children[0].childNodes[0];
-const _n5 = _r0.children[2].children[1];
-const _n6 = _r0.children[2].children[1].childNodes[0];
+const _n1 = _r0.firstElementChild!.nextElementSibling!.firstChild!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!;
+const _n4 = _n3.firstChild!;
+const _n5 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!;
+const _n6 = _n5.firstChild!;
 _child(_n1, () => (this.state.loggedIn
                     ? (() => {
 const _r7 = clone(_t1);
@@ -119,13 +119,11 @@ return _r9.firstChild!;
 })()
                     : ''));
 _event(_n3, 'click', this.toggleLogin);
-const _x10 = document.createTextNode('');
-_n4.replaceWith(_x10);
-_text(_x10, () => (this.state.loggedIn ? 'Sign out' : 'Sign in'));
 _event(_n5, 'click', this.toggleTip);
-const _x11 = document.createTextNode('');
-_n6.replaceWith(_x11);
-_text(_x11, () => (this.state.showTip ? 'Hide tip' : 'Show tip'));
+effect(() => {
+_setText(_n4, (this.state.loggedIn ? 'Sign out' : 'Sign in'));
+_setText(_n6, (this.state.showTip ? 'Hide tip' : 'Show tip'));
+});
 return _r0;
 }
 }

@@ -24,6 +24,10 @@ pub enum Slot {
     Attr(String),
     /// An element-content hole, addressed by a `<!---->` anchor in the markup.
     Content,
+    /// A plain text hole that is the sole child of its element: the markup bakes a
+    /// real text node, grabbed and written directly — no comment anchor, no
+    /// `createTextNode`/`replaceWith` at render time.
+    Text,
 }
 
 /// A located hole after parsing: how to reach its node, where it sits, and the

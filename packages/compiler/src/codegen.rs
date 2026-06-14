@@ -97,7 +97,12 @@ fn gen_template(
         .map(|b| grab(ctx, emitter, &root, &b.path, &mut grabbed, &mut lines))
         .collect();
 
-    // Phase 2: emit the bindings against the pre-grabbed vars.
+    // Phase 2: emit the bindings against the pre-grabbed vars. Value writes
+    // (text/attr/class/style/prop) are collected into `group` and wrapped in ONE
+    // effect per template instance, so a row costs a single Scope/Set rather than
+    // one per binding. Their one-time setup (text anchors, class-initial capture)
+    // stays inline; structural (list/child) and wiring (event/model/…) emit as-is.
+    let mut group: Vec<String> = Vec::new();
     for (b, node) in bindings.iter().zip(&nodes) {
         let name = b.name.as_deref().unwrap_or("");
         match b.kind {
@@ -106,20 +111,28 @@ fn gen_template(
             }
             BindingKind::List => lines.push(lower_list(&b.expr, node, ctx, emitter)),
             BindingKind::Child => lines.extend(lower_child(&b.expr, node, ctx, emitter)),
+            BindingKind::Text if b.baked => group.push(emitter.set_text(node, &b.expr)),
             BindingKind::Text => {
                 let tnode = ctx.var("x");
                 lines.push(emitter.text_anchor(&tnode, node));
-                lines.push(emitter.text(&tnode, &b.expr));
+                group.push(emitter.set_text(&tnode, &b.expr));
             }
-            BindingKind::Attr => lines.push(emitter.attr(node, name, &b.expr)),
-            BindingKind::Class => lines.push(emitter.class(node, &b.expr)),
-            BindingKind::Style => lines.push(emitter.style(node, &b.expr)),
+            BindingKind::Attr => group.push(emitter.set_attr(node, name, &b.expr)),
+            // A class binding fully absorbs any static class into its expression
+            // (`class="a ${x}"` → one dynamic value), so the initial base is always
+            // empty — no need to read it back off the DOM.
+            BindingKind::Class => group.push(emitter.set_class(node, "''", &b.expr)),
+            BindingKind::Style => group.push(emitter.set_style(node, &b.expr)),
+            BindingKind::Prop => group.push(emitter.set_prop(node, name, &b.expr)),
             BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
-            BindingKind::Prop => lines.push(emitter.prop(node, name, &b.expr)),
             BindingKind::Model => lines.push(emitter.model(node, &b.expr)),
             BindingKind::OnModel => lines.push(emitter.onmodel(node, &b.expr)),
             BindingKind::Ref => lines.push(emitter.reference(node, &b.expr)),
         }
+    }
+
+    if !group.is_empty() {
+        lines.push(emitter.bind_group(&group));
     }
 
     lines.push(emitter.ret(&root, builder));
@@ -128,7 +141,10 @@ fn gen_template(
     body
 }
 
-/// Grab the node at `path` once, reusing the var if already grabbed.
+/// Grab the node at `path` once, reusing the var if already grabbed. To avoid
+/// re-walking from the root on every grab, walk from the longest already-grabbed
+/// node that is a prefix of `path` (common-subexpression elimination) — this is
+/// per-row hot code, so the saved `.children[i]` hops add up.
 fn grab(
     ctx: &mut Ctx,
     emitter: &dyn Emitter,
@@ -140,8 +156,19 @@ fn grab(
     if let Some((_, var)) = grabbed.iter().find(|(p, _)| p == path) {
         return var.clone();
     }
+    let from = grabbed
+        .iter()
+        .filter(|(p, _)| p.len() < path.len() && path.starts_with(p))
+        .max_by_key(|(p, _)| p.len())
+        .map(|(p, base)| (p.len(), base.clone()));
     let var = ctx.var("n");
-    lines.push(emitter.grab(&var, root, path));
+    match from {
+        Some((plen, base)) => {
+            let remaining: NodePath = path[plen..].to_vec();
+            lines.push(emitter.grab(&var, &base, &remaining));
+        }
+        None => lines.push(emitter.grab(&var, root, path)),
+    }
     grabbed.push((path.clone(), var.clone()));
     var
 }

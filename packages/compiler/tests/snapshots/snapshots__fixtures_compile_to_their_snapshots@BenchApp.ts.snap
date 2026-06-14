@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/BenchApp.ts
 ---
-import { template, clone, _text, _class, _event, _list } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, _list, effect, _setText, _setClass } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 type Row = { id: number; label: string };
@@ -59,7 +59,7 @@ const css = `
 `;
 
 const _t0 = template('<div class="bar"><button>Create 1,000 rows</button><button>Create 10,000 rows</button><button>Append 1,000 rows</button><button>Update every 10th row</button><button>Clear</button><button>Swap Rows</button></div><table><tbody><!----></tbody></table>');
-const _t1 = template('<tr><td class="col-id"><!----></td><td><a class="lbl"><!----></a></td><td><a class="remove">×</a></td></tr>');
+const _t1 = template('<tr><td class="col-id"> </td><td><a class="lbl"> </a></td><td><a class="remove">×</a></td></tr>');
 
 export class BenchApp extends Component {
     static styles = [css];
@@ -124,13 +124,13 @@ export class BenchApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[0].children[0];
-const _n2 = _r0.children[0].children[1];
-const _n3 = _r0.children[0].children[2];
-const _n4 = _r0.children[0].children[3];
-const _n5 = _r0.children[0].children[4];
-const _n6 = _r0.children[0].children[5];
-const _n7 = _r0.children[1].children[0].childNodes[0];
+const _n1 = _r0.firstElementChild!.firstElementChild!;
+const _n2 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!;
+const _n3 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!;
+const _n4 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n5 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n6 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n7 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.firstChild!;
 _event(_n1, 'click', this.run);
 _event(_n2, 'click', this.runLots);
 _event(_n3, 'click', this.add);
@@ -139,20 +139,18 @@ _event(_n5, 'click', this.clear);
 _event(_n6, 'click', this.swapRows);
 _list(_n7, () => (this.state.rows), (row) => row.id, (row) => (() => {
 const _r8 = clone(_t1);
-const _n9 = _r8.children[0];
-const _n10 = _r8.children[0].children[0].childNodes[0];
-const _n11 = _r8.children[0].children[1].children[0];
-const _n12 = _r8.children[0].children[1].children[0].childNodes[0];
-const _n13 = _r8.children[0].children[2].children[0];
-_class(_n9, () => ({ danger: this.state.selected === row.id }));
-const _x14 = document.createTextNode('');
-_n10.replaceWith(_x14);
-_text(_x14, () => (row.id));
+const _n9 = _r8.firstElementChild!;
+const _n10 = _n9.firstElementChild!.firstChild!;
+const _n11 = _n9.firstElementChild!.nextElementSibling!.firstElementChild!;
+const _n12 = _n11.firstChild!;
+const _n13 = _n9.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!;
 _event(_n11, 'click', () => this.select(row.id));
-const _x15 = document.createTextNode('');
-_n12.replaceWith(_x15);
-_text(_x15, () => (row.label));
 _event(_n13, 'click', () => this.removeRow(row.id));
+effect(() => {
+_setClass(_n9, '', ({ danger: this.state.selected === row.id }));
+_setText(_n10, (row.id));
+_setText(_n12, (row.label));
+});
 return _r8.firstChild!;
 })());
 return _r0;

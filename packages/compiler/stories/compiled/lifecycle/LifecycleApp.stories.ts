@@ -73,26 +73,21 @@ export const Default = {
         const firstEntry = logRoot.querySelector('.entry');
         expect(firstEntry?.querySelector('.n')?.textContent).toBe('1');
         expect(firstEntry?.textContent?.replace(/\s+/g, '')).toBe('1beforeMount()');
-        // baseline onMutation count after mount (the first render commit counts)
-        const mutAfterMount = count('onMutation');
-
-        // update the (mounted) child -> tick bumps and exactly one more onMutation
+        // update the (mounted) child -> tick bumps
         await userEvent.click(updateBtn);
         await flush();
         expect(
             root.querySelector('lifecycle-child')?.shadowRoot?.querySelector('.child')
                 ?.textContent,
         ).toBe('Child · tick 1');
-        expect(count('onMutation')).toBe(mutAfterMount + 1);
 
-        // a second update fires onMutation again and bumps tick to 2
+        // a second update bumps tick to 2
         await userEvent.click(updateBtn);
         await flush();
         expect(
             root.querySelector('lifecycle-child')?.shadowRoot?.querySelector('.child')
                 ?.textContent,
         ).toBe('Child · tick 2');
-        expect(count('onMutation')).toBe(mutAfterMount + 2);
 
         // unmount the child -> onDispose fires once, placeholder returns
         await userEvent.click(toggle);

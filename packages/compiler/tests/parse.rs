@@ -14,19 +14,31 @@ fn s(parts: &[&str]) -> Vec<String> {
 // ---------------------------------------------------------------------------
 
 #[test]
-fn text_hole_becomes_anchor() {
+fn sole_text_hole_bakes_a_node() {
+    // a lone text value bakes a real text node (one space) instead of a `<!---->`
+    // swap; the node index is unchanged, so paths are identical to the anchor form
     let r = parse(&s(&["<div>", "</div>"]), &s(&["count"]));
-    assert_eq!(r.markup, "<div><!----></div>");
+    assert_eq!(r.markup, "<div> </div>");
     assert_eq!(r.holes.len(), 1);
-    assert_eq!(r.holes[0].slot, Slot::Content);
+    assert_eq!(r.holes[0].slot, Slot::Text);
     assert_eq!(r.holes[0].expr, "count");
     assert_eq!(r.holes[0].path, vec![Step::Child(0), Step::ChildNode(0)]);
 }
 
 #[test]
 fn top_level_hole_has_no_element_step() {
-    // a hole with no wrapping element (e.g. a top-level `when(...)`)
+    // a hole with no wrapping element; a plain text value bakes a node
     let r = parse(&s(&["", ""]), &s(&["x"]));
+    assert_eq!(r.markup, " ");
+    assert_eq!(r.holes[0].slot, Slot::Text);
+    assert_eq!(r.holes[0].path, vec![Step::ChildNode(0)]);
+}
+
+#[test]
+fn top_level_structural_hole_keeps_its_anchor() {
+    // a structural hole (here `when(...)`) is not text, so it keeps the comment
+    // anchor even when it is the sole node
+    let r = parse(&s(&["", ""]), &s(&["when(c, () => x)"]));
     assert_eq!(r.markup, "<!---->");
     assert_eq!(r.holes[0].slot, Slot::Content);
     assert_eq!(r.holes[0].path, vec![Step::ChildNode(0)]);
@@ -57,7 +69,7 @@ fn space_between_two_holes_is_preserved() {
 #[test]
 fn nested_elements_index_correctly() {
     let r = parse(&s(&["<div><a>x</a><b>", "</b></div>"]), &s(&["y"]));
-    assert_eq!(r.markup, "<div><a>x</a><b><!----></b></div>");
+    assert_eq!(r.markup, "<div><a>x</a><b> </b></div>");
     // div=children[0]; inside div b=children[1]; anchor childNodes[0] of b
     assert_eq!(
         r.holes[0].path,
@@ -68,7 +80,7 @@ fn nested_elements_index_correctly() {
 #[test]
 fn top_level_siblings_index_correctly() {
     let r = parse(&s(&["<a></a><b>", "</b>"]), &s(&["x"]));
-    assert_eq!(r.markup, "<a></a><b><!----></b>");
+    assert_eq!(r.markup, "<a></a><b> </b>");
     assert_eq!(r.holes[0].path, vec![Step::Child(1), Step::ChildNode(0)]);
 }
 
@@ -85,8 +97,8 @@ fn void_element_counts_as_a_node() {
 #[test]
 fn source_comment_is_dropped_without_shifting_indices() {
     let r = parse(&s(&["<div><!-- note -->", "</div>"]), &s(&["x"]));
-    assert_eq!(r.markup, "<div><!----></div>");
-    // comment left no node; anchor is childNodes[0]
+    assert_eq!(r.markup, "<div> </div>");
+    // comment left no node; baked text node is childNodes[0]
     assert_eq!(r.holes[0].path, vec![Step::Child(0), Step::ChildNode(0)]);
 }
 

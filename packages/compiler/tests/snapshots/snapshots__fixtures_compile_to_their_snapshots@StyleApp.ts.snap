@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StyleApp.ts
 ---
-import { template, clone, _style, _event } from '@neuralfog/elemix/runtime';
+import { template, clone, _event, effect, _setStyle } from '@neuralfog/elemix/runtime';
 import { Component, defineComponent, state } from '@neuralfog/elemix';
 
 type State = {
@@ -68,18 +68,20 @@ export class StyleApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.children[1];
-const _n2 = _r0.children[2];
-const _n3 = _r0.children[3];
-const _n4 = _r0.children[4];
-_style(_n1 as HTMLElement, () => ({
+const _n1 = _r0.firstElementChild!.nextElementSibling!;
+const _n2 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!;
+const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n4 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+_event(_n2, 'click', this.recolor);
+_event(_n3, 'click', this.resize);
+_event(_n4, 'click', this.shade);
+effect(() => {
+_setStyle(_n1 as HTMLElement, ({
                 color: this.state.color,
                 'font-size': `${this.state.size}px`,
                 background: this.state.bg,
             }));
-_event(_n2, 'click', this.recolor);
-_event(_n3, 'click', this.resize);
-_event(_n4, 'click', this.shade);
+});
 return _r0;
 }
 }

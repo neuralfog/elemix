@@ -40,7 +40,7 @@ fn class_member_helper_is_inlined_and_spliced() {
     assert!(!out.contains("tpl`"));
     // spliced via _child, with the header template hoisted + cloned
     assert!(out.contains("_child("));
-    assert!(out.contains("<h2><!----></h2>"));
+    assert!(out.contains("<h2> </h2>"));
     assert!(out.contains(".firstChild!"));
 }
 

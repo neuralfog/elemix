@@ -103,19 +103,17 @@ export class ChatApp extends Component {
         if (!text) return;
         this.state.messages.push({ id: this.nextId(), text, me: true });
         this.state.draft.value = '';
-    };
-
-    onMutation(): void {
+        // Renders are synchronous, so the new message is already in the DOM here —
+        // scroll the log to the bottom right after sending, no lifecycle hook needed.
         const log = this.root?.querySelector('.log');
         if (log) log.scrollTop = log.scrollHeight;
-    }
+    };
 
     template = (): Template => tpl`
         <p class="note">
-            Elemix batches renders asynchronously, so a new message is not in the
-            DOM yet inside <code>send()</code>. <code>onMutation()</code> fires
-            right after the DOM is written, making it the correct place to scroll
-            this log to the bottom.
+            Renders are synchronous, so a new message is in the DOM as soon as
+            <code>send()</code> pushes it — the same handler scrolls this log to the
+            bottom.
         </p>
         <div class="log">
             ${repeat(
