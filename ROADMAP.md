@@ -55,7 +55,6 @@ Target release of fully compiled framework is `v0.9.0`
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
-- [] Release v0.9.0-dev.0
 - [] Update `perf` peronal repo with new toolchain and compiled version of framework ⚡️⚡️
 - [] Got to check behaviour of vite plugin on more complicated projects - many files etc
 - [] Render Cost Table looks suspicious - 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
@@ -291,3 +290,4 @@ This will be a headache if I get there 😂❤️😂
 - [x] Streamline release with tags ✅
 - [x] Finish single tag release for all packages, automated publishing via github actions
 - [x] Add changelogs, refer to `https://github.com/brownhounds/migoro` for a full implementation with releases and workflows
+- [x] Release v0.9.0-dev.0

@@ -29,8 +29,11 @@ package.json                                          (root)
 packages/{elemix,storybook,vite,compiler}/package.json    every workspace package
 packages/compiler/npm/*  (launcher + 6 platform pkgs)     via version.mjs, optionalDeps pinned
 packages/compiler/Cargo.toml  →  [package] version
-packages/vite  →  the @neuralfog/elemix-compiler dependency pin   (cross-dep lockstep)
 ```
+
+The vite plugin's `@neuralfog/elemix-compiler` pin is **not** bumped here — it stays at
+a published, lockfile-resolvable version so installs work, and `release-vite.yml`
+stamps it to the release version at publish time.
 
 ## ② Tag — `pnpm tag` / `pnpm tag-remove`
 

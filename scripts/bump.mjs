@@ -29,16 +29,15 @@ const next = (() => {
 })();
 
 // Text replace so only the version line changes — no reformatting churn.
+// NB: cross-package pins (e.g. the vite plugin's `@neuralfog/elemix-compiler`
+// dependency) are deliberately NOT bumped here. They must stay at a published,
+// lockfile-resolvable version so `pnpm install` works locally and in CI; the
+// release workflow stamps them to the release version at publish time.
 for (const file of files) {
-    const text = readFileSync(file, 'utf8')
-        .replace(/("version":\s*")[^"]+(")/, `$1${next}$2`)
-        // Lockstep any pinned @neuralfog/elemix-compiler[-wasm] cross-dependency
-        // (e.g. the vite plugin's pin on the native compiler it drives).
-        // `workspace:*` specs are left alone.
-        .replace(
-            /("@neuralfog\/elemix-compiler(?:-wasm)?":\s*")(?!workspace:)[^"]+(")/g,
-            `$1${next}$2`,
-        );
+    const text = readFileSync(file, 'utf8').replace(
+        /("version":\s*")[^"]+(")/,
+        `$1${next}$2`,
+    );
     writeFileSync(file, text);
     console.log(`${file} -> ${next}`);
 }
