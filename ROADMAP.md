@@ -48,12 +48,11 @@ Target release of fully compiled framework is `v0.9.0`
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
-- [] 🤷🤷🤷
-
-### Phase 3 - Packaging and Tooling 🛠️
+- [] Run benchamrks and 👀👀
 
 ## TODOS
 
+- [] Update perf repo with new toolchain and compiled version of framework ⚡️⚡️
 - [] Poke at sourcemaps at some point ⏰️⏰️
 - [] Render Cost Table looks suspicious - 4 nodes have been touched on moves, I'm pretty sure it should be just 2 🤔
 - [] Add changelogs, refer to `https://github.com/brownhounds/migoro` for a full implementation with releases and workflows
@@ -63,7 +62,7 @@ Target release of fully compiled framework is `v0.9.0`
 - [] Design `compiler hints`
 - [] At the moment the reactivity primitive is running off `defineProperty`, maybe better to swap to proxy.
 
-### Phase 3 - Why would you use a fork for eating soup 🍴
+### Phase 3 - Why would you use a fork for eating soup 🍴 Packaging and Tooling 🛠️
 
 ***Compiler As Vite Plugin 🛠️🛠️🛠️***
 
@@ -77,7 +76,7 @@ Target release of fully compiled framework is `v0.9.0`
   compiler build it ships with
 - Release pipeline mapped in `RELEASE-PIPELINE.md` 🗺️
 - Proven end to end via the throwaway repo `https://github.com/neuralfog/test-compiler` 🗑️ `pnpm prove:vite` builds a real component
-  through the published
+  through the published package
 - No source maps yet 🗺️❌ compiled output maps to `view()`, not the original `tpl`
 - HMR not explicitly tested 🤔 transform re-runs per load so it should work, just unverified
 
