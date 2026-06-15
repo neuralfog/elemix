@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StyleApp.ts
 ---
-import { template, clone, _event, effect, _setStyle } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setStyle, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type State = {
     color: string;
@@ -43,10 +43,10 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note"><code>style</code> binds an object of CSS properties (or a string). Each change re-applies only the style declaration.</p><div class="box">Styled box</div><button>color</button><button>size</button><button>background</button>');
 
 export class StyleApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         color: '#1e293b',
@@ -85,5 +85,5 @@ _setStyle(_n1 as HTMLElement, ({
 return _r0;
 }
 }
-
+StyleApp.__sheets = [..._s0];
 defineComponent('style-app', StyleApp);

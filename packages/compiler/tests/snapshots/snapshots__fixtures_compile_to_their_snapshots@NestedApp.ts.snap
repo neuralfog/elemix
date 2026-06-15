@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/NestedApp.ts
 ---
-import { template, clone, _event, _list, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _list, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type Item = { id: string; name: string };
 type Category = { id: string; name: string; items: Item[] };
@@ -69,12 +69,12 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note"><code>repeat</code> nests: the outer loop renders categories, each with its own inner <code>repeat</code> of items. Both levels are keyed, so adding an item patches only that one list.</p><div class="tree"><!----></div>');
 const _t1 = template('<div class="category"><div class="head"><strong> </strong><button>+ item</button></div><ul><!----></ul></div>');
 const _t2 = template('<li> </li>');
 
 export class NestedApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         categories: [
@@ -125,5 +125,5 @@ return _r2.firstChild!;
 return _r0;
 }
 }
-
+NestedApp.__sheets = [..._s0];
 defineComponent('nested-app', NestedApp);

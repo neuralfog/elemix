@@ -1,4 +1,4 @@
-import { Component, defineComponent, ref, state, tpl } from '@neuralfog/elemix';
+import { Component, ref, state, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Ref, Template } from '@neuralfog/elemix/types';
 
@@ -83,8 +83,8 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
+`#component #styles ${css}`
 export class ChatApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         draft: ref(''),
@@ -136,4 +136,3 @@ export class ChatApp extends Component {
     `;
 }
 
-defineComponent('chat-app', ChatApp);

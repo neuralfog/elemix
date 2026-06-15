@@ -36,7 +36,7 @@ Target release of compiled templates `v0.9.0`
 - Opt-in reactivity, drive your own updates if you like 🏇
 - `AOT` compiled templates with minimal runtime
 - Be in charge of architecture 🌉
-- Single dependency at runtime without any sub dependencies (no vulnerabilities nightmares) 👹
+- Single dependency or bundle at runtime without any sub dependencies (no vulnerabilities nightmares) 👹
 - `Constructable Stylesheet` API 💅
 - Freedom - good library, framework or api does not get in the way - wishful thinking in the current state of
   the affairs and tooling 🤮
@@ -68,24 +68,18 @@ Target release of compiled templates `v0.9.0`
 ## TODOS
 
 - [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
+- [] Add banner to rust cli - omit for --stdin
 - [] Add elemix to official benchmarks
 - [] WASM package needs its own readme 🤔
 - [] Poke at sourcemaps at some point ⏰️⏰️
 - [] Design `compiler hints`
 - [] Design a feature `analyzer` for templates `prop` typechecking `cli` only!!
-  - [] Do I want analyzer in `v0.9.0` or defere it to => `v1.0.0` 🧐
+  - [] Do I want analyzer in `v0.9.0` or defer it to => `v1.0.0` 🧐
   I have a repo in graveyard already in `typescript` 🤔
-- [] Do I need concept of `computed(() => {})` ⁉️🧐 Don't really want it... Dig in to it 🪏 Proof the
-  concept, otherwise add `computed` 🤮 The issue here - architecture has changed, the concept of computation
-  was not needed before 🧐
+  - [] Also is this going to live in compiler or separate module
 
 ## Chores
 
-- [] Why is this static ?? `public static styles?: string[];` styles get adopted in `connectedCallback`
-  - [] Leftover from decorator
-  - [] Make it non static
-  - [] Allow adopting styles during runtime (connected state)
-    - [] Use getters and setters
 - [] Release pipeline is junky ♻️ Mostly works... The order is not correct
   - [] Organize workflows in to nicer dependency chain
 
@@ -101,21 +95,28 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
-- [] Compiler hints (macros #⃣️) 🧐
-  - [] Syntax have to pass typescript typechecking phase - most likely `#component` <= This is just a valid string 🤔
-  - [] No special syntax - don't care about editors so it has to just work 🔩
-  - [] Do I make macros position line independent, maybe (global and line specific ones) ⁉️🧐
-  - [] Architecture for this has to be clean AF - ability to easily extend
-    - [] For now 2 types of macros `global` and `positioned`
-  - [] This will resolve two issues at once
-    - [] Decorators are Typescript dependent and stink 🦨
-    - [] Automatic component registration with tags derived from component classes, no more issue with name `mangling`
-      after bundling
-  - [] Watch where this is going, maybe it will lead to dynamic macros, slightly going in direction of `meta` programming 🧐
-  - [] `Compalerino` resilience
-    - [] Pass file for transpilation based on the existence of compiler hint ⁉️
-    - [] Multiple components per file
-    - [] Object destructuring in template procedure, this should already work 🤔
+***Compiler Hints #⃣️#⃣️#⃣️***
+
+- For time being the simplest possible solution to serve sole purpose of replacement for class decorator
+- `#component` auto registers the component inlining `defineComponent` procedure, if no tag name will 
+  be derived from class name. This was a headache in runtime as I had to preserve class names otherwise
+  mangling would screw references, not an issue any more. `defineComponent` will throw from custom element
+  registry level 💥
+- `#tag my-component` defines tag name for custom element #⃣️
+- `#styles ${css}` allows setting styles on component previously handled by static class field 💅
+- `#form` registers component as form member ✍️
+- The nice thing about going with string literals is that I can have dynamic values, also this is valid syntax
+  in js world 🪐
+- All fixtures are using new syntax now #⃣️
+
+- [] `Compalerino` resilience
+  - [] Pass file for transpilation based on the existence of compiler hint ⁉️
+  - [] Multiple components per file
+  - [] Object destructuring in template procedure, this should already work 🤔
+- [] Do I need concept of `computed(() => {})` ⁉️🧐 Don't really want it... Dig in to it 🪏 Proof the
+  concept, otherwise add `computed` 🤮 The issue here - architecture has changed, the concept of computation
+  was not needed before 🧐
+
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
@@ -397,3 +398,19 @@ This will be a headache if I get there 😂❤️😂
 - [x] Memory will drop drastically ✅
 - [x] Time to first paint should drop as there is less setup code before component mounts (no more template
   evaluation and tracking) ✅
+- [x] Why is this static ?? `public static styles?: string[];` styles get adopted in `connectedCallback`
+  - [x] Leftover from decorator
+  - [x] Make it non static
+  - [x] Allow adopting styles during runtime (connected state)
+    - [x] Use getters and setters
+
+- [x] Compiler hints (macros #⃣️) 🧐
+  - [x] Syntax have to pass typescript typechecking phase - most likely `#component` <= This is just a valid string 🤔
+  - [x] No special syntax - don't care about editors so it has to just work 🔩
+  - [x] Do I make macros position line independent, maybe (global and line specific ones) ⁉️🧐
+  - [x] Architecture for this has to be clean AF - ability to easily extend
+    - [x] For now 2 types of macros `global` and `positioned`
+  - [x] This will resolve two issues at once
+    - [x] Decorators are Typescript dependent and stink 🦨
+    - [x] Automatic component registration with tags derived from component classes, no more issue with name `mangling`
+      after bundling

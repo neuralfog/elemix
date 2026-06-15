@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/LifecycleApp.ts
 ---
-import { template, clone, _event, _child, effect, _setText, _setAttr, _setProp } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _child, effect, _setText, _setAttr, _setProp, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 import './LifecycleChild';
 import './LogView';
@@ -64,12 +64,12 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">Mounting and unmounting the child fires <code>beforeMount</code>, <code>onMount</code> and <code>onDispose</code>. Updating it re-renders and fires <code>onMutation</code>. Each hook appends to the log below.</p><div class="stage"><!----></div><div class="buttons"><button> </button><button>Update child</button><button class="ghost">Clear log</button></div><log-view></log-view>');
 const _t1 = template('<lifecycle-child></lifecycle-child>');
 const _t2 = template('<div class="empty">child unmounted</div>');
 
 export class LifecycleApp extends Component {
-    static styles = [css];
 
     state = state<State>({ mounted: false, tick: 0 });
 
@@ -115,5 +115,5 @@ _setAttr(_n4, 'disabled', (!this.state.mounted));
 return _r0;
 }
 }
-
+LifecycleApp.__sheets = [..._s0];
 defineComponent('lifecycle-app', LifecycleApp);

@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/DirectApp.ts
 ---
-import { template, clone, _event, effect, _setAttr, _setClass } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setAttr, _setClass, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type Toggle = 'active' | 'rounded' | 'large' | 'disabled';
 
@@ -89,10 +89,10 @@ const css = `
     .action:disabled { opacity: 0.5; cursor: not-allowed; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">Everything in a template is an attribute. A bare attribute binding sets an attribute (booleans toggle their presence); a class binding toggles classes from an object. Live DOM properties are set imperatively via a ref, never from the template.</p><div>class</div><div class="toggles"><button>active</button><button>rounded</button><button>large</button></div><label class="prop-demo"><input type="checkbox"/> Disable the button (<code>disabled</code>)</label><button class="action">Action</button>');
 
 export class DirectApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         active: true,
@@ -130,5 +130,5 @@ _setAttr(_n6, 'disabled', (this.state.disabled));
 return _r0;
 }
 }
-
+DirectApp.__sheets = [..._s0];
 defineComponent('direct-app', DirectApp);

@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/SubmitButton.ts
 ---
-import { template, clone, _event } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, _event, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 const css = `
     :host { display: inline-block; }
@@ -20,13 +20,11 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<button type="button"><slot></slot></button>');
 
 export class SubmitButton extends Component {
-    static styles = [css];
-
     static formAssociated = true;
-    declare internals: ElementInternals;
 
     submit = (): void => {
         this.internals.form?.requestSubmit();
@@ -39,5 +37,5 @@ _event(_n1, 'click', this.submit);
 return _r0;
 }
 }
-
+SubmitButton.__sheets = [..._s0];
 defineComponent('submit-button', SubmitButton);

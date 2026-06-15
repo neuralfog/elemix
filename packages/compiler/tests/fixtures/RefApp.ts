@@ -1,4 +1,4 @@
-import { Component, defineComponent, ref, state, tpl } from '@neuralfog/elemix';
+import { Component, ref, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {
@@ -58,8 +58,8 @@ const css = `
     .out { font-size: 14px; font-weight: 600; color: var(--accent); }
 `;
 
+`#component #styles ${css}`
 export class RefApp extends Component {
-    static styles = [css];
 
     input = ref<HTMLInputElement>();
 
@@ -92,4 +92,3 @@ export class RefApp extends Component {
     `;
 }
 
-defineComponent('ref-app', RefApp);

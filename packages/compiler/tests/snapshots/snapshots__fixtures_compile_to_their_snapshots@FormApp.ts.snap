@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/FormApp.ts
 ---
-import { template, clone, _event, _child, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _child, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 import './RatingInput';
 import './SubmitButton';
@@ -66,11 +66,11 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">With <code>static formAssociated = true</code>, Elemix attaches <code>ElementInternals</code>. Both the star rating and the submit button are custom elements that take part in the native form.</p><form><label>Name <input name="name" type="text" value="Ada"/></label><label>Rating <rating-input name="rating"></rating-input></label><submit-button>Submit</submit-button></form> <!---->');
 const _t1 = template('<pre class="out"> </pre>');
 
 export class FormApp extends Component {
-    static styles = [css];
 
     state = state<State>({ result: '' });
 
@@ -98,5 +98,5 @@ return _r3.firstChild!;
 return _r0;
 }
 }
-
+FormApp.__sheets = [..._s0];
 defineComponent('form-app', FormApp);

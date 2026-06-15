@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/SignalButtons.ts
 ---
-import { template, clone, _event } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, _event, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 import { counter } from './SignalStore';
 
@@ -25,10 +25,10 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<div class="buttons"><button>−</button><button>Reset</button><button>+</button></div>');
 
 export class SignalButtons extends Component {
-    static styles = [css];
 
     dec = (): void => {
         counter.count--;
@@ -53,5 +53,5 @@ _event(_n3, 'click', this.inc);
 return _r0;
 }
 }
-
+SignalButtons.__sheets = [..._s0];
 defineComponent('signal-buttons', SignalButtons);

@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/MultiStateApp.ts
 ---
-import { template, clone, _event, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type CounterState = { count: number };
 type UserState = { name: string; online: boolean };
@@ -65,10 +65,10 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">A component can hold several independent <code>state()</code> slices. Each is deeply reactive on its own — mutating <code>counter</code> re-renders only the count, never the user card, and vice versa.</p><div class="slice"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="slice"><strong class="name"> </strong><span class="status"> </span><button>toggle status</button><button>rename</button></div>');
 
 export class MultiStateApp extends Component {
-    static styles = [css];
 
     counter = state<CounterState>({ count: 0 });
     user = state<UserState>({ name: 'Ada', online: true });
@@ -110,5 +110,5 @@ _setText(_n5, (this.user.online ? 'online' : 'offline'));
 return _r0;
 }
 }
-
+MultiStateApp.__sheets = [..._s0];
 defineComponent('multi-state-app', MultiStateApp);

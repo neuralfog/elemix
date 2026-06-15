@@ -1,4 +1,4 @@
-import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
+import { Component, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {
@@ -28,8 +28,8 @@ const css = `
     }
 `;
 
+`#component #styles ${css}`
 export class CounterApp extends Component {
-    static styles = [css];
 
     state = state<State>({ count: 0 });
 
@@ -41,4 +41,3 @@ export class CounterApp extends Component {
         tpl`<button @click=${this.increment}>count is ${this.state.count}</button>`;
 }
 
-defineComponent('counter-app', CounterApp);

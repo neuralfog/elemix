@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type Props = {
@@ -41,8 +41,8 @@ const css = `
     }
 `;
 
+`#component #styles ${css}`
 export class StoreControls extends Component<Props> {
-    static styles = [css];
 
     dec = (): void => {
         this.props.counter.value--;
@@ -62,4 +62,3 @@ export class StoreControls extends Component<Props> {
     </div>`;
 }
 
-defineComponent('store-controls', StoreControls);

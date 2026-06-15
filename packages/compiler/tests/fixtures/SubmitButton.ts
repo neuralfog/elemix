@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 const css = `
@@ -15,11 +15,8 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
+`#component #form #styles ${css}`
 export class SubmitButton extends Component {
-    static styles = [css];
-
-    static formAssociated = true;
-    declare internals: ElementInternals;
 
     submit = (): void => {
         this.internals.form?.requestSubmit();
@@ -29,4 +26,3 @@ export class SubmitButton extends Component {
         tpl`<button type="button" @click=${this.submit}><slot></slot></button>`;
 }
 
-defineComponent('submit-button', SubmitButton);

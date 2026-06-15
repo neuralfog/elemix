@@ -5,19 +5,36 @@
 - `ec` — elemix compiler (this crate; the first pass).
 - `tsc` — the TypeScript compiler (the second pass). `ec` emits `.ts`; `tsc` lowers it to `.js`.
 
-Oxc already gives us a battle-tested JS/TS frontend (lex + parse + AST + spans + scopes). So we don't build a frontend or a backend - no IR optimizer, no codegen passes, no symbol tables we don't get for free. We bolt one small thing onto oxc (a mini HTML parser for the template body) and one small thing onto the output (a string/AST emitter). Everything in between is thin.
+Oxc already gives us a battle-tested JS/TS frontend (lex + parse + AST + spans + scopes). So we don't build a frontend or a backend - no IR optimizer, no codegen passes, no symbol tables we don't get for free. We bolt small things onto oxc (a mini HTML parser for the template body, a `#`-pragma scanner) and one small thing onto the output (a string/AST emitter). Everything in between is thin.
 
-`compile(source)` is just `rewrite(inline_helpers(source))` — a Splice pre-pass that folds helper templates into one self-contained template, then the rewrite that compiles it.
+`compile(source)` is four isolated string-rewriting passes over the oxc AST:
 
 ```
-.ts source
-  │
-[0] splice     inline helper templates: ${header} (local const) and          ← splice.rs::inline_helpers
-  │            ${this.fooTemplate()} (member) get folded into their hole,
-  │            leaving exactly ONE outermost template. Identity if no helpers.
+compile = merge_imports( rewrite( pragma::expand( splice::inline_helpers( source ))))
+
+[A] splice    inline helper templates: ${header} (local const) /              ← splice.rs
+  │           ${this.fooTemplate()} (member) fold into their hole, leaving
+  │           ONE outermost template. Identity if no helpers.
   ▼
-  │ oxc parse  ── AST + spans
+[B] pragma    expand `#`-pragma blocks above a class →                         ← pragma/
+  │           defineComponent + hoisted sheet() consts + __sheets + #form's
+  │           formAssociated. Identity if no pragmas. (detail ↓↓)
   ▼
+[C] rewrite   lower the class's `tpl` template member into a view()            ← rewrite.rs
+  │           (the locate→parse→classify→codegen detail below); hoist the
+  │           const template(...) consts, wire the /runtime import (only the
+  │           primitives used), drop the erased /directives import, strip the
+  │           compile-time tpl tag + the now-unused Template type import.
+  ▼
+[D] merge     fold the compiler's own '@neuralfog/elemix/runtime' imports      ← imports.rs
+  │           (pragma's + rewrite's) into one. User imports never touched.
+  ▼
+emit .ts  ── then tsc → js
+```
+
+Template lowering — what `rewrite` [C] does to the `tpl` member:
+
+```
 [1] locate     find tpl`` tagged templates                                    ← locate.rs
   │            → per template: { statics: [String], holes: [String] }
   ▼
@@ -35,13 +52,6 @@ Oxc already gives us a battle-tested JS/TS frontend (lex + parse + AST + spans +
   │            effect per template instance; structural (list/child) and
   │            wiring (event/model/ref) emit as-is.
   │            → clone(_t0) + node grabs + effect(() => { _setText(n, x) … })
-  ▼
-[5] rewrite    splice the generated view() + hoist the const template(...)     ← rewrite.rs
-  │            consts, wire the /runtime import (only the primitives used),
-  │            drop the erased /directives import, strip the compile-time
-  │            tpl tag + the now-unused Template type import
-  ▼
-emit .ts  ── then tsc → js
 ```
 
 Content holes recurse: a nested `` tpl`...` `` inside a directive's argument lowers to an
@@ -78,3 +88,56 @@ Mapping by slot/sigil: bare `name=${}` → `_setAttr`, `class=` → `_setClass`,
 A bare `${nestedTemplate}` reference (`${header}` / `${this.headerTemplate()}` that survives the
 Splice pre-pass) is the one deferred case — syntactically identical to a text value, it needs
 symbol resolution to know the referent is a template, so it currently falls through to Text.
+
+### Pragmas — component-level macros (`pragma/`)
+
+A **pragma block** is bare template-literal statement(s) directly above a component class. It
+replaces hand-written `defineComponent` calls, `static styles`, and `static formAssociated`:
+
+```ts
+`#component #tag pf-builder #styles ${css}`     // one line
+export class PfBuilder extends Component { … }
+
+`#component`; `#tag x`; `#styles ${css}`;       // or split across `;`-terminated lines
+```
+
+The design rule mirrors the rest of the compiler: **generic parsing is fully decoupled from
+directive meaning**, so adding a directive is *one field + one `resolve` arm* and `parse.rs`
+never changes.
+
+- **parse.rs** — `(statics, holes) → Vec<Directive>{name, args}`. Splits directives on `#` in the
+  *static* text only, so a `#` inside an interpolation (`${'#fff'}`) is opaque (arrives as an
+  `Arg::Expr`). Pure, no oxc.
+- **locate.rs** — oxc: find pragma statements, group contiguous runs, bind each to the next
+  `class` (error: *orphan* if none). Handles `;`-separated statements (buffered) **and**
+  no-semicolon multi-line, which JS parses as a *chained* tagged template — flattened here.
+  Note: the no-semicolon form is compiler-valid but `tsc` rejects it (`string` isn't callable),
+  so source that must typecheck uses the `;`-terminated form. Records the spans `lower` needs
+  plus the class-body-open offset (for `#form` injection).
+- **mod.rs::resolve** — **the extension point.** Folds directives into a typed `ComponentMeta`
+  (`register` / `tag` / `styles` / `form`). Unknown directive or conflicting `#tag` → error.
+  `kebab(class_name)` derives the tag when `#tag` is absent.
+- **lower.rs** — per block: hoist `const _sN = sheet(<expr>)` (deduped by expression, like the
+  template hoister), append `Class.__sheets = [...]` + `defineComponent('<tag>', Class)` after
+  the class, inject `static formAssociated = true` into the body for `#form`, strip the pragma
+  statements, prepend the `/runtime` import.
+
+Directives (closed set, independent + composable):
+
+| directive | does |
+|---|---|
+| `#component` | register the class via `defineComponent` |
+| `#tag <name>` | explicit tag; else derived `PascalCase → kebab` |
+| `#styles ${expr}` | adopt stylesheet(s); accumulates across occurrences |
+| `#form` | form-associated element (inject `static formAssociated = true`) |
+
+Tag *validity* (the required hyphen, reserved names) is **not** checked — `customElements.define`
+is the canonical validator and throws at registration (`Button → button` fails loudly there), so
+the compiler stays thin. Pragma errors surface as a leading `// [ec] pragma error: …` comment,
+never a panic — the wasm playground must survive half-typed input.
+
+The runtime targets the pragma lowering emits live in `@neuralfog/elemix/runtime`: `sheet()`
+(content-cached `CSSStyleSheet[]`), `defineComponent`, and the base `Component.adoptStyles()` /
+static `__sheets` that `connectedCallback` adopts. `#form` relies on the base reading
+`ctor.formAssociated` and attaching `internals` (typed non-optional so `#form` components use it
+without per-class narrowing).

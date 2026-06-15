@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/SignalValue.ts
 ---
-import { template, clone, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 import { counter } from './SignalStore';
 
@@ -24,10 +24,10 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<div class="value"> </div>');
 
 export class SignalValue extends Component {
-    static styles = [css];
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
@@ -38,5 +38,5 @@ _setText(_n1, (counter.count));
 return _r0;
 }
 }
-
+SignalValue.__sheets = [..._s0];
 defineComponent('signal-value', SignalValue);

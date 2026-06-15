@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import { counter } from './SignalStore';
@@ -19,10 +19,9 @@ const css = `
     }
 `;
 
+`#component #styles ${css}`
 export class SignalValue extends Component {
-    static styles = [css];
 
     template = (): Template => tpl`<div class="value">${counter.count}</div>`;
 }
 
-defineComponent('signal-value', SignalValue);

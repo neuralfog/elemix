@@ -6,8 +6,10 @@
 pub mod codegen;
 pub mod emit;
 pub mod grammar;
+pub mod imports;
 mod locate;
 pub mod lower;
+pub mod pragma;
 pub mod rewrite;
 pub mod splice;
 pub mod template;
@@ -18,9 +20,19 @@ pub mod wasm;
 pub use locate::collect_ts_files;
 pub use locate::{find_html_templates, FoundTemplate};
 
-/// Compile one source file: inline helper templates (Splice), then rewrite the
-/// `template` member into a compiled `view()`, hoisting the `template(...)`
-/// consts and wiring the runtime import.
+/// Compile one source file: inline helper templates (Splice), expand `#`-pragma
+/// blocks (component registration + styles), then rewrite the `template` member
+/// into a compiled `view()`, hoisting the `template(...)` consts and wiring the
+/// runtime import.
+///
+/// Pragma errors are surfaced as a leading comment rather than a panic — the
+/// compiler must stay alive for the in-browser playground (half-typed garbage
+/// passes through untouched).
 pub fn compile(source: &str) -> String {
-    rewrite::rewrite(&splice::inline_helpers(source))
+    let spliced = splice::inline_helpers(source);
+    let expanded = match pragma::expand(&spliced) {
+        Ok(out) => out,
+        Err(e) => format!("// [ec] pragma error: {e}\n{spliced}"),
+    };
+    imports::merge_runtime_imports(&rewrite::rewrite(&expanded))
 }

@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ConditionalApp.ts
 ---
-import { template, clone, _event, _child, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _child, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type State = {
     loggedIn: boolean;
@@ -74,13 +74,13 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">Conditionals are just JavaScript in the template. A ternary swaps between two templates; a ternary with an empty branch (<code>: \'\'</code>) renders nothing.</p><div class="panel"><!----> <!----></div><div class="buttons"><button> </button><button class="ghost"> </button></div>');
 const _t1 = template('<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>');
 const _t2 = template('<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>');
 const _t3 = template('<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>');
 
 export class ConditionalApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         loggedIn: false,
@@ -127,5 +127,5 @@ _setText(_n6, (this.state.showTip ? 'Hide tip' : 'Show tip'));
 return _r0;
 }
 }
-
+ConditionalApp.__sheets = [..._s0];
 defineComponent('conditional-app', ConditionalApp);

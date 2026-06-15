@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 const css = `
@@ -48,8 +48,8 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
+`#component #styles ${css}`
 export class RenderApp extends Component {
-    static styles = [css];
 
     count = 0;
 
@@ -80,4 +80,3 @@ export class RenderApp extends Component {
     `;
 }
 
-defineComponent('render-app', RenderApp);

@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ModelApp.ts
 ---
-import { template, clone, _model, _onmodel, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
+import { template, clone, _model, _onmodel, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, ref, state } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
 const clamp = (v: string): string => {
@@ -68,10 +68,10 @@ const css = `
     .out:last-child { margin-bottom: 0; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note"><code>~model</code> two-way binds an input to a ref. <code>~onmodel</code> runs a transform on every keystroke before the value is stored — here it clamps the number to 0–100.</p><label>Name (<code>~model</code>) <input type="text"/></label><div class="out">Hello, <!----></div><label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"/></label><div class="out">Volume: <!----></div>');
 
 export class ModelApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         name: ref('Ada'),
@@ -98,5 +98,5 @@ _setText(_x6, (this.state.volume.value));
 return _r0;
 }
 }
-
+ModelApp.__sheets = [..._s0];
 defineComponent('model-app', ModelApp);

@@ -1,4 +1,4 @@
-import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
+import { Component, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import './RatingInput';
@@ -61,8 +61,8 @@ const css = `
     }
 `;
 
+`#component #styles ${css}`
 export class FormApp extends Component {
-    static styles = [css];
 
     state = state<State>({ result: '' });
 
@@ -97,4 +97,3 @@ export class FormApp extends Component {
     `;
 }
 
-defineComponent('form-app', FormApp);

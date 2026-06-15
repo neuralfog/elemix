@@ -49,6 +49,35 @@ export const template = (markup: string): DocumentFragment => {
 export const clone = (master: DocumentFragment): DocumentFragment =>
     master.cloneNode(true) as DocumentFragment;
 
+const sheetCache = new Map<string, CSSStyleSheet>();
+
+const toSheet = (value: string | CSSStyleSheet): CSSStyleSheet => {
+    if (typeof value !== 'string') return value;
+    let cached = sheetCache.get(value);
+    if (!cached) {
+        cached = new CSSStyleSheet();
+        cached.replaceSync(value);
+        sheetCache.set(value, cached);
+    }
+    return cached;
+};
+
+export const sheet = (
+    input: string | CSSStyleSheet | ReadonlyArray<string | CSSStyleSheet>,
+): CSSStyleSheet[] =>
+    Array.isArray(input)
+        ? input.map(toSheet)
+        : [toSheet(input as string | CSSStyleSheet)];
+
+export const defineComponent = (
+    tag: string,
+    component: CustomElementConstructor,
+): void => {
+    if (customElements.get(tag) === undefined) {
+        customElements.define(tag, component);
+    }
+};
+
 type PropTarget = {
     props?: Record<string, unknown>;
     __pendingProps?: Record<string, unknown>;

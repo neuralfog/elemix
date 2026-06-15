@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/InterpApp.ts
 ---
-import { template, clone, _event, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type State = {
     first: string;
@@ -38,10 +38,10 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">Interpolation edge cases: adjacent holes with no static text between, holes separated by static text, a <code>null</code> value (renders empty), and a numeric hole.</p><p class="full"><span class="k">full:</span> <!----><!----></p><p class="dash"><span class="k">dash:</span> <!---->-<!----></p><p class="middle"><span class="k">middle:</span> [<!---->]</p><p class="num"><span class="k">num:</span> <!----></p><button>swap</button><button>set middle</button><button>inc</button>');
 
 export class InterpApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         first: 'Ada',
@@ -101,5 +101,5 @@ _setText(_x15, (this.state.n));
 return _r0;
 }
 }
-
+InterpApp.__sheets = [..._s0];
 defineComponent('interp-app', InterpApp);

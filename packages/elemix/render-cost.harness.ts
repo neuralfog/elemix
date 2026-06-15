@@ -10,13 +10,14 @@
  * only create/clear are O(n). There is no interpreter, so nothing re-reads the DOM.
  */
 import { test } from 'vitest';
-import { Component, defineComponent } from './src/component/Component';
+import { Component } from './src/component/Component';
 import {
     _list,
     _setAttr,
     _setClass,
     _setText,
     clone,
+    defineComponent,
     effect,
     template,
 } from './src/runtime';

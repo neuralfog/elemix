@@ -1,4 +1,4 @@
-import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
+import { Component, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import './StoreControls';
@@ -36,8 +36,8 @@ const css = `
     .readout strong { font-size: 22px; color: var(--accent); }
 `;
 
+`#component #styles ${css}`
 export class StoreApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         counter: { value: 0 },
@@ -58,4 +58,3 @@ export class StoreApp extends Component {
     `;
 }
 
-defineComponent('store-app', StoreApp);

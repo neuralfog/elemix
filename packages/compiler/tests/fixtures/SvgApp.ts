@@ -1,4 +1,4 @@
-import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
+import { Component, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {
@@ -33,8 +33,8 @@ const css = `
 
 const COLORS = ['#6366f1', '#ef4444', '#22c55e', '#f59e0b'];
 
+`#component #styles ${css}`
 export class SvgApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         cx: 100,
@@ -74,4 +74,3 @@ export class SvgApp extends Component {
     `;
 }
 
-defineComponent('svg-app', SvgApp);

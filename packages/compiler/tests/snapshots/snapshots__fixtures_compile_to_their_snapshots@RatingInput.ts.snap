@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/RatingInput.ts
 ---
-import { template, clone, _event, _list, effect, _setClass } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _list, effect, _setClass, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type State = {
     value: number;
@@ -27,14 +27,12 @@ const css = `
     button.star:hover { color: #fbbf24; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<div class="stars"><!----></div>');
 const _t1 = template('<button type="button">★</button>');
 
 export class RatingInput extends Component {
-    static styles = [css];
-
     static formAssociated = true;
-    declare internals: ElementInternals;
 
     state = state<State>({ value: 0 });
 
@@ -62,5 +60,5 @@ return _r2.firstChild!;
 return _r0;
 }
 }
-
+RatingInput.__sheets = [..._s0];
 defineComponent('rating-input', RatingInput);

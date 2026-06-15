@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/TodoApp.ts
 ---
-import { template, clone, _event, _model, _list, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
+import { template, clone, _event, _model, _list, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, ref, state } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
 type Todo = { id: string; text: string };
@@ -70,11 +70,11 @@ const css = `
     .remove:hover { background: rgba(239, 68, 68, 0.12); }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<h3>Todos</h3><div class="row"><input type="text" placeholder="What needs doing?"/><button class="add">Add</button></div><ul><!----></ul>');
 const _t1 = template('<li><span> </span><button class="remove">×</button></li>');
 
 export class TodoApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         draft: ref(''),
@@ -118,5 +118,5 @@ return _r4.firstChild!;
 return _r0;
 }
 }
-
+TodoApp.__sheets = [..._s0];
 defineComponent('todo-app', TodoApp);
