@@ -1,24 +1,57 @@
 export type Scope = {
     deps: Set<Set<Scope>>;
-    rerun(): void;
+    fn: () => void;
+    next: Scope | null;
 };
 
 let activeScope: Scope | null = null;
-let currentSink: Set<Scope> | null = null;
+let sink: Scope | null = null;
+let collecting = false;
+let lastScopes: Scope | null = null;
 
-export const collect = <T>(sink: Set<Scope>, fn: () => T): T => {
-    const prev = currentSink;
-    currentSink = sink;
+const runScope = (scope: Scope): void => {
+    for (const subs of scope.deps) subs.delete(scope);
+    scope.deps.clear();
+    const prev = activeScope;
+    activeScope = scope;
     try {
-        return fn();
+        scope.fn();
     } finally {
-        currentSink = prev;
+        activeScope = prev;
     }
 };
 
-export const dispose = (scope: Scope): void => {
-    for (const subs of scope.deps) subs.delete(scope);
-    scope.deps.clear();
+export const rerun = (scope: Scope): void => runScope(scope);
+
+export const collect = <T>(fn: () => T): T => {
+    const prevSink = sink;
+    const prevCollecting = collecting;
+    sink = null;
+    collecting = true;
+    try {
+        return fn();
+    } finally {
+        lastScopes = sink;
+        sink = prevSink;
+        collecting = prevCollecting;
+    }
+};
+
+export const takeScopes = (): Scope | null => {
+    const s = lastScopes;
+    lastScopes = null;
+    return s;
+};
+
+export const dispose = (head: Scope | null): void => {
+    let scope = head;
+    while (scope) {
+        for (const subs of scope.deps) subs.delete(scope);
+        scope.deps.clear();
+        const next = scope.next;
+        scope.next = null;
+        scope = next;
+    }
 };
 
 export const untrack = <T>(fn: () => T): T => {
@@ -39,27 +72,16 @@ export const track = (subs: Set<Scope>): void => {
 };
 
 export const trigger = (subs: Set<Scope>): void => {
-    for (const scope of [...subs]) scope.rerun();
+    for (const scope of [...subs]) runScope(scope);
 };
 
 export const effect = (fn: () => void): void => {
-    const scope: Scope = {
-        deps: new Set(),
-        rerun: () => run(),
-    };
-    if (currentSink) currentSink.add(scope);
-    const run = (): void => {
-        for (const subs of scope.deps) subs.delete(scope);
-        scope.deps.clear();
-        const prev = activeScope;
-        activeScope = scope;
-        try {
-            fn();
-        } finally {
-            activeScope = prev;
-        }
-    };
-    run();
+    const scope: Scope = { deps: new Set(), fn, next: null };
+    if (collecting) {
+        scope.next = sink;
+        sink = scope;
+    }
+    runScope(scope);
 };
 
 export const reactive = <T extends object>(source: T): T => {

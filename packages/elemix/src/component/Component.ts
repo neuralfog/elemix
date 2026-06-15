@@ -2,6 +2,8 @@ import { initStyles } from './styles';
 import {
     reactive,
     collect,
+    takeScopes,
+    rerun,
     dispose,
     untrack,
     type Scope,
@@ -23,7 +25,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
     public $props?: Record<string, unknown>;
     private connected = false;
-    private scopes = new Set<Scope>();
+    private scopes: Scope | null = null;
 
     public internals?: ElementInternals;
 
@@ -68,9 +70,9 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
             if (this.view) {
                 const view = this.view;
-                this.shadowRoot?.appendChild(
-                    collect(this.scopes, () => view.call(this)),
-                );
+                const frag = collect(() => view.call(this));
+                this.scopes = takeScopes();
+                this.shadowRoot?.appendChild(frag);
             }
 
             this.removeAttribute('data-cloak');
@@ -90,15 +92,19 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         queueMicrotask(() => {
             if (this.isConnected) return;
             untrack(() => {
-                for (const scope of this.scopes) dispose(scope);
-                this.scopes.clear();
+                dispose(this.scopes);
+                this.scopes = null;
                 this.onDispose?.();
             });
         });
     }
 
     public render(): void {
-        for (const scope of this.scopes) scope.rerun();
+        let scope = this.scopes;
+        while (scope) {
+            rerun(scope);
+            scope = scope.next;
+        }
     }
 
     public hasSlot(name: string): boolean {

@@ -1,4 +1,11 @@
-import { effect, collect, dispose, untrack, type Scope } from './reactive';
+import {
+    effect,
+    collect,
+    takeScopes,
+    dispose,
+    untrack,
+    type Scope,
+} from './reactive';
 import { mergeClasses } from '../utilities';
 
 type Getter<T> = () => T;
@@ -90,22 +97,22 @@ export const _ref = (el: Element, ref: { value: unknown }): void => {
 
 export const _child = (anchor: Node, get: Getter<unknown>): void => {
     let current: Node | null = null;
-    let scopes = new Set<Scope>();
+    let scopes: Scope | null = null;
     effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
-        const sink = new Set<Scope>();
-        const value = collect(sink, () => get());
+        const value = collect(() => get());
+        const fresh = takeScopes();
         const next =
             value instanceof Node
                 ? value
                 : document.createTextNode(toText(value));
         if (current === next) {
-            for (const scope of sink) dispose(scope);
+            dispose(fresh);
             return;
         }
-        for (const scope of scopes) dispose(scope);
-        scopes = sink;
+        dispose(scopes);
+        scopes = fresh;
         if (current) {
             parent.replaceChild(next, current);
         } else {
@@ -122,7 +129,7 @@ export const _list = <T>(
     render: (item: T, index: number) => Node,
 ): void => {
     let nodes = new Map<unknown, Node>();
-    const rowScopes = new Map<unknown, Set<Scope>>();
+    const rowScopes = new Map<unknown, Scope | null>();
     effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
@@ -130,24 +137,24 @@ export const _list = <T>(
         const next = new Map<unknown, Node>();
         const keys: unknown[] = new Array(list.length);
 
+        let survivors = 0;
         untrack(() => {
             for (let i = 0; i < list.length; i++) {
                 const key = keyFn(list[i], i);
                 keys[i] = key;
                 let node = nodes.get(key);
                 if (!node) {
-                    const sink = new Set<Scope>();
                     const item = list[i];
                     const index = i;
-                    node = collect(sink, () => render(item, index));
-                    rowScopes.set(key, sink);
+                    node = collect(() => render(item, index));
+                    rowScopes.set(key, takeScopes());
+                } else {
+                    survivors++;
                 }
                 next.set(key, node);
             }
         });
 
-        let survivors = 0;
-        for (const key of nodes.keys()) if (next.has(key)) survivors++;
         if (nodes.size > 0 && survivors === 0) {
             let first: Node | undefined;
             let last: Node | undefined;
@@ -168,23 +175,26 @@ export const _list = <T>(
                 range.deleteContents();
             }
             for (const key of nodes.keys()) {
-                const sink = rowScopes.get(key);
-                if (sink) {
-                    for (const scope of sink) dispose(scope);
-                    rowScopes.delete(key);
-                }
+                dispose(rowScopes.get(key) ?? null);
+                rowScopes.delete(key);
             }
-        } else {
+        } else if (survivors < nodes.size) {
             for (const [key, node] of nodes) {
                 if (!next.has(key)) {
                     (node as ChildNode).remove();
-                    const sink = rowScopes.get(key);
-                    if (sink) {
-                        for (const scope of sink) dispose(scope);
-                        rowScopes.delete(key);
-                    }
+                    dispose(rowScopes.get(key) ?? null);
+                    rowScopes.delete(key);
                 }
             }
+        }
+
+        if (survivors === 0) {
+            const frag = document.createDocumentFragment();
+            for (let k = 0; k < keys.length; k++)
+                frag.appendChild(next.get(keys[k]) as Node);
+            parent.insertBefore(frag, anchor);
+            nodes = next;
+            return;
         }
 
         const oldPos = new Map<unknown, number>();
