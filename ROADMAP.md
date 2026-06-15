@@ -78,11 +78,6 @@ Target release of compiled templates `v0.9.0`
   I have a repo in graveyard already in `typescript` 🤔
   - [] Also is this going to live in compiler or separate module
 
-## Chores
-
-- [] Release pipeline is junky ♻️ Mostly works... The order is not correct
-  - [] Organize workflows in to nicer dependency chain
-
 ### Phase 6 - Close the release of v0.9.0 ❎
 
 - [] Now I need a logotype or logo FML ☹️
@@ -414,3 +409,5 @@ This will be a headache if I get there 😂❤️😂
     - [x] Decorators are Typescript dependent and stink 🦨
     - [x] Automatic component registration with tags derived from component classes, no more issue with name `mangling`
       after bundling
+- [x] Release pipeline is junky ♻️ Mostly works... The order is not correct
+  - [x] Organize workflows in to nicer dependency chain      

@@ -1,23 +1,24 @@
 # RELEASE PIPELINE
 
-One version, one tag, everything ships. `pnpm bump` locksteps every version in the
-repo, `pnpm tag` pushes a single `v<version>` tag, and three CI workflows publish the
-whole toolchain to npm — in the right order.
+One version, one tag, everything ships — **gated**. `pnpm bump` locksteps every version
+in the repo, `pnpm tag` pushes a single `v<version>` tag, and **one** CI workflow
+(`release.yml`) runs the whole toolchain through a fail-fast pipeline: nothing reaches
+npm unless the tests pass, the changelogs are in order, and every binary built.
 
 ```
-   pnpm bump <ver>          git commit          pnpm tag            push v<ver>
-   ───────────────►         ─────────►          ────────►           ──────────►
-   sync every version       commit the          create + push       CI fires
-   across the repo          bump                 ONE tag v<ver>      three workflows
-                                                      │
-                ┌───────────────────────────────────────┼───────────────────────────────────────┐
-                ▼                                       ▼                                       ▼
-        release-compiler.yml                    release-vite.yml                       release-elemix.yml
-        native binaries + wasm                  the Vite plugin                        library + storybook
-                │                                       │                                       │
-                │                          (vite waits for compiler)                  elemix ──► storybook
-                ▼                                       ▼                                       ▼
-               npm                                     npm                                     npm
+   pnpm bump <ver>      git commit      pnpm tag         push v<ver>      release.yml (one gated DAG)
+   ───────────────►     ─────────►      ────────►        ──────────►
+   sync every version   commit the      create + push    CI fires
+   across the repo      bump            ONE tag v<ver>
+
+        test  ─►  changelog  ─►  build-compiler (6 binaries)  ─►  publish-*  ─►  release-notes
+        (full     (top entry      (the one build the test         (compiler · wasm ·    (GitHub
+         suite)    == <ver>)       gate can't cover; ANY           elemix · storybook ·  Release)
+                                   target fails ⇒ no publish)      vite)
+                                                                     │
+                                            nothing publishes unless every step left is green;
+                                            cross-package order (storybook→elemix, vite→compiler)
+                                            comes from `needs:`, not npm polling.
 ```
 
 ## ① Version — `pnpm bump <version | major | minor | patch>`
@@ -32,7 +33,7 @@ packages/compiler/Cargo.toml  →  [package] version
 ```
 
 The vite plugin's `@neuralfog/elemix-compiler` pin is **not** bumped here — it stays at
-a published, lockfile-resolvable version so installs work, and `release-vite.yml`
+a published, lockfile-resolvable version so installs work, and the `publish-vite` job
 stamps it to the release version at publish time.
 
 ## ② Tag — `pnpm tag` / `pnpm tag-remove`
@@ -46,84 +47,59 @@ A single `v<version>` tag fires **all three** release workflows. The version is 
 from the tag (`v0.9.0` → `0.9.0`) — the tag is the source of truth, not the
 committed manifests.
 
-## ③ CI — one `v*` tag, three workflows
+## ③ CI — one `v*` tag, one gated workflow (`release.yml`)
 
-### release-compiler.yml → native binaries + launcher + wasm
+A single workflow runs the whole release as a `needs:`-wired DAG. Every job is a gate
+for the next; a failure anywhere upstream means **nothing publishes**.
 
 ```
-build (matrix · 6 targets)
-   linux-x64 · linux-arm64     static musl, zig-cross on ubuntu
-   darwin-x64 · darwin-arm64   native on macos (universal SDK)
-   win32-x64 · win32-arm64     native / cross on windows
-        │  each drops its binary into npm/<platform>/ → uploads artifact
+version ──┐  (resolve <version> from the tag, or the manual workflow_dispatch input)
+          │
+test  ────┤  GATE 1 — reuses test.yml (workflow_call): pnpm install · build (compiler +
+          │           every lib + wasm conformance) · lint · full test suite.
+          ▼
+changelog ─  GATE 2 — node scripts/changelog.mjs check <version>
+          ▼           (every package's top entry == <version>, well-formed)
+build-compiler (matrix · 6 targets)   ← the ONE build the test gate can't cover
+   linux-x64 · linux-arm64   musl, zig-cross on ubuntu
+   darwin-x64 · darwin-arm64 cross on Apple Silicon (universal SDK)
+   win32-x64 · win32-arm64   on windows
+        │  each drops its binary into npm/<platform>/ → uploads artifact.
+        │  fail-fast:false, but ANY target failing fails the job ⇒ no publish.
         ▼
- publish (needs: build)                 publish-wasm (independent)
-   download binaries, chmod +x            wasm-pack build --target web
-   stamp version (from tag)               stamp name + version (from tag)
-   npm publish 6 platform pkgs            npm publish @…-compiler-wasm
-   npm publish launcher
+   ── every publish needs build-compiler (⇒ changelog ⇒ test): the "publish
+      only if EVERYTHING built" guarantee. Cross-deps ordered by `needs:` ──
+        │
+  ┌─────┼───────────────┬────────────────┬─────────────────────┐
+  ▼     ▼               ▼                ▼                     ▼
+publish-compiler   publish-wasm   publish-elemix        (rebuild-in-publish, opt-b)
+  download arts      wasm-pack       stamp + build            │
+  stamp version      build+stamp     npm publish              ├─► publish-storybook
+  publish 6+launcher npm publish                              │     needs publish-elemix
+                                                              │     (short CDN wait)
+                                                              └─► publish-vite
+                                                                    needs publish-compiler
+                                                                    (pin compiler = <ver>,
+                                                                     short CDN wait)
+        ▼
+release-notes  needs: ALL publishes — assemble per-package changelog sections +
+               npm links → one GitHub Release (--prerelease when <ver> has a hyphen).
+               No artifacts attached; the packages already live on npm.
 ```
 
-Publishes: `@neuralfog/elemix-compiler` (launcher) · 6× `@neuralfog/elemix-compiler-<platform>` · `@neuralfog/elemix-compiler-wasm`.
+Publishes (under `latest`, or `dev` when the version has a hyphen):
+`@neuralfog/elemix-compiler` (launcher) · 6× `…-compiler-<platform>` · `…-compiler-wasm` ·
+`@neuralfog/elemix` · `@neuralfog/elemix-storybook` · `@neuralfog/elemix-vite`.
 
-### release-elemix.yml → the library + its Storybook integration
+**Ordering without polling.** Storybook peer-depends on elemix and vite pins the native
+compiler, so they publish *after* their dep — but that's now a `needs:` edge inside one
+DAG, not a cross-workflow guess. The remaining `npm view` wait is a short ride-out of
+CDN propagation lag (the publish already ran), not a blind poll. pnpm rewrites
+storybook's `workspace:*` peer to elemix's stamped version at publish time; vite's
+compiler pin is stamped to `<version>` so the plugin always depends on the build it ships with.
 
-```
-publish-elemix                          publish-storybook (needs: publish-elemix)
-   stamp version (from tag)               stamp version + elemix peer-dep (from tag)
-   build the library                      build elemix (types), then storybook
-   npm publish @neuralfog/elemix          ⏳ WAIT for @neuralfog/elemix@<version> on npm
-                                          npm publish @neuralfog/elemix-storybook
-```
-
-Storybook peer-depends on `@neuralfog/elemix`, so it publishes second. pnpm rewrites
-its `workspace:*` peer-dep to elemix's version field at publish time — both manifests
-are stamped to the tag, so the peer resolves to the version being released. The wait
-guards against npm's CDN propagation lag.
-
-Publishes: `@neuralfog/elemix` · `@neuralfog/elemix-storybook`.
-
-### release-vite.yml → the Vite plugin
-
-```
-install · build (tsc)
-   → resolve <version> from the tag
-   → stamp package.json:  version = <version>,  @neuralfog/elemix-compiler = <version>
-   → ⏳ WAIT for @neuralfog/elemix-compiler@<version> on npm
-   → npm publish @neuralfog/elemix-vite
-```
-
-The wait makes vite publish **after** the compiler it depends on — an installer
-never sees a missing dependency. The compiler pin is stamped to the version being
-released, so the plugin always depends on the exact build it ships with.
-
-## ④ Changelogs + release notes — `release-notes.yml`
-
-Every package keeps its own `CHANGELOG.md` ([Keep a Changelog](https://keepachangelog.com)
-format) and ships it inside its npm tarball (it's in each package's `files`). On the
-same `v*` tag, `release-notes.yml` turns those into one GitHub Release — **no artifacts
-attached**, since the packages already live on npm:
-
-```
-node scripts/changelog.mjs check <version>      gate: every package's top entry == <version>,
-                                                and the changelogs are well-formed
-node scripts/release-notes.mjs <version>        assemble per-package sections + npm links
-gh release create v<version> --notes-file …     (--prerelease when the version has a hyphen)
-```
-
-Each block in the release body links the package on npm at that exact version
-(`npmjs.com/package/<pkg>/v/<version>`). The format check also runs on every PR
-(`pnpm changelog:lint` in `test.yml`), so a malformed or out-of-date changelog is
-caught before release.
-
-```
-              v<version>
-       ┌──────────┬──────────┬──────────────┐
-       ▼          ▼          ▼              ▼
-   compiler     vite      elemix      release-notes.yml
-     npm         npm        npm        GitHub Release
-                                       (changelogs + npm links, no artifacts)
-```
+The changelog format check also runs on every PR (`node scripts/changelog.mjs lint` in
+`test.yml`), so a malformed changelog is caught long before release.
 
 ## dist-tags
 

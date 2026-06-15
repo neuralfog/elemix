@@ -7,7 +7,7 @@ if (!version) {
     process.exit(1);
 }
 
-// One release tag — both release-compiler.yml and release-vite.yml fire on `v*`.
+// One release tag — release.yml fires on `v*` and gates the whole pipeline.
 const tags = [`v${version}`];
 
 const git = (args) => execFileSync('git', args, { stdio: 'inherit' });

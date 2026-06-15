@@ -1,0 +1,462 @@
+name: release
+
+# One `v*` tag releases the whole toolchain, gated end-to-end:
+#
+#   test → changelog → build-compiler (6 binaries) → publish-* → release-notes
+#
+# Nothing publishes unless everything before it is green. The `test` gate runs
+# the full suite (which also `pnpm build`s every package + the wasm conformance),
+# so the only build it can't cover is the cross-platform binaries — that's the
+# one explicit build job, and EVERY publish needs it. Cross-package order
+# (vite after compiler, storybook after elemix) comes from `needs:`, not npm
+# polling — the deps were just published, so only a short CDN wait remains.
+#
+# Manual runs: workflow_dispatch with an explicit version.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 0.1.0)'
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # ── the released version, from the tag or the manual input ──────────────────
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      value: ${{ steps.v.outputs.value }}
+    steps:
+      - id: v
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ── gate 1: the full test suite (reused from test.yml) ──────────────────────
+  test:
+    uses: ./.github/workflows/test.yml
+
+  # ── gate 2: every package's top changelog entry == <version>, well-formed ───
+  changelog:
+    needs: [test, version]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Check changelogs
+        run: node scripts/changelog.mjs check "${{ needs.version.outputs.value }}"
+
+  # ── the one build the test gate can't cover: the 6 cross-platform binaries.
+  #    A failure on ANY target blocks every publish below. ──────────────────────
+  build-compiler:
+    needs: changelog
+    name: build ${{ matrix.pkg }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pkg: linux-x64
+            target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          - pkg: linux-arm64
+            target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          # Cross-compiled on Apple Silicon (the macOS SDK is universal) so we
+          # don't depend on the deprecated, often-queued Intel macos-13 runner.
+          - pkg: darwin-x64
+            target: x86_64-apple-darwin
+            os: macos-latest
+          - pkg: darwin-arm64
+            target: aarch64-apple-darwin
+            os: macos-latest
+          - pkg: win32-x64
+            target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - pkg: win32-arm64
+            target: aarch64-pc-windows-msvc
+            os: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/compiler
+          key: ${{ matrix.target }}
+
+      # Linux musl (x64 + arm64) cross-compiles cleanly from one runner via zig.
+      - uses: mlugg/setup-zig@v2
+        if: ${{ matrix.zig }}
+      - name: Install cargo-zigbuild
+        if: ${{ matrix.zig }}
+        run: cargo install --locked cargo-zigbuild
+
+      - name: Build (zig)
+        if: ${{ matrix.zig }}
+        working-directory: packages/compiler
+        run: cargo zigbuild --release --target ${{ matrix.target }}
+
+      - name: Build (native)
+        if: ${{ !matrix.zig }}
+        working-directory: packages/compiler
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Stage binary into platform package
+        working-directory: packages/compiler
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp "target/${{ matrix.target }}/release/elemix-compiler.exe" "npm/${{ matrix.pkg }}/elemix-compiler.exe"
+          else
+            cp "target/${{ matrix.target }}/release/elemix-compiler" "npm/${{ matrix.pkg }}/elemix-compiler"
+            chmod +x "npm/${{ matrix.pkg }}/elemix-compiler"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: npm-${{ matrix.pkg }}
+          path: packages/compiler/npm/${{ matrix.pkg }}
+          if-no-files-found: error
+          retention-days: 1
+
+  # ── publish: nothing here runs unless build-compiler (⇒ changelog ⇒ test) is
+  #    fully green. That's the "publish only if everything built" guarantee. ────
+
+  publish-compiler:
+    name: publish compiler to npm
+    needs: [build-compiler, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      # Restore each platform package (now carrying its binary) over the scaffold.
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: npm-*
+          path: artifacts
+
+      - name: Place binaries
+        run: |
+          for dir in artifacts/npm-*; do
+            pkg="${dir#artifacts/npm-}"
+            cp -r "$dir/." "packages/compiler/npm/$pkg/"
+          done
+          # upload-artifact zips files and drops the Unix exec bit — restore it so
+          # the published tarball ships an executable binary (npm preserves modes).
+          chmod +x packages/compiler/npm/*/elemix-compiler 2>/dev/null || true
+
+      - name: Stamp version
+        run: node packages/compiler/npm/version.mjs "${{ needs.version.outputs.value }}"
+
+      # Ship the changelog inside the launcher package (its `files` lists it).
+      - name: Stage changelog into launcher
+        run: cp packages/compiler/CHANGELOG.md packages/compiler/npm/elemix-compiler/CHANGELOG.md
+
+      # Platform packages first, then the launcher that depends on them.
+      - name: Publish
+        working-directory: packages/compiler/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing compiler $VERSION under dist-tag: $TAG"
+          for pkg in linux-x64 linux-arm64 darwin-x64 darwin-arm64 win32-x64 win32-arm64; do
+            npm publish "./$pkg" --access public --provenance --tag "$TAG"
+          done
+          npm publish ./elemix-compiler --access public --provenance --tag "$TAG"
+
+  publish-wasm:
+    name: publish wasm to npm
+    needs: [build-compiler, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/compiler
+          key: wasm
+
+      - name: Install wasm-pack
+        run: curl -sSf https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build wasm package
+        working-directory: packages/compiler
+        run: wasm-pack build --target web --out-dir pkg --no-default-features --features wasm
+
+      # Set the published name + stamp the version (like the binaries).
+      - name: Finalize package
+        working-directory: packages/compiler
+        run: node scripts/wasm-pkg.mjs "${{ needs.version.outputs.value }}"
+
+      - name: Publish
+        working-directory: packages/compiler/pkg
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing wasm $VERSION under dist-tag: $TAG"
+          npm publish --access public --provenance --tag "$TAG"
+
+  publish-elemix:
+    name: publish @neuralfog/elemix
+    needs: [build-compiler, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Stamp version
+        env:
+          VERSION: ${{ needs.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const f = "packages/elemix/package.json";
+            const p = JSON.parse(fs.readFileSync(f, "utf8"));
+            p.version = process.env.VERSION;
+            fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            console.log(`elemix@${process.env.VERSION}`);
+          '
+
+      - name: Build
+        run: pnpm --filter @neuralfog/elemix build
+
+      - name: Publish
+        working-directory: packages/elemix
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/elemix@$VERSION under dist-tag: $TAG"
+          pnpm publish --access public --provenance --no-git-checks --tag "$TAG"
+
+  publish-storybook:
+    name: publish @neuralfog/elemix-storybook
+    # After elemix is on npm (peer dependency).
+    needs: [publish-elemix, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      # Stamp BOTH manifests: storybook's own version, and elemix's — pnpm
+      # rewrites storybook's `workspace:*` peer-dep to whatever elemix's version
+      # field says at publish time, so it must read the released version.
+      - name: Stamp version + elemix peer-dep
+        env:
+          VERSION: ${{ needs.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = process.env.VERSION;
+            for (const f of ["packages/elemix/package.json", "packages/storybook/package.json"]) {
+              const p = JSON.parse(fs.readFileSync(f, "utf8"));
+              p.version = v;
+              fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            }
+            console.log(`elemix-storybook@${v} (peer @neuralfog/elemix ${v})`);
+          '
+
+      # Storybook builds against elemix's types — build the library first.
+      - name: Build
+        run: |
+          pnpm --filter @neuralfog/elemix build
+          pnpm --filter @neuralfog/elemix-storybook build
+
+      # `needs: publish-elemix` already ran the publish — this only rides out
+      # npm's CDN propagation lag so an installer never sees a missing peer.
+      - name: Wait for the elemix peer dependency
+        run: |
+          DEP="${{ needs.version.outputs.value }}"
+          echo "waiting for @neuralfog/elemix@$DEP on npm..."
+          for i in $(seq 1 30); do
+            if npm view "@neuralfog/elemix@$DEP" version >/dev/null 2>&1; then
+              echo "✓ @neuralfog/elemix@$DEP is published"
+              exit 0
+            fi
+            echo "  not yet ($i/30)..."; sleep 5
+          done
+          echo "::error::@neuralfog/elemix@$DEP did not propagate in time"
+          exit 1
+
+      - name: Publish
+        working-directory: packages/storybook
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/elemix-storybook@$VERSION under dist-tag: $TAG"
+          pnpm publish --access public --provenance --no-git-checks --tag "$TAG"
+
+  publish-vite:
+    name: publish @neuralfog/elemix-vite
+    # After the compiler is on npm (runtime dependency, pinned to this version).
+    needs: [publish-compiler, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm --filter @neuralfog/elemix-vite build
+
+      # Stamp the published version AND pin the native compiler dependency to it
+      # (this release's compiler version), overriding whatever was committed.
+      - name: Stamp version + compiler pin
+        env:
+          VERSION: ${{ needs.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const f = "packages/vite/package.json";
+            const p = JSON.parse(fs.readFileSync(f, "utf8"));
+            const v = process.env.VERSION;
+            p.version = v;
+            p.dependencies["@neuralfog/elemix-compiler"] = v;
+            fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            console.log(`elemix-vite@${v} (compiler dep ${v})`);
+          '
+
+      # `needs: publish-compiler` already ran the publish — ride out CDN lag.
+      - name: Wait for the compiler dependency
+        run: |
+          DEP="${{ needs.version.outputs.value }}"
+          echo "waiting for @neuralfog/elemix-compiler@$DEP on npm..."
+          for i in $(seq 1 30); do
+            if npm view "@neuralfog/elemix-compiler@$DEP" version >/dev/null 2>&1; then
+              echo "✓ @neuralfog/elemix-compiler@$DEP is published"
+              exit 0
+            fi
+            echo "  not yet ($i/30)..."; sleep 5
+          done
+          echo "::error::@neuralfog/elemix-compiler@$DEP did not propagate in time"
+          exit 1
+
+      - name: Publish
+        working-directory: packages/vite
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/elemix-vite@$VERSION under dist-tag: $TAG"
+          npm publish --access public --provenance --tag "$TAG"
+
+  # ── after everything is on npm: one GitHub Release from the changelogs ──────
+  release-notes:
+    name: GitHub Release
+    needs:
+      - version
+      - publish-compiler
+      - publish-wasm
+      - publish-elemix
+      - publish-storybook
+      - publish-vite
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Assemble release notes
+        run: node scripts/release-notes.mjs "${{ needs.version.outputs.value }}" > RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG="${{ github.ref_name }}"
+          [ -z "$TAG" ] && TAG="v$VERSION"
+          PRERELEASE=()
+          [[ "$VERSION" == *-* ]] && PRERELEASE=(--prerelease)
+          # Idempotent: update notes if a release for this tag already exists.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --notes-file RELEASE_NOTES.md "${PRERELEASE[@]}"
+          else
+            gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md "${PRERELEASE[@]}"
+          fi

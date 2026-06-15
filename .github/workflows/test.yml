@@ -4,6 +4,8 @@ on:
   push:
     branches: [main, master]
   pull_request:
+  # Callable as the first gate of the release pipeline (release.yml).
+  workflow_call:
 
 jobs:
   test:

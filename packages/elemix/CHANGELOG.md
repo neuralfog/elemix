@@ -7,6 +7,12 @@ All notable changes to `@neuralfog/elemix` are documented here. The format follo
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.2] - 2026-06-15
+
+### Added
+
+- Compiler hints
+
 ## [0.9.0-dev.1] - 2026-06-14
 
 ### Added
