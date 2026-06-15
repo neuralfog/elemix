@@ -90,13 +90,36 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
+***Computed Properties 🧮🧮🧮***
+
+- No need for it, native getters do the job just fine `get test() {}`
+- We have manual way to drive updates `this.render()` if nescessary
+- The mechanic: the view's effect subscribes to whatever it reads through tracked getters. So:
+
+```ts
+get total() { return this.state.qty * this.state.price; }   // ✅ reads state → reactive
+get total() { return this.qty * this.price; }               // ❌ plain fields → computes once, NEVER updates
+```
+- In the ❌ case the getter still runs and returns the right number on first paint, but nothing tracked it, so
+  changing `this.qty` later won't re-run the view. This is by design 🎨
+- At least one value in getter has to come from a reactive source ☢️
+- Chains fine too: a getter reading another getter just works ⛓️
+
+***Releae Pipeline Fixed 🪚🪚🪚***
+
+- Entire pipeline reworked to fail early ❌
+- `npm` packages will be only published if all artifacts available 📦
+- Hopefully no more partialy released packages 🙏
+- `RELEASE-PIPELINE.md` 🗺️
+
 ***Compiler Hints #⃣️#⃣️#⃣️***
 
 - For time being the simplest possible solution to serve sole purpose of replacement for class decorator
 - `#component` auto registers the component inlining `defineComponent` procedure, if no tag name will 
   be derived from class name. This was a headache in runtime as I had to preserve class names otherwise
-  mangling would screw references, not an issue any more. `defineComponent` will throw from custom element
-  registry level 💥
+  mangling would screw references, not an issue any more. If class named incorectly `defineComponent` will
+  throw from custom element registry level 💥 May need to handle it gracefully, later when extending `compalerino`
+  capabilites.
 - `#tag my-component` defines tag name for custom element #⃣️
 - `#styles ${css}` allows setting styles on component previously handled by static class field 💅
 - `#form` registers component as form member ✍️
@@ -108,9 +131,6 @@ Target release of compiled templates `v0.9.0`
   - [] Pass file for transpilation based on the existence of compiler hint ⁉️
   - [] Multiple components per file
   - [] Object destructuring in template procedure, this should already work 🤔
-- [] Do I need concept of `computed(() => {})` ⁉️🧐 Don't really want it... Dig in to it 🪏 Proof the
-  concept, otherwise add `computed` 🤮 The issue here - architecture has changed, the concept of computation
-  was not needed before 🧐
 
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
@@ -410,4 +430,7 @@ This will be a headache if I get there 😂❤️😂
     - [x] Automatic component registration with tags derived from component classes, no more issue with name `mangling`
       after bundling
 - [x] Release pipeline is junky ♻️ Mostly works... The order is not correct
-  - [x] Organize workflows in to nicer dependency chain      
+  - [x] Organize workflows in to nicer dependency chain
+- [x] Do I need concept of `computed(() => {})` ⁉️🧐 Don't really want it... Dig in to it 🪏 Proof the
+  concept, otherwise add `computed` 🤮 The issue here - architecture has changed, the concept of computation
+  was not needed before 🧐
