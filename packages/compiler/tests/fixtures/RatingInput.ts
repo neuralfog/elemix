@@ -1,4 +1,4 @@
-import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
+import { Component, state, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -23,11 +23,8 @@ const css = `
     button.star:hover { color: #fbbf24; }
 `;
 
+`#component #form #styles ${css}`
 export class RatingInput extends Component {
-    static styles = [css];
-
-    static formAssociated = true;
-    declare internals: ElementInternals;
 
     state = state<State>({ value: 0 });
 
@@ -53,4 +50,3 @@ export class RatingInput extends Component {
     </div>`;
 }
 
-defineComponent('rating-input', RatingInput);

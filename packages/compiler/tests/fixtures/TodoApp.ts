@@ -1,4 +1,4 @@
-import { Component, defineComponent, ref, state, tpl } from '@neuralfog/elemix';
+import { Component, ref, state, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Ref, Template } from '@neuralfog/elemix/types';
 
@@ -65,8 +65,8 @@ const css = `
     .remove:hover { background: rgba(239, 68, 68, 0.12); }
 `;
 
+`#component #styles ${css}`
 export class TodoApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         draft: ref(''),
@@ -115,4 +115,3 @@ export class TodoApp extends Component {
     `;
 }
 
-defineComponent('todo-app', TodoApp);

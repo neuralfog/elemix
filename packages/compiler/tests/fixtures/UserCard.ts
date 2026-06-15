@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type Props = {
@@ -21,8 +21,8 @@ const css = `
     .role { font-size: 12px; color: #64748b; }
 `;
 
+`#component #styles ${css}`
 export class UserCard extends Component<Props> {
-    static styles = [css];
 
     template = (): Template => tpl`<div class="card">
         <span class="name">${this.props.name}</span>
@@ -30,4 +30,3 @@ export class UserCard extends Component<Props> {
     </div>`;
 }
 
-defineComponent('user-card', UserCard);

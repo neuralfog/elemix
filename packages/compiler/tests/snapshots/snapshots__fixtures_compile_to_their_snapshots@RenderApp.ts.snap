@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/RenderApp.ts
 ---
-import { template, clone, _event, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 const css = `
     :host {
@@ -53,10 +53,10 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note"><code>count</code> here is a plain field, not reactive state, so mutating it does not re-render. "Increment (silent)" changes the value behind the scenes; "Increment + render()" calls <code>this.render()</code> to manually flush it to the DOM — watch the silent increments catch up. This is ideal when you want full manual control over rendering, driving updates yourself without reactive state getting in the way.</p><div class="value"> </div><div class="buttons"><button class="ghost">Increment (silent)</button><button>Increment + render()</button></div>');
 
 export class RenderApp extends Component {
-    static styles = [css];
 
     count = 0;
 
@@ -82,5 +82,5 @@ _setText(_n1, (this.count));
 return _r0;
 }
 }
-
+RenderApp.__sheets = [..._s0];
 defineComponent('render-app', RenderApp);

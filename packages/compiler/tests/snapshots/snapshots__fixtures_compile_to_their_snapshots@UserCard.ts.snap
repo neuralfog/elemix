@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/UserCard.ts
 ---
-import { template, clone, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 type Props = {
     name: string;
@@ -26,10 +26,10 @@ const css = `
     .role { font-size: 12px; color: #64748b; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<div class="card"><span class="name"> </span><span class="role"> </span></div>');
 
 export class UserCard extends Component<Props> {
-    static styles = [css];
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
@@ -42,5 +42,5 @@ _setText(_n2, (this.props.role));
 return _r0;
 }
 }
-
+UserCard.__sheets = [..._s0];
 defineComponent('user-card', UserCard);

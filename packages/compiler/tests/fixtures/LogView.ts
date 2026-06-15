@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -31,8 +31,8 @@ const css = `
     .empty { font-size: 12px; color: #64748b; padding: 2px 6px; }
 `;
 
+`#component #styles ${css}`
 export class LogView extends Component {
-    static styles = [css];
 
     template = (): Template => tpl`<div class="log">
         ${
@@ -49,4 +49,3 @@ export class LogView extends Component {
     </div>`;
 }
 
-defineComponent('log-view', LogView);

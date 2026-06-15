@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StoreControls.ts
 ---
-import { template, clone, _event, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 type Props = {
     counter: { value: number };
@@ -46,10 +46,10 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<div class="panel"><span class="label">Child controls</span><div class="buttons"><button>−</button><span class="value"> </span><button>+</button></div></div>');
 
 export class StoreControls extends Component<Props> {
-    static styles = [css];
 
     dec = (): void => {
         this.props.counter.value--;
@@ -72,5 +72,5 @@ _setText(_n2, (this.props.counter.value));
 return _r0;
 }
 }
-
+StoreControls.__sheets = [..._s0];
 defineComponent('store-controls', StoreControls);

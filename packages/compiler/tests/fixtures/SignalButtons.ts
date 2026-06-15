@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import { counter } from './SignalStore';
@@ -20,8 +20,8 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
+`#component #styles ${css}`
 export class SignalButtons extends Component {
-    static styles = [css];
 
     dec = (): void => {
         counter.count--;
@@ -42,4 +42,3 @@ export class SignalButtons extends Component {
     </div>`;
 }
 
-defineComponent('signal-buttons', SignalButtons);

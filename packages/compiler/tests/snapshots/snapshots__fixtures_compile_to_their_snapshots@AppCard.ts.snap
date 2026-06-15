@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/AppCard.ts
 ---
-import { template, clone, _child } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, _child, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 const css = `
     :host { display: block; margin-bottom: 14px; font-family: system-ui, sans-serif; }
@@ -31,12 +31,12 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<div class="card"><!----> <div class="body"><slot></slot></div> <!----></div>');
 const _t1 = template('<div class="header"><slot name="header"></slot></div>');
 const _t2 = template('<div class="footer"><slot name="footer"></slot></div>');
 
 export class AppCard extends Component {
-    static styles = [css];
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
@@ -57,5 +57,5 @@ return _r4.firstChild!;
 return _r0;
 }
 }
-
+AppCard.__sheets = [..._s0];
 defineComponent('app-card', AppCard);

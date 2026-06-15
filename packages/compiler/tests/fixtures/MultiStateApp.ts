@@ -1,4 +1,4 @@
-import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
+import { Component, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type CounterState = { count: number };
@@ -60,8 +60,8 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
+`#component #styles ${css}`
 export class MultiStateApp extends Component {
-    static styles = [css];
 
     counter = state<CounterState>({ count: 0 });
     user = state<UserState>({ name: 'Ada', online: true });
@@ -102,4 +102,3 @@ export class MultiStateApp extends Component {
     `;
 }
 
-defineComponent('multi-state-app', MultiStateApp);

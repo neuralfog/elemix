@@ -1,0 +1,33 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/PragmaApp.ts
+---
+import { template, clone, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .label { font-weight: 700; color: #6366f1; }
+`;
+
+// Registration + styles via a pragma block — no `static styles`, no manual
+// `defineComponent`. The compiler derives the tag (`PragmaApp` → `pragma-app`),
+// hoists `sheet(css)`, wires `__sheets`, and emits the `defineComponent` call.
+const _s0 = sheet(css);
+const _t0 = template('<span class="label"> </span>');
+
+export class PragmaApp extends Component {
+    state = state({ label: 'hello' });
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.firstElementChild!.firstChild!;
+effect(() => {
+_setText(_n1, (this.state.label));
+});
+return _r0;
+}
+}
+PragmaApp.__sheets = [..._s0];
+defineComponent('pragma-app', PragmaApp);

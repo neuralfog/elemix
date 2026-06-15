@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/CounterApp.ts
 ---
-import { template, clone, _event, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type State = {
     count: number;
@@ -33,10 +33,10 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<button>count is <!----></button>');
 
 export class CounterApp extends Component {
-    static styles = [css];
 
     state = state<State>({ count: 0 });
 
@@ -57,5 +57,5 @@ _setText(_x3, (this.state.count));
 return _r0;
 }
 }
-
+CounterApp.__sheets = [..._s0];
 defineComponent('counter-app', CounterApp);

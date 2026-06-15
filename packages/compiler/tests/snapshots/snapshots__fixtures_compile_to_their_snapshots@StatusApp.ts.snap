@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StatusApp.ts
 ---
-import { template, clone, _event, _child, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _child, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type Status = 'idle' | 'loading' | 'ready' | 'failed';
 
@@ -87,6 +87,7 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note"><code>choose</code> renders the first branch whose condition is truthy — use <code>[true, ...]</code> as the fallback. <code>when</code> renders one branch or nothing. Both take lazy factory functions, so only the chosen branch is ever built.</p><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage"><!----></div><button class="link"><!----> log</button> <!---->');
 const _t1 = template('<div class="card idle">Pick a status above</div>');
 const _t2 = template('<div class="card failed">✕ Build failed</div>');
@@ -95,7 +96,6 @@ const _t4 = template('<div class="card loading"><span class="spinner"></span>Wor
 const _t5 = template('<pre class="log">status = <!----></pre>');
 
 export class StatusApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         status: 'idle',
@@ -156,5 +156,5 @@ _setText(_x13, (this.state.showLog ? 'Hide' : 'Show'));
 return _r0;
 }
 }
-
+StatusApp.__sheets = [..._s0];
 defineComponent('status-app', StatusApp);

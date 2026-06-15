@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import { record } from './LifecycleStore';
@@ -17,8 +17,8 @@ const css = `
     }
 `;
 
+`#component #styles ${css}`
 export class LifecycleChild extends Component<ChildProps> {
-    static styles = [css];
 
     beforeMount(): void {
         record('beforeMount');
@@ -36,4 +36,3 @@ export class LifecycleChild extends Component<ChildProps> {
         tpl`<div class="child">Child · tick ${this.props.tick}</div>`;
 }
 
-defineComponent('lifecycle-child', LifecycleChild);

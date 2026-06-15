@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/PanelApp.ts
 ---
-import { template, clone, _event, _child, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _child, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type State = {
     title: string;
@@ -57,12 +57,12 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">Sub-templates pulled out as <code>class members</code> — the natural way to organize a component. The main template composes them with member calls; each stays independently reactive.</p><div class="panel"><!----> <!----> <button>add</button><button>rename</button></div>');
 const _t1 = template('<h2> </h2>');
 const _t2 = template('<p class="stat"><!----> open</p>');
 
 export class PanelApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         title: 'Inbox',
@@ -108,5 +108,5 @@ _event(_n4, 'click', this.rename);
 return _r0;
 }
 }
-
+PanelApp.__sheets = [..._s0];
 defineComponent('panel-app', PanelApp);

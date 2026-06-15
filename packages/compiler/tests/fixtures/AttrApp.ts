@@ -1,4 +1,4 @@
-import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
+import { Component, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {
@@ -61,8 +61,8 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
+`#component #styles ${css}`
 export class AttrApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         userId: 1,
@@ -101,4 +101,3 @@ export class AttrApp extends Component {
     `;
 }
 
-defineComponent('attr-app', AttrApp);

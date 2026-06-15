@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/LifecycleChild.ts
 ---
-import { template, clone, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 import { record } from './LifecycleStore';
 
@@ -22,10 +22,10 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<div class="child">Child · tick <!----></div>');
 
 export class LifecycleChild extends Component<ChildProps> {
-    static styles = [css];
 
     beforeMount(): void {
         record('beforeMount');
@@ -50,5 +50,5 @@ _setText(_x2, (this.props.tick));
 return _r0;
 }
 }
-
+LifecycleChild.__sheets = [..._s0];
 defineComponent('lifecycle-child', LifecycleChild);

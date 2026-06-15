@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/SlotApp.ts
 ---
-import { template, clone } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 import './AppCard';
 
@@ -35,15 +35,15 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">Slots project light-DOM children into a component\'s shadow DOM. <code>hasSlot(\'footer\')</code> lets the card render an area only when matching content is provided.</p><app-card><span slot="header">⭐ Featured</span><p>Default-slot content lives in the card body.</p><span slot="footer">Updated just now</span></app-card><app-card><p>This card has only body content — no header or footer slot.</p></app-card>');
 
 export class SlotApp extends Component {
-    static styles = [css];
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
 return _r0;
 }
 }
-
+SlotApp.__sheets = [..._s0];
 defineComponent('slot-app', SlotApp);

@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/AttrApp.ts
 ---
-import { template, clone, _event, effect, _setText, _setAttr } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, _setAttr, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type State = {
     userId: number;
@@ -66,10 +66,10 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">Everything in a template is an attribute. <code>_attr</code> handles interpolated values (<code>href</code>), <code>data-*</code>/<code>aria-*</code>, and boolean attributes that toggle their presence (<code>hidden</code>).</p><a class="link">Open profile #<!----></a><span class="badge"> </span><div class="secret">Secret content</div><button>next user</button><button>rename</button><button>toggle secret</button>');
 
 export class AttrApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         userId: 1,
@@ -116,5 +116,5 @@ _setAttr(_n5, 'hidden', (this.state.collapsed));
 return _r0;
 }
 }
-
+AttrApp.__sheets = [..._s0];
 defineComponent('attr-app', AttrApp);

@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/CardListApp.ts
 ---
-import { template, clone, _event, _list, effect, _setProp } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _list, effect, _setProp, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 import './UserCard';
 
@@ -51,11 +51,11 @@ const css = `
 
 const NAMES = ['Ada', 'Grace', 'Linus', 'Margaret', 'Dennis', 'Barbara'];
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">A keyed <code>repeat</code> whose rows are <em>child components</em>, each with <code>:name</code>/<code>:role</code> prop bindings. Adding, removing and promoting patch only the affected card.</p><div class="bar"><button>Add user</button></div><div class="list"><!----></div>');
 const _t1 = template('<div class="row"><user-card></user-card><button class="promote">promote</button><button class="drop">×</button></div>');
 
 export class CardListApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         users: [
@@ -106,5 +106,5 @@ return _r3.firstChild!;
 return _r0;
 }
 }
-
+CardListApp.__sheets = [..._s0];
 defineComponent('card-list-app', CardListApp);

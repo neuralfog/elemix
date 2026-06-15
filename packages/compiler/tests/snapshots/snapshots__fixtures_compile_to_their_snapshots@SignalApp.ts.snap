@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/SignalApp.ts
 ---
-import { template, clone } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent } from '@neuralfog/elemix';
+import { template, clone, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 import './SignalValue';
 import './SignalButtons';
@@ -38,15 +38,15 @@ const css = `
     }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">A reactive <code>state</code> store created in its own module (<code>SignalStore.ts</code>) and imported wherever it is needed. The two components below are siblings with no props between them — yet the buttons in one update the number shown in the other, because both subscribe to the same store.</p><signal-value></signal-value><signal-buttons></signal-buttons>');
 
 export class SignalApp extends Component {
-    static styles = [css];
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
 return _r0;
 }
 }
-
+SignalApp.__sheets = [..._s0];
 defineComponent('signal-app', SignalApp);

@@ -1,4 +1,3 @@
-import { initStyles } from './styles';
 import {
     reactive,
     collect,
@@ -8,26 +7,16 @@ import {
     untrack,
     type Scope,
 } from '../runtime/reactive';
+import { sheet } from '../runtime/dom';
 import type { Template } from '../types';
-
-export const defineComponent = (
-    tag: string,
-    component: CustomElementConstructor,
-): void => {
-    if (customElements.get(tag) === undefined) {
-        customElements.define(tag, component);
-    }
-};
 
 export class Component<ComponentProps = unknown> extends HTMLElement {
     public static formAssociated?: boolean;
-    public static styles?: string[];
-
+    public static __sheets?: CSSStyleSheet[];
     public $props?: Record<string, unknown>;
     private connected = false;
     private scopes: Scope | null = null;
-
-    public internals?: ElementInternals;
+    public internals!: ElementInternals;
 
     public get root(): HTMLElement | ShadowRoot | null {
         return this.shadowRoot;
@@ -63,7 +52,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         this.connected = true;
 
         untrack(() => {
-            initStyles(this);
+            this.adoptStyles();
             this.attachFormInternals();
             this.initProps();
             this.beforeMount?.();
@@ -104,6 +93,18 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         while (scope) {
             rerun(scope);
             scope = scope.next;
+        }
+    }
+
+    public adoptStyles(
+        input?: string | CSSStyleSheet | ReadonlyArray<string | CSSStyleSheet>,
+    ): void {
+        const sheets =
+            input !== undefined
+                ? sheet(input)
+                : (this.constructor as typeof Component).__sheets;
+        if (this.shadowRoot && sheets && sheets.length) {
+            this.shadowRoot.adoptedStyleSheets = sheets;
         }
     }
 

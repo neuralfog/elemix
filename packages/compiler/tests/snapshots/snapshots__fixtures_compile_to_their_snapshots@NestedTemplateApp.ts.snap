@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/NestedTemplateApp.ts
 ---
-import { template, clone, _event, _child, effect, _setText } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _child, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type State = {
     title: string;
@@ -60,12 +60,12 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">A nested template can be assigned to a variable and embedded in another. Each embed builds a fresh, independently-reactive fragment — the same <code>chip</code> template is reused twice and both update from one shared cell.</p><section><!----> <div class="chips"><!----> and again <!----></div><button>change title</button><button>change tag</button></section>');
 const _t1 = template('<h2> </h2>');
 const _t2 = template('<span class="chip"> </span>');
 
 export class NestedTemplateApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         title: 'Dashboard',
@@ -117,5 +117,5 @@ _event(_n5, 'click', this.changeTag);
 return _r0;
 }
 }
-
+NestedTemplateApp.__sheets = [..._s0];
 defineComponent('nested-template-app', NestedTemplateApp);

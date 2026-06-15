@@ -1,4 +1,4 @@
-import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
+import { Component, state, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -65,8 +65,8 @@ const css = `
     }
 `;
 
+`#component #styles ${css}`
 export class NestedApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         categories: [
@@ -120,4 +120,3 @@ export class NestedApp extends Component {
     `;
 }
 
-defineComponent('nested-app', NestedApp);

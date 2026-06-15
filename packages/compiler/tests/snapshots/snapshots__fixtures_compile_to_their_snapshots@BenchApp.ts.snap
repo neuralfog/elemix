@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/BenchApp.ts
 ---
-import { template, clone, _event, _list, effect, _setText, _setClass } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, _event, _list, effect, _setText, _setClass, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 type Row = { id: number; label: string };
 
@@ -58,11 +58,11 @@ const css = `
     tr.danger .lbl { color: #991b1b; font-weight: 700; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<div class="bar"><button>Create 1,000 rows</button><button>Create 10,000 rows</button><button>Append 1,000 rows</button><button>Update every 10th row</button><button>Clear</button><button>Swap Rows</button></div><table><tbody><!----></tbody></table>');
 const _t1 = template('<tr><td class="col-id"> </td><td><a class="lbl"> </a></td><td><a class="remove">×</a></td></tr>');
 
 export class BenchApp extends Component {
-    static styles = [css];
 
     state = state<State>({ rows: [], selected: 0 });
 
@@ -156,5 +156,5 @@ return _r8.firstChild!;
 return _r0;
 }
 }
-
+BenchApp.__sheets = [..._s0];
 defineComponent('bench-app', BenchApp);

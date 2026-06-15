@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StoreApp.ts
 ---
-import { template, clone, effect, _setText, _setProp } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, state } from '@neuralfog/elemix';
+import { template, clone, effect, _setText, _setProp, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
 
 import './StoreControls';
 
@@ -41,10 +41,10 @@ const css = `
     .readout strong { font-size: 22px; color: var(--accent); }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">The <code>counter</code> object lives in this parent\'s reactive state and is passed down as a prop. Objects are shared by reference, so when the child mutates <code>this.props.counter.value</code>, every component subscribed to that object re-renders — including this parent.</p><div class="readout">Parent reads: <strong> </strong></div><store-controls></store-controls>');
 
 export class StoreApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         counter: { value: 0 },
@@ -61,5 +61,5 @@ _setProp(_n2, 'counter', (this.state.counter));
 return _r0;
 }
 }
-
+StoreApp.__sheets = [..._s0];
 defineComponent('store-app', StoreApp);

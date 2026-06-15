@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ChatApp.ts
 ---
-import { template, clone, _event, _model, _list, effect, _setText, _setClass } from '@neuralfog/elemix/runtime';
-import { Component, defineComponent, ref, state } from '@neuralfog/elemix';
+import { template, clone, _event, _model, _list, effect, _setText, _setClass, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, ref, state } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
 type Message = { id: string; text: string; me: boolean };
@@ -88,11 +88,11 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
+const _s0 = sheet(css);
 const _t0 = template('<p class="note">Renders are synchronous, so a new message is in the DOM as soon as <code>send()</code> pushes it — the same handler scrolls this log to the bottom.</p><div class="log"><!----></div><div class="composer"><input type="text" placeholder="Type a message…"/><button>Send</button></div>');
 const _t1 = template('<div> </div>');
 
 export class ChatApp extends Component {
-    static styles = [css];
 
     state = state<State>({
         draft: ref(''),
@@ -140,5 +140,5 @@ _event(_n3, 'click', this.send);
 return _r0;
 }
 }
-
+ChatApp.__sheets = [..._s0];
 defineComponent('chat-app', ChatApp);

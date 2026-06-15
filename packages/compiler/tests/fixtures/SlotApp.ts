@@ -1,4 +1,4 @@
-import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import './AppCard';
@@ -30,8 +30,8 @@ const css = `
     }
 `;
 
+`#component #styles ${css}`
 export class SlotApp extends Component {
-    static styles = [css];
 
     template = (): Template => tpl`
         <p class="note">
@@ -50,4 +50,3 @@ export class SlotApp extends Component {
     `;
 }
 
-defineComponent('slot-app', SlotApp);
