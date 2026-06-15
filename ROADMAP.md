@@ -13,21 +13,57 @@ Target release of compiled templates `v0.9.0`
 - Most commercial frameworks just got smoked big time 💨💨💨 React 🔫 - `gitgood` 🤓
 - Pulled nice distance from `vue 3` and `lit` ♥️🥹
 - No cheating, driving test fully via reactive state - no manual DOM operations 🙅🙅🙅
-- Very happy with overall matrix, no yellow or red on any fields 💚💚💚
+- Very happy with overall matrix, no yeller or red on any fields 💚💚💚
 - Not the fastest, but incredibly consistent across the board 🏅
-- `remove row` - the fastest, faster than vanilla js ✅
-- `smallest bundle` - across the board ✅
+- `select row` - the fastest, faster than vanilla js ✅
+- `smallest bundle` - across the board ✅ - this may change, but in good spot not to overinflate ☑️
 - `second` - on first paint ahead of vanilla js ✅
 - `lowest memory` after initial page load ✅
 - I have to be careful I may spend rest of my life optimising trying to pull ahead 😂😂😂 Too addictive 🚬
 
-- Only tested selected matrix, the full picture will be visible on full release after `PR` to official repo
+- **Only tested selected matrix, the full picture will be visible on full release after `PR` to official repo**
+
+***Officially not a slop, satisfied with results so further work will continue***
 
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
 🦇🦇🦇
 
-***Officially not a slop, satisfied with results so further work will continue***
+## Resolve Identity Crisis - What the hell is this ⁉️🐦‍🔥
+
+- `customElements` rocks!! 🎸🤘
+- This is not a framework, it's a library at best. Frameworks get in the way 🚷
+- Opt-in reactivity, drive your own updates if you like 🏇
+- `AOT` compiled templates with minimal runtime
+- Be in charge of architecture 🌉
+- Single dependency at runtime without any sub dependencies (no vulnerabilities nightmares) 👹
+- `Constructable Stylesheet` API 💅
+- Freedom - good library, framework or api does not get in the way - wishful thinking in the current state of
+  the affairs and tooling 🤮
+- Full encapsulation with `ShadowDOM`
+- Will work in any environment, it is just augmented `HTML` node - Vue, React whatever 🤷
+- `css` is just a string that gets adopted, use what ever you want 🤷
+- `Reactive Elements` - CustomElements are amazing, Google claimed `WebComponents` don't want to touch that 😒
+- Few primitives and you can do more than others. `state`, `ref` and `component` FINITO!! 🤌
+  Anything else just write it, or `gitgood`
+- Part of the native DOM flow `customElements` are just DOM nodes 🤏
+- Native web is amazing, not the freaking abominations 🧟 that industry is pushing on me 🚫🚫
+- Simpler API the better LLM can work with it 🤖
+
+## Know the Limitations 🏁🏁
+
+- High chances of clashing with native `HTMLElement` properties, not a biggy. Typescript catches it cleanly 🥅
+- Class based API, not a problem is just how Web Platform works end of story 🏁 May change in the future 🧐
+- Template primitives only work in the context of library, there is no issue with attributes
+  May add special `attr` that will redirect in to props of the `:host`, actually this should be EZ 🤌
+- At the moment still closely coupled with typescript, slowly going away from that so `js` should be supported
+  sooner than later
+- SSR - I don't give a flying `&*%*%*&` - is not a problem at all. `customElements` are notoriously difficult
+  to fully server render 😒 Yeah, return `HTML` from server == `SSR` 😂 May poke at this in the future seems
+  like interesting problem to have 🧐
+- Tooling targeted at CLIs, don't have time to deal with editors - last thing I need in my life is to work with
+  junk like (VSCode plugin eco system🤮)
+- SPA don't care - what's the point ⁉️ If you really want to push it just use something from `npm` black hole 😂⚫
 
 ## TODOS
 
@@ -37,7 +73,49 @@ Target release of compiled templates `v0.9.0`
 - [] Poke at sourcemaps at some point ⏰️⏰️
 - [] Design `compiler hints`
 - [] Design a feature `analyzer` for templates `prop` typechecking `cli` only!!
+  - [] Do I want analyzer in `v0.9.0` or defere it to => `v1.0.0` 🧐
   I have a repo in graveyard already in `typescript` 🤔
+- [] Do I need concept of `computed(() => {})` ⁉️🧐 Don't really want it... Dig in to it 🪏 Proof the
+  concept, otherwise add `computed` 🤮 The issue here - architecture has changed, the concept of computation
+  was not needed before 🧐
+
+## Chores
+
+- [] Why is this static ?? `public static styles?: string[];` styles get adopted in `connectedCallback`
+  - [] Leftover from decorator
+  - [] Make it non static
+  - [] Allow adopting styles during runtime (connected state)
+    - [] Use getters and setters
+- [] Release pipeline is junky ♻️ Mostly works... The order is not correct
+  - [] Organize workflows in to nicer dependency chain
+
+### Phase 6 - Close the release of v0.9.0 ❎
+
+- [] Now I need a logotype or logo FML ☹️
+- [] Update playground with WASM compiler
+  - [] Update all examples with updated API, add new and maybe remove some
+  - [] Playground needs some cleanup, better file management for examples, atm just a giant file 🤮
+- [] Put a website at `elemix.dev`
+- [] Update all `README` files at the moment is just autocomplete filler from the `minion` 🤖
+- [] Add template repo 📍
+
+### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
+
+- [] Compiler hints (macros #⃣️) 🧐
+  - [] Syntax have to pass typescript typechecking phase - most likely `#component` <= This is just a valid string 🤔
+  - [] No special syntax - don't care about editors so it has to just work 🔩
+  - [] Do I make macros position line independent, maybe (global and line specific ones) ⁉️🧐
+  - [] Architecture for this has to be clean AF - ability to easily extend
+    - [] For now 2 types of macros `global` and `positioned`
+  - [] This will resolve two issues at once
+    - [] Decorators are Typescript dependent and stink 🦨
+    - [] Automatic component registration with tags derived from component classes, no more issue with name `mangling`
+      after bundling
+  - [] Watch where this is going, maybe it will lead to dynamic macros, slightly going in direction of `meta` programming 🧐
+  - [] `Compalerino` resilience
+    - [] Pass file for transpilation based on the existence of compiler hint ⁉️
+    - [] Multiple components per file
+    - [] Object destructuring in template procedure, this should already work 🤔
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
@@ -181,13 +259,6 @@ What went well:
   stories running in real browser within storybook to assert behaviour
 - Managed to repurpose LIS algo and list reconciliation
 
-### Assumptions
-
-- [] Near native performance going through thin layer of reactivity - well most likely not 🤔
-- [] Memory will drop drastically
-- [] Time to first paint should drop as there is less setup code before component mounts (no more template
-  evaluation and tracking)
-
 **Proceed to next stage only if happy with compiler workflow and benchmark results**
 
 ## Composition Like Api - Module as component - bit like svelte
@@ -223,15 +294,6 @@ This is just an idea, but do I even need to transpile to a class ?? Maybe not...
 One thing I will not compromise on, target data structure has to be `customElement`!!
 
 This will be a headache if I get there 😂❤️😂
-
-## Chores
-
-- [] Why is this static ?? `public static styles?: string[];` styles get adopted in `connectedCallback`
-  - [] Leftover from decorator
-  - [] Make it non static
-  - [] Allow adopting styles during runtime (connected state)
-    - [] Use getters and setters
-
 
 ## DONE
 
@@ -330,3 +392,8 @@ This will be a headache if I get there 😂❤️😂
   - [x] I am bringing bigger guns this time
     - [x] Now we are going after the rest of the party!!
     - [x] Benchmark is purely focused on hyper optimisation for list rendering, so yeah, tuff!! 😂😂😂
+
+- [x] Near native performance going through thin layer of reactivity - well most likely not 🤔 Close enough 🎉
+- [x] Memory will drop drastically ✅
+- [x] Time to first paint should drop as there is less setup code before component mounts (no more template
+  evaluation and tracking) ✅
