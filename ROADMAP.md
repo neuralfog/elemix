@@ -70,11 +70,6 @@ Target release of compiled templates `v0.9.0`
 - [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
 - [] Add elemix to official benchmarks
 - [] WASM package needs its own readme 🤔
-- [] Poke at sourcemaps at some point ⏰️⏰️
-- [] Design a feature `analyzer` for templates `prop` typechecking `cli` only!!
-  - [] Do I want analyzer in `v0.9.0` or defer it to => `v1.0.0` 🧐
-  I have a repo in graveyard already in `typescript` 🤔
-  - [] Also is this going to live in compiler or separate module
 
 ### Phase 6 - Close the release of v0.9.0 ❎
 
@@ -87,6 +82,30 @@ Target release of compiled templates `v0.9.0`
 - [] Add template repo 📍
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
+
+- [] Poke at sourcemaps at some point ⏰️⏰️
+
+***Design Analyzer Diagnostic Tool 🚦🚦🚦***
+
+- This is way harder than I initially thought, my first instinct I will have to mess with `tsc` was
+  correct ✅
+- Is not as bad as it could be though, cant be native - there is no independent typescript checker
+  out there that I can use, writing my own is pure insanity and asking for trouble 💥
+- Good news that most of the hard work is already done in compiler so I can get all metadata that
+  is needed 🌋
+- One thing that became obvious - typechecking has to be performed by the same version of `tsc` that
+  the project is using, so using something other than `tsc` would be wrong here, I am looking
+  for consistency here 📐
+- New crate for `ec-analyzer` and compiler as dependency 📦
+- I can perform typechecking on transient/synthetic file with type assertions with `tsc`, take the
+  results - augment - and present 📺
+- I will be aiming for two modes `--pretty`: human readable for cli, and `--lsp`: lsp compatible
+  json format, hopefully that will give me a lever for code editor integrations 🔌
+- Not sure if that will work or not, there will be no real `lsp` server running, try and 👀👀👀
+- If `--lsp` mode will not work drop it, small amount of effort is just formatting 💥
+- For conformance of `--lsp` mode I will be forced to build plugin for editor 😒 FML
+- `nvim` and `vscode` 📝
+- Locked in design doc `ANALYZER.md` 🔒
 
 ***Resilience ⚙️⚙️⚙️***
 
@@ -101,7 +120,7 @@ Target release of compiled templates `v0.9.0`
   full scope analysis 🤏
 - Template-less pragma components (`#component #styles`, no `tpl`) were silently skipped by the
   vite tpl-only filter and never registered. Fixed 💥 a regression from adding compiler hints 🤦
-  the gate now lets pragma blocks through too 🚪
+  The gate now lets pragma blocks through too 🚪
 - Compiler CLI now greets you with a banner 🪧 version baked in at build from `package.json`
   Go-`ldflags` style (`$npm_package_version`), omitted in `--stdin` pipe mode 🤫 no more shite
   hand-rolled JSON parsing in `build.rs` either, killed it with fire 🔥
@@ -125,7 +144,7 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 
 - Entire pipeline reworked to fail early ❌
 - `npm` packages will be only published if all artifacts available 📦
-- Hopefully no more partialy released packages 🙏
+- Hopefully no more partially released packages 🙏
 - `RELEASE-PIPELINE.md` 🗺️
 
 ***Compiler Hints #⃣️#⃣️#⃣️***
@@ -142,9 +161,6 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 - The nice thing about going with string literals is that I can have dynamic values, also this is valid syntax
   in js world 🪐
 - All fixtures are using new syntax now #⃣️
-
-- [] `Compalerino` resilience
-  - [] Pass file for transpilation based on the existence of compiler hint ⁉️
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
