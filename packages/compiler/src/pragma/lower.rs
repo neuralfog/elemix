@@ -82,9 +82,16 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         let meta = resolve(&class.directives).map_err(ExpandError::Resolve)?;
 
         // #styles fields → strip each, hoist a `sheet(<value>)` (deduped) + __sheets.
+        // Under #no-shadow there's no shadow root to adopt into, so skip the sheet
+        // entirely — strip only the marker comment, leave the field (keeping its
+        // value referenced) and emit nothing.
         let mut hoist = String::new();
         let mut sheet_vars: Vec<String> = Vec::new();
         for sf in &class.styles {
+            if meta.no_shadow {
+                edits.push((sf.comment.0, sf.comment.1, String::new()));
+                continue;
+            }
             edits.push((sf.strip.0, sf.strip.1, String::new()));
             let var = match seen.get(&sf.value) {
                 Some(v) => v.clone(),
@@ -109,6 +116,15 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
                 class.body_open,
                 class.body_open,
                 "\n    static formAssociated = true;".to_string(),
+            ));
+        }
+
+        // #no-shadow → render to light DOM (the base skips attachShadow).
+        if meta.no_shadow {
+            edits.push((
+                class.body_open,
+                class.body_open,
+                "\n    static __noShadow = true;".to_string(),
             ));
         }
 

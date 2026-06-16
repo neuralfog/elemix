@@ -44,6 +44,9 @@ pub struct ComponentMeta {
     /// `#form` — make the element form-associated (inject the static
     /// `formAssociated = true` the browser reads at registration).
     pub form: bool,
+    /// `#no-shadow` — render to light DOM (skip `attachShadow`); `#styles`
+    /// adoption becomes a noop without a shadow root.
+    pub no_shadow: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -76,6 +79,7 @@ pub fn resolve(directives: &[Directive]) -> Result<ComponentMeta, PragmaError> {
                 meta.tag = Some(tag);
             }
             "form" => meta.form = true,
+            "no-shadow" => meta.no_shadow = true,
             "styles" | "state" | "effect" => return Err(PragmaError::OnClass(d.name.clone())),
             other => return Err(PragmaError::Unknown(other.to_string())),
         }

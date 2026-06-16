@@ -61,6 +61,7 @@ fn resolves_component_and_tag() {
             register: true,
             tag: Some("pf-builder".to_string()),
             form: false,
+            no_shadow: false,
         })
     );
 }
@@ -69,6 +70,30 @@ fn resolves_component_and_tag() {
 fn form_resolves_to_a_flag() {
     assert!(resolve(&[dir("form", &[])]).unwrap().form);
     assert!(!resolve(&[dir("component", &[])]).unwrap().form);
+}
+
+#[test]
+fn no_shadow_resolves_to_a_flag() {
+    assert!(resolve(&[dir("no-shadow", &[])]).unwrap().no_shadow);
+    assert!(!resolve(&[dir("component", &[])]).unwrap().no_shadow);
+}
+
+#[test]
+fn no_shadow_injects_the_static_flag() {
+    let out = expand("// #component #no-shadow\nclass Foo extends Component {}").unwrap();
+    assert!(out.contains("static __noShadow = true;"));
+    assert!(out.contains("defineComponent('foo', Foo);"));
+}
+
+#[test]
+fn no_shadow_skips_styles_emission() {
+    let src = "const css = `x`;\n// #component #no-shadow\nclass Foo extends Component {\n    // #styles\n    styles = css;\n}";
+    let out = expand(src).unwrap();
+    assert!(out.contains("static __noShadow = true;"));
+    assert!(!out.contains("sheet(")); // no stylesheet emitted
+    assert!(!out.contains("__sheets"));
+    assert!(out.contains("styles = css;")); // field kept → `css` stays referenced
+    assert!(!out.contains("// #styles")); // marker stripped
 }
 
 #[test]

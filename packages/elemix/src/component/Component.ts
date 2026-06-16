@@ -13,6 +13,7 @@ import type { Template } from '../types';
 export class Component<ComponentProps = unknown> extends HTMLElement {
     public static formAssociated?: boolean;
     public static __sheets?: CSSStyleSheet[];
+    public static __noShadow?: boolean;
     public $props?: Record<string, unknown>;
     private connected = false;
     private scopes: Scope | null = null;
@@ -20,8 +21,8 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     public isMounted = false;
     public internals!: ElementInternals;
 
-    public get root(): HTMLElement | ShadowRoot | null {
-        return this.shadowRoot;
+    public get root(): HTMLElement | ShadowRoot {
+        return this.shadowRoot ?? this;
     }
 
     public get props(): ComponentProps {
@@ -38,7 +39,9 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
     constructor() {
         super();
-        this.attachShadow({ mode: 'open' });
+        if (!(this.constructor as typeof Component).__noShadow) {
+            this.attachShadow({ mode: 'open' });
+        }
         this.setAttribute('data-cloak', '');
     }
 
@@ -64,7 +67,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
                 const view = this.view;
                 const frag = collect(() => view.call(this));
                 this.scopes = takeScopes();
-                this.shadowRoot?.appendChild(frag);
+                (this.shadowRoot ?? this).appendChild(frag);
             }
 
             if (this.effects) {
