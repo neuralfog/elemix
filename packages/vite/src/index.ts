@@ -14,10 +14,27 @@ const resolveBin = (): string => {
     return join(dirname(pkgJson), `elemix-compiler${ext}`);
 };
 
-// Pipe one module's source through `elemix-compiler --stdin` → compiled `.ts`.
-const compile = (bin: string, source: string): Promise<string> =>
+// A Source Map v3 object (only the fields we touch are typed).
+interface SourceMap {
+    version: 3;
+    sources: string[];
+    sourcesContent?: string[];
+    mappings: string;
+    [key: string]: unknown;
+}
+
+interface Compiled {
+    code: string;
+    map: SourceMap;
+}
+
+// Pipe one module's source through `elemix-compiler --stdin --sourcemap`, which
+// answers with a `{ code, map }` JSON envelope. Returning the map keeps the
+// source-map chain intact — Vite composes it with esbuild's TS→JS map so
+// breakpoints / stack traces resolve to the original `tpl` source.
+const compile = (bin: string, source: string): Promise<Compiled> =>
     new Promise((resolve, reject) => {
-        const child = spawn(bin, ['--stdin']);
+        const child = spawn(bin, ['--stdin', '--sourcemap']);
         let out = '';
         let err = '';
         child.stdout.on('data', (chunk) => {
@@ -28,9 +45,17 @@ const compile = (bin: string, source: string): Promise<string> =>
         });
         child.on('error', reject);
         child.on('close', (code) => {
-            if (code === 0) resolve(out);
-            else
+            if (code !== 0) {
                 reject(new Error(err || `elemix-compiler exited with ${code}`));
+                return;
+            }
+            try {
+                resolve(JSON.parse(out) as Compiled);
+            } catch (e) {
+                reject(
+                    new Error(`elemix-compiler: bad output envelope (${e})`),
+                );
+            }
         });
         child.stdin.end(source);
     });
@@ -65,7 +90,11 @@ export const elemix = (options: ElemixPluginOptions = {}): Plugin => {
                 return null;
             }
             if (!bin) bin = resolveBin();
-            return { code: await compile(bin, code), map: null };
+            const { code: compiled, map } = await compile(bin, code);
+            // The compiler emits a placeholder source name; point it at the
+            // real module so Vite resolves the original file in devtools.
+            map.sources = [id];
+            return { code: compiled, map };
         },
     };
 };

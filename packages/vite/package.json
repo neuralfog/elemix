@@ -32,7 +32,9 @@
         "@neuralfog/elemix-compiler": "0.0.0-dev.2"
     },
     "devDependencies": {
+        "@ampproject/remapping": "2.3.0",
         "@biomejs/biome": "1.9.4",
+        "@jridgewell/trace-mapping": "0.3.25",
         "@neuralfog/biome-config": "0.1.2",
         "@neuralfog/ts-config": "0.1.2",
         "@types/node": "25.9.1",

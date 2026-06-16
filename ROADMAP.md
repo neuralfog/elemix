@@ -15,11 +15,12 @@ Target release of compiled templates `v0.9.0`
 - No cheating, driving test fully via reactive state - no manual DOM operations 🙅🙅🙅
 - Very happy with overall matrix, no yeller or red on any fields 💚💚💚
 - Not the fastest, but incredibly consistent across the board 🏅
-- `select row` - the fastest, faster than vanilla js ✅
+- `select row` - the fastest, faster than vanilla js ✅ Most likely invariants from the test run, makes no sense TBH 😂
 - `smallest bundle` - across the board ✅ - this may change, but in good spot not to overinflate ☑️
 - `second` - on first paint ahead of vanilla js ✅
 - `lowest memory` after initial page load ✅
 - I have to be careful I may spend rest of my life optimising trying to pull ahead 😂😂😂 Too addictive 🚬
+- Usage memory has been dropped below 3mb after further optimisations 🎯
 
 - **Only tested selected matrix, the full picture will be visible on full release after `PR` to official repo**
 
@@ -83,7 +84,11 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
-- [] Poke at sourcemaps at some point ⏰️⏰️
+***Source Maps 🗺️🗺️🗺️***
+
+- Turns out we don't need the fancy version 🤓 compile is splice-based, so real code - methods,
+  getters, `defineComponent`, imports - survives VERBATIM, just shifted down by the lines
+  the compiler bolts on (runtime import, hoisted `template()` consts, the expanded `view()`) 🪄
 
 ***Design Analyzer Diagnostic Tool 🚦🚦🚦***
 
@@ -469,3 +474,4 @@ This will be a headache if I get there 😂❤️😂
   not just zero-arg - the win is `repeat` driven list rows 📜
 - [x] Design `compiler hints`
 - [x] Add banner to rust cli - omit for --stdin
+- [x] Poke at sourcemaps at some point ⏰️⏰️
