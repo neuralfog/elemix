@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-compiler-darwin-arm64",
-  "version": "0.9.0-dev.2",
+  "version": "0.9.0-dev.3",
   "description": "Prebuilt elemix-compiler binary for macOS arm64 (Apple Silicon).",
   "license": "MIT",
   "author": "brownhounds",
