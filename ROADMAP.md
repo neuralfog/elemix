@@ -86,7 +86,7 @@ Target release of compiled templates `v0.9.0`
 
 ***Source Maps 🗺️🗺️🗺️***
 
-- Turns out we don't need the fancy version 🤓 compile is splice-based, so real code - methods,
+- Turns out I don't need the fancy version 🤓 compile is splice-based, so real code - methods,
   getters, `defineComponent`, imports - survives VERBATIM, just shifted down by the lines
   the compiler bolts on (runtime import, hoisted `template()` consts, the expanded `view()`) 🪄
 
@@ -133,7 +133,7 @@ Target release of compiled templates `v0.9.0`
 ***Computed Properties 🧮🧮🧮***
 
 - No need for it, native getters do the job just fine `get test() {}`
-- We have manual way to drive updates `this.render()` if necessary
+- I have manual way to drive updates `this.render()` if necessary
 - The mechanic: the view's effect subscribes to whatever it reads through tracked getters. So:
 
 ```ts
@@ -189,7 +189,7 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 - Ticks are a tad slower on 10k compared to the old renderer, but hey who the hell renders 10k components with ticking state
   (`animationFrame`) on every component coming from 3 different sources 😂 Yeah try having that in React - good luck 🍀
 
-## Compiler - We don't React. We compile. 😂😂😂
+## Compiler - I don't React. I compile. 😂😂😂
 
 ### Phase 3 - Why would you use a fork for eating soup 🍴 Packaging and Tooling 🛠️
 
@@ -230,7 +230,7 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 ***Compiler Packaging 📦📦📦***
 
 - Compiler now ships as an npm module `https://www.npmjs.com/package/@neuralfog/elemix-compiler` 📦
-- Tightening the release process as we go, moving to `tag`-based releases 🏃🏾‍♂️🏃
+- Tightening the release process as I go, moving to `tag`-based releases 🏃🏾‍♂️🏃
 - Compiler ships as an executable across the entire matrix of operating systems and CPU architectures 🤓
 - Directives and the template definition `tpl` tag have been turned into compiler-only macros ✨
   JS will throw if any bleed into post-compiled sources 🥷🥷🥷
@@ -256,7 +256,7 @@ This went better than I expected:
   passed through `typescript` and exhaustively tested for interaction with storybook.
 - The idea of snapshotting was kinda cute, well, it did not work. I caught 3 different bugs related to emitted code by running
   components in a real browser environment 💪💪💪
-- Treat it as a first unoptimised pass - we will see what the benchmarks say, not getting my hopes up 🙈
+- Treat it as a first unoptimised pass - I will see what the benchmarks say, not getting my hopes up 🙈
 - Entire runtime has been dropped 🌟
 - Open for possibilities of custom `pragma like` hints that will be trivial to implement ❤️
 - Best example I can think of replacing freaking decorators with custom compiler hints (in the end I get what I want
@@ -359,7 +359,7 @@ This will be a headache if I get there 😂❤️😂
   - [x] State, signals, and props
   - [x] Apart from small changes like removing virtual attributes and moving statics!
 - [x] Main goals
-   - [x] Can we increase speed, although we are close to the limitations of native DOM operations 🎉
+   - [x] Can I increase speed, although I am close to the limitations of native DOM operations 🎉
    - [x] Literal milliseconds do not matter on row swaps etc. This is faster than it has to be!!
    - [x] Freedom and api is what matters
 - [x] Memory usage, this is a clear win
@@ -399,7 +399,7 @@ This will be a headache if I get there 😂❤️😂
 - [x] `ec-wasm` needs to be able to transpile on `playground`
 - [x] Rust compiles to wasm - first class support - can still use it in playground
 - [x] Most likely `ec-vite` plugin, got to find a way to make compilation as painless and invisible as possible
-    vite plugin is a good candidate here, we can hook into the `vite` compilation process, I did it before
+    vite plugin is a good candidate here, I can hook into the `vite` compilation process, I did it before
 - [x] Compiler `cli` may change based on two requirements above - Yes it did 😂
 - [x] In theory this should be the easiest part, hard work is done!! 🚀🚀🚀 EZ just ton shite of work 💩💩💩
 - [x] Streamline release with tags ✅
@@ -438,9 +438,9 @@ This will be a headache if I get there 😂❤️😂
     - automatic memo for list rendering and identity keys
     caused a massive memory spike, a lot of tracking and object retention 😬
 
-  - [x] Framework/Lib Api has been frozen - I don't want any more changes we are in a good spot
+  - [x] Framework/Lib Api has been frozen - I don't want any more changes I am in a good spot
   - [x] I am bringing bigger guns this time
-    - [x] Now we are going after the rest of the party!!
+    - [x] Now I am going after the rest of the party!!
     - [x] Benchmark is purely focused on hyper optimisation for list rendering, so yeah, tuff!! 😂😂😂
 
 - [x] Near native performance going through thin layer of reactivity - well most likely not 🤔 Close enough 🎉
