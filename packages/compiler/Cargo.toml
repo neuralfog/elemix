@@ -25,11 +25,11 @@ wasm = ["dep:wasm-bindgen", "dep:console_error_panic_hook"]
 [dependencies]
 clap = { version = "4.6.1", features = ["derive"], optional = true }
 glob = { version = "0.3.3", optional = true }
-oxc_allocator = "0.135.0"
-oxc_ast = "0.135.0"
-oxc_ast_visit = "0.135.0"
-oxc_parser = "0.135.0"
-oxc_span = "0.135.0"
+oxc_allocator = "0.136.0"
+oxc_ast = "0.136.0"
+oxc_ast_visit = "0.136.0"
+oxc_parser = "0.136.0"
+oxc_span = "0.136.0"
 wasm-bindgen = { version = "0.2", optional = true }
 console_error_panic_hook = { version = "0.1", optional = true }
 
