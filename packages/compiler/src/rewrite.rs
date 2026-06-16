@@ -12,11 +12,11 @@ use crate::emit::TsEmitter;
 use crate::locate::find_html_templates;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
-    Class, ClassElement, Declaration, ImportDeclarationSpecifier, ModuleExportName, PropertyKey,
-    Statement,
+    Class, ClassElement, Declaration, Expression, ImportDeclarationSpecifier, ModuleExportName,
+    PropertyKey, Statement,
 };
 use oxc_parser::Parser;
-use oxc_span::SourceType;
+use oxc_span::{GetSpan, SourceType};
 
 const PRIMITIVES: &[&str] = &[
     "template",
@@ -39,6 +39,9 @@ const PRIMITIVES: &[&str] = &[
 struct Plan {
     class_start: usize,
     member: (usize, usize),
+    /// Source of the statements preceding the `return tpl` in a block-bodied
+    /// `template()` (e.g. a destructure) — prepended into `view()`.
+    prelude: String,
     directives_import: Option<(usize, usize)>,
     /// The `/types` import span + the specifier names left after dropping
     /// `Template` (which the rewritten `view()` no longer needs).
@@ -63,7 +66,14 @@ pub fn rewrite(source: &str) -> String {
     let t = &templates[0];
     let g = generate(&t.statics, &t.holes, &TsEmitter::new());
     let runtime_import = runtime_import(&g.decls, &g.body);
-    let view = format!("view(): DocumentFragment {{\n{}}}", g.body);
+    let view = if plan.prelude.is_empty() {
+        format!("view(): DocumentFragment {{\n{}}}", g.body)
+    } else {
+        format!(
+            "view(): DocumentFragment {{\n{}\n{}}}",
+            plan.prelude, g.body
+        )
+    };
 
     // Apply edits from the back so earlier offsets stay valid.
     let mut edits: Vec<(usize, usize, String)> = vec![
@@ -125,6 +135,7 @@ fn plan(source: &str) -> Option<Plan> {
 
     let mut class_start = None;
     let mut member = None;
+    let mut prelude = String::new();
     let mut directives_import = None;
     let mut types_import = None;
     let mut main_import = None;
@@ -155,12 +166,18 @@ fn plan(source: &str) -> Option<Plan> {
             Statement::ExportNamedDeclaration(export) => {
                 if let Some(Declaration::ClassDeclaration(class)) = &export.declaration {
                     class_start = Some(export.span.start as usize);
-                    member = find_template_member(class);
+                    if let Some((s, e, p)) = find_template_member(source, class) {
+                        member = Some((s, e));
+                        prelude = p;
+                    }
                 }
             }
             Statement::ClassDeclaration(class) => {
                 class_start = Some(class.span.start as usize);
-                member = find_template_member(class);
+                if let Some((s, e, p)) = find_template_member(source, class) {
+                    member = Some((s, e));
+                    prelude = p;
+                }
             }
             _ => {}
         }
@@ -169,6 +186,7 @@ fn plan(source: &str) -> Option<Plan> {
     Some(Plan {
         class_start: class_start?,
         member: member?,
+        prelude,
         directives_import,
         types_import,
         main_import,
@@ -193,17 +211,41 @@ fn import_names(import: &oxc_ast::ast::ImportDeclaration) -> Vec<String> {
         .collect()
 }
 
-fn find_template_member(class: &Class) -> Option<(usize, usize)> {
+fn find_template_member(source: &str, class: &Class) -> Option<(usize, usize, String)> {
     for element in &class.body.body {
         if let ClassElement::PropertyDefinition(prop) = element {
             if let PropertyKey::StaticIdentifier(id) = &prop.key {
                 if id.name.as_str() == "template" {
-                    return Some((prop.span.start as usize, prop.span.end as usize));
+                    return Some((
+                        prop.span.start as usize,
+                        prop.span.end as usize,
+                        template_prelude(source, &prop.value),
+                    ));
                 }
             }
         }
     }
     None
+}
+
+/// For a block-bodied `template = () => { …prelude…; return tpl`…`; }`, the
+/// source of the statements before the `return` — they must survive into
+/// `view()` (e.g. a `const { inc } = this` destructure that the holes reference).
+/// Empty for an expression-bodied template or a block with no prelude.
+fn template_prelude(source: &str, value: &Option<Expression>) -> String {
+    let Some(Expression::ArrowFunctionExpression(arrow)) = value else {
+        return String::new();
+    };
+    if arrow.expression {
+        return String::new();
+    }
+    let stmts = &arrow.body.statements;
+    if stmts.len() <= 1 {
+        return String::new();
+    }
+    let start = stmts[0].span().start as usize;
+    let end = stmts[stmts.len() - 2].span().end as usize;
+    source[start..end].to_string()
 }
 
 /// Build the runtime import for exactly the primitives the generated code uses.

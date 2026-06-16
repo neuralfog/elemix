@@ -90,6 +90,12 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
+***Resiliance ⚙️⚙️⚙️***
+
+- Statments before return in template procedure has been stripped, this has been fixed with
+  prelude in rewrite stage 🥇
+- So far hasn't seen any issues related to hoisting post compilation 🤔
+
 ***Computed Properties 🧮🧮🧮***
 
 - No need for it, native getters do the job just fine `get test() {}`
@@ -130,8 +136,6 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 - [] `Compalerino` resilience
   - [] Pass file for transpilation based on the existence of compiler hint ⁉️
   - [] Multiple components per file
-  - [] Object destructuring in template procedure, this should already work 🤔
-
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
@@ -434,3 +438,4 @@ This will be a headache if I get there 😂❤️😂
 - [x] Do I need concept of `computed(() => {})` ⁉️🧐 Don't really want it... Dig in to it 🪏 Proof the
   concept, otherwise add `computed` 🤮 The issue here - architecture has changed, the concept of computation
   was not needed before 🧐
+- [x] Object destructuring in template procedure, this should already work 🤔

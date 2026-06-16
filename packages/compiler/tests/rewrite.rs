@@ -57,3 +57,30 @@ fn main_import_is_dropped_when_only_tpl_remained() {
     // ...but the generated runtime import is still there.
     assert!(out.contains("from '@neuralfog/elemix/runtime';"));
 }
+
+const BLOCK_BODY: &str = r#"import { Component, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class DestructApp extends Component {
+    inc = (): void => {};
+    template = (): Template => {
+        const { inc } = this;
+        return tpl`<button @click=${inc}>${this.state.count}</button>`;
+    };
+}
+defineComponent('destruct-app', DestructApp);
+"#;
+
+#[test]
+fn block_body_prelude_survives_into_view() {
+    // The statements before `return tpl` (here a destructure the holes use) must
+    // be carried into view() — otherwise `inc` is undefined in the emitted code.
+    let out = compile(BLOCK_BODY);
+    assert!(out.contains("view(): DocumentFragment {"));
+    assert!(out.contains("const { inc } = this;"));
+    // and it lands inside view(), before the clone — not left in dead template().
+    let view_at = out.find("view(): DocumentFragment").unwrap();
+    let destruct_at = out.find("const { inc } = this;").unwrap();
+    let clone_at = out.find("clone(").unwrap();
+    assert!(view_at < destruct_at && destruct_at < clone_at);
+    assert!(!out.contains("tpl`"));
+}
