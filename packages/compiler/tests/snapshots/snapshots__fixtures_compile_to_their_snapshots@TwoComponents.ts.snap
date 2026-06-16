@@ -1,0 +1,51 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: tests/fixtures/TwoComponents.ts
+---
+import { template, clone, _event, effect, _setText, defineComponent } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
+
+// Two full components in one file — each gets its own pragma block, its own
+// registration, and its own compiled view(). The compiler must lower BOTH
+// templates (not bail because it saw more than one).
+
+const _t0 = template('<button class="first"> </button>');
+const _t1 = template('<button class="second"> </button>');
+
+export class FirstWidget extends Component {
+    state = state<{ n: number }>({ n: 1 });
+    inc = (): void => {
+        this.state.n++;
+    };
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.firstElementChild!;
+const _n2 = _n1.firstChild!;
+_event(_n1, 'click', this.inc);
+effect(() => {
+_setText(_n2, (this.state.n));
+});
+return _r0;
+}
+}
+defineComponent('first-widget', FirstWidget);
+
+export class SecondWidget extends Component {
+    state = state<{ label: string }>({ label: 'hi' });
+    flip = (): void => {
+        this.state.label = this.state.label === 'hi' ? 'bye' : 'hi';
+    };
+    view(): DocumentFragment {
+const _r3 = clone(_t1);
+const _n4 = _r3.firstElementChild!;
+const _n5 = _n4.firstChild!;
+_event(_n4, 'click', this.flip);
+effect(() => {
+_setText(_n5, (this.state.label));
+});
+return _r3;
+}
+}
+defineComponent('second-widget', SecondWidget);

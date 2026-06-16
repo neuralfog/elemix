@@ -54,6 +54,22 @@ pub fn generate(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> 
     }
 }
 
+/// Generate `view()` bodies for several templates sharing ONE module scope:
+/// the hoisted `template(...)` consts are numbered uniquely + deduped across all
+/// of them, returned once, alongside each template's body. This is what lets a
+/// file hold multiple components without their `_tN` consts colliding.
+pub fn generate_all(
+    templates: &[(Vec<String>, Vec<String>)],
+    emitter: &dyn Emitter,
+) -> (String, Vec<String>) {
+    let mut ctx = Ctx::default();
+    let bodies = templates
+        .iter()
+        .map(|(statics, holes)| gen_template(statics, holes, &mut ctx, emitter, false))
+        .collect();
+    (ctx.decls, bodies)
+}
+
 /// Generate the source for one top-level template: the module-scope
 /// `template(...)` consts followed by the `view()` body.
 pub fn codegen(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> String {

@@ -55,7 +55,15 @@ export const elemix = (options: ElemixPluginOptions = {}): Plugin => {
             if (file.includes('/node_modules/') || !file.endsWith('.ts')) {
                 return null;
             }
-            if (file.endsWith('.d.ts') || !code.includes('tpl`')) return null;
+            // Compile a file if it has a template (`tpl`) OR a pragma block
+            // (a backtick string opening with `#`, e.g. a template-less
+            // `#component #styles` wrapper) — both lower to runtime calls.
+            if (
+                file.endsWith('.d.ts') ||
+                (!code.includes('tpl`') && !/`\s*#/.test(code))
+            ) {
+                return null;
+            }
             if (!bin) bin = resolveBin();
             return { code: await compile(bin, code), map: null };
         },

@@ -79,6 +79,51 @@ fn stdin_mode_pipes_compiled_source_to_stdout() {
 }
 
 #[test]
+fn banner_shows_the_package_json_version_on_stderr() {
+    // the version baked into the banner must match package.json (not Cargo.toml)
+    let pkg = std::fs::read_to_string("package.json").unwrap();
+    let key = "\"version\"";
+    let after = &pkg[pkg.find(key).unwrap() + key.len()..];
+    let open = after.find('"').unwrap() + 1;
+    let version = &after[open..open + after[open..].find('"').unwrap()];
+
+    let out = Command::new(bin())
+        .args(["--file", "tests/fixtures/CounterApp.ts"])
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(stderr.contains("elemix"));
+    assert!(stderr.contains("template compiler"));
+    assert!(stderr.contains(version), "banner missing version {version}");
+}
+
+#[test]
+fn stdin_mode_emits_no_banner() {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let mut child = Command::new(bin())
+        .arg("--stdin")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(b"const x = 1;")
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        !stderr.contains("template compiler"),
+        "banner leaked into pipe mode"
+    );
+}
+
+#[test]
 fn compiles_a_directory_of_fixtures() {
     let dir = out_dir("dir");
     let status = Command::new(bin())
@@ -92,7 +137,7 @@ fn compiles_a_directory_of_fixtures() {
         .unwrap()
         .filter_map(Result::ok)
         .collect();
-    assert_eq!(files.len(), 41);
+    assert_eq!(files.len(), 44);
 
     // no compiled file in the whole corpus leaks the html intrinsic or a directive
     for entry in files {
