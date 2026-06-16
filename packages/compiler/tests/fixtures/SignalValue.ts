@@ -19,8 +19,10 @@ const css = `
     }
 `;
 
-`#component #styles ${css}`
+// #component
 export class SignalValue extends Component {
+    // #styles
+    styles = css;
 
     template = (): Template => tpl`<div class="value">${counter.count}</div>`;
 }

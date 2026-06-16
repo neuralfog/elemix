@@ -84,6 +84,48 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
+***Compiler Hints Rewrite & Effects #⃣️🌀***
+
+- This slowly starts to become what I envisioned 😶‍🌫️🥳
+- Redesigned compiler hints, string literals was a bad idea, they can't be used on class members #⃣️#⃣️#⃣️
+- All hints are position dependent, they decorate property on next line 📍
+- Marker marks, the real declaration holds the value - so `tsc` still checks it ✅
+- Going full blast on code generation here 💥💥💥
+- Fully redesigned with comments syntax `// #....`
+- `// #component #tag hello-there` behaviour unchanged 🧊
+- `// #state` is used to decorate naked objects and class members 🛟
+- `state` and `effect` are macros now - injected from `/runtime`, ripped out of the public barrel 🔪
+- `// #styles` moved to class member, can't have values in comments in straight forward manner 🫟
+- Exposed `isMounted` on component adding ability to check programmatically if component is mounted or not
+- Added `// #effect` which registers procedure to run side effect, similar to watchers in `vue`, this
+  style is way cleaner (solid style), don't have to be specific about property to watch, just use it 🚤
+- Multiple `// #state` and `// #effect` are allowed in scope of component 💪💪
+- `mergeClasses` helper dropped ♻️
+- Simple Effect:
+
+```ts
+// #effect
+mirror() {
+  this.setAttribute('data-count', String(this.state.count));
+}
+
+// #effect
+mirror = (): void => {
+  this.setAttribute('data-count', String(this.state.count));
+}
+```
+
+- Both arrow fields and methods work for effects 🪢
+- Effect can skip the mount run (this may change if I can think of cleaner way):
+
+```ts
+// #effect
+save() {
+  const c = this.state.count;     // ← read first → tracked
+  if (!this.isMounted) return;    // ← skip the mount
+  localStorage.setItem('count', String(c));
+}
+```
 ***Source Maps 🗺️🗺️🗺️***
 
 - Turns out I don't need the fancy version 🤓 compile is splice-based, so real code - methods,

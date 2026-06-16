@@ -16,6 +16,8 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     public $props?: Record<string, unknown>;
     private connected = false;
     private scopes: Scope | null = null;
+    private effectScopes: Scope | null = null;
+    public isMounted = false;
     public internals!: ElementInternals;
 
     public get root(): HTMLElement | ShadowRoot | null {
@@ -42,6 +44,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
     public template?(): Template;
     public view?(): DocumentFragment;
+    public effects?(): void;
 
     public beforeMount?(): void;
     public onMount?(): void;
@@ -64,9 +67,17 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
                 this.shadowRoot?.appendChild(frag);
             }
 
+            if (this.effects) {
+                const effects = this.effects;
+                collect(() => effects.call(this));
+                this.effectScopes = takeScopes();
+            }
+
             this.removeAttribute('data-cloak');
             this.onMount?.();
         });
+
+        this.isMounted = true;
     }
 
     private attachFormInternals(): void {
@@ -83,8 +94,11 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
             untrack(() => {
                 dispose(this.scopes);
                 this.scopes = null;
+                dispose(this.effectScopes);
+                this.effectScopes = null;
                 this.onDispose?.();
             });
+            this.isMounted = false;
         });
     }
 

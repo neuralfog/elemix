@@ -1,4 +1,4 @@
-import { Component, ref, state, tpl } from '@neuralfog/elemix';
+import { Component, ref, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Ref, Template } from '@neuralfog/elemix/types';
 
@@ -65,13 +65,16 @@ const css = `
     .remove:hover { background: rgba(239, 68, 68, 0.12); }
 `;
 
-`#component #styles ${css}`
+// #component
 export class TodoApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         draft: ref(''),
         todos: [{ id: 't0', text: 'Learn Elemix' }],
-    });
+    };
 
     private seq = 0;
 

@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = { count: number };
@@ -33,9 +33,12 @@ const css = `
 // `const { inc, dec } = this`) when it lowers the body into view() — otherwise
 // inc/dec would be undefined. Reactivity is unaffected: count is still read as
 // this.state.count inside the effect.
-`#component #styles ${css}`
+// #component
 export class ProofDestructuring extends Component {
-    state = state<State>({ count: 0 });
+    // #styles
+    styles = css;
+    // #state
+    state: State = { count: 0 };
 
     inc = (): void => {
         this.state.count++;

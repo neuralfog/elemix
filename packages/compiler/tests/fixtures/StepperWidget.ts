@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = { count: number };
@@ -43,15 +43,15 @@ const css = `
     }
 `;
 
-// A multi-line pragma block with an explicit `#tag` that overrides the derived
-// one (`StepperWidget` would otherwise become `stepper-widget`). The lines are
-// `;`-terminated so each is its own statement — the typecheck-safe multi-line
-// form (a no-semicolon block chains into a tagged template TS rejects).
-`#component`;
-`#tag ui-stepper`;
-`#styles ${css}`;
+// An explicit `#tag` that overrides the derived one (`StepperWidget` would
+// otherwise become `stepper-widget`). The pragma is a plain `//` comment bound
+// to the class on the next line.
+// #component #tag ui-stepper
 export class StepperWidget extends Component {
-    state = state<State>({ count: 0 });
+    // #styles
+    styles = css;
+    // #state
+    state: State = { count: 0 };
 
     dec = (): void => {
         this.state.count--;

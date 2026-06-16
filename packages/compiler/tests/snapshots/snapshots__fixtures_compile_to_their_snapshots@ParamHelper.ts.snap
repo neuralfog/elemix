@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ParamHelper.ts
 ---
-import { template, clone, _event, _list, effect, _setText, _setAttr, defineComponent, sheet } from '@neuralfog/elemix/runtime';
-import { Component, state } from '@neuralfog/elemix';
+import { template, clone, _event, _list, effect, _setText, _setAttr, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 type Row = { id: number; name: string };
 

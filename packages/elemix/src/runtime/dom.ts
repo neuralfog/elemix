@@ -6,7 +6,6 @@ import {
     untrack,
     type Scope,
 } from './reactive';
-import { mergeClasses } from '../utilities';
 
 type Getter<T> = () => T;
 
@@ -307,20 +306,26 @@ export const _setAttr = (el: Element, name: string, value: unknown): void => {
 
 export const _setClass = (
     el: Element,
-    initial: string,
+    _initial: string,
     value: unknown,
 ): void => {
-    let dynamic = '';
+    let next = '';
+    const seen = new Set<string>();
+    const add = (name: string): void => {
+        if (name && !seen.has(name)) {
+            seen.add(name);
+            next += next.length ? ` ${name}` : name;
+        }
+    };
     if (typeof value === 'string') {
-        dynamic = value;
+        for (const part of value.split(' ')) add(part);
     } else if (value !== null && typeof value === 'object') {
         for (const [name, on] of Object.entries(
             value as Record<string, unknown>,
         )) {
-            if (on) dynamic += dynamic.length ? ` ${name}` : name;
+            if (on) add(name);
         }
     }
-    const next = mergeClasses(initial, dynamic);
     const e = el as Element & Cache;
     if (e.__c === next) return;
     e.__c = next;

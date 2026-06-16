@@ -26,8 +26,10 @@ const css = `
     .likes { margin-left: auto; font-size: 15px; font-weight: 600; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class ProfileCard extends Component<Props> {
+    // #styles
+    styles = css;
 
     template = (): Template => tpl`<div class="card">
         <div class="avatar">${this.props.name.charAt(0)}</div>

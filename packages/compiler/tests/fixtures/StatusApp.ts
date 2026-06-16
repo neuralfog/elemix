@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import { when, choose } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -83,13 +83,16 @@ const css = `
     }
 `;
 
-`#component #styles ${css}`
+// #component
 export class StatusApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         status: 'idle',
         showLog: false,
-    });
+    };
 
     set = (status: Status): void => {
         this.state.status = status;

@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {
@@ -33,15 +33,18 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class InterpApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         first: 'Ada',
         last: 'Lovelace',
         middle: null,
         n: 0,
-    });
+    };
 
     swap = (): void => {
         const f = this.state.first;

@@ -21,8 +21,10 @@ const css = `
     .role { font-size: 12px; color: #64748b; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class UserCard extends Component<Props> {
+    // #styles
+    styles = css;
 
     template = (): Template => tpl`<div class="card">
         <span class="name">${this.props.name}</span>

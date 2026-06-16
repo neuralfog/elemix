@@ -1,10 +1,18 @@
 packages:
   - 'packages/*'
+# Storybook's bundled CLI resolves its framework preset via ESM from its own
+# location; pnpm's strict layout hides it. Hoist the storybook packages to the
+# root so `@storybook/web-components-vite/preset` resolves.
+publicHoistPattern:
+  - '*storybook*'
 overrides:
   # CVE: esbuild >= 0.27.3, < 0.28.1 — force every (incl. transitive) copy to the patch.
   esbuild: 0.28.1
 allowBuilds:
   '@biomejs/biome': true
+  # storybook's HMR file-watcher; ships prebuilt binaries, so its node-gyp
+  # build script never needs to run — skip it.
+  '@parcel/watcher': false
   esbuild: true
 # We publish the @neuralfog scope ourselves — exempt it from the release-age
 # cooldown so the vite plugin can depend on our own just-published builds.

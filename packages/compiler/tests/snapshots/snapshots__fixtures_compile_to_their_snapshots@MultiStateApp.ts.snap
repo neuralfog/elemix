@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/MultiStateApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
-import { Component, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 type CounterState = { count: number };
 type UserState = { name: string; online: boolean };

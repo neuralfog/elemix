@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -47,15 +47,18 @@ const css = `
 
 const NAMES = ['Ada', 'Grace', 'Linus', 'Margaret', 'Dennis', 'Barbara'];
 
-`#component #styles ${css}`
+// #component
 export class CardListApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         users: [
             { id: 1, name: 'Ada', role: 'Engineer' },
             { id: 2, name: 'Grace', role: 'Engineer' },
         ],
-    });
+    };
 
     private seq = 2;
 

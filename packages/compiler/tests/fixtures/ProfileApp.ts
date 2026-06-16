@@ -1,4 +1,4 @@
-import { Component, ref, state, tpl } from '@neuralfog/elemix';
+import { Component, ref, tpl } from '@neuralfog/elemix';
 import type { Ref, Template } from '@neuralfog/elemix/types';
 
 import './ProfileCard';
@@ -31,14 +31,17 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class ProfileApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         name: ref('Ada Lovelace'),
         role: ref('Engineer'),
         likes: 0,
-    });
+    };
 
     like = (): void => {
         this.state.likes++;

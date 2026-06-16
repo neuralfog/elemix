@@ -41,8 +41,10 @@ const css = `
     }
 `;
 
-`#component #styles ${css}`
+// #component
 export class StoreControls extends Component<Props> {
+    // #styles
+    styles = css;
 
     dec = (): void => {
         this.props.counter.value--;

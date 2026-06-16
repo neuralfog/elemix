@@ -16,9 +16,9 @@ compile = merge_imports( rewrite( pragma::expand( splice::inline_helpers( source
   │           ${this.fooTemplate()} (member) fold into their hole, leaving
   │           ONE outermost template. Identity if no helpers.
   ▼
-[B] pragma    expand `#`-pragma blocks above a class →                         ← pragma/
-  │           defineComponent + hoisted sheet() consts + __sheets + #form's
-  │           formAssociated. Identity if no pragmas. (detail ↓↓)
+[B] pragma    expand `// #` comment pragmas: tag a class (#component/#tag/      ← pragma/
+  │           #form) or a member (#styles/#state/#effect) → defineComponent,
+  │           sheets, state()/effect() wiring. Identity if no pragmas. (↓↓)
   ▼
 [C] rewrite   lower the class's `tpl` template member into a view()            ← rewrite.rs
   │           (the locate→parse→classify→codegen detail below); hoist the
@@ -89,55 +89,71 @@ A bare `${nestedTemplate}` reference (`${header}` / `${this.headerTemplate()}` t
 Splice pre-pass) is the one deferred case — syntactically identical to a text value, it needs
 symbol resolution to know the referent is a template, so it currently falls through to Text.
 
-### Pragmas — component-level macros (`pragma/`)
+### Pragmas — comment macros (`pragma/`)
 
-A **pragma block** is bare template-literal statement(s) directly above a component class. It
-replaces hand-written `defineComponent` calls, `static styles`, and `static formAssociated`:
+A **pragma** is a `//` line comment that tags the declaration on the *immediately following* line (no
+blank between). It replaces hand-written `defineComponent`, `static styles`/`formAssociated`,
+`state(…)` calls, and effect wiring:
 
 ```ts
-`#component #tag pf-builder #styles ${css}`     // one line
-export class PfBuilder extends Component { … }
+const css = `:host { … }`;
 
-`#component`; `#tag x`; `#styles ${css}`;       // or split across `;`-terminated lines
+// #component #tag user-card
+export class UserCard extends Component {
+  // #styles
+  styles = css;                 // → const _s0 = sheet(css); UserCard.__sheets = [..._s0]; (field stripped)
+  // #state
+  state: State = { n: 0 };      // → state = state<State>({ n: 0 })
+  // #effect
+  sync(): void { … }            // → effects() { effect(() => this.sync()); }
+}
 ```
 
-The design rule mirrors the rest of the compiler: **generic parsing is fully decoupled from
-directive meaning**, so adding a directive is *one field + one `resolve` arm* and `parse.rs`
-never changes.
+**Marker ≠ value.** A pragma only *marks*; the real declaration *carries* the value, so it stays an
+expression `tsc` checks — and the same `//` comment works byte-identically in `.ts` and `.js` (no
+import, no annotation, no decorator runtime). That is *why* pragmas are comments and not string
+literals (illegal above a class member) or decorators (class-only, need typed stub imports, re-couple
+to decorator-aware tooling). The design rule still holds: **generic parsing is decoupled from
+directive meaning** — a new class-level directive is one `ComponentMeta` field + one `resolve` arm;
+`parse.rs` never changes.
 
-- **parse.rs** — `(statics, holes) → Vec<Directive>{name, args}`. Splits directives on `#` in the
-  *static* text only, so a `#` inside an interpolation (`${'#fff'}`) is opaque (arrives as an
-  `Arg::Expr`). Pure, no oxc.
-- **locate.rs** — oxc: find pragma statements, group contiguous runs, bind each to the next
-  `class` (error: *orphan* if none). Handles `;`-separated statements (buffered) **and**
-  no-semicolon multi-line, which JS parses as a *chained* tagged template — flattened here.
-  Note: the no-semicolon form is compiler-valid but `tsc` rejects it (`string` isn't callable),
-  so source that must typecheck uses the `;`-terminated form. Records the spans `lower` needs
-  plus the class-body-open offset (for `#form` injection).
-- **mod.rs::resolve** — **the extension point.** Folds directives into a typed `ComponentMeta`
-  (`register` / `tag` / `styles` / `form`). Unknown directive or conflicting `#tag` → error.
-  `kebab(class_name)` derives the tag when `#tag` is absent.
-- **lower.rs** — per block: hoist `const _sN = sheet(<expr>)` (deduped by expression, like the
-  template hoister), append `Class.__sheets = [...]` + `defineComponent('<tag>', Class)` after
-  the class, inject `static formAssociated = true` into the body for `#form`, strip the pragma
-  statements, prepend the `/runtime` import.
+- **parse.rs** — a pragma comment's text → `Vec<Directive>{name, args}`, split on `#`. Pure text, no
+  interpolation (values live in the declaration), no oxc.
+- **locate.rs** — walk `program.comments`; bind each `//` pragma to the nearest declaration on the
+  next line (whitespace-only gap, exactly one newline — a blank line breaks it → *orphan*). Targets:
+  a **class** (`#component`/`#tag`/`#form`), a **field** (`#styles`/`#state`/`#effect`), a **method**
+  (`#effect`), or a module **const** (`#state`). Records the spans + class-body-open offset `lower`
+  needs, plus the per-`#state` rewrite and per-class effect names.
+- **mod.rs::resolve** — the extension point for class directives → `ComponentMeta`
+  (`register`/`tag`/`form`); `#styles`/`#state`/`#effect` on a class error here. `kebab(class_name)`
+  derives the tag when `#tag` is absent.
+- **lower.rs** — strip every pragma comment, then apply per the table below; emit the runtime import
+  for exactly what was used.
 
-Directives (closed set, independent + composable):
+Directives (closed set):
 
-| directive | does |
-|---|---|
-| `#component` | register the class via `defineComponent` |
-| `#tag <name>` | explicit tag; else derived `PascalCase → kebab` |
-| `#styles ${expr}` | adopt stylesheet(s); accumulates across occurrences |
-| `#form` | form-associated element (inject `static formAssociated = true`) |
+| directive | tags | lowers to |
+|---|---|---|
+| `#component` | class | `defineComponent('<tag>', Class)` |
+| `#tag <name>` | class | explicit tag; else `PascalCase → kebab` |
+| `#form` | class | `static formAssociated = true` injected in the body |
+| `#styles` | class field | inline the field value into `const _sN = sheet(<value>)` + `Class.__sheets`; strip the field |
+| `#state` | field / module `const` | wrap the initializer: `name: T = init` → `name = state<T>(init)` (annotation → generic) |
+| `#effect` | method / arrow field | a generated `effects() { effect(() => this.m()); … }` hook (one per tag, multiple allowed) |
 
-Tag *validity* (the required hyphen, reserved names) is **not** checked — `customElements.define`
-is the canonical validator and throws at registration (`Button → button` fails loudly there), so
-the compiler stays thin. Pragma errors surface as a leading `// [ec] pragma error: …` comment,
-never a panic — the wasm playground must survive half-typed input.
+`#styles` MUST tag a class *field* (a module `const` referenced only by a comment trips
+`noUnusedLocals`); the idiom keeps the css module-scope and reassigns it onto the instance
+(`styles = css`). `#state`/`#effect` resolve `state`/`effect` from `@neuralfog/elemix/runtime`
+(compile targets merged into the runtime import) — neither is on the public barrel, so users never
+call them by hand.
 
-The runtime targets the pragma lowering emits live in `@neuralfog/elemix/runtime`: `sheet()`
-(content-cached `CSSStyleSheet[]`), `defineComponent`, and the base `Component.adoptStyles()` /
-static `__sheets` that `connectedCallback` adopts. `#form` relies on the base reading
-`ctor.formAssociated` and attaching `internals` (typed non-optional so `#form` components use it
-without per-class narrowing).
+Tag *validity* is **not** checked — `customElements.define` is the canonical validator and throws at
+registration. Errors surface as a leading `// [ec] pragma error: …` comment, never a panic — the wasm
+playground must survive half-typed input.
+
+Runtime targets in `@neuralfog/elemix/runtime`: `sheet()` (content-cached `CSSStyleSheet[]`),
+`defineComponent`, `state`, `effect`, and the base `Component` — `__sheets`/`adoptStyles()` (styles),
+`ctor.formAssociated` + `internals` (form), and the generated `effects()` hook the base runs at mount
+inside its own `collect()`, owning effect scopes in a **separate** list disposed on disconnect but
+never re-run by `render()`. `Component.isMounted` (false during the mount effect run, true after) lets
+a `#effect` skip its mount-time action with an early return.

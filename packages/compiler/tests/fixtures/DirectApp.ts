@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type Toggle = 'active' | 'rounded' | 'large' | 'disabled';
@@ -84,15 +84,18 @@ const css = `
     .action:disabled { opacity: 0.5; cursor: not-allowed; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class DirectApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         active: true,
         rounded: false,
         large: false,
         disabled: false,
-    });
+    };
 
     toggle = (key: Toggle): void => {
         this.state[key] = !this.state[key];

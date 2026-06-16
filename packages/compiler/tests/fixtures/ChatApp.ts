@@ -1,4 +1,4 @@
-import { Component, ref, state, tpl } from '@neuralfog/elemix';
+import { Component, ref, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Ref, Template } from '@neuralfog/elemix/types';
 
@@ -83,17 +83,20 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class ChatApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         draft: ref(''),
         messages: [
             { id: 'a', text: 'Hey there 👋', me: false },
             { id: 'b', text: 'This log auto-scrolls.', me: false },
             { id: 'c', text: 'Send a few messages and watch.', me: false },
         ],
-    });
+    };
 
     private seq = 0;
     private nextId = (): string => `m${++this.seq}`;

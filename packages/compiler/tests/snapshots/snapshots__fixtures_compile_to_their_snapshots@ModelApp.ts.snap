@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ModelApp.ts
 ---
-import { template, clone, _model, _onmodel, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
-import { Component, ref, state } from '@neuralfog/elemix';
+import { template, clone, _model, _onmodel, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { Component, ref } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
 const clamp = (v: string): string => {

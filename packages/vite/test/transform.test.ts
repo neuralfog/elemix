@@ -34,14 +34,18 @@ describe('elemix vite plugin', () => {
     });
 
     it('compiles a template-less pragma component (no tpl`)', async () => {
-        // A pure-styles wrapper: `#component #styles` and no template. It has no
-        // `tpl`, so the old gate skipped it — the pragma would bleed through
-        // uncompiled and the element would never register.
+        // A pure-styles wrapper: `// #component` + `// #styles` and no template.
+        // It has no `tpl`, so the gate must still match on the pragma comment,
+        // else the pragma bleeds through and the element never registers.
         const PRAGMA_ONLY = [
             "import { Component } from '@neuralfog/elemix';",
             'const css = `:host { display: block; }`;',
-            '`#component #styles ${css}`',
-            'export class Spacer extends Component {}',
+            '',
+            '// #component',
+            'export class Spacer extends Component {',
+            '    // #styles',
+            '    styles = css;',
+            '}',
         ].join('\n');
         const result = await runTransform(
             elemix({ bin: BIN }),
@@ -51,6 +55,6 @@ describe('elemix vite plugin', () => {
         expect(result).toBeTruthy();
         expect(result?.code).toContain("defineComponent('spacer', Spacer)");
         expect(result?.code).toContain('Spacer.__sheets');
-        expect(result?.code).not.toContain('`#component');
+        expect(result?.code).not.toContain('// #component');
     });
 });

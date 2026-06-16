@@ -1,4 +1,4 @@
-import { Component, ref, state, tpl } from '@neuralfog/elemix';
+import { Component, ref, tpl } from '@neuralfog/elemix';
 import type { Ref, Template } from '@neuralfog/elemix/types';
 
 const clamp = (v: string): string => {
@@ -62,13 +62,16 @@ const css = `
     .out:last-child { margin-bottom: 0; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class ModelApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         name: ref('Ada'),
         volume: ref('50'),
-    });
+    };
 
     template = (): Template => tpl`
         <p class="note">

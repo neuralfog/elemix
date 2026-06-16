@@ -3,6 +3,6 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/SignalStore.ts
 ---
-import { state } from '@neuralfog/elemix';
+import { state } from '@neuralfog/elemix/runtime';
 
 export const counter = state({ count: 0 });

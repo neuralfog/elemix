@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {
@@ -52,13 +52,16 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class PanelApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         title: 'Inbox',
         count: 3,
-    });
+    };
 
     add = (): void => {
         this.state.count++;

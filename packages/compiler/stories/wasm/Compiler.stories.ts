@@ -4,13 +4,14 @@ import wasmUrl from '../../pkg/elemix_compiler_bg.wasm?url';
 
 // A real elemix component, compiled in the browser by the wasm build.
 const SOURCE = [
-    "import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';",
+    "import { Component, tpl } from '@neuralfog/elemix';",
+    '// #component',
     'export class CounterApp extends Component {',
-    '    state = state({ count: 0 });',
+    '    // #state',
+    '    state: { count: number } = { count: 0 };',
     '    increment = () => { this.state.count++; };',
     '    template = () => tpl`<button @click=${this.increment}>count is ${this.state.count}</button>`;',
     '}',
-    "defineComponent('counter-app', CounterApp);",
 ].join('\n');
 
 let ready = false;

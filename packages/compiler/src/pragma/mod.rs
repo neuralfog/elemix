@@ -1,15 +1,21 @@
-//! Compile-time pragmas — a block of `#directive` tokens in bare
-//! template-literal statements directly above a component class, e.g.
+//! Compile-time pragmas — `//` line comments that tag the declaration on the
+//! next line, e.g.
 //!
 //! ```ignore
-//! `#component #tag pf-builder #styles ${[css]}`
-//! class PfBuilder extends Component { ... }
+//! const css = `:host { display: grid; }`;
+//!
+//! // #component #tag pf-builder
+//! class PfBuilder extends Component {
+//!     // #styles
+//!     styles = css;
+//! }
 //! ```
 //!
-//! Generic parsing (a directive is just a `name` + ordered `args`) is fully
-//! decoupled from what a directive *means*. To add a new directive you touch
-//! exactly two places: a field on [`ComponentMeta`] and one arm in [`resolve`]
-//! (plus its lowering). [`parse`] never changes.
+//! A pragma MARKS; the real declaration CARRIES the value (so `tsc` checks it and
+//! the same pragma works in `.ts` and `.js`). Generic parsing (a directive is a
+//! `name` + word `args`) is decoupled from what a directive *means*: to add a
+//! component-level directive you touch a field on [`ComponentMeta`] and one arm
+//! in [`resolve`]; [`parse`] never changes.
 
 pub mod locate;
 pub mod lower;
@@ -17,24 +23,17 @@ pub mod parse;
 
 pub use lower::expand;
 
-/// One argument token of a directive: a static word (`pf-builder`) or the
-/// source of a `${...}` interpolation (`[css]`).
-#[derive(Debug, Clone, PartialEq)]
-pub enum Arg {
-    Word(String),
-    Expr(String),
-}
-
-/// A parsed directive — its `name` (without the leading `#`) and ordered args.
-/// Purely structural; the parser never knows what a directive means.
+/// A parsed directive — its `name` (without the leading `#`) and ordered word
+/// args. Purely structural; the parser never knows what a directive means.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Directive {
     pub name: String,
-    pub args: Vec<Arg>,
+    pub args: Vec<String>,
 }
 
-/// The typed meaning of a whole pragma block — the single home of directive
-/// semantics. Extend by adding a field here and an arm in [`resolve`].
+/// The typed meaning of a component's pragma (the directives that tag the class
+/// itself). `#styles` is NOT here — it tags a class field whose value is the
+/// stylesheet (see [`locate`]/[`lower`]).
 #[derive(Debug, Default, PartialEq)]
 pub struct ComponentMeta {
     /// `#component` — register the class as a custom element.
@@ -42,8 +41,6 @@ pub struct ComponentMeta {
     /// `#tag <name>` — explicit tag; when absent the tag is derived from the
     /// class name via [`kebab`].
     pub tag: Option<String>,
-    /// `#styles ${...}` — adopted stylesheets; multiple occurrences accumulate.
-    pub styles: Vec<Arg>,
     /// `#form` — make the element form-associated (inject the static
     /// `formAssociated = true` the browser reads at registration).
     pub form: bool,
@@ -57,11 +54,13 @@ pub enum PragmaError {
     DuplicateTag(String, String),
     /// `#tag` without exactly one bare-word argument.
     TagArity,
+    /// A declaration-level directive (`#styles`) found on a class pragma.
+    OnClass(String),
 }
 
-/// Fold generic directives into typed meaning. **This is the extension point** —
-/// every directive's semantics (flag / single-value / accumulating list) live
-/// here and nowhere else.
+/// Fold a class pragma's directives into typed meaning. **The extension point**
+/// for component-level directives. `#styles` is rejected here — it belongs above
+/// the `const` it tags, not on the class.
 pub fn resolve(directives: &[Directive]) -> Result<ComponentMeta, PragmaError> {
     let mut meta = ComponentMeta::default();
     for d in directives {
@@ -76,8 +75,8 @@ pub fn resolve(directives: &[Directive]) -> Result<ComponentMeta, PragmaError> {
                 }
                 meta.tag = Some(tag);
             }
-            "styles" => meta.styles.extend(d.args.iter().cloned()),
             "form" => meta.form = true,
+            "styles" | "state" | "effect" => return Err(PragmaError::OnClass(d.name.clone())),
             other => return Err(PragmaError::Unknown(other.to_string())),
         }
     }
@@ -86,7 +85,7 @@ pub fn resolve(directives: &[Directive]) -> Result<ComponentMeta, PragmaError> {
 
 fn single_word(d: &Directive) -> Option<String> {
     match d.args.as_slice() {
-        [Arg::Word(w)] => Some(w.clone()),
+        [w] => Some(w.clone()),
         _ => None,
     }
 }
