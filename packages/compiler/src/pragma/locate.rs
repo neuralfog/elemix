@@ -23,11 +23,14 @@ use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
 
 /// A `#styles`-tagged class field: its initializer text (the value passed to
-/// `sheet`) and the source range to strip (the marker comment + the field line).
+/// `sheet`), the full range to strip (marker comment + field line, for the
+/// normal shadow case), and the comment-only range (for `#no-shadow`, where the
+/// styles are skipped but the field stays so its value remains referenced).
 #[derive(Debug, PartialEq)]
 pub struct StyleField {
     pub value: String,
     pub strip: (usize, usize),
+    pub comment: (usize, usize),
 }
 
 /// A `#state` rewrite: replace `[start, end)` (from the binding name's end through
@@ -200,6 +203,7 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                 "styles" => classes[*class_idx].styles.push(StyleField {
                     value: slice(source, *value),
                     strip: (line, field_block_end(source, *prop_end)),
+                    comment: (line, cend + usize::from(source[cend..].starts_with('\n'))),
                 }),
                 "state" => {
                     states.push(state_edit(source, *name_end, *type_span, *value));

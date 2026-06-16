@@ -84,10 +84,45 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
+***Don't underestimate the power of the dark side 🌑☀️*** 
+
+- Added ability to disable `ShadowDOM` with `// #no-shadow` pragma ☀️
+- Styles set on instance `// #styles` become noop, not adopted
+- ShadowDOM is enabled by default, opt in to disable
+- Also decided to keep `// #component` as mandatory, the idea was to strip it, but it will be better
+  to have it in current form as it allows extending `components` further 😬
+
+```
+#no-shadow on → #styles is skipped, no sheet code emitted (just the dangling css string)
+#no-shadow off → #styles lights back up — sheet(css) + __sheets + adopted into the shadow root
+```
+
+All Compiler Hints:
+
+```
+┌────────────┬────────────────┬────────────────────────────┐
+│            │      tags      │            does            │
+├────────────┼────────────────┼────────────────────────────┤
+│ #component │ class          │ register                   │
+├────────────┼────────────────┼────────────────────────────┤
+│ #tag       │ class          │ override derived tag       │
+├────────────┼────────────────┼────────────────────────────┤
+│ #form      │ class          │ form-associated            │
+├────────────┼────────────────┼────────────────────────────┤
+│ #no-shadow │ class          │ light DOM (styles noop)    │
+├────────────┼────────────────┼────────────────────────────┤
+│ #styles    │ field          │ adopt stylesheet           │
+├────────────┼────────────────┼────────────────────────────┤
+│ #state     │ field / const  │ wrap in state<T>(…)        │
+├────────────┼────────────────┼────────────────────────────┤
+│ #effect    │ method / arrow │ owned reactive effect      │
+└────────────┴────────────────┴────────────────────────────┘
+```
+
 ***Compiler Hints Rewrite & Effects #⃣️🌀***
 
 - This slowly starts to become what I envisioned 😶‍🌫️🥳
-- Redesigned compiler hints, string literals was a bad idea, they can't be used on class members #⃣️#⃣️#⃣️
+- Redesigned compiler hints, string literals were a bad idea, they can't be used on class members #⃣️#⃣️#⃣️
 - All hints are position dependent, they decorate property on next line 📍
 - Marker marks, the real declaration holds the value - so `tsc` still checks it ✅
 - Going full blast on code generation here 💥💥💥

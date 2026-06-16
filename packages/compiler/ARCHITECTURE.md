@@ -137,6 +137,7 @@ Directives (closed set):
 | `#component` | class | `defineComponent('<tag>', Class)` |
 | `#tag <name>` | class | explicit tag; else `PascalCase → kebab` |
 | `#form` | class | `static formAssociated = true` injected in the body |
+| `#no-shadow` | class | `static __noShadow = true` → base renders to light DOM (no `attachShadow`); `#styles` is **skipped entirely** (no sheet emitted — only the marker stripped, the field stays) |
 | `#styles` | class field | inline the field value into `const _sN = sheet(<value>)` + `Class.__sheets`; strip the field |
 | `#state` | field / module `const` | wrap the initializer: `name: T = init` → `name = state<T>(init)` (annotation → generic) |
 | `#effect` | method / arrow field | a generated `effects() { effect(() => this.m()); … }` hook (one per tag, multiple allowed) |
@@ -153,7 +154,8 @@ playground must survive half-typed input.
 
 Runtime targets in `@neuralfog/elemix/runtime`: `sheet()` (content-cached `CSSStyleSheet[]`),
 `defineComponent`, `state`, `effect`, and the base `Component` — `__sheets`/`adoptStyles()` (styles),
-`ctor.formAssociated` + `internals` (form), and the generated `effects()` hook the base runs at mount
+`ctor.formAssociated` + `internals` (form), `ctor.__noShadow` (light DOM — skip `attachShadow`, render
+into `this`, so `adoptStyles` finds no shadow root and noops), and the generated `effects()` hook the base runs at mount
 inside its own `collect()`, owning effect scopes in a **separate** list disposed on disconnect but
 never re-run by `render()`. `Component.isMounted` (false during the mount effect run, true after) lets
 a `#effect` skip its mount-time action with an early return.
