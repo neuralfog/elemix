@@ -3,7 +3,10 @@
 use clap::Parser;
 use elemix_compiler::codegen::codegen;
 use elemix_compiler::emit::TsEmitter;
-use elemix_compiler::{collect_ts_files, compile, find_html_templates, FoundTemplate};
+use elemix_compiler::sourcemap::json_string;
+use elemix_compiler::{
+    collect_ts_files, compile, compile_with_map, find_html_templates, FoundTemplate,
+};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -26,6 +29,12 @@ struct Cli {
     /// Read source from stdin and write the compiled `.ts` to stdout.
     #[arg(long)]
     stdin: bool,
+
+    /// Also produce a line-level source map back to the original. With `--stdin`
+    /// stdout becomes a `{"code","map"}` JSON envelope; with `--out` a sidecar
+    /// `<file>.map` is written and the compiled file gets a `sourceMappingURL`.
+    #[arg(long)]
+    sourcemap: bool,
 }
 
 fn main() {
@@ -37,8 +46,16 @@ fn main() {
     if cli.stdin {
         let mut source = String::new();
         io::stdin().read_to_string(&mut source).expect("read stdin");
+        let payload = if cli.sourcemap {
+            // Machine envelope: the Vite plugin parses this and returns
+            // `{ code, map }` so the source-map chain is never severed.
+            let (code, map) = compile_with_map(&source, "input.ts");
+            format!("{{\"code\":{},\"map\":{map}}}", json_string(&code))
+        } else {
+            compile(&source)
+        };
         io::stdout()
-            .write_all(compile(&source).as_bytes())
+            .write_all(payload.as_bytes())
             .expect("write stdout");
         return;
     }
@@ -51,10 +68,10 @@ fn main() {
     }
 
     for path in collect_ts_files(&cli.dirs) {
-        process(&path, cli.out.as_deref(), false);
+        process(&path, cli.out.as_deref(), cli.sourcemap, false);
     }
     if let Some(path) = cli.file.clone() {
-        process(&path, cli.out.as_deref(), true);
+        process(&path, cli.out.as_deref(), cli.sourcemap, true);
     }
 }
 
@@ -75,7 +92,7 @@ fn banner() {
     eprintln!();
 }
 
-fn process(path: &Path, out: Option<&Path>, verbose: bool) {
+fn process(path: &Path, out: Option<&Path>, sourcemap: bool, verbose: bool) {
     let source = match fs::read_to_string(path) {
         Ok(s) => s,
         Err(e) => {
@@ -84,7 +101,7 @@ fn process(path: &Path, out: Option<&Path>, verbose: bool) {
         }
     };
     match out {
-        Some(dir) => emit(dir, path, &compile(&source)),
+        Some(dir) => emit(dir, path, &source, sourcemap),
         None if verbose => print_detail(path, &find_html_templates(&source)),
         None => {
             let n = find_html_templates(&source).len();
@@ -93,11 +110,22 @@ fn process(path: &Path, out: Option<&Path>, verbose: bool) {
     }
 }
 
-/// Write the compiled source to `<dir>/<filename>`.
-fn emit(dir: &Path, src: &Path, compiled: &str) {
+/// Write the compiled source to `<dir>/<filename>`, plus a sidecar `.map` and a
+/// `sourceMappingURL` footer when `sourcemap` is set.
+fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool) {
     fs::create_dir_all(dir).expect("create out dir");
-    let dest = dir.join(src.file_name().expect("source has a file name"));
-    fs::write(&dest, compiled).expect("write emitted file");
+    let name = src.file_name().expect("source has a file name");
+    let dest = dir.join(name);
+
+    if sourcemap {
+        let (mut compiled, map) = compile_with_map(source, &name.to_string_lossy());
+        let map_name = format!("{}.map", name.to_string_lossy());
+        compiled.push_str(&format!("\n//# sourceMappingURL={map_name}\n"));
+        fs::write(dir.join(&map_name), map).expect("write source map");
+        fs::write(&dest, compiled).expect("write emitted file");
+    } else {
+        fs::write(&dest, compile(source)).expect("write emitted file");
+    }
     println!("emitted {}", dest.display());
 }
 

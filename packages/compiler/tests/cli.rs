@@ -124,6 +124,55 @@ fn stdin_mode_emits_no_banner() {
 }
 
 #[test]
+fn stdin_sourcemap_emits_a_code_map_envelope() {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let source = std::fs::read_to_string("tests/fixtures/CounterApp.ts").unwrap();
+    let mut child = Command::new(bin())
+        .args(["--stdin", "--sourcemap"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(source.as_bytes())
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert!(out.status.success());
+
+    // stdout is a JSON envelope, not raw code: it carries both code and a v3 map
+    let envelope = String::from_utf8(out.stdout).unwrap();
+    assert!(envelope.starts_with("{\"code\":"));
+    assert!(envelope.contains("\"map\":{\"version\":3"));
+    assert!(envelope.contains("view(): DocumentFragment"));
+}
+
+#[test]
+fn compiles_a_single_file_with_a_sidecar_map() {
+    let dir = out_dir("map");
+    let status = Command::new(bin())
+        .args([
+            "--file",
+            "tests/fixtures/CounterApp.ts",
+            "--sourcemap",
+            "--out",
+        ])
+        .arg(&dir)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let compiled = std::fs::read_to_string(dir.join("CounterApp.ts")).unwrap();
+    assert!(compiled.contains("//# sourceMappingURL=CounterApp.ts.map"));
+    let map = std::fs::read_to_string(dir.join("CounterApp.ts.map")).unwrap();
+    assert!(map.contains("\"version\":3"));
+}
+
+#[test]
 fn compiles_a_directory_of_fixtures() {
     let dir = out_dir("dir");
     let status = Command::new(bin())

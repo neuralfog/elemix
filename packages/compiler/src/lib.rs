@@ -11,6 +11,8 @@ mod locate;
 pub mod lower;
 pub mod pragma;
 pub mod rewrite;
+#[cfg(feature = "cli")]
+pub mod sourcemap;
 pub mod splice;
 pub mod template;
 #[cfg(feature = "wasm")]
@@ -35,4 +37,17 @@ pub fn compile(source: &str) -> String {
         Err(e) => format!("// [ec] pragma error: {e}\n{spliced}"),
     };
     imports::merge_runtime_imports(&rewrite::rewrite(&expanded))
+}
+
+/// Compile + a line-level source map back to the original (`cli` feature).
+///
+/// `compile` is splice-based, so user code survives verbatim and only shifts;
+/// the map recovers each preserved line's origin by diffing original vs. output.
+/// Returns `(compiled, source_map_json)`. `source_name` seeds `sources`/`file`
+/// (callers that know the real path overwrite `sources[0]`).
+#[cfg(feature = "cli")]
+pub fn compile_with_map(source: &str, source_name: &str) -> (String, String) {
+    let code = compile(source);
+    let map = sourcemap::line_map(source, &code, source_name);
+    (code, map)
 }
