@@ -44,6 +44,9 @@ pub trait Emitter {
     fn set_class(&self, node: &str, initial: &str, expr: &str) -> String;
     fn set_style(&self, node: &str, expr: &str) -> String;
     fn set_prop(&self, node: &str, name: &str, expr: &str) -> String;
+    /// `const <var> = (<expr>)` — a hoisted local for a common subexpression
+    /// shared by grouped writes, so its signal is read/tracked once, not per use.
+    fn local(&self, var: &str, expr: &str) -> String;
     /// Wrap the collected grouped writes in a single `effect(() => { ... })`.
     fn bind_group(&self, writes: &[String]) -> String;
 }

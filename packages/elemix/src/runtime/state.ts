@@ -1,8 +1,9 @@
-import { track, trigger, type Scope } from './reactive';
+import { track, trigger, dep, type Dep } from './reactive';
 
-const observed = new WeakSet<object>();
+const RAW = Symbol();
+const ARRAY = Symbol();
 
-const MUTATORS = [
+const MUTATORS = new Set<string>([
     'push',
     'pop',
     'shift',
@@ -10,60 +11,81 @@ const MUTATORS = [
     'splice',
     'sort',
     'reverse',
-] as const;
+]);
 
-const observeArray = (arr: unknown[], subs: Set<Scope>): void => {
-    if (observed.has(arr)) return;
-    observed.add(arr);
-    for (let i = 0; i < arr.length; i++) observe(arr[i]);
-    for (const name of MUTATORS) {
-        const original = Array.prototype[name] as (
-            ...args: unknown[]
-        ) => unknown;
-        Object.defineProperty(arr, name, {
-            enumerable: false,
-            configurable: true,
-            writable: true,
-            value(this: unknown[], ...args: unknown[]): unknown {
-                const result = original.apply(this, args);
-                for (let i = 0; i < this.length; i++) observe(this[i]);
-                trigger(subs);
+const proxies = new WeakMap<object, object>();
+const deps = new WeakMap<object, Map<PropertyKey, Dep>>();
+
+const depFor = (target: object, key: PropertyKey): Dep => {
+    let map = deps.get(target);
+    if (!map) {
+        map = new Map();
+        deps.set(target, map);
+    }
+    let d = map.get(key);
+    if (!d) {
+        d = dep();
+        map.set(key, d);
+    }
+    return d;
+};
+
+type Target = Record<PropertyKey, unknown>;
+
+const objectHandler: ProxyHandler<Target> = {
+    get(target, key) {
+        if (key === RAW) return target;
+        const value = target[key];
+        if (value === null || typeof value !== 'object') {
+            if (typeof key !== 'symbol') track(depFor(target, key));
+            return value;
+        }
+        if (typeof key !== 'symbol') {
+            track(depFor(target, key));
+            if (Array.isArray(value)) track(depFor(value, ARRAY));
+        }
+        return reactive(value);
+    },
+    set(target, key, value) {
+        const prev = target[key];
+        if (prev === value) return true;
+        target[key] = value;
+        if (typeof key !== 'symbol') trigger(depFor(target, key));
+        return true;
+    },
+};
+
+const arrayHandler: ProxyHandler<Target> = {
+    get(target, key) {
+        if (key === RAW) return target;
+        if (typeof key === 'string' && MUTATORS.has(key)) {
+            return (...args: unknown[]): unknown => {
+                const fn = target[key] as (...a: unknown[]) => unknown;
+                const result = fn.apply(target, args);
+                trigger(depFor(target, ARRAY));
                 return result;
-            },
-        });
-    }
+            };
+        }
+        return reactive(target[key]);
+    },
+    set(target, key, value) {
+        const prev = target[key];
+        target[key] = value;
+        if (prev !== value) trigger(depFor(target, ARRAY));
+        return true;
+    },
 };
 
-const observe = (value: unknown): void => {
-    if (value === null || typeof value !== 'object') return;
-    if (Array.isArray(value)) return;
-    if (observed.has(value)) return;
-    observed.add(value);
-    const obj = value as Record<string, unknown>;
-    for (const key of Object.keys(obj)) {
-        let val = obj[key];
-        const subs = new Set<Scope>();
-        if (Array.isArray(val)) observeArray(val, subs);
-        else observe(val);
-        Object.defineProperty(obj, key, {
-            enumerable: true,
-            configurable: true,
-            get(): unknown {
-                track(subs);
-                return val;
-            },
-            set(next: unknown): void {
-                if (val === next) return;
-                if (Array.isArray(next)) observeArray(next, subs);
-                else observe(next);
-                val = next;
-                trigger(subs);
-            },
-        });
-    }
+const reactive = (value: unknown): unknown => {
+    if (value === null || typeof value !== 'object') return value;
+    const obj = value as Target;
+    if (obj[RAW] !== undefined) return obj;
+    const cached = proxies.get(obj);
+    if (cached) return cached;
+    const handler = Array.isArray(obj) ? arrayHandler : objectHandler;
+    const p = new Proxy(obj, handler);
+    proxies.set(obj, p);
+    return p;
 };
 
-export const state = <T extends object>(source: T): T => {
-    observe(source);
-    return source;
-};
+export const state = <T extends object>(source: T): T => reactive(source) as T;

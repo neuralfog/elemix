@@ -118,28 +118,60 @@ fn gen_template(
     // effect per template instance, so a row costs a single Scope/Set rather than
     // one per binding. Their one-time setup (text anchors, class-initial capture)
     // stays inline; structural (list/child) and wiring (event/model/…) emit as-is.
-    let mut group: Vec<String> = Vec::new();
+    // Phase 2a — CSE: a pure member read (`a.b`, `this.x.y`) appearing in more
+    // than one grouped value binding is otherwise read — and thus tracked — once
+    // per occurrence. Hoist it to a single const at the top of the effect so the
+    // row subscribes to that signal once. Only side-effect-free member chains
+    // qualify; structural/event bindings are excluded and keep their raw expr.
+    let mut cse: HashMap<String, String> = HashMap::new();
+    let mut hoists: Vec<String> = Vec::new();
+    {
+        let mut counts: HashMap<&str, usize> = HashMap::new();
+        for b in &bindings {
+            if is_grouped(&b.kind) && is_simple_read(b.expr.trim()) {
+                *counts.entry(b.expr.trim()).or_insert(0) += 1;
+            }
+        }
+        for b in &bindings {
+            if !is_grouped(&b.kind) {
+                continue;
+            }
+            let e = b.expr.trim();
+            if counts.get(e).copied().unwrap_or(0) >= 2 && !cse.contains_key(e) {
+                let v = ctx.var("v");
+                hoists.push(emitter.local(&v, e));
+                cse.insert(e.to_string(), v);
+            }
+        }
+    }
+
+    let mut group: Vec<String> = hoists;
     for (b, node) in bindings.iter().zip(&nodes) {
         let name = b.name.as_deref().unwrap_or("");
+        // grouped value writes use the hoisted var when their read was CSE'd
+        let g = cse
+            .get(b.expr.trim())
+            .map(String::as_str)
+            .unwrap_or(b.expr.as_str());
         match b.kind {
             BindingKind::Splice => {
                 lines.push(emitter.pending("Splice content binding — symbol resolution pending"))
             }
             BindingKind::List => lines.push(lower_list(&b.expr, node, ctx, emitter)),
             BindingKind::Child => lines.extend(lower_child(&b.expr, node, ctx, emitter)),
-            BindingKind::Text if b.baked => group.push(emitter.set_text(node, &b.expr)),
+            BindingKind::Text if b.baked => group.push(emitter.set_text(node, g)),
             BindingKind::Text => {
                 let tnode = ctx.var("x");
                 lines.push(emitter.text_anchor(&tnode, node));
-                group.push(emitter.set_text(&tnode, &b.expr));
+                group.push(emitter.set_text(&tnode, g));
             }
-            BindingKind::Attr => group.push(emitter.set_attr(node, name, &b.expr)),
+            BindingKind::Attr => group.push(emitter.set_attr(node, name, g)),
             // A class binding fully absorbs any static class into its expression
             // (`class="a ${x}"` → one dynamic value), so the initial base is always
             // empty — no need to read it back off the DOM.
-            BindingKind::Class => group.push(emitter.set_class(node, "''", &b.expr)),
-            BindingKind::Style => group.push(emitter.set_style(node, &b.expr)),
-            BindingKind::Prop => group.push(emitter.set_prop(node, name, &b.expr)),
+            BindingKind::Class => group.push(emitter.set_class(node, "''", g)),
+            BindingKind::Style => group.push(emitter.set_style(node, g)),
+            BindingKind::Prop => group.push(emitter.set_prop(node, name, g)),
             BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
             BindingKind::Model => lines.push(emitter.model(node, &b.expr)),
             BindingKind::OnModel => lines.push(emitter.onmodel(node, &b.expr)),
@@ -339,4 +371,35 @@ fn strip_brackets(s: &str) -> String {
         .and_then(|x| x.strip_suffix(']'))
         .unwrap_or(t)
         .to_string()
+}
+
+/// Grouped value bindings share one effect, so a read duplicated across them is
+/// the CSE candidate; structural (list/child) and wiring (event/model/…)
+/// bindings evaluate elsewhere and are excluded.
+fn is_grouped(k: &BindingKind) -> bool {
+    matches!(
+        k,
+        BindingKind::Text
+            | BindingKind::Attr
+            | BindingKind::Class
+            | BindingKind::Style
+            | BindingKind::Prop
+    )
+}
+
+fn is_js_ident(p: &str) -> bool {
+    let mut chars = p.chars();
+    match chars.next() {
+        Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '$' => {}
+        _ => return false,
+    }
+    chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '$')
+}
+
+/// A pure member chain (`a.b`, `this.x.y`) — safe to read once and reuse. Rejects
+/// anything with a call, index, operator or whitespace (potential side effects or
+/// a differing value), and bare identifiers (no signal read, nothing to save).
+fn is_simple_read(e: &str) -> bool {
+    let parts: Vec<&str> = e.split('.').collect();
+    parts.len() >= 2 && parts.iter().all(|p| is_js_ident(p))
 }

@@ -95,6 +95,10 @@ impl Emitter for TsEmitter {
         format!("_setProp({node}, '{name}', ({expr}));")
     }
 
+    fn local(&self, var: &str, expr: &str) -> String {
+        format!("const {var} = ({expr});")
+    }
+
     fn bind_group(&self, writes: &[String]) -> String {
         format!("effect(() => {{\n{}\n}});", writes.join("\n"))
     }

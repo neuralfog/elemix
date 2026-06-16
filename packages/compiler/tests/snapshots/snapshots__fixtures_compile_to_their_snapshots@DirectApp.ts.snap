@@ -118,14 +118,15 @@ _event(_n3, 'click', () => this.toggle('rounded'));
 _event(_n4, 'click', () => this.toggle('large'));
 _event(_n5, 'change', () => this.toggle('disabled'));
 effect(() => {
+const _v7 = (this.state.disabled);
 _setClass(_n1, '', ({
                 box: true,
                 active: this.state.active,
                 rounded: this.state.rounded,
                 large: this.state.large,
             }));
-_setAttr(_n5, 'checked', (this.state.disabled));
-_setAttr(_n6, 'disabled', (this.state.disabled));
+_setAttr(_n5, 'checked', (_v7));
+_setAttr(_n6, 'disabled', (_v7));
 });
 return _r0;
 }

@@ -10,7 +10,11 @@ import {
 type Getter<T> = () => T;
 
 const toText = (value: unknown): string =>
-    value === null || value === undefined ? '' : String(value);
+    typeof value === 'string'
+        ? value
+        : value === null || value === undefined
+          ? ''
+          : String(value);
 
 const computeLIS = (arr: number[]): number[] => {
     const n = arr.length;
@@ -281,8 +285,15 @@ export const _list = <T>(
 
 type Cache = { __t?: string; __c?: string; __s?: string };
 
+const attrKeys = new Map<string, string>();
+
 export const _setText = (node: Text, value: unknown): void => {
-    const next = toText(value);
+    const next =
+        typeof value === 'string'
+            ? value
+            : value === null || value === undefined
+              ? ''
+              : String(value);
     const n = node as Text & Cache;
     if (n.__t === next) return;
     n.__t = next;
@@ -290,18 +301,34 @@ export const _setText = (node: Text, value: unknown): void => {
 };
 
 export const _setAttr = (el: Element, name: string, value: unknown): void => {
+    let key = attrKeys.get(name);
+    if (key === undefined) {
+        key = `__a_${name}`;
+        attrKeys.set(name, key);
+    }
+    const cache = el as unknown as Record<string, unknown>;
+    if (cache[key] === value) return;
+    cache[key] = value;
     const next =
         value === false || value === null || value === undefined
             ? null
             : value === true
               ? ''
               : String(value);
-    const cache = el as unknown as Record<string, string | null | undefined>;
-    const key = `__a_${name}`;
-    if (cache[key] === next) return;
-    cache[key] = next;
     if (next === null) el.removeAttribute(name);
     else el.setAttribute(name, next);
+};
+
+const dedupeClasses = (value: string): string => {
+    const seen = new Set<string>();
+    let out = '';
+    for (const part of value.split(' ')) {
+        if (part && !seen.has(part)) {
+            seen.add(part);
+            out += out.length ? ` ${part}` : part;
+        }
+    }
+    return out;
 };
 
 export const _setClass = (
@@ -309,26 +336,23 @@ export const _setClass = (
     _initial: string,
     value: unknown,
 ): void => {
-    let next = '';
-    const seen = new Set<string>();
-    const add = (name: string): void => {
-        if (name && !seen.has(name)) {
-            seen.add(name);
-            next += next.length ? ` ${name}` : name;
-        }
-    };
+    let next: string;
     if (typeof value === 'string') {
-        for (const part of value.split(' ')) add(part);
+        next = value.indexOf(' ') === -1 ? value : dedupeClasses(value);
     } else if (value !== null && typeof value === 'object') {
-        for (const [name, on] of Object.entries(
-            value as Record<string, unknown>,
-        )) {
-            if (on) add(name);
+        next = '';
+        const obj = value as Record<string, unknown>;
+        for (const name in obj) {
+            if (obj[name]) next += next.length ? ` ${name}` : name;
         }
+    } else {
+        next = '';
     }
     const e = el as Element & Cache;
     if (e.__c === next) return;
+    const first = e.__c === undefined;
     e.__c = next;
+    if (first && next === '') return;
     el.setAttribute('class', next);
 };
 
@@ -337,9 +361,9 @@ export const _setStyle = (el: HTMLElement, value: unknown): void => {
     if (typeof value === 'string') {
         css = value;
     } else if (value !== null && typeof value === 'object') {
-        for (const [name, v] of Object.entries(
-            value as Record<string, unknown>,
-        )) {
+        const obj = value as Record<string, unknown>;
+        for (const name in obj) {
+            const v = obj[name];
             if (v !== null && v !== undefined && v !== false) {
                 css += `${name}:${String(v)};`;
             }

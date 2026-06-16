@@ -99,18 +99,20 @@ const _n5 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextE
 const _n6 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
 const _n7 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
 const _n8 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
-const _x9 = document.createTextNode('');
-_n2.replaceWith(_x9);
+const _x11 = document.createTextNode('');
+_n2.replaceWith(_x11);
 _event(_n6, 'click', this.next);
 _event(_n7, 'click', this.rename);
 _event(_n8, 'click', this.toggle);
 effect(() => {
+const _v9 = (this.state.label);
+const _v10 = (this.state.userId);
 _setAttr(_n1, 'href', (`/users/${this.state.userId}`));
-_setAttr(_n1, 'title', (this.state.label));
-_setText(_x9, (this.state.userId));
-_setAttr(_n3, 'data-count', (this.state.userId));
-_setAttr(_n3, 'aria-label', (this.state.label));
-_setText(_n4, (this.state.label));
+_setAttr(_n1, 'title', (_v9));
+_setText(_x11, (_v10));
+_setAttr(_n3, 'data-count', (_v10));
+_setAttr(_n3, 'aria-label', (_v9));
+_setText(_n4, (_v9));
 _setAttr(_n5, 'hidden', (this.state.collapsed));
 });
 return _r0;

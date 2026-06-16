@@ -2,29 +2,16 @@
 
 Target release of compiled templates `v0.9.0`
 
-![elemix speed benchmark](.roadmap/speed.png)
+![elemix speed benchmark](.roadmap/speed2.png)
 
-![elemix memory benchmark](.roadmap/memory-transfer.png)
+![elemix memory benchmark](.roadmap/memory-transfer2.png)
 
-***Round 2*** 🏆🏆🏆
+***Round 3*** 🏆🏆🏆
 
-- Sitting very high on TOP - next to GREATEST `solid`, `ivi` and `svelte` 🙇🙇🙇
-- Honestly this was way too easy 😂😂😂 
-- Most commercial frameworks just got smoked big time 💨💨💨 React 🔫 - `gitgood` 🤓
-- Pulled nice distance from `vue 3` and `lit` ♥️🥹
-- No cheating, driving test fully via reactive state - no manual DOM operations 🙅🙅🙅
-- Very happy with overall matrix, no yeller or red on any fields 💚💚💚
-- Not the fastest, but incredibly consistent across the board 🏅
-- `select row` - the fastest, faster than vanilla js ✅ Most likely invariants from the test run, makes no sense TBH 😂
-- `smallest bundle` - across the board ✅ - this may change, but in good spot not to overinflate ☑️
-- `second` - on first paint ahead of vanilla js ✅
-- `lowest memory` after initial page load ✅
-- I have to be careful I may spend rest of my life optimising trying to pull ahead 😂😂😂 Too addictive 🚬
-- Usage memory has been dropped below 3mb after further optimisations 🎯
-
-- **Only tested selected matrix, the full picture will be visible on full release after `PR` to official repo**
-
-***Officially not a slop, satisfied with results so further work will continue***
+- Reduced memory usage which is huge down to `2.58mb` 🎉🎉🎉
+- Final bottleneck to close the gap - creating rows is to slow 😒
+- I think I can close the gap there 🧐🧐🧐
+- Can I compile away reactivity layer ⁉️ I don't know 🤷
 
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
@@ -552,3 +539,27 @@ This will be a headache if I get there 😂❤️😂
 - [x] Design `compiler hints`
 - [x] Add banner to rust cli - omit for --stdin
 - [x] Poke at sourcemaps at some point ⏰️⏰️
+
+![elemix speed benchmark](.roadmap/speed.png)
+
+![elemix memory benchmark](.roadmap/memory-transfer.png)
+
+***Round 2*** 🏆🏆🏆
+
+- Sitting very high on TOP - next to GREATEST `solid`, `ivi` and `svelte` 🙇🙇🙇
+- Honestly this was way too easy 😂😂😂 
+- Most commercial frameworks just got smoked big time 💨💨💨 React 🔫 - `gitgood` 🤓
+- Pulled nice distance from `vue 3` and `lit` ♥️🥹
+- No cheating, driving test fully via reactive state - no manual DOM operations 🙅🙅🙅
+- Very happy with overall matrix, no yeller or red on any fields 💚💚💚
+- Not the fastest, but incredibly consistent across the board 🏅
+- `select row` - the fastest, faster than vanilla js ✅ Most likely invariants from the test run, makes no sense TBH 😂
+- `smallest bundle` - across the board ✅ - this may change, but in good spot not to overinflate ☑️
+- `second` - on first paint ahead of vanilla js ✅
+- `lowest memory` after initial page load ✅
+- I have to be careful I may spend rest of my life optimising trying to pull ahead 😂😂😂 Too addictive 🚬
+- Usage memory has been dropped below 3mb after further optimisations 🎯
+
+- **Only tested selected matrix, the full picture will be visible on full release after `PR` to official repo**
+
+***Officially not a slop, satisfied with results so further work will continue***
