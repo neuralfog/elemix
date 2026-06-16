@@ -68,11 +68,9 @@ Target release of compiled templates `v0.9.0`
 ## TODOS
 
 - [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
-- [] Add banner to rust cli - omit for --stdin
 - [] Add elemix to official benchmarks
 - [] WASM package needs its own readme 🤔
 - [] Poke at sourcemaps at some point ⏰️⏰️
-- [] Design `compiler hints`
 - [] Design a feature `analyzer` for templates `prop` typechecking `cli` only!!
   - [] Do I want analyzer in `v0.9.0` or defer it to => `v1.0.0` 🧐
   I have a repo in graveyard already in `typescript` 🤔
@@ -90,16 +88,28 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
-***Resiliance ⚙️⚙️⚙️***
+***Resilience ⚙️⚙️⚙️***
 
-- Statments before return in template procedure has been stripped, this has been fixed with
+- Statements before return in template procedure had been stripped, this has been fixed with
   prelude in rewrite stage 🥇
 - So far hasn't seen any issues related to hoisting post compilation 🤔
+- Multiple components per file are allowed now
+- Parameterized helper templates 🎉 `${this.row(item)}` now inlines - splice substitutes the
+  helper's param for the call's arg (identifier-aware, skips strings + property names) and splices
+  it in 🔬 The win: extract list rows into a named method, `repeat(items, (i) => this.row(i), key)` 📜
+  ⚠️ note: a helper that shadows its own param inside its body would over-rename - rare and not worth
+  full scope analysis 🤏
+- Template-less pragma components (`#component #styles`, no `tpl`) were silently skipped by the
+  vite tpl-only filter and never registered. Fixed 💥 a regression from adding compiler hints 🤦
+  the gate now lets pragma blocks through too 🚪
+- Compiler CLI now greets you with a banner 🪧 version baked in at build from `package.json`
+  Go-`ldflags` style (`$npm_package_version`), omitted in `--stdin` pipe mode 🤫 no more shite
+  hand-rolled JSON parsing in `build.rs` either, killed it with fire 🔥
 
 ***Computed Properties 🧮🧮🧮***
 
 - No need for it, native getters do the job just fine `get test() {}`
-- We have manual way to drive updates `this.render()` if nescessary
+- We have manual way to drive updates `this.render()` if necessary
 - The mechanic: the view's effect subscribes to whatever it reads through tracked getters. So:
 
 ```ts
@@ -111,7 +121,7 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 - At least one value in getter has to come from a reactive source ☢️
 - Chains fine too: a getter reading another getter just works ⛓️
 
-***Releae Pipeline Fixed 🪚🪚🪚***
+***Release Pipeline Fixed 🪚🪚🪚***
 
 - Entire pipeline reworked to fail early ❌
 - `npm` packages will be only published if all artifacts available 📦
@@ -123,9 +133,9 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 - For time being the simplest possible solution to serve sole purpose of replacement for class decorator
 - `#component` auto registers the component inlining `defineComponent` procedure, if no tag name will 
   be derived from class name. This was a headache in runtime as I had to preserve class names otherwise
-  mangling would screw references, not an issue any more. If class named incorectly `defineComponent` will
+  mangling would screw references, not an issue any more. If class named incorrectly `defineComponent` will
   throw from custom element registry level 💥 May need to handle it gracefully, later when extending `compalerino`
-  capabilites.
+  capabilities.
 - `#tag my-component` defines tag name for custom element #⃣️
 - `#styles ${css}` allows setting styles on component previously handled by static class field 💅
 - `#form` registers component as form member ✍️
@@ -135,7 +145,6 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 
 - [] `Compalerino` resilience
   - [] Pass file for transpilation based on the existence of compiler hint ⁉️
-  - [] Multiple components per file
 
 ### Phase 4 - Put it through its paces - BENCH Round 2 🔔🔔🔔
 
@@ -439,3 +448,8 @@ This will be a headache if I get there 😂❤️😂
   concept, otherwise add `computed` 🤮 The issue here - architecture has changed, the concept of computation
   was not needed before 🧐
 - [x] Object destructuring in template procedure, this should already work 🤔
+- [x] Multiple components per file
+- [x] Inline parameterized helpers `${this.row(item)}` 🤏 arg-substituted + identifier-aware now,
+  not just zero-arg - the win is `repeat` driven list rows 📜
+- [x] Design `compiler hints`
+- [x] Add banner to rust cli - omit for --stdin

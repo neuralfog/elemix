@@ -1,0 +1,66 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/ParamHelper.ts
+---
+import { template, clone, _event, _list, effect, _setText, _setAttr, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { Component, state } from '@neuralfog/elemix';
+
+type Row = { id: number; name: string };
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    button {
+        font: inherit;
+        padding: 4px 10px;
+        border: none;
+        border-radius: 8px;
+        background: #6366f1;
+        color: white;
+        cursor: pointer;
+        margin-bottom: 8px;
+    }
+    ul { list-style: none; margin: 0; padding: 0; }
+    .row { padding: 4px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+`;
+
+// A parameterized helper template — `row` takes an item and returns a template,
+// called as `this.row(r)` inside a repeat. Splice must inline it, substituting
+// the helper param `item` for the call's arg `r`, so the holes become r.id / r.name.
+const _s0 = sheet(css);
+const _t0 = template('<div><button class="add">add row</button><ul class="list"><!----></ul></div>');
+const _t1 = template('<li class="row"> </li>');
+
+export class RowList extends Component {
+    state = state<{ rows: Row[] }>({
+        rows: [
+            { id: 1, name: 'alpha' },
+            { id: 2, name: 'beta' },
+        ],
+    });
+
+    add = (): void => {
+        this.state.rows.push({ id: this.state.rows.length + 1, name: 'new' });
+    };
+
+    
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.firstElementChild!.firstElementChild!;
+const _n2 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstChild!;
+_event(_n1, 'click', this.add);
+_list(_n2, () => (this.state.rows), (r) => r.id, (r) => (() => {
+const _r3 = clone(_t1);
+const _n4 = _r3.firstElementChild!;
+const _n5 = _n4.firstChild!;
+effect(() => {
+_setAttr(_n4, 'data-id', (r.id));
+_setText(_n5, (r.name));
+});
+return _r3.firstChild!;
+})());
+return _r0;
+}
+}
+RowList.__sheets = [..._s0];
+defineComponent('row-list', RowList);

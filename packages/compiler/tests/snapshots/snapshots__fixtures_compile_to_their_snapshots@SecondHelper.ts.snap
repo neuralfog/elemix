@@ -1,0 +1,37 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/SecondHelper.ts
+---
+import { template, clone, _child, defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+// Two components — the SECOND one uses a helper template (`this.heading()`).
+// Splice must inline helpers for every class, not just the first, or the
+// non-first component's `${this.heading()}` never gets inlined.
+
+const _t0 = template('<span class="plain">plain</span>');
+const _t1 = template('<div class="card"><!----><p class="body">body</p></div>');
+const _t2 = template('<h2 class="heading">Title</h2>');
+
+export class PlainNote extends Component {
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+return _r0;
+}
+}
+defineComponent('plain-note', PlainNote);
+
+export class TitledNote extends Component {
+    
+    view(): DocumentFragment {
+const _r1 = clone(_t1);
+const _n2 = _r1.firstElementChild!.firstChild!;
+_child(_n2, () => ((() => {
+const _r3 = clone(_t2);
+return _r3.firstChild!;
+})()));
+return _r1;
+}
+}
+defineComponent('titled-note', TitledNote);

@@ -185,12 +185,12 @@ fn is_tpl_tag(c: &[char], i: usize) -> bool {
     i == 0 || !is_ident_char(c[i - 1])
 }
 
-fn is_ident_char(c: char) -> bool {
+pub(crate) fn is_ident_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_' || c == '$'
 }
 
 /// `c[open]` is a backtick; return the index of the matching closing backtick.
-fn tl_end(c: &[char], open: usize) -> usize {
+pub(crate) fn tl_end(c: &[char], open: usize) -> usize {
     let mut i = open + 1;
     while i < c.len() {
         match c[i] {
@@ -207,7 +207,7 @@ fn tl_end(c: &[char], open: usize) -> usize {
 
 /// `from` is just past an opener; return the index just past the matching
 /// `close`, descending through nested brackets/strings/templates.
-fn skip_to_close(c: &[char], from: usize, close: char) -> usize {
+pub(crate) fn skip_to_close(c: &[char], from: usize, close: char) -> usize {
     let mut i = from;
     while i < c.len() {
         let ch = c[i];
@@ -227,7 +227,7 @@ fn skip_to_close(c: &[char], from: usize, close: char) -> usize {
 }
 
 /// `c[i]` is the opening quote; return the index just past the closing quote.
-fn skip_string(c: &[char], i: usize, quote: char) -> usize {
+pub(crate) fn skip_string(c: &[char], i: usize, quote: char) -> usize {
     let mut j = i + 1;
     while j < c.len() {
         if c[j] == '\\' {

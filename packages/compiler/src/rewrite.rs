@@ -1,22 +1,21 @@
 //! Stage 5 — splice generated code back into the source file.
 //!
-//! Replaces the `template = () => tpl`...`` class member with a compiled
-//! `view()`, hoists the `template(...)` consts to module scope, adds the runtime
-//! import, drops the erased `/directives` import, and strips the compile-time
-//! `tpl` tag from the main `@neuralfog/elemix` import. Only the canonical
-//! single-template component is rewritten; anything else (Splice cases) passes
-//! through untouched.
+//! For EVERY component class in the module, replaces its `template = () => tpl`…``
+//! member with a compiled `view()`. The hoisted `template(...)` consts are shared
+//! across all components (uniquely numbered, deduped) and placed above the first
+//! class; the runtime import is wired once, the erased `/directives` import is
+//! dropped, and the compile-time `tpl` tag is stripped from the main import. A
+//! file may hold any number of components; one with none passes through.
 
-use crate::codegen::generate;
+use crate::codegen::generate_all;
 use crate::emit::TsEmitter;
-use crate::locate::find_html_templates;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
-    Class, ClassElement, Declaration, Expression, ImportDeclarationSpecifier, ModuleExportName,
-    PropertyKey, Statement,
+    ArrowFunctionExpression, Class, ClassElement, Declaration, Expression,
+    ImportDeclarationSpecifier, ModuleExportName, PropertyKey, Statement, TaggedTemplateExpression,
 };
 use oxc_parser::Parser;
-use oxc_span::{GetSpan, SourceType};
+use oxc_span::{GetSpan, SourceType, Span};
 
 const PRIMITIVES: &[&str] = &[
     "template",
@@ -35,52 +34,62 @@ const PRIMITIVES: &[&str] = &[
     "_setProp",
 ];
 
-/// Where the edits land in the source.
-struct Plan {
+/// One component to rewrite: where its class begins, its `template` member span,
+/// the block-body prelude (statements before `return tpl`, e.g. a destructure),
+/// and its template's statics + holes.
+struct Comp {
     class_start: usize,
     member: (usize, usize),
-    /// Source of the statements preceding the `return tpl` in a block-bodied
-    /// `template()` (e.g. a destructure) — prepended into `view()`.
     prelude: String,
+    statics: Vec<String>,
+    holes: Vec<String>,
+}
+
+/// Where the edits land in the source.
+struct Plan {
+    comps: Vec<Comp>,
     directives_import: Option<(usize, usize)>,
-    /// The `/types` import span + the specifier names left after dropping
-    /// `Template` (which the rewritten `view()` no longer needs).
+    /// The `/types` import span + the names left after dropping `Template`.
     types_import: Option<(usize, usize, Vec<String>)>,
-    /// The main `@neuralfog/elemix` import span + the names left after dropping
-    /// `tpl` (the compile-time tag, erased by the rewrite).
+    /// The main `@neuralfog/elemix` import span + the names left after dropping `tpl`.
     main_import: Option<(usize, usize, Vec<String>)>,
 }
 
-/// Compile one source file: rewrite the `template` member into `view()`.
+/// Compile one source file: rewrite every `template` member into a `view()`.
 pub fn rewrite(source: &str) -> String {
-    let templates = find_html_templates(source);
-    // Exactly one outermost template == the canonical component. More than one
-    // means sub-template members / locals (Splice) — deferred, pass through.
-    if templates.len() != 1 {
+    let plan = plan(source);
+    if plan.comps.is_empty() {
         return source.to_string();
     }
-    let Some(plan) = plan(source) else {
-        return source.to_string();
-    };
 
-    let t = &templates[0];
-    let g = generate(&t.statics, &t.holes, &TsEmitter::new());
-    let runtime_import = runtime_import(&g.decls, &g.body);
-    let view = if plan.prelude.is_empty() {
-        format!("view(): DocumentFragment {{\n{}}}", g.body)
-    } else {
-        format!(
-            "view(): DocumentFragment {{\n{}\n{}}}",
-            plan.prelude, g.body
-        )
-    };
+    // Generate all views against ONE shared codegen context so the hoisted
+    // `template(...)` consts never collide between components.
+    let emitter = TsEmitter::new();
+    let templates: Vec<(Vec<String>, Vec<String>)> = plan
+        .comps
+        .iter()
+        .map(|c| (c.statics.clone(), c.holes.clone()))
+        .collect();
+    let (decls, bodies) = generate_all(&templates, &emitter);
+    let runtime_import = runtime_import(&decls, &bodies.join("\n"));
 
-    // Apply edits from the back so earlier offsets stay valid.
-    let mut edits: Vec<(usize, usize, String)> = vec![
-        (plan.member.0, plan.member.1, view),
-        (plan.class_start, plan.class_start, format!("{}\n", g.decls)),
-        (0, 0, format!("{runtime_import}\n")),
-    ];
+    let mut edits: Vec<(usize, usize, String)> = Vec::new();
+
+    // Each component's `template` member → its compiled `view()`.
+    for (c, body) in plan.comps.iter().zip(&bodies) {
+        let view = if c.prelude.is_empty() {
+            format!("view(): DocumentFragment {{\n{body}}}")
+        } else {
+            format!("view(): DocumentFragment {{\n{}\n{body}}}", c.prelude)
+        };
+        edits.push((c.member.0, c.member.1, view));
+    }
+
+    // The shared module-scope `template(...)` consts go above the first class.
+    let first_class = plan.comps.iter().map(|c| c.class_start).min().unwrap();
+    edits.push((first_class, first_class, format!("{decls}\n")));
+    edits.push((0, 0, format!("{runtime_import}\n")));
+
     if let Some((s, e)) = plan.directives_import {
         let e = e + trailing_newline(source, e);
         edits.push((s, e, String::new()));
@@ -117,8 +126,7 @@ pub fn rewrite(source: &str) -> String {
     }
 
     // Back-to-front by start; on a tie (the main-import replace at 0 vs. the
-    // runtime-import insert at 0) the wider replace must apply first, so the
-    // 0-width prepend lands cleanly in front of it.
+    // runtime-import insert at 0) the wider replace applies first.
     edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
     let mut out = source.to_string();
     for (start, end, repl) in edits {
@@ -127,15 +135,12 @@ pub fn rewrite(source: &str) -> String {
     out
 }
 
-/// Locate the class statement start, the `template` member span, and the
-/// `/directives` import (if any).
-fn plan(source: &str) -> Option<Plan> {
+/// Collect every component + the erasable imports.
+fn plan(source: &str) -> Plan {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
 
-    let mut class_start = None;
-    let mut member = None;
-    let mut prelude = String::new();
+    let mut comps = Vec::new();
     let mut directives_import = None;
     let mut types_import = None;
     let mut main_import = None;
@@ -165,32 +170,117 @@ fn plan(source: &str) -> Option<Plan> {
             }
             Statement::ExportNamedDeclaration(export) => {
                 if let Some(Declaration::ClassDeclaration(class)) = &export.declaration {
-                    class_start = Some(export.span.start as usize);
-                    if let Some((s, e, p)) = find_template_member(source, class) {
-                        member = Some((s, e));
-                        prelude = p;
+                    if let Some(c) = component(source, export.span.start as usize, class) {
+                        comps.push(c);
                     }
                 }
             }
             Statement::ClassDeclaration(class) => {
-                class_start = Some(class.span.start as usize);
-                if let Some((s, e, p)) = find_template_member(source, class) {
-                    member = Some((s, e));
-                    prelude = p;
+                if let Some(c) = component(source, class.span.start as usize, class) {
+                    comps.push(c);
                 }
             }
             _ => {}
         }
     }
 
-    Some(Plan {
-        class_start: class_start?,
-        member: member?,
-        prelude,
+    Plan {
+        comps,
         directives_import,
         types_import,
         main_import,
-    })
+    }
+}
+
+/// A `Comp` for a class IFF it has a `template = () => tpl`…`` member.
+fn component(source: &str, class_start: usize, class: &Class) -> Option<Comp> {
+    for element in &class.body.body {
+        let ClassElement::PropertyDefinition(prop) = element else {
+            continue;
+        };
+        let PropertyKey::StaticIdentifier(id) = &prop.key else {
+            continue;
+        };
+        if id.name.as_str() != "template" {
+            continue;
+        }
+        let Some(Expression::ArrowFunctionExpression(arrow)) = &prop.value else {
+            return None;
+        };
+        let tt = template_tag(arrow)?;
+        if !is_tpl(source, tt) {
+            return None;
+        }
+        let statics = tt
+            .quasi
+            .quasis
+            .iter()
+            .map(|q| slice(source, q.span))
+            .collect();
+        let holes = tt
+            .quasi
+            .expressions
+            .iter()
+            .map(|e| slice(source, e.span()))
+            .collect();
+        return Some(Comp {
+            class_start,
+            member: (prop.span.start as usize, prop.span.end as usize),
+            prelude: arrow_prelude(source, arrow),
+            statics,
+            holes,
+        });
+    }
+    None
+}
+
+/// The `tpl`…`` a `template()` returns — directly (expression body) or via the
+/// `return` (block body).
+fn template_tag<'a>(
+    arrow: &'a ArrowFunctionExpression,
+) -> Option<&'a TaggedTemplateExpression<'a>> {
+    if arrow.expression {
+        let Statement::ExpressionStatement(es) = arrow.body.statements.first()? else {
+            return None;
+        };
+        match &es.expression {
+            Expression::TaggedTemplateExpression(tt) => Some(tt),
+            _ => None,
+        }
+    } else {
+        let ret = arrow.body.statements.iter().rev().find_map(|s| match s {
+            Statement::ReturnStatement(r) => Some(r),
+            _ => None,
+        })?;
+        match ret.argument.as_ref()? {
+            Expression::TaggedTemplateExpression(tt) => Some(tt),
+            _ => None,
+        }
+    }
+}
+
+fn is_tpl(source: &str, tt: &TaggedTemplateExpression) -> bool {
+    matches!(&tt.tag, Expression::Identifier(id) if slice(source, id.span) == "tpl")
+}
+
+/// For a block-bodied `template = () => { …prelude…; return tpl`…`; }`, the
+/// source of the statements before the `return` — they must survive into
+/// `view()` (e.g. a `const { inc } = this` destructure the holes reference).
+fn arrow_prelude(source: &str, arrow: &ArrowFunctionExpression) -> String {
+    if arrow.expression {
+        return String::new();
+    }
+    let stmts = &arrow.body.statements;
+    if stmts.len() <= 1 {
+        return String::new();
+    }
+    let start = stmts[0].span().start as usize;
+    let end = stmts[stmts.len() - 2].span().end as usize;
+    source[start..end].to_string()
+}
+
+fn slice(source: &str, span: Span) -> String {
+    source[span.start as usize..span.end as usize].to_string()
 }
 
 /// The imported names of a named import declaration.
@@ -209,43 +299,6 @@ fn import_names(import: &oxc_ast::ast::ImportDeclaration) -> Vec<String> {
             _ => None,
         })
         .collect()
-}
-
-fn find_template_member(source: &str, class: &Class) -> Option<(usize, usize, String)> {
-    for element in &class.body.body {
-        if let ClassElement::PropertyDefinition(prop) = element {
-            if let PropertyKey::StaticIdentifier(id) = &prop.key {
-                if id.name.as_str() == "template" {
-                    return Some((
-                        prop.span.start as usize,
-                        prop.span.end as usize,
-                        template_prelude(source, &prop.value),
-                    ));
-                }
-            }
-        }
-    }
-    None
-}
-
-/// For a block-bodied `template = () => { …prelude…; return tpl`…`; }`, the
-/// source of the statements before the `return` — they must survive into
-/// `view()` (e.g. a `const { inc } = this` destructure that the holes reference).
-/// Empty for an expression-bodied template or a block with no prelude.
-fn template_prelude(source: &str, value: &Option<Expression>) -> String {
-    let Some(Expression::ArrowFunctionExpression(arrow)) = value else {
-        return String::new();
-    };
-    if arrow.expression {
-        return String::new();
-    }
-    let stmts = &arrow.body.statements;
-    if stmts.len() <= 1 {
-        return String::new();
-    }
-    let start = stmts[0].span().start as usize;
-    let end = stmts[stmts.len() - 2].span().end as usize;
-    source[start..end].to_string()
 }
 
 /// Build the runtime import for exactly the primitives the generated code uses.

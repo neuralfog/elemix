@@ -70,6 +70,29 @@ export class DestructApp extends Component {
 defineComponent('destruct-app', DestructApp);
 "#;
 
+const TWO_COMPONENTS: &str = r#"import { Component, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class A extends Component {
+    template = (): Template => tpl`<span>${this.x}</span>`;
+}
+export class B extends Component {
+    template = (): Template => tpl`<div>${this.y}</div>`;
+}
+defineComponent('a-el', A);
+defineComponent('b-el', B);
+"#;
+
+#[test]
+fn multiple_components_per_file_each_compile() {
+    let out = compile(TWO_COMPONENTS);
+    // both templates lowered, no tpl tag bleeds through
+    assert_eq!(out.matches("view(): DocumentFragment").count(), 2);
+    assert!(!out.contains("tpl`"));
+    // their hoisted template consts are unique (no _t0/_t0 collision)
+    assert!(out.contains("const _t0 = template("));
+    assert!(out.contains("const _t1 = template("));
+}
+
 #[test]
 fn block_body_prelude_survives_into_view() {
     // The statements before `return tpl` (here a destructure the holes use) must
