@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/PragmaApp.ts
 ---
-import { template, clone, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
-import { Component, state } from '@neuralfog/elemix';
+import { template, clone, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 const css = `
     :host { display: block; font-family: system-ui, sans-serif; }

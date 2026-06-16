@@ -1,8 +1,8 @@
-import { state } from '@neuralfog/elemix';
 
 export type LogEntry = { id: number; event: string };
 
-export const log = state<{ entries: LogEntry[] }>({ entries: [] });
+// #state
+export const log: { entries: LogEntry[] } = { entries: [] };
 
 let seq = 0;
 

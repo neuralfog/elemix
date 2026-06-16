@@ -17,8 +17,10 @@ const css = `
     }
 `;
 
-`#component #styles ${css}`
+// #component
 export class LifecycleChild extends Component<ChildProps> {
+    // #styles
+    styles = css;
 
     beforeMount(): void {
         record('beforeMount');

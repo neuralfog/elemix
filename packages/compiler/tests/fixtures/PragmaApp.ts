@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 const css = `
@@ -9,9 +9,12 @@ const css = `
 // Registration + styles via a pragma block — no `static styles`, no manual
 // `defineComponent`. The compiler derives the tag (`PragmaApp` → `pragma-app`),
 // hoists `sheet(css)`, wires `__sheets`, and emits the `defineComponent` call.
-`#component #styles ${css}`
+// #component
 export class PragmaApp extends Component {
-    state = state({ label: 'hello' });
+    // #styles
+    styles = css;
+    // #state
+    state = { label: 'hello' };
 
     template = (): Template =>
         tpl`<span class="label">${this.state.label}</span>`;

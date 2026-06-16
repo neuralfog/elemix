@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {
@@ -38,14 +38,17 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class StyleApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         color: '#1e293b',
         size: 18,
         bg: '#e0e7ff',
-    });
+    };
 
     recolor = (): void => {
         this.state.color = this.state.color === '#1e293b' ? '#ffffff' : '#1e293b';

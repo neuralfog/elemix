@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import './StoreControls';
@@ -36,12 +36,15 @@ const css = `
     .readout strong { font-size: 22px; color: var(--accent); }
 `;
 
-`#component #styles ${css}`
+// #component
 export class StoreApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         counter: { value: 0 },
-    });
+    };
 
     template = (): Template => tpl`
         <p class="note">

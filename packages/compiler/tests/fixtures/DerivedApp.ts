@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = { qty: number; price: number };
@@ -35,9 +35,12 @@ const css = `
 // tracked `state`, so the effect subscribes and the getters re-evaluate on any
 // change — no memo primitive, no `.value`, nothing. `total` even derives from
 // another getter (`subtotal`), proving chained derivation works the same way.
-`#component #styles ${css}`
+// #component
 export class DerivedApp extends Component {
-    state = state<State>({ qty: 2, price: 10 });
+    // #styles
+    styles = css;
+    // #state
+    state: State = { qty: 2, price: 10 };
 
     get subtotal(): number {
         return this.state.qty * this.state.price;

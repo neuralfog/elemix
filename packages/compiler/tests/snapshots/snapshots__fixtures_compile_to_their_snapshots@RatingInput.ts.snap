@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/RatingInput.ts
 ---
-import { template, clone, _event, _list, effect, _setClass, defineComponent, sheet } from '@neuralfog/elemix/runtime';
-import { Component, state } from '@neuralfog/elemix';
+import { template, clone, _event, _list, effect, _setClass, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 type State = {
     value: number;

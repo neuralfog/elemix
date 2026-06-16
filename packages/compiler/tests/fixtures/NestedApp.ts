@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -65,10 +65,13 @@ const css = `
     }
 `;
 
-`#component #styles ${css}`
+// #component
 export class NestedApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({
+    // #state
+    state: State = {
         categories: [
             {
                 id: 'fruit',
@@ -84,7 +87,7 @@ export class NestedApp extends Component {
                 items: [{ id: 'carrot', name: 'Carrot' }],
             },
         ],
-    });
+    };
 
     private seq = 0;
 

@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StoreApp.ts
 ---
-import { template, clone, effect, _setText, _setProp, defineComponent, sheet } from '@neuralfog/elemix/runtime';
-import { Component, state } from '@neuralfog/elemix';
+import { template, clone, effect, _setText, _setProp, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 import './StoreControls';
 

@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import './LifecycleChild';
@@ -59,10 +59,13 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class LifecycleApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({ mounted: false, tick: 0 });
+    // #state
+    state: State = { mounted: false, tick: 0 };
 
     toggleMount = (): void => {
         this.state.mounted = !this.state.mounted;

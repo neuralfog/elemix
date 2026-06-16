@@ -15,8 +15,10 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
-`#component #form #styles ${css}`
+// #component #form
 export class SubmitButton extends Component {
+    // #styles
+    styles = css;
 
     submit = (): void => {
         this.internals.form?.requestSubmit();

@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -23,14 +23,17 @@ const css = `
 // A parameterized helper template — `row` takes an item and returns a template,
 // called as `this.row(r)` inside a repeat. Splice must inline it, substituting
 // the helper param `item` for the call's arg `r`, so the holes become r.id / r.name.
-`#component #styles ${css}`
+// #component
 export class RowList extends Component {
-    state = state<{ rows: Row[] }>({
+    // #styles
+    styles = css;
+    // #state
+    state: { rows: Row[] } = {
         rows: [
             { id: 1, name: 'alpha' },
             { id: 2, name: 'beta' },
         ],
-    });
+    };
 
     add = (): void => {
         this.state.rows.push({ id: this.state.rows.length + 1, name: 'new' });

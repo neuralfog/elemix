@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 import './RatingInput';
@@ -61,10 +61,13 @@ const css = `
     }
 `;
 
-`#component #styles ${css}`
+// #component
 export class FormApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({ result: '' });
+    // #state
+    state: State = { result: '' };
 
     submit = (e: Event): void => {
         e.preventDefault();

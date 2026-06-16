@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/LifecycleStore.ts
 ---
-import { state } from '@neuralfog/elemix';
+import { state } from '@neuralfog/elemix/runtime';
 
 export type LogEntry = { id: number; event: string };
 

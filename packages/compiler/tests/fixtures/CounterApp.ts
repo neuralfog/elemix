@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
 type State = {
@@ -28,10 +28,13 @@ const css = `
     }
 `;
 
-`#component #styles ${css}`
+// #component
 export class CounterApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({ count: 0 });
+    // #state
+    state: State = { count: 0 };
 
     increment = (): void => {
         this.state.count++;

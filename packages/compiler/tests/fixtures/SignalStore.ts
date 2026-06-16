@@ -1,3 +1,3 @@
-import { state } from '@neuralfog/elemix';
 
-export const counter = state({ count: 0 });
+// #state
+export const counter = { count: 0 };

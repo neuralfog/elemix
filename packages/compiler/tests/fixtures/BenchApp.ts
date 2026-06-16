@@ -1,4 +1,4 @@
-import { Component, state, tpl } from '@neuralfog/elemix';
+import { Component, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
@@ -54,10 +54,13 @@ const css = `
     tr.danger .lbl { color: #991b1b; font-weight: 700; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class BenchApp extends Component {
+    // #styles
+    styles = css;
 
-    state = state<State>({ rows: [], selected: 0 });
+    // #state
+    state: State = { rows: [], selected: 0 };
 
     private rowId = 1;
 

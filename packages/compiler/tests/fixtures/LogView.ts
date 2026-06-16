@@ -31,8 +31,10 @@ const css = `
     .empty { font-size: 12px; color: #64748b; padding: 2px 6px; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class LogView extends Component {
+    // #styles
+    styles = css;
 
     template = (): Template => tpl`<div class="log">
         ${

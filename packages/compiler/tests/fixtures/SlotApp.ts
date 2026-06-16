@@ -30,8 +30,10 @@ const css = `
     }
 `;
 
-`#component #styles ${css}`
+// #component
 export class SlotApp extends Component {
+    // #styles
+    styles = css;
 
     template = (): Template => tpl`
         <p class="note">

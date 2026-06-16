@@ -3,8 +3,8 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/StepperWidget.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
-import { Component, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 type State = { count: number };
 
@@ -48,10 +48,9 @@ const css = `
     }
 `;
 
-// A multi-line pragma block with an explicit `#tag` that overrides the derived
-// one (`StepperWidget` would otherwise become `stepper-widget`). The lines are
-// `;`-terminated so each is its own statement — the typecheck-safe multi-line
-// form (a no-semicolon block chains into a tagged template TS rejects).
+// An explicit `#tag` that overrides the derived one (`StepperWidget` would
+// otherwise become `stepper-widget`). The pragma is a plain `//` comment bound
+// to the class on the next line.
 const _s0 = sheet(css);
 const _t0 = template('<div class="stepper"><button>−</button><span class="count"> </span><button>+</button></div>');
 

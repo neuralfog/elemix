@@ -1,11 +1,10 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/TwoComponents.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent } from '@neuralfog/elemix/runtime';
-import { Component, state } from '@neuralfog/elemix';
+import { template, clone, _event, effect, _setText, defineComponent, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
 
 // Two full components in one file — each gets its own pragma block, its own
 // registration, and its own compiled view(). The compiler must lower BOTH

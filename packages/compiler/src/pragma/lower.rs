@@ -1,13 +1,12 @@
-//! Stage: lower pragma blocks into runtime wiring.
+//! Stage: lower pragma-tagged declarations into runtime wiring.
 //!
-//! For each block: hoist a `const _sN = sheet(<expr>)` per `#styles` (deduped by
-//! expression, like the template hoister), append `<Class>.__sheets = [...]` and
-//! `defineComponent('<tag>', <Class>)` after the class, strip the pragma
-//! statements, and prepend the `@neuralfog/elemix/runtime` import for whatever
-//! was used. Tag is the explicit `#tag` or `kebab(class_name)`.
+//! Strip every pragma comment, then: for each class apply `#component`/`#tag`/
+//! `#form` + its `#styles` fields (inline the value into `sheet(...)`, strip the
+//! field, wire `__sheets`); rewrite every `#state` declaration's initializer to
+//! `state<T>(…)` and splice `state` into the `@neuralfog/elemix` import.
 
 use crate::pragma::locate::{locate, LocateError};
-use crate::pragma::{kebab, resolve, Arg, PragmaError};
+use crate::pragma::{kebab, resolve, PragmaError};
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
@@ -20,7 +19,13 @@ impl std::fmt::Display for ExpandError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ExpandError::Locate(LocateError::Orphan) => {
-                write!(f, "pragma block has no component class directly below it")
+                write!(f, "pragma comment has no declaration on the next line")
+            }
+            ExpandError::Locate(LocateError::OnConst(n)) => {
+                write!(f, "`#{n}` can't tag a const; only #state may")
+            }
+            ExpandError::Locate(LocateError::OnField(n)) => {
+                write!(f, "`#{n}` can't tag a field; only #styles/#state may")
             }
             ExpandError::Resolve(PragmaError::Unknown(n)) => {
                 write!(f, "unknown pragma directive `#{n}`")
@@ -31,14 +36,22 @@ impl std::fmt::Display for ExpandError {
             ExpandError::Resolve(PragmaError::TagArity) => {
                 write!(f, "#tag needs exactly one bare-word name")
             }
+            ExpandError::Resolve(PragmaError::OnClass(n)) => {
+                write!(f, "`#{n}` must tag a declaration, not a class")
+            }
         }
     }
 }
 
-/// Expand every pragma block in `source`. Identity when there are none.
+/// Expand every pragma in `source`. Identity when there are none.
 pub fn expand(source: &str) -> Result<String, ExpandError> {
-    let blocks = locate(source).map_err(ExpandError::Locate)?;
-    if blocks.is_empty() {
+    let located = locate(source).map_err(ExpandError::Locate)?;
+    let no_pragmas = located.states.is_empty()
+        && located
+            .classes
+            .iter()
+            .all(|c| c.directives.is_empty() && c.styles.is_empty() && c.effects.is_empty());
+    if no_pragmas {
         return Ok(source.to_string());
     }
 
@@ -47,51 +60,75 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
     let mut counter = 0usize;
     let mut needs_sheet = false;
     let mut needs_define = false;
+    let mut needs_effect = false;
 
-    for b in &blocks {
-        let meta = resolve(&b.directives).map_err(ExpandError::Resolve)?;
+    // Strip every pragma comment (its whole line, incl. indentation + newline).
+    for (s, e) in &located.strips {
+        let end = e + trailing_newline(source, *e);
+        edits.push((*s, end, String::new()));
+    }
 
-        // #styles → hoisted sheet consts (deduped) + the class's __sheets.
+    // #state → wrap each initializer in `state<T>(…)`. `state` is a compile
+    // target, imported from /runtime below (merged with the rest).
+    for st in &located.states {
+        edits.push((st.start, st.end, st.repl.clone()));
+    }
+    let needs_state = !located.states.is_empty();
+
+    for class in &located.classes {
+        if class.directives.is_empty() && class.styles.is_empty() && class.effects.is_empty() {
+            continue;
+        }
+        let meta = resolve(&class.directives).map_err(ExpandError::Resolve)?;
+
+        // #styles fields → strip each, hoist a `sheet(<value>)` (deduped) + __sheets.
         let mut hoist = String::new();
         let mut sheet_vars: Vec<String> = Vec::new();
-        for arg in &meta.styles {
-            let Arg::Expr(expr) = arg else { continue };
-            let var = match seen.get(expr) {
+        for sf in &class.styles {
+            edits.push((sf.strip.0, sf.strip.1, String::new()));
+            let var = match seen.get(&sf.value) {
                 Some(v) => v.clone(),
                 None => {
                     let v = format!("_s{counter}");
                     counter += 1;
                     needs_sheet = true;
-                    hoist.push_str(&format!("const {v} = sheet({expr});\n"));
-                    seen.insert(expr.clone(), v.clone());
+                    hoist.push_str(&format!("const {v} = sheet({});\n", sf.value));
+                    seen.insert(sf.value.clone(), v.clone());
                     v
                 }
             };
             sheet_vars.push(var);
         }
-
-        // New sheet consts go directly above this class (so the `css` import
-        // they reference is already in scope, and later classes can reuse them).
         if !hoist.is_empty() {
-            edits.push((b.class_start, b.class_start, hoist));
+            edits.push((class.start, class.start, hoist));
         }
 
-        // #form → make the element form-associated. `formAssociated` must be a
-        // static on the class (the browser reads it at registration); the base
-        // `attachFormInternals` then attaches `internals` on connect.
+        // #form → static formAssociated inside the class body.
         if meta.form {
             edits.push((
-                b.class_body_open,
-                b.class_body_open,
+                class.body_open,
+                class.body_open,
                 "\n    static formAssociated = true;".to_string(),
             ));
         }
 
-        // Strip the pragma statements (+ their trailing newline).
-        let strip_end = b.block_end + trailing_newline(source, b.block_end);
-        edits.push((b.block_start, strip_end, String::new()));
+        // #effect → a generated `effects()` hook the base runs (owned, disposed
+        // separately from the view) registering one effect per tagged method.
+        if !class.effects.is_empty() {
+            needs_effect = true;
+            let calls: String = class
+                .effects
+                .iter()
+                .map(|name| format!("\n        effect(() => this.{name}());"))
+                .collect();
+            edits.push((
+                class.body_open,
+                class.body_open,
+                format!("\n    effects(): void {{{calls}\n    }}"),
+            ));
+        }
 
-        // Append __sheets + defineComponent after the class.
+        // __sheets + defineComponent after the class.
         let mut after = String::new();
         if !sheet_vars.is_empty() {
             let spread = sheet_vars
@@ -99,15 +136,15 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
                 .map(|v| format!("...{v}"))
                 .collect::<Vec<_>>()
                 .join(", ");
-            after.push_str(&format!("\n{}.__sheets = [{spread}];", b.class_name));
+            after.push_str(&format!("\n{}.__sheets = [{spread}];", class.name));
         }
         if meta.register {
             needs_define = true;
-            let tag = meta.tag.unwrap_or_else(|| kebab(&b.class_name));
-            after.push_str(&format!("\ndefineComponent('{tag}', {});", b.class_name));
+            let tag = meta.tag.unwrap_or_else(|| kebab(&class.name));
+            after.push_str(&format!("\ndefineComponent('{tag}', {});", class.name));
         }
         if !after.is_empty() {
-            edits.push((b.class_end, b.class_end, after));
+            edits.push((class.end, class.end, after));
         }
     }
 
@@ -117,6 +154,12 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
     }
     if needs_sheet {
         names.push("sheet");
+    }
+    if needs_state {
+        names.push("state");
+    }
+    if needs_effect {
+        names.push("effect");
     }
     if !names.is_empty() {
         edits.push((
@@ -129,7 +172,8 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         ));
     }
 
-    // Apply back-to-front so earlier offsets stay valid.
+    // Apply back-to-front so earlier offsets stay valid; on a tie the wider
+    // replace applies first.
     edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
     let mut out = source.to_string();
     for (start, end, repl) in edits {

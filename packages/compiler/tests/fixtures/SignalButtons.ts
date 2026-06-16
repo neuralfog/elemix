@@ -20,8 +20,10 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class SignalButtons extends Component {
+    // #styles
+    styles = css;
 
     dec = (): void => {
         counter.count--;

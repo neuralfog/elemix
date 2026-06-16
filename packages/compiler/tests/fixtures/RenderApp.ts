@@ -48,8 +48,10 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
-`#component #styles ${css}`
+// #component
 export class RenderApp extends Component {
+    // #styles
+    styles = css;
 
     count = 0;
 
