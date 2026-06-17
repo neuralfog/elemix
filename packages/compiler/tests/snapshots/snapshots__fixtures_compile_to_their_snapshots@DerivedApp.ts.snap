@@ -64,18 +64,24 @@ export class DerivedApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.firstElementChild!.firstElementChild!;
-const _n2 = _r0.firstElementChild!.firstElementChild!.firstElementChild!.nextElementSibling!.firstChild!;
-const _n3 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!;
-const _n4 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!.firstChild!;
-const _n5 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.firstChild!;
-const _n6 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.firstChild!;
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!;
 _event(_n1, 'click', this.addQty);
 _event(_n3, 'click', this.bumpPrice);
 effect(() => {
 _setText(_n2, (this.state.qty));
+});
+effect(() => {
 _setText(_n4, (this.state.price));
+});
+effect(() => {
 _setText(_n5, (this.subtotal));
+});
+effect(() => {
 _setText(_n6, (this.total));
 });
 return _r0;

@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/AppCard.ts
 ---
-import { template, clone, _child, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { template, clone, templateEl, cloneEl, _child, defineComponent, sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const css = `
@@ -33,25 +33,25 @@ const css = `
 
 const _s0 = sheet(css);
 const _t0 = template('<div class="card"><!----> <div class="body"><slot></slot></div> <!----></div>');
-const _t1 = template('<div class="header"><slot name="header"></slot></div>');
-const _t2 = template('<div class="footer"><slot name="footer"></slot></div>');
+const _t1 = templateEl('<div class="header"><slot name="header"></slot></div>');
+const _t2 = templateEl('<div class="footer"><slot name="footer"></slot></div>');
 
 export class AppCard extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.firstChild!;
-const _n2 = _r0.firstElementChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 _child(_n1, () => (this.hasSlot('header')
                 ? (() => {
-const _r3 = clone(_t1);
-return _r3.firstChild!;
+const _r3 = cloneEl(_t1);
+return _r3;
 })()
                 : ''));
 _child(_n2, () => (this.hasSlot('footer')
                 ? (() => {
-const _r4 = clone(_t2);
-return _r4.firstChild!;
+const _r4 = cloneEl(_t2);
+return _r4;
 })()
                 : ''));
 return _r0;

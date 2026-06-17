@@ -20,6 +20,9 @@ use oxc_span::{GetSpan, SourceType, Span};
 const PRIMITIVES: &[&str] = &[
     "template",
     "clone",
+    "templateEl",
+    "cloneEl",
+    "raw",
     "_event",
     "_model",
     "_onmodel",

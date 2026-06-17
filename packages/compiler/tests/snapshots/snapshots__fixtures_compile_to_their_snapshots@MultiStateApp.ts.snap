@@ -91,20 +91,24 @@ export class MultiStateApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.firstChild!;
-const _n2 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!;
-const _n3 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!;
-const _n4 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.firstChild!;
-const _n5 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.firstChild!;
-const _n6 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!;
-const _n7 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n1 = _r0.firstChild!.nextSibling!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.firstChild!;
+const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 _event(_n2, 'click', this.inc);
 _event(_n3, 'click', this.reset);
 _event(_n6, 'click', this.toggle);
 _event(_n7, 'click', this.rename);
 effect(() => {
 _setText(_n1, (this.counter.count));
+});
+effect(() => {
 _setText(_n4, (this.user.name));
+});
+effect(() => {
 _setText(_n5, (this.user.online ? 'online' : 'offline'));
 });
 return _r0;

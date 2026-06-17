@@ -23,8 +23,16 @@ impl Emitter for TsEmitter {
         format!("const {id} = template({});", js_string(markup))
     }
 
+    fn template_el_decl(&self, id: &str, markup: &str) -> String {
+        format!("const {id} = templateEl({});", js_string(markup))
+    }
+
     fn clone_root(&self, root: &str, tpl: &str) -> String {
         format!("const {root} = clone({tpl});")
+    }
+
+    fn clone_el(&self, root: &str, tpl: &str) -> String {
+        format!("const {root} = cloneEl({tpl});")
     }
 
     fn grab(&self, var: &str, parent: &str, path: &NodePath) -> String {
@@ -39,8 +47,8 @@ impl Emitter for TsEmitter {
         format!("const {var} = document.createComment('');\n{sibling}.before({var});")
     }
 
-    fn ret(&self, root: &str, builder: bool) -> String {
-        if builder {
+    fn ret(&self, root: &str, builder: bool, el: bool) -> String {
+        if builder && !el {
             format!("return {root}.firstChild!;")
         } else {
             format!("return {root};")
@@ -79,6 +87,14 @@ impl Emitter for TsEmitter {
         format!("_setText({node}, ({expr}));")
     }
 
+    fn set_text_direct(&self, node: &str, expr: &str) -> String {
+        format!("{node}.data = ({expr});")
+    }
+
+    fn set_attr_direct(&self, node: &str, name: &str, expr: &str) -> String {
+        format!("{node}.setAttribute('{name}', ({expr}));")
+    }
+
     fn set_attr(&self, node: &str, name: &str, expr: &str) -> String {
         format!("_setAttr({node}, '{name}', ({expr}));")
     }
@@ -104,22 +120,16 @@ impl Emitter for TsEmitter {
     }
 }
 
-/// Render a path as TS member accesses using direct-pointer navigation —
-/// `firstElementChild`/`nextElementSibling` for element steps,
-/// `firstChild`/`nextSibling` for node steps. These are O(1) pointer reads;
-/// `.children[i]`/`.childNodes[i]` go through a live collection. `!` asserts the
-/// node exists (the path is derived from the known template shape).
+/// Render a path as TS member accesses using direct-pointer navigation. Every
+/// step is node-indexed, so `firstChild`/`nextSibling` (raw pointer slots) reach
+/// the target — cheaper than `firstElementChild`/`nextElementSibling`, whose
+/// element-filtering is wasted work on the compiler's whitespace-tight markup.
+/// `!` asserts the node exists (the path is derived from the known template shape).
 fn accessor(path: &NodePath) -> String {
     let mut s = String::new();
     for step in path {
         match step {
-            Step::Child(i) => {
-                s.push_str(".firstElementChild!");
-                for _ in 0..*i {
-                    s.push_str(".nextElementSibling!");
-                }
-            }
-            Step::ChildNode(i) => {
+            Step::Child(i) | Step::ChildNode(i) => {
                 s.push_str(".firstChild!");
                 for _ in 0..*i {
                     s.push_str(".nextSibling!");

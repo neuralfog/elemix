@@ -4,8 +4,8 @@ export type Dep = {
 };
 
 export type Scope = {
-    deps: Dep[];
-    depSlots: number[];
+    deps: Dep | Dep[] | null;
+    depSlots: number | number[];
     fn: () => void;
     next: Scope | null;
 };
@@ -17,25 +17,38 @@ let sink: Scope | null = null;
 let collecting = false;
 let lastScopes: Scope | null = null;
 
+const removeSub = (d: Dep, slot: number): void => {
+    const subs = d.subs;
+    if (Array.isArray(subs)) {
+        const slots = d.subSlots as number[];
+        const last = subs.pop() as Scope;
+        const lastSlot = slots.pop() as number;
+        if (slot < subs.length) {
+            subs[slot] = last;
+            slots[slot] = lastSlot;
+            if (Array.isArray(last.depSlots)) {
+                last.depSlots[lastSlot] = slot;
+            } else {
+                last.depSlots = slot;
+            }
+        }
+    } else {
+        d.subs = null;
+    }
+};
+
 const cleanSources = (scope: Scope): void => {
     const deps = scope.deps;
-    const depSlots = scope.depSlots;
-    while (deps.length) {
-        const d = deps.pop() as Dep;
-        const slot = depSlots.pop() as number;
-        const subs = d.subs;
-        if (Array.isArray(subs)) {
-            const slots = d.subSlots as number[];
-            const last = subs.pop() as Scope;
-            const lastSlot = slots.pop() as number;
-            if (slot < subs.length) {
-                subs[slot] = last;
-                slots[slot] = lastSlot;
-                last.depSlots[lastSlot] = slot;
-            }
-        } else {
-            d.subs = null;
-        }
+    if (deps === null) return;
+    if (Array.isArray(deps)) {
+        const depSlots = scope.depSlots as number[];
+        for (let k = 0; k < deps.length; k++) removeSub(deps[k], depSlots[k]);
+        deps.length = 0;
+        depSlots.length = 0;
+    } else {
+        removeSub(deps, scope.depSlots as number);
+        scope.deps = null;
+        scope.depSlots = 0;
     }
 };
 
@@ -92,6 +105,30 @@ export const untrack = <T>(fn: () => T): T => {
     }
 };
 
+const addDep = (scope: Scope, d: Dep): number => {
+    const deps = scope.deps;
+    if (deps === null) {
+        scope.deps = d;
+        return 0;
+    }
+    if (Array.isArray(deps)) {
+        deps.push(d);
+        (scope.depSlots as number[]).push(0);
+        return deps.length - 1;
+    }
+    scope.deps = [deps, d];
+    scope.depSlots = [scope.depSlots as number, 0];
+    return 1;
+};
+
+const setDepSlot = (scope: Scope, sslot: number, dslot: number): void => {
+    if (Array.isArray(scope.depSlots)) {
+        scope.depSlots[sslot] = dslot;
+    } else {
+        scope.depSlots = dslot;
+    }
+};
+
 export const track = (d: Dep): void => {
     const scope = activeScope;
     if (scope === null) return;
@@ -99,20 +136,20 @@ export const track = (d: Dep): void => {
     if (subs === scope) return;
     if (Array.isArray(subs)) {
         if (subs[subs.length - 1] === scope) return;
-        scope.deps.push(d);
-        scope.depSlots.push(subs.length);
-        (d.subSlots as number[]).push(scope.deps.length - 1);
+        const sslot = addDep(scope, d);
+        setDepSlot(scope, sslot, subs.length);
+        (d.subSlots as number[]).push(sslot);
         subs.push(scope);
     } else if (subs === null) {
-        scope.deps.push(d);
-        scope.depSlots.push(0);
+        const sslot = addDep(scope, d);
+        setDepSlot(scope, sslot, 0);
         d.subs = scope;
-        d.subSlots = scope.deps.length - 1;
+        d.subSlots = sslot;
     } else {
-        scope.deps.push(d);
-        scope.depSlots.push(1);
+        const sslot = addDep(scope, d);
+        setDepSlot(scope, sslot, 1);
         d.subs = [subs, scope];
-        d.subSlots = [d.subSlots as number, scope.deps.length - 1];
+        d.subSlots = [d.subSlots as number, sslot];
     }
 };
 
@@ -128,12 +165,19 @@ export const trigger = (d: Dep): void => {
 };
 
 export const effect = (fn: () => void): void => {
-    const scope: Scope = { deps: [], depSlots: [], fn, next: null };
+    const scope: Scope = { deps: null, depSlots: 0, fn, next: null };
     if (collecting) {
         scope.next = sink;
         sink = scope;
     }
     runScope(scope);
+};
+
+export const bind = (fn: () => void, sources: Dep[]): void => {
+    effect(() => {
+        for (let i = 0; i < sources.length; i++) track(sources[i]);
+        fn();
+    });
 };
 
 export const reactive = <T extends object>(source: T): T => {

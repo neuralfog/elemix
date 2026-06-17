@@ -1,4 +1,4 @@
-import { track, trigger, dep, type Dep } from './reactive';
+import { type Dep, dep, track, trigger } from './reactive';
 
 const RAW = Symbol();
 const ARRAY = Symbol();
@@ -28,6 +28,17 @@ const depFor = (target: object, key: PropertyKey): Dep => {
         map.set(key, d);
     }
     return d;
+};
+
+export const depOf = (obj: object, key: PropertyKey): Dep => {
+    const t = (obj as Record<PropertyKey, unknown>)[RAW];
+    return depFor((t as object) ?? obj, key);
+};
+
+export const raw = <T>(obj: T): T => {
+    const t =
+        obj == null ? undefined : (obj as Record<PropertyKey, unknown>)[RAW];
+    return (t as T) ?? obj;
 };
 
 type Target = Record<PropertyKey, unknown>;

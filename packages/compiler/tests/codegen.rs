@@ -32,8 +32,8 @@ fn markup_is_escaped_as_a_js_string() {
 #[test]
 fn nested_path_renders_member_accessors() {
     let out = gen(&["<div><span><b>", "</b></span></div>"], &["x"]);
-    // div > span > b > baked text node, via direct-pointer navigation
-    assert!(out.contains(".firstElementChild!.firstElementChild!.firstElementChild!.firstChild!;"));
+    // div > span > b > baked text node, via node-indexed firstChild pointers
+    assert!(out.contains(".firstChild!.firstChild!.firstChild!.firstChild!;"));
 }
 
 // ---------------------------------------------------------------------------
@@ -126,7 +126,7 @@ fn ref_is_raw() {
 #[test]
 fn bindings_on_one_element_grab_it_once() {
     let out = gen(&["<a href=", " @click=", ">x</a>"], &["u", "this.go"]);
-    assert_eq!(out.matches("= _r0.firstElementChild!;").count(), 1);
+    assert_eq!(out.matches("= _r0.firstChild!;").count(), 1);
     assert!(out.contains("_setAttr(_n1, 'href', (u));"));
     assert!(out.contains("_event(_n1, 'click', this.go);"));
 }
@@ -141,15 +141,14 @@ fn repeat_lowers_to_list_with_an_iife_builder() {
         &["<ul>", "</ul>"],
         &["repeat(this.rows, (r) => tpl`<li>${r.t}</li>`, (r) => r.id)"],
     );
-    // the row template is hoisted to module scope; the lone text hole bakes a node
-    assert!(out.contains("const _t1 = template('<li> </li>');"));
+    // single-root row → element-clone master (templateEl), lone text hole baked
+    assert!(out.contains("const _t1 = templateEl('<li> </li>');"));
     // args reordered: _list(anchor, () => (items), key, render)
     assert!(out.contains("_list(_n1, () => (this.rows), (r) => r.id, (r) => (() => {"));
-    // the builder clones the row template, binds, and returns its first node
-    assert!(out.contains("clone(_t1)"));
+    // the builder clones the row ELEMENT directly and returns it (no fragment)
+    assert!(out.contains("cloneEl(_t1)"));
     assert!(out.contains("_setText("));
     assert!(out.contains("(r.t));"));
-    assert!(out.contains(".firstChild!;"));
 }
 
 #[test]
@@ -158,9 +157,9 @@ fn nested_repeat_recurses() {
         &["<ul>", "</ul>"],
         &["repeat(cats, (c) => tpl`<li>${repeat(c.items, (i) => tpl`<b>${i.n}</b>`, (i) => i.id)}</li>`, (c) => c.id)"],
     );
-    assert!(out.contains("const _t0 = template("));
-    assert!(out.contains("const _t1 = template("));
-    assert!(out.contains("const _t2 = template("));
+    assert!(out.contains("const _t0 = template(")); // the <ul> view (fragment)
+    assert!(out.contains("const _t1 = templateEl(")); // single-root <li> row
+    assert!(out.contains("const _t2 = templateEl(")); // single-root <b> row
     // two list calls, one nested inside the other's builder
     assert_eq!(out.matches("_list(").count(), 2);
     assert!(out.contains("() => (cats)"));
@@ -176,8 +175,8 @@ fn template_ternary_lowers_to_child() {
     let out = gen(&["<div>", "</div>"], &["c ? tpl`<a></a>` : tpl`<b></b>`"]);
     assert!(out.contains("_child(_n1, () => (c"));
     assert!(out.contains("? (() => {"));
-    assert!(out.contains("clone(_t1)"));
-    assert!(out.contains("clone(_t2)"));
+    assert!(out.contains("cloneEl(_t1)"));
+    assert!(out.contains("cloneEl(_t2)"));
 }
 
 #[test]

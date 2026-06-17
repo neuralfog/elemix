@@ -32,7 +32,7 @@ export class SubmitButton extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!;
+const _n1 = _r0.firstChild!;
 _event(_n1, 'click', this.submit);
 return _r0;
 }

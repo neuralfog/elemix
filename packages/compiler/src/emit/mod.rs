@@ -15,8 +15,12 @@ use crate::template::node::NodePath;
 pub trait Emitter {
     /// `const <id> = template('<markup>')` (module scope).
     fn template_decl(&self, id: &str, markup: &str) -> String;
+    /// `const <id> = templateEl('<markup>')` — single-root element master.
+    fn template_el_decl(&self, id: &str, markup: &str) -> String;
     /// `const <root> = clone(<tpl>)`.
     fn clone_root(&self, root: &str, tpl: &str) -> String;
+    /// `const <root> = cloneEl(<tpl>)` — clone the root element directly.
+    fn clone_el(&self, root: &str, tpl: &str) -> String;
     /// `const <var> = <parent><path>` — reach a node by path.
     fn grab(&self, var: &str, parent: &str, path: &NodePath) -> String;
     /// Replace a content anchor with a fresh text node for `_text`; binds `var`.
@@ -24,8 +28,9 @@ pub trait Emitter {
     /// Insert a fresh comment anchor before `sibling`; binds `var` (used to give
     /// a `repeat`-in-ternary its own `_list` anchor next to the `_child` one).
     fn comment_anchor(&self, var: &str, sibling: &str) -> String;
-    /// `return <root>` (view) or `return <root>.firstChild!` (nested builder).
-    fn ret(&self, root: &str, builder: bool) -> String;
+    /// `return <root>` (view, or an element-cloned builder) or
+    /// `return <root>.firstChild!` (fragment-cloned nested builder).
+    fn ret(&self, root: &str, builder: bool, el: bool) -> String;
     /// A marker for a binding the codegen cannot yet lower.
     fn pending(&self, note: &str) -> String;
 
@@ -41,6 +46,10 @@ pub trait Emitter {
     // via `bind_group`, so a row costs one Scope/Set instead of one per binding.
     fn set_text(&self, node: &str, expr: &str) -> String;
     fn set_attr(&self, node: &str, name: &str, expr: &str) -> String;
+    /// Set-once direct writes for static (key-field) bindings — no toText, no
+    /// write-cache: the value is written once and never re-checked.
+    fn set_text_direct(&self, node: &str, expr: &str) -> String;
+    fn set_attr_direct(&self, node: &str, name: &str, expr: &str) -> String;
     fn set_class(&self, node: &str, initial: &str, expr: &str) -> String;
     fn set_style(&self, node: &str, expr: &str) -> String;
     fn set_prop(&self, node: &str, name: &str, expr: &str) -> String;
