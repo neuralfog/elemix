@@ -6,7 +6,7 @@ import {
     takeScopes,
     untrack,
 } from './reactive';
-import { raw } from './state';
+import { toRaw } from './state';
 
 type Getter<T> = () => T;
 
@@ -184,7 +184,7 @@ export const _list = <T>(
         const parent = anchor.parentNode;
         if (!parent) return;
         const list = items();
-        const rawList = raw(list);
+        const rawList = toRaw(list);
         const len = rawList.length;
         const next = new Map<unknown, Node>();
         const keys: unknown[] = new Array(len);
