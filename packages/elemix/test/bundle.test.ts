@@ -55,6 +55,9 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             'reactive',
             'effect',
             'untrack',
+            // compile-reactivity primitives (codegen target for compiled bindings)
+            'bind',
+            'depOf',
             // runtime: DOM-wiring primitives (the codegen contract)
             'template',
             'clone',

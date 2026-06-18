@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/BenchApp.ts
 ---
-import { template, clone, _event, _list, effect, _setText, _setClass, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { template, clone, templateEl, cloneEl, raw, _event, _list, effect, _setText, _setClass, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Row = { id: number; label: string };
@@ -60,7 +60,7 @@ const css = `
 
 const _s0 = sheet(css);
 const _t0 = template('<div class="bar"><button>Create 1,000 rows</button><button>Create 10,000 rows</button><button>Append 1,000 rows</button><button>Update every 10th row</button><button>Clear</button><button>Swap Rows</button></div><table><tbody><!----></tbody></table>');
-const _t1 = template('<tr><td class="col-id"> </td><td><a class="lbl"> </a></td><td><a class="remove">×</a></td></tr>');
+const _t1 = templateEl('<tr><td class="col-id"> </td><td><a class="lbl"> </a></td><td><a class="remove">×</a></td></tr>');
 
 export class BenchApp extends Component {
 
@@ -124,13 +124,13 @@ export class BenchApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.firstElementChild!;
-const _n2 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!;
-const _n3 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!;
-const _n4 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
-const _n5 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
-const _n6 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
-const _n7 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.firstChild!;
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.nextSibling!.firstChild!.firstChild!;
 _event(_n1, 'click', this.run);
 _event(_n2, 'click', this.runLots);
 _event(_n3, 'click', this.add);
@@ -138,20 +138,21 @@ _event(_n4, 'click', this.update);
 _event(_n5, 'click', this.clear);
 _event(_n6, 'click', this.swapRows);
 _list(_n7, () => (this.state.rows), (row) => row.id, (row) => (() => {
-const _r8 = clone(_t1);
-const _n9 = _r8.firstElementChild!;
-const _n10 = _n9.firstElementChild!.firstChild!;
-const _n11 = _n9.firstElementChild!.nextElementSibling!.firstElementChild!;
-const _n12 = _n11.firstChild!;
-const _n13 = _n9.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!;
-_event(_n11, 'click', () => this.select(row.id));
-_event(_n13, 'click', () => this.removeRow(row.id));
+const _r8 = cloneEl(_t1);
+const _n9 = _r8.firstChild!.firstChild!;
+const _n10 = _r8.firstChild!.nextSibling!.firstChild!;
+const _n11 = _n10.firstChild!;
+const _n12 = _r8.firstChild!.nextSibling!.nextSibling!.firstChild!;
+_event(_n10, 'click', () => this.select(row.id));
+_event(_n12, 'click', () => this.removeRow(row.id));
+_n9.data = (raw(row).id);
 effect(() => {
-_setClass(_n9, '', ({ danger: this.state.selected === row.id }));
-_setText(_n10, (row.id));
-_setText(_n12, (row.label));
+_setClass(_r8, '', ({ danger: this.state.selected === row.id }));
 });
-return _r8.firstChild!;
+effect(() => {
+_setText(_n11, (row.label));
+});
+return _r8;
 })());
 return _r0;
 }

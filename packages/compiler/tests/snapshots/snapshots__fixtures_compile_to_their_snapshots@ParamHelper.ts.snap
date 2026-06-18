@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ParamHelper.ts
 ---
-import { template, clone, _event, _list, effect, _setText, _setAttr, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { template, clone, templateEl, cloneEl, raw, _event, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Row = { id: number; name: string };
@@ -29,7 +29,7 @@ const css = `
 // the helper param `item` for the call's arg `r`, so the holes become r.id / r.name.
 const _s0 = sheet(css);
 const _t0 = template('<div><button class="add">add row</button><ul class="list"><!----></ul></div>');
-const _t1 = template('<li class="row"> </li>');
+const _t1 = templateEl('<li class="row"> </li>');
 
 export class RowList extends Component {
     state = state<{ rows: Row[] }>({
@@ -46,18 +46,17 @@ export class RowList extends Component {
     
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.firstElementChild!;
-const _n2 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstChild!;
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 _event(_n1, 'click', this.add);
 _list(_n2, () => (this.state.rows), (r) => r.id, (r) => (() => {
-const _r3 = clone(_t1);
-const _n4 = _r3.firstElementChild!;
-const _n5 = _n4.firstChild!;
+const _r3 = cloneEl(_t1);
+const _n4 = _r3.firstChild!;
+_r3.setAttribute('data-id', (raw(r).id));
 effect(() => {
-_setAttr(_n4, 'data-id', (r.id));
-_setText(_n5, (r.name));
+_setText(_n4, (r.name));
 });
-return _r3.firstChild!;
+return _r3;
 })());
 return _r0;
 }

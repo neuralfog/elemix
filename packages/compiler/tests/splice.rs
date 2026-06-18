@@ -94,8 +94,9 @@ fn parameterized_helper_is_inlined_with_arg_substituted() {
     assert!(!out.contains("row ="));
     assert!(!out.contains("this.row("));
     assert!(!out.contains("tpl`"));
-    // the param `item` was substituted for the call's arg `r` in the holes
-    assert!(out.contains("(r.id)"));
+    // the param `item` was substituted for the call's arg `r` in the holes;
+    // r.id is the set-once key (read raw), r.name stays a tracked Proxy read
+    assert!(out.contains("(raw(r).id)"));
     assert!(out.contains("(r.name)"));
     assert!(!out.contains("item.id"));
     // and it lowered to a keyed list

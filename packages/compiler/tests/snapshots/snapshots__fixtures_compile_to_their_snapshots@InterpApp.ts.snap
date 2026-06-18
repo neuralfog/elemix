@@ -66,15 +66,15 @@ export class InterpApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.nextElementSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n2 = _r0.firstElementChild!.nextElementSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
-const _n8 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
-const _n9 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n1 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n9 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _x12 = document.createTextNode('');
 _n1.replaceWith(_x12);
 const _x13 = document.createTextNode('');

@@ -107,12 +107,12 @@ export class DirectApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.nextElementSibling!;
-const _n2 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!;
-const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!;
-const _n4 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!.nextElementSibling!;
-const _n5 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.firstElementChild!;
-const _n6 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.nextElementSibling!.nextElementSibling!;
+const _n1 = _r0.firstChild!.nextSibling!;
+const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 _event(_n2, 'click', () => this.toggle('active'));
 _event(_n3, 'click', () => this.toggle('rounded'));
 _event(_n4, 'click', () => this.toggle('large'));

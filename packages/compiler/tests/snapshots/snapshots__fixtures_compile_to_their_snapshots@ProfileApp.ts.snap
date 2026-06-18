@@ -54,16 +54,20 @@ export class ProfileApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.firstElementChild!.firstElementChild!;
-const _n2 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.firstElementChild!;
-const _n3 = _r0.firstElementChild!.firstElementChild!.nextElementSibling!.nextElementSibling!;
-const _n4 = _r0.firstElementChild!.nextElementSibling!;
+const _n1 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!;
 _model(_n1 as HTMLInputElement, () => (this.state.name));
 _model(_n2 as HTMLInputElement, () => (this.state.role));
 _event(_n3, 'click', this.like);
 effect(() => {
 _setProp(_n4, 'name', (this.state.name.value));
+});
+effect(() => {
 _setProp(_n4, 'role', (this.state.role.value));
+});
+effect(() => {
 _setProp(_n4, 'likes', (this.state.likes));
 });
 return _r0;

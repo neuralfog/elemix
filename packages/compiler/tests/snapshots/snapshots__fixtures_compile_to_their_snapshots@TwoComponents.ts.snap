@@ -20,7 +20,7 @@ export class FirstWidget extends Component {
     };
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!;
+const _n1 = _r0.firstChild!;
 const _n2 = _n1.firstChild!;
 _event(_n1, 'click', this.inc);
 effect(() => {
@@ -38,7 +38,7 @@ export class SecondWidget extends Component {
     };
     view(): DocumentFragment {
 const _r3 = clone(_t1);
-const _n4 = _r3.firstElementChild!;
+const _n4 = _r3.firstChild!;
 const _n5 = _n4.firstChild!;
 _event(_n4, 'click', this.flip);
 effect(() => {

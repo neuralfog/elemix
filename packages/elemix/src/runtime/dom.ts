@@ -1,11 +1,12 @@
 import {
-    effect,
-    collect,
-    takeScopes,
-    dispose,
-    untrack,
     type Scope,
+    collect,
+    dispose,
+    effect,
+    takeScopes,
+    untrack,
 } from './reactive';
+import { raw } from './state';
 
 type Getter<T> = () => T;
 
@@ -16,11 +17,18 @@ const toText = (value: unknown): string =>
           ? ''
           : String(value);
 
+let lisPred = new Int32Array(0);
+let lisTails = new Int32Array(0);
+
 const computeLIS = (arr: number[]): number[] => {
     const n = arr.length;
     if (n === 0) return [];
-    const pred = new Int32Array(n);
-    const tails = new Int32Array(n);
+    if (lisPred.length < n) {
+        lisPred = new Int32Array(n);
+        lisTails = new Int32Array(n);
+    }
+    const pred = lisPred;
+    const tails = lisTails;
     let len = 0;
     for (let i = 0; i < n; i++) {
         let lo = 0;
@@ -51,6 +59,16 @@ export const template = (markup: string): DocumentFragment => {
 
 export const clone = (master: DocumentFragment): DocumentFragment =>
     master.cloneNode(true) as DocumentFragment;
+
+export const templateEl = (markup: string): Element => {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = markup;
+    const el = tpl.content.firstElementChild as Element;
+    return document.importNode(el, true) as Element;
+};
+
+export const cloneEl = (master: Element): Element =>
+    master.cloneNode(true) as Element;
 
 const sheetCache = new Map<string, CSSStyleSheet>();
 
@@ -166,19 +184,20 @@ export const _list = <T>(
         const parent = anchor.parentNode;
         if (!parent) return;
         const list = items();
+        const rawList = raw(list);
+        const len = rawList.length;
         const next = new Map<unknown, Node>();
-        const keys: unknown[] = new Array(list.length);
+        const keys: unknown[] = new Array(len);
 
         let survivors = 0;
+        const initial = nodes.size === 0;
         untrack(() => {
-            for (let i = 0; i < list.length; i++) {
-                const key = keyFn(list[i], i);
+            for (let i = 0; i < len; i++) {
+                const key = keyFn(rawList[i] as T, i);
                 keys[i] = key;
-                let node = nodes.get(key);
+                let node = initial ? undefined : nodes.get(key);
                 if (!node) {
-                    const item = list[i];
-                    const index = i;
-                    node = collect(() => render(item, index));
+                    node = collect(() => render(list[i], i));
                     rowScopes.set(key, takeScopes());
                 } else {
                     survivors++;
@@ -236,19 +255,32 @@ export const _list = <T>(
         const seq: number[] = [];
         const seqPos: number[] = [];
         const fresh = new Uint8Array(keys.length);
+        let ordered = true;
+        let lastOi = -1;
         for (let i = 0; i < keys.length; i++) {
             const oi = oldPos.get(keys[i]);
             if (oi === undefined) {
                 fresh[i] = 1;
             } else {
+                if (oi < lastOi) ordered = false;
+                lastOi = oi;
                 seq.push(oi);
                 seqPos.push(i);
             }
         }
 
+        if (ordered && seq.length === keys.length) {
+            nodes = next;
+            return;
+        }
+
         const keep = new Uint8Array(keys.length);
-        const lis = computeLIS(seq);
-        for (let i = 0; i < lis.length; i++) keep[seqPos[lis[i]]] = 1;
+        if (ordered) {
+            for (let i = 0; i < keys.length; i++) if (!fresh[i]) keep[i] = 1;
+        } else {
+            const lis = computeLIS(seq);
+            for (let i = 0; i < lis.length; i++) keep[seqPos[lis[i]]] = 1;
+        }
 
         let i = keys.length - 1;
         while (i >= 0) {

@@ -15,12 +15,23 @@ use std::collections::HashMap;
 /// Per-run state: globally-unique counters, the accumulated module-scope
 /// `template(...)` declarations, and a markup→id cache so identical templates
 /// (e.g. a helper embedded twice) share one `template()` const.
+/// A reactive root in scope: the `repeat` render's item param and (if the key
+/// is a plain `item.field` member) the key field, which is immutable per row in
+/// a keyed list — so a binding reading exactly `item.field` is static (set once,
+/// no effect, no subscription).
+#[derive(Clone)]
+struct Reactive {
+    item: String,
+    key_field: Option<String>,
+}
+
 #[derive(Default)]
 struct Ctx {
     tpls: usize,
     vars: usize,
     decls: String,
     seen: HashMap<String, String>,
+    reactive: Vec<Reactive>,
 }
 
 impl Ctx {
@@ -89,20 +100,37 @@ fn gen_template(
     let parsed = parse(statics, holes);
     let bindings: Vec<_> = parsed.holes.iter().map(classify).collect();
 
-    let tpl = match ctx.seen.get(&parsed.markup) {
+    // A single-root nested builder (every list row) clones the root ELEMENT
+    // directly — the clone IS the root, so all paths drop their leading Child(0).
+    let el = builder && parsed.single_root;
+
+    let seen_key = if el {
+        format!("\u{0}el\u{0}{}", parsed.markup)
+    } else {
+        parsed.markup.clone()
+    };
+    let tpl = match ctx.seen.get(&seen_key) {
         Some(id) => id.clone(),
         None => {
             let id = ctx.tpl();
-            ctx.decls
-                .push_str(&emitter.template_decl(&id, &parsed.markup));
+            let decl = if el {
+                emitter.template_el_decl(&id, &parsed.markup)
+            } else {
+                emitter.template_decl(&id, &parsed.markup)
+            };
+            ctx.decls.push_str(&decl);
             ctx.decls.push('\n');
-            ctx.seen.insert(parsed.markup.clone(), id.clone());
+            ctx.seen.insert(seen_key, id.clone());
             id
         }
     };
 
     let root = ctx.var("r");
-    let mut lines = vec![emitter.clone_root(&root, &tpl)];
+    let mut lines = vec![if el {
+        emitter.clone_el(&root, &tpl)
+    } else {
+        emitter.clone_root(&root, &tpl)
+    }];
     let mut grabbed: Vec<(NodePath, String)> = Vec::new();
 
     // Phase 1: grab every binding's node WHILE THE CLONE IS PRISTINE. Bindings
@@ -110,7 +138,14 @@ fn gen_template(
     // node references must be captured before any binding runs.
     let nodes: Vec<String> = bindings
         .iter()
-        .map(|b| grab(ctx, emitter, &root, &b.path, &mut grabbed, &mut lines))
+        .map(|b| {
+            let path: NodePath = if el && !b.path.is_empty() {
+                b.path[1..].to_vec()
+            } else {
+                b.path.clone()
+            };
+            grab(ctx, emitter, &root, &path, &mut grabbed, &mut lines)
+        })
         .collect();
 
     // Phase 2: emit the bindings against the pre-grabbed vars. Value writes
@@ -123,8 +158,11 @@ fn gen_template(
     // per occurrence. Hoist it to a single const at the top of the effect so the
     // row subscribes to that signal once. Only side-effect-free member chains
     // qualify; structural/event bindings are excluded and keep their raw expr.
+    // Static reads (a `repeat` key field) hoist OUTSIDE the effect (set once);
+    // dynamic reads keep the in-effect CSE.
     let mut cse: HashMap<String, String> = HashMap::new();
     let mut hoists: Vec<String> = Vec::new();
+    let mut static_hoists: Vec<String> = Vec::new();
     {
         let mut counts: HashMap<&str, usize> = HashMap::new();
         for b in &bindings {
@@ -139,39 +177,92 @@ fn gen_template(
             let e = b.expr.trim();
             if counts.get(e).copied().unwrap_or(0) >= 2 && !cse.contains_key(e) {
                 let v = ctx.var("v");
-                hoists.push(emitter.local(&v, e));
+                if is_static_key(e, ctx) {
+                    // set-once key read — go through raw, no Proxy trap / dep lookup
+                    static_hoists.push(emitter.local(&v, &static_raw(e)));
+                } else {
+                    hoists.push(emitter.local(&v, e));
+                }
                 cse.insert(e.to_string(), v);
             }
         }
     }
 
+    // `group` becomes the per-row effect (dynamic bindings). `statics` are written
+    // once at mount: a `repeat` key field never changes within a row, so it needs
+    // no effect, no dep, no subscription.
+    // With no shared (CSE) read, each dynamic binding can own its effect, so a
+    // change to one field re-runs only that binding — surgical updates.
+    let split = hoists.is_empty();
     let mut group: Vec<String> = hoists;
+    let mut statics: Vec<String> = static_hoists;
     for (b, node) in bindings.iter().zip(&nodes) {
         let name = b.name.as_deref().unwrap_or("");
-        // grouped value writes use the hoisted var when their read was CSE'd
-        let g = cse
-            .get(b.expr.trim())
-            .map(String::as_str)
-            .unwrap_or(b.expr.as_str());
+        let stat = is_grouped(&b.kind) && is_static_key(b.expr.trim(), ctx);
+        // grouped value writes use the hoisted var when their read was CSE'd; a
+        // non-CSE'd static key reads through raw (no trap/dep lookup).
+        let read: String = match cse.get(b.expr.trim()) {
+            Some(v) => v.clone(),
+            None if stat => static_raw(b.expr.trim()),
+            None => b.expr.trim().to_string(),
+        };
+        let g = read.as_str();
         match b.kind {
             BindingKind::Splice => {
                 lines.push(emitter.pending("Splice content binding — symbol resolution pending"))
             }
             BindingKind::List => lines.push(lower_list(&b.expr, node, ctx, emitter)),
             BindingKind::Child => lines.extend(lower_child(&b.expr, node, ctx, emitter)),
-            BindingKind::Text if b.baked => group.push(emitter.set_text(node, g)),
+            BindingKind::Text if b.baked => {
+                if stat {
+                    statics.push(emitter.set_text_direct(node, g))
+                } else {
+                    group.push(emitter.set_text(node, g))
+                }
+            }
             BindingKind::Text => {
                 let tnode = ctx.var("x");
                 lines.push(emitter.text_anchor(&tnode, node));
-                group.push(emitter.set_text(&tnode, g));
+                if stat {
+                    statics.push(emitter.set_text_direct(&tnode, g))
+                } else {
+                    group.push(emitter.set_text(&tnode, g))
+                }
             }
-            BindingKind::Attr => group.push(emitter.set_attr(node, name, g)),
+            BindingKind::Attr => {
+                if stat {
+                    statics.push(emitter.set_attr_direct(node, name, g))
+                } else {
+                    group.push(emitter.set_attr(node, name, g))
+                }
+            }
             // A class binding fully absorbs any static class into its expression
             // (`class="a ${x}"` → one dynamic value), so the initial base is always
             // empty — no need to read it back off the DOM.
-            BindingKind::Class => group.push(emitter.set_class(node, "''", g)),
-            BindingKind::Style => group.push(emitter.set_style(node, g)),
-            BindingKind::Prop => group.push(emitter.set_prop(node, name, g)),
+            BindingKind::Class => {
+                let w = emitter.set_class(node, "''", g);
+                if stat {
+                    statics.push(w)
+                } else {
+                    group.push(w)
+                }
+            }
+            BindingKind::Style => {
+                let w = emitter.set_style(node, g);
+                if stat {
+                    statics.push(w)
+                } else {
+                    group.push(w)
+                }
+            }
+            BindingKind::Prop => {
+                let w = emitter.set_prop(node, name, g);
+                if stat {
+                    statics.push(w)
+                } else {
+                    group.push(w)
+                }
+            }
             BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
             BindingKind::Model => lines.push(emitter.model(node, &b.expr)),
             BindingKind::OnModel => lines.push(emitter.onmodel(node, &b.expr)),
@@ -179,11 +270,18 @@ fn gen_template(
         }
     }
 
+    lines.append(&mut statics);
     if !group.is_empty() {
-        lines.push(emitter.bind_group(&group));
+        if split && group.len() > 1 {
+            for w in &group {
+                lines.push(emitter.bind_group(std::slice::from_ref(w)));
+            }
+        } else {
+            lines.push(emitter.bind_group(&group));
+        }
     }
 
-    lines.push(emitter.ret(&root, builder));
+    lines.push(emitter.ret(&root, builder, el));
     let mut body = lines.join("\n");
     body.push('\n');
     body
@@ -201,6 +299,10 @@ fn grab(
     grabbed: &mut Vec<(NodePath, String)>,
     lines: &mut Vec<String>,
 ) -> String {
+    // An empty path is the cloned root itself (element-clone root binding).
+    if path.is_empty() {
+        return root.to_string();
+    }
     if let Some((_, var)) = grabbed.iter().find(|(p, _)| p == path) {
         return var.clone();
     }
@@ -228,7 +330,18 @@ fn lower_list(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) ->
     if args.len() < 2 {
         return emitter.pending("List: repeat() with unexpected arity");
     }
+    let reactive = arrow_first_param(&args[1]).map(|item| Reactive {
+        item,
+        key_field: args.get(2).and_then(|k| key_field(k)),
+    });
+    let pushed = reactive.is_some();
+    if let Some(r) = reactive {
+        ctx.reactive.push(r);
+    }
     let render = substitute_html(&args[1], ctx, emitter);
+    if pushed {
+        ctx.reactive.pop();
+    }
     let key = args
         .get(2)
         .cloned()
@@ -287,7 +400,18 @@ fn lower_repeat_ternary(
     if args.len() < 2 {
         return vec![emitter.pending("repeat-in-ternary: repeat() with unexpected arity")];
     }
+    let reactive = arrow_first_param(&args[1]).map(|item| Reactive {
+        item,
+        key_field: args.get(2).and_then(|k| key_field(k)),
+    });
+    let pushed = reactive.is_some();
+    if let Some(r) = reactive {
+        ctx.reactive.push(r);
+    }
     let render = substitute_html(&args[1], ctx, emitter);
+    if pushed {
+        ctx.reactive.pop();
+    }
     let key = args
         .get(2)
         .cloned()
@@ -402,4 +526,55 @@ fn is_js_ident(p: &str) -> bool {
 fn is_simple_read(e: &str) -> bool {
     let parts: Vec<&str> = e.split('.').collect();
     parts.len() >= 2 && parts.iter().all(|p| is_js_ident(p))
+}
+
+/// First parameter name of an arrow (`(item) => …`, `(item: Row) => …`,
+/// `(item, i) => …`). The reactive item bound by a `repeat` render/key arrow.
+fn arrow_first_param(arrow: &str) -> Option<String> {
+    let (params, _) = arrow.split_once("=>")?;
+    let params = params.trim();
+    let params = params
+        .strip_prefix('(')
+        .map(|p| p.trim_end_matches(')'))
+        .unwrap_or(params);
+    let name = params.split(',').next()?.split(':').next()?.trim();
+    if is_js_ident(name) {
+        Some(name.to_string())
+    } else {
+        None
+    }
+}
+
+/// The key field of a `repeat` key arrow IFF it is a plain `param.field` member
+/// (e.g. `(item) => item.id` → `id`). Computed/complex keys yield `None`.
+fn key_field(key_arrow: &str) -> Option<String> {
+    let param = arrow_first_param(key_arrow)?;
+    let (_, body) = key_arrow.split_once("=>")?;
+    let field = body.trim().strip_prefix(&param)?.trim().strip_prefix('.')?;
+    if is_js_ident(field) {
+        Some(field.to_string())
+    } else {
+        None
+    }
+}
+
+/// True when `expr` reads exactly the current reactive root's key field
+/// (`item.id`) — immutable per row in a keyed list, so the binding is static.
+fn is_static_key(expr: &str, ctx: &Ctx) -> bool {
+    match ctx.reactive.last() {
+        Some(Reactive {
+            item,
+            key_field: Some(kf),
+        }) => expr == format!("{item}.{kf}"),
+        _ => false,
+    }
+}
+
+/// Wrap the root of a set-once key read in `raw()` so it skips the Proxy get-trap
+/// and dep lookup: `item.id` → `raw(item).id`.
+fn static_raw(expr: &str) -> String {
+    match expr.split_once('.') {
+        Some((root, rest)) => format!("raw({root}).{rest}"),
+        None => expr.to_string(),
+    }
 }

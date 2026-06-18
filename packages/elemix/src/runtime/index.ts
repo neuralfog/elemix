@@ -1,3 +1,3 @@
 export * from './dom';
-export { reactive, effect, untrack } from './reactive';
-export { state } from './state';
+export { reactive, effect, untrack, bind } from './reactive';
+export { state, depOf, raw } from './state';

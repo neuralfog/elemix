@@ -20,6 +20,9 @@ use super::node::{Hole, NodePath, Slot, Step};
 pub struct ParsedTemplate {
     pub markup: String,
     pub holes: Vec<Hole>,
+    /// Exactly one top-level node and it is an element — the clone can target the
+    /// element directly (no fragment wrapper, no root `.firstElementChild` walk).
+    pub single_root: bool,
 }
 
 /// HTML void elements — self-closing with no end tag. Matches the renderer's
@@ -452,8 +455,7 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
     // A lone content hole has no sibling text node to merge with, so a plain text
     // value can be baked as a real text node instead of a `<!---->` swap.
     let sole = children.len() == 1;
-    let mut child_count = 0usize; // element index (.children[i])
-    let mut node_count = 0usize; // node index (.childNodes[i])
+    let mut node_count = 0usize; // node index (.childNodes[i]) — used for all steps
     for child in children {
         match child {
             Child::Text(t) => {
@@ -482,7 +484,7 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
             }
             Child::Elem(el) => {
                 let mut elem_path = path.clone();
-                elem_path.push(Step::Child(child_count));
+                elem_path.push(Step::Child(node_count));
                 for (name, expr) in &el.attr_holes {
                     holes.push(Hole {
                         path: elem_path.clone(),
@@ -510,7 +512,6 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                     markup.push_str(&el.tag);
                     markup.push('>');
                 }
-                child_count += 1;
                 node_count += 1;
             }
         }
@@ -530,11 +531,15 @@ pub fn parse(statics: &[String], holes: &[String]) -> ParsedTemplate {
     let mut root = p.stack.swap_remove(0);
     normalize(&mut root.children);
 
+    let single_root =
+        root.children.len() == 1 && matches!(root.children[0], Child::Elem(_));
+
     let mut markup = String::new();
     let mut out_holes = Vec::new();
     serialize(&root.children, &Vec::new(), &mut markup, &mut out_holes);
     ParsedTemplate {
         markup,
         holes: out_holes,
+        single_root,
     }
 }

@@ -2,56 +2,20 @@
 
 Target release of compiled templates `v0.9.0`
 
-![elemix speed benchmark](.roadmap/speed2.png)
+![elemix speed benchmark](.roadmap/speed3.png)
 
-![elemix memory benchmark](.roadmap/memory-transfer2.png)
+![elemix memory benchmark](.roadmap/memory-transfer3.png)
 
-***Round 3*** 🏆🏆🏆
+***Round 4*** 🏆🏆🏆
 
-- Reduced memory usage which is huge down to `2.58mb` 🎉🎉🎉
-- Final bottleneck to close the gap - creating rows is to slow 😒
-- I think I can close the gap there 🧐🧐🧐
-- Can I compile away reactivity layer ⁉️ I don't know 🤷
+- This is an absolute blood bath, I love it 😍 Fighting for every millisecond 🥋👊😂
+- This is at the floor now, fast enough in my books 🤓📖
+- On par with `svelte` 🔥🔥🔥🥳
+- Surrounded by good company 👌👏
 
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
 🦇🦇🦇
-
-## Resolve Identity Crisis - What the hell is this ⁉️🐦‍🔥
-
-- `customElements` rocks!! 🎸🤘
-- This is not a framework, it's a library at best. Frameworks get in the way 🚷
-- Opt-in reactivity, drive your own updates if you like 🏇
-- `AOT` compiled templates with minimal runtime
-- Be in charge of architecture 🌉
-- Single dependency or bundle at runtime without any sub dependencies (no vulnerabilities nightmares) 👹
-- `Constructable Stylesheet` API 💅
-- Freedom - good library, framework or api does not get in the way - wishful thinking in the current state of
-  the affairs and tooling 🤮
-- Full encapsulation with `ShadowDOM`
-- Will work in any environment, it is just augmented `HTML` node - Vue, React whatever 🤷
-- `css` is just a string that gets adopted, use what ever you want 🤷
-- `Reactive Elements` - CustomElements are amazing, Google claimed `WebComponents` don't want to touch that 😒
-- Few primitives and you can do more than others. `state`, `ref` and `component` FINITO!! 🤌
-  Anything else just write it, or `gitgood`
-- Part of the native DOM flow `customElements` are just DOM nodes 🤏
-- Native web is amazing, not the freaking abominations 🧟 that industry is pushing on me 🚫🚫
-- Simpler API the better LLM can work with it 🤖
-
-## Know the Limitations 🏁🏁
-
-- High chances of clashing with native `HTMLElement` properties, not a biggy. Typescript catches it cleanly 🥅
-- Class based API, not a problem is just how Web Platform works end of story 🏁 May change in the future 🧐
-- Template primitives only work in the context of library, there is no issue with attributes
-  May add special `attr` that will redirect in to props of the `:host`, actually this should be EZ 🤌
-- At the moment still closely coupled with typescript, slowly going away from that so `js` should be supported
-  sooner than later
-- SSR - I don't give a flying `&*%*%*&` - is not a problem at all. `customElements` are notoriously difficult
-  to fully server render 😒 Yeah, return `HTML` from server == `SSR` 😂 May poke at this in the future seems
-  like interesting problem to have 🧐
-- Tooling targeted at CLIs, don't have time to deal with editors - last thing I need in my life is to work with
-  junk like (VSCode plugin eco system🤮)
-- SPA don't care - what's the point ⁉️ If you really want to push it just use something from `npm` black hole 😂⚫
 
 ## TODOS
 
@@ -70,6 +34,28 @@ Target release of compiled templates `v0.9.0`
 - [] Add template repo 📍
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
+
+***Drag Racing 🚜💨💥***
+
+- This is as far as I can push it without changing, adding or rearchitecting the core of the lib 🚫
+- The issue is `deepReactivity` that I don't want to compromise on, there is more allocation with
+  the current set up, but gives me the freedom and ability to keep single concept for state management
+- Optimised allocations, memory usage and hot path ♨️♨️♨️
+- Other option is to add special primitive with a shallow ref to satisfy benchmark and shoot further
+  ahead - pointless as this will not represent the real use case and dilute the api adding confusion
+  by exposing different ways of managing state 😵‍💫😵‍💫 Won't compromise the api for the sake of the bench 🪑
+- I get `deepReactivity` out of the box, no `.value` all over the place, no special `setThis` or `setThat`
+  nonsense just to kick off the update 🤮
+- I can throw almost anything at the state and it will just work ✅
+- Compiling reactivity experiment 🔬 - can be done with shallow refs but not worth the effort, too many
+  restrictions and massive complexity added to the compiler. One of which is typescript dependency
+  and forcing explicit typed state all over the place, limitations of what I can throw at the state.
+  Generated code had too many corner cases and weird limitations I would have to explain 🫨🫨🫨
+- I think there may be another way, basically coming up with highly specialized data structure for the
+  compiler to spit out, similar to what `ivi` does, not todays me problem 🔮 Atm proxy at runtime
+  is as optimal as it gets for this particular use case 🎯🎯🎯
+- Btw what the hell React is doing, official benchmarks showing that React 19 with a compiler is
+  slower than normal React app 😂😂😂 What is the point, what are they doing ⁉️⁉️🤷🤷
 
 ***Don't underestimate the power of the dark side 🌑☀️*** 
 
@@ -117,7 +103,7 @@ All Compiler Hints:
 - `// #component #tag hello-there` behaviour unchanged 🧊
 - `// #state` is used to decorate naked objects and class members 🛟
 - `state` and `effect` are macros now - injected from `/runtime`, ripped out of the public barrel 🔪
-- `// #styles` moved to class member, can't have values in comments in straight forward manner 🫟
+- `// #styles` moved to class member, can't have values in comments in a straightforward manner 🫟
 - Exposed `isMounted` on component adding ability to check programmatically if component is mounted or not
 - Added `// #effect` which registers procedure to run side effect, similar to watchers in `vue`, this
   style is way cleaner (solid style), don't have to be specific about property to watch, just use it 🚤
@@ -158,7 +144,7 @@ save() {
 
 - This is way harder than I initially thought, my first instinct I will have to mess with `tsc` was
   correct ✅
-- Is not as bad as it could be though, cant be native - there is no independent typescript checker
+- Is not as bad as it could be though, can't be native - there is no independent typescript checker
   out there that I can use, writing my own is pure insanity and asking for trouble 💥
 - Good news that most of the hard work is already done in compiler so I can get all metadata that
   is needed 🌋
@@ -221,7 +207,7 @@ get total() { return this.qty * this.price; }               // ❌ plain fields 
 - For time being the simplest possible solution to serve sole purpose of replacement for class decorator
 - `#component` auto registers the component inlining `defineComponent` procedure, if no tag name will 
   be derived from class name. This was a headache in runtime as I had to preserve class names otherwise
-  mangling would screw references, not an issue any more. If class named incorrectly `defineComponent` will
+  mangling would screw references, not an issue any more. If a class is named incorrectly `defineComponent` will
   throw from custom element registry level 💥 May need to handle it gracefully, later when extending `compalerino`
   capabilities.
 - `#tag my-component` defines tag name for custom element #⃣️
@@ -373,41 +359,41 @@ What went well:
   stories running in real browser within storybook to assert behaviour
 - Managed to repurpose LIS algo and list reconciliation
 
-**Proceed to next stage only if happy with compiler workflow and benchmark results**
+## Resolve Identity Crisis - What the hell is this ⁉️🐦‍🔥
 
-## Composition Like Api - Module as component - bit like svelte
+- `customElements` rocks!! 🎸🤘
+- This is not a framework, it's a library at best. Frameworks get in the way 🚷
+- Opt-in reactivity, drive your own updates if you like 🏇
+- `AOT` compiled templates with minimal runtime
+- Be in charge of architecture 🌉
+- Single dependency or bundle at runtime without any sub dependencies (no vulnerabilities nightmares) 👹
+- `Constructable Stylesheet` API 💅
+- Freedom - good library, framework or api does not get in the way - wishful thinking in the current state of
+  the affairs and tooling 🤮
+- Full encapsulation with `ShadowDOM`
+- Will work in any environment, it is just augmented `HTML` node - Vue, React whatever 🤷
+- `css` is just a string that gets adopted, use what ever you want 🤷
+- `Reactive Elements` - CustomElements are amazing, Google claimed `WebComponents` don't want to touch that 😒
+- Few primitives and you can do more than others. `state`, `ref` and `component` FINITO!! 🤌
+  Anything else just write it, or `gitgood`
+- Part of the native DOM flow `customElements` are just DOM nodes 🤏
+- Native web is amazing, not the freaking abominations 🧟 that industry is pushing on me 🚫🚫
+- Simpler API the better LLM can work with it 🤖
 
-Brief idea:
+## Know the Limitations 🏁🏁
 
-`#component #tag user-card` → Define pragma syntax for defining things like components and tags, most likely more
-
-
-```ts
-`#component #tag user-card`
-
-const count = signal(0)
-const inc = () => count.value++
-const template = (): Template => tpl`<button @click=${inc}>${count.value}</button>`
-```
-
-→ becomes the existing class form, verbatim to what works now:
-
-```ts
-class UserCard extends Component {
-  count = signal(0);
-  inc = () => this.count.value++;
-  template = () => tpl`<button @click=${this.inc}>${this.count.value}</button>`;
-}
-defineComponent('user-card', UserCard);
-```
-
-Most likely will need to handle context reference rewrites - `this` is not an issue.
-Have to be aware of module scope and external scopes so as not to mangle references 🤔
-
-This is just an idea, but do I even need to transpile to a class ?? Maybe not...
-One thing I will not compromise on, target data structure has to be `customElement`!!
-
-This will be a headache if I get there 😂❤️😂
+- High chances of clashing with native `HTMLElement` properties, not a biggy. Typescript catches it cleanly 🥅
+- Class based API, not a problem is just how Web Platform works end of story 🏁 May change in the future 🧐
+- Template primitives only work in the context of library, there is no issue with attributes
+  May add special `attr` that will redirect in to props of the `:host`, actually this should be EZ 🤌
+- At the moment still closely coupled with typescript, slowly going away from that so `js` should be supported
+  sooner than later
+- SSR - I don't give a flying `&*%*%*&` - is not a problem at all. `customElements` are notoriously difficult
+  to fully server render 😒 Yeah, return `HTML` from server == `SSR` 😂 May poke at this in the future seems
+  like interesting problem to have 🧐
+- Tooling targeted at CLIs, don't have time to deal with editors - last thing I need in my life is to work with
+  junk like (VSCode plugin eco system🤮)
+- SPA don't care - what's the point ⁉️ If you really want to push it just use something from `npm` black hole 😂⚫
 
 ## DONE
 
@@ -554,7 +540,7 @@ This will be a headache if I get there 😂❤️😂
 - Very happy with overall matrix, no yeller or red on any fields 💚💚💚
 - Not the fastest, but incredibly consistent across the board 🏅
 - `select row` - the fastest, faster than vanilla js ✅ Most likely invariants from the test run, makes no sense TBH 😂
-- `smallest bundle` - across the board ✅ - this may change, but in good spot not to overinflate ☑️
+- `smallest bundle` - across the board ✅ - this may change, but in a good spot not to overinflate ☑️
 - `second` - on first paint ahead of vanilla js ✅
 - `lowest memory` after initial page load ✅
 - I have to be careful I may spend rest of my life optimising trying to pull ahead 😂😂😂 Too addictive 🚬
@@ -563,3 +549,14 @@ This will be a headache if I get there 😂❤️😂
 - **Only tested selected matrix, the full picture will be visible on full release after `PR` to official repo**
 
 ***Officially not a slop, satisfied with results so further work will continue***
+
+![elemix speed benchmark](.roadmap/speed2.png)
+
+![elemix memory benchmark](.roadmap/memory-transfer2.png)
+
+***Round 3*** 🏆🏆🏆
+
+- Reduced memory usage which is huge down to `2.58mb` 🎉🎉🎉
+- Final bottleneck to close the gap - creating rows is too slow 😒
+- I think I can close the gap there 🧐🧐🧐
+- Can I compile away reactivity layer ⁉️ I don't know 🤷

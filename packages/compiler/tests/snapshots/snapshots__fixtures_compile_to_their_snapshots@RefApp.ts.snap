@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/RefApp.ts
 ---
-import { template, clone, _event, _ref, _child, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { template, clone, templateEl, cloneEl, _event, _ref, _child, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 
 type State = {
@@ -65,7 +65,7 @@ const css = `
 
 const _s0 = sheet(css);
 const _t0 = template('<p class="note"><code>:ref</code> binds a DOM node to a <code>ref()</code>. Read the element imperatively through <code>this.input.value</code> — here to focus the field and measure its width.</p><input type="text" placeholder="Type something…"/><div class="buttons"><button>Focus</button><button class="ghost">Measure width</button></div> <!---->');
-const _t1 = template('<div class="out">Input is <!---->px wide</div>');
+const _t1 = templateEl('<div class="out">Input is <!---->px wide</div>');
 
 export class RefApp extends Component {
 
@@ -83,23 +83,23 @@ export class RefApp extends Component {
 
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.nextElementSibling!;
-const _n2 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!;
-const _n3 = _r0.firstElementChild!.nextElementSibling!.nextElementSibling!.firstElementChild!.nextElementSibling!;
+const _n1 = _r0.firstChild!.nextSibling!;
+const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
 const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 _ref(_n1, this.input);
 _event(_n2, 'click', this.focusInput);
 _event(_n3, 'click', this.measure);
 _child(_n4, () => (this.state.width
                 ? (() => {
-const _r5 = clone(_t1);
-const _n6 = _r5.firstElementChild!.firstChild!.nextSibling!;
+const _r5 = cloneEl(_t1);
+const _n6 = _r5.firstChild!.nextSibling!;
 const _x7 = document.createTextNode('');
 _n6.replaceWith(_x7);
 effect(() => {
 _setText(_x7, (this.state.width));
 });
-return _r5.firstChild!;
+return _r5;
 })()
                 : ''));
 return _r0;

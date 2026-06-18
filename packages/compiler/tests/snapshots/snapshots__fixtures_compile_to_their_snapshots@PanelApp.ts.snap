@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/PanelApp.ts
 ---
-import { template, clone, _event, _child, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { template, clone, templateEl, cloneEl, _event, _child, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -59,8 +59,8 @@ const css = `
 
 const _s0 = sheet(css);
 const _t0 = template('<p class="note">Sub-templates pulled out as <code>class members</code> — the natural way to organize a component. The main template composes them with member calls; each stays independently reactive.</p><div class="panel"><!----> <!----> <button>add</button><button>rename</button></div>');
-const _t1 = template('<h2> </h2>');
-const _t2 = template('<p class="stat"><!----> open</p>');
+const _t1 = templateEl('<h2> </h2>');
+const _t2 = templateEl('<p class="stat"><!----> open</p>');
 
 export class PanelApp extends Component {
 
@@ -81,27 +81,27 @@ export class PanelApp extends Component {
     
     view(): DocumentFragment {
 const _r0 = clone(_t0);
-const _n1 = _r0.firstElementChild!.nextElementSibling!.firstChild!;
-const _n2 = _r0.firstElementChild!.nextElementSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!;
-const _n4 = _r0.firstElementChild!.nextElementSibling!.firstElementChild!.nextElementSibling!;
+const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 _child(_n1, () => ((() => {
-const _r5 = clone(_t1);
-const _n6 = _r5.firstElementChild!.firstChild!;
+const _r5 = cloneEl(_t1);
+const _n6 = _r5.firstChild!;
 effect(() => {
 _setText(_n6, (this.state.title));
 });
-return _r5.firstChild!;
+return _r5;
 })()));
 _child(_n2, () => ((() => {
-const _r7 = clone(_t2);
-const _n8 = _r7.firstElementChild!.firstChild!;
+const _r7 = cloneEl(_t2);
+const _n8 = _r7.firstChild!;
 const _x9 = document.createTextNode('');
 _n8.replaceWith(_x9);
 effect(() => {
 _setText(_x9, (this.state.count));
 });
-return _r7.firstChild!;
+return _r7;
 })()));
 _event(_n3, 'click', this.add);
 _event(_n4, 'click', this.rename);
