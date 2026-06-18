@@ -14,6 +14,7 @@ allowBuilds:
   # build script never needs to run — skip it.
   '@parcel/watcher': false
   esbuild: true
+  wasm-pack: true
 # We publish the @neuralfog scope ourselves — exempt it from the release-age
 # cooldown so the vite plugin can depend on our own just-published builds.
 minimumReleaseAgeExclude:
