@@ -531,8 +531,7 @@ pub fn parse(statics: &[String], holes: &[String]) -> ParsedTemplate {
     let mut root = p.stack.swap_remove(0);
     normalize(&mut root.children);
 
-    let single_root =
-        root.children.len() == 1 && matches!(root.children[0], Child::Elem(_));
+    let single_root = root.children.len() == 1 && matches!(root.children[0], Child::Elem(_));
 
     let mut markup = String::new();
     let mut out_holes = Vec::new();

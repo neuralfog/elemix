@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/BenchApp.ts
 ---
-import { template, clone, templateEl, cloneEl, raw, _event, _list, effect, _setText, _setClass, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { template, clone, templateEl, cloneEl, toRaw, _event, _list, effect, _setText, _setClass, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Row = { id: number; label: string };
@@ -145,7 +145,7 @@ const _n11 = _n10.firstChild!;
 const _n12 = _r8.firstChild!.nextSibling!.nextSibling!.firstChild!;
 _event(_n10, 'click', () => this.select(row.id));
 _event(_n12, 'click', () => this.removeRow(row.id));
-_n9.data = (raw(row).id);
+_n9.data = (toRaw(row).id);
 effect(() => {
 _setClass(_r8, '', ({ danger: this.state.selected === row.id }));
 });

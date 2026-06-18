@@ -35,6 +35,15 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
+***Application without state and side effects is useless ☁️☁️☁️***
+
+- Collections have been added to reactive state so `Set`, `Map`, `WeakSet` and `WeakMap` are fully supported now ✅
+- Usage of `classes` in reactive state has been proven and fully covered with tests 🚦
+- Private fields will throw from the level of proxy, same behaviour as `vue` 😒
+- Added helper `raw` to skip reactivity setup for granular control, helps battle the case above, `vue` inspired ♥️
+- Added regression gate protecting deep reactive state, fixed the bug where nested arrays were not supported 🐛 
+- Hot path is being protected at all costs ♨️♨️♨️
+
 ***Drag Racing 🚜💨💥***
 
 - This is as far as I can push it without changing, adding or rearchitecting the core of the lib 🚫
@@ -362,6 +371,8 @@ What went well:
 ## Resolve Identity Crisis - What the hell is this ⁉️🐦‍🔥
 
 - `customElements` rocks!! 🎸🤘
+- Class based API depending on the point of view it's a strength or weakness, it does not bother me so `class`
+  it is, no module transpiltaion, what's the point ⁉️
 - This is not a framework, it's a library at best. Frameworks get in the way 🚷
 - Opt-in reactivity, drive your own updates if you like 🏇
 - `AOT` compiled templates with minimal runtime
@@ -383,7 +394,6 @@ What went well:
 ## Know the Limitations 🏁🏁
 
 - High chances of clashing with native `HTMLElement` properties, not a biggy. Typescript catches it cleanly 🥅
-- Class based API, not a problem is just how Web Platform works end of story 🏁 May change in the future 🧐
 - Template primitives only work in the context of library, there is no issue with attributes
   May add special `attr` that will redirect in to props of the `:host`, actually this should be EZ 🤌
 - At the moment still closely coupled with typescript, slowly going away from that so `js` should be supported

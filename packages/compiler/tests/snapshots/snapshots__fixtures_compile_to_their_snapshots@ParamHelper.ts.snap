@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ParamHelper.ts
 ---
-import { template, clone, templateEl, cloneEl, raw, _event, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { template, clone, templateEl, cloneEl, toRaw, _event, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Row = { id: number; name: string };
@@ -52,7 +52,7 @@ _event(_n1, 'click', this.add);
 _list(_n2, () => (this.state.rows), (r) => r.id, (r) => (() => {
 const _r3 = cloneEl(_t1);
 const _n4 = _r3.firstChild!;
-_r3.setAttribute('data-id', (raw(r).id));
+_r3.setAttribute('data-id', (toRaw(r).id));
 effect(() => {
 _setText(_n4, (r.name));
 });

@@ -160,7 +160,7 @@ fn nested_repeat_recurses() {
     assert!(out.contains("const _t0 = template(")); // the <ul> view (fragment)
     assert!(out.contains("const _t1 = templateEl(")); // single-root <li> row
     assert!(out.contains("const _t2 = templateEl(")); // single-root <b> row
-    // two list calls, one nested inside the other's builder
+                                                      // two list calls, one nested inside the other's builder
     assert_eq!(out.matches("_list(").count(), 2);
     assert!(out.contains("() => (cats)"));
     assert!(out.contains("() => (c.items)"));

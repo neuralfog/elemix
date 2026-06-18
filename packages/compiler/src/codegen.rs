@@ -570,11 +570,11 @@ fn is_static_key(expr: &str, ctx: &Ctx) -> bool {
     }
 }
 
-/// Wrap the root of a set-once key read in `raw()` so it skips the Proxy get-trap
-/// and dep lookup: `item.id` → `raw(item).id`.
+/// Wrap the root of a set-once key read in `toRaw()` so it skips the Proxy get-trap
+/// and dep lookup: `item.id` → `toRaw(item).id`.
 fn static_raw(expr: &str) -> String {
     match expr.split_once('.') {
-        Some((root, rest)) => format!("raw({root}).{rest}"),
+        Some((root, rest)) => format!("toRaw({root}).{rest}"),
         None => expr.to_string(),
     }
 }

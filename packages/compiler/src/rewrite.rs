@@ -22,7 +22,7 @@ const PRIMITIVES: &[&str] = &[
     "clone",
     "templateEl",
     "cloneEl",
-    "raw",
+    "toRaw",
     "_event",
     "_model",
     "_onmodel",
