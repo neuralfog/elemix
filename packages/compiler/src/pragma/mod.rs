@@ -17,6 +17,7 @@
 //! component-level directive you touch a field on [`ComponentMeta`] and one arm
 //! in [`resolve`]; [`parse`] never changes.
 
+pub mod diagnose;
 pub mod locate;
 pub mod lower;
 pub mod parse;

@@ -35,6 +35,17 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
+***Compiler Errors ⚙️➡️🕸***
+
+- Compiler now inlines errors and warnings so they propagate to runtime 🏃‍➡️⌚️
+- This is initial work, this opens possibilities that are not possible in normal workflow such as detecting
+  unimported components, which is an absolute pain with custom elements, nothing renders, why ?? 🤨⁉️
+- Diagnostics and errors are always printed to `stderr` 🔳
+- Added `--strict` to prevent the compiler from emitting and inlining any `errors` and `console.warn` in production fe ⛵️
+- Need to think hard about this, there is an analyzer coming shortly which should be responsible for diagnostics 🤔
+  Rework if needed when shipping the analyzer 🎯 Hard failures need to be handled either way, wasm build has to be
+  supported so depending on bundlers is not an option here 🙅
+
 ***Application without state and side effects is useless ☁️☁️☁️***
 
 - Collections have been added to reactive state so `Set`, `Map`, `WeakSet` and `WeakMap` are fully supported now ✅

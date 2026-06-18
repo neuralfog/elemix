@@ -2,11 +2,10 @@
 
 use clap::Parser;
 use elemix_compiler::codegen::codegen;
+use elemix_compiler::diagnostics::{self, Diagnostic, Severity};
 use elemix_compiler::emit::TsEmitter;
-use elemix_compiler::sourcemap::json_string;
-use elemix_compiler::{
-    collect_ts_files, compile, compile_with_map, find_html_templates, FoundTemplate,
-};
+use elemix_compiler::sourcemap::{json_string, line_map};
+use elemix_compiler::{collect_ts_files, compile_diagnostics, find_html_templates, FoundTemplate};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -35,6 +34,12 @@ struct Cli {
     /// `<file>.map` is written and the compiled file gets a `sourceMappingURL`.
     #[arg(long)]
     sourcemap: bool,
+
+    /// Fail (non-zero exit, no file written) on an error-level diagnostic.
+    /// Off by default: the compiler writes best-effort output with errors
+    /// inlined as a runtime `throw` and reports them on stderr.
+    #[arg(long)]
+    strict: bool,
 }
 
 fn main() {
@@ -46,13 +51,18 @@ fn main() {
     if cli.stdin {
         let mut source = String::new();
         io::stdin().read_to_string(&mut source).expect("read stdin");
+        // Dev path: never fail. Diagnostics are inlined into `code` (so they
+        // surface in the browser) and echoed to stderr (so they show in the
+        // Vite terminal); the compile always succeeds and HMR stays alive.
+        let (code, diags) = compile_diagnostics(&source);
+        report(None, &diags);
         let payload = if cli.sourcemap {
             // Machine envelope: the Vite plugin parses this and returns
             // `{ code, map }` so the source-map chain is never severed.
-            let (code, map) = compile_with_map(&source, "input.ts");
+            let map = line_map(&source, &code, "input.ts");
             format!("{{\"code\":{},\"map\":{map}}}", json_string(&code))
         } else {
-            compile(&source)
+            code
         };
         io::stdout()
             .write_all(payload.as_bytes())
@@ -67,11 +77,40 @@ fn main() {
         std::process::exit(2);
     }
 
+    // Build path: a diagnostic error fails the run (non-zero exit, broken file
+    // not written) so CI never ships code that throws at runtime.
+    let mut ok = true;
     for path in collect_ts_files(&cli.dirs) {
-        process(&path, cli.out.as_deref(), cli.sourcemap, false);
+        ok &= process(&path, cli.out.as_deref(), cli.sourcemap, cli.strict, false);
     }
     if let Some(path) = cli.file.clone() {
-        process(&path, cli.out.as_deref(), cli.sourcemap, true);
+        ok &= process(&path, cli.out.as_deref(), cli.sourcemap, cli.strict, true);
+    }
+    if !ok {
+        std::process::exit(1);
+    }
+}
+
+/// Print diagnostics to stderr (never stdout — that's reserved for compiled
+/// output / the pipe envelope). Errors red, warnings yellow.
+fn report(path: Option<&Path>, diags: &[Diagnostic]) {
+    if diags.is_empty() {
+        return;
+    }
+    if let Some(p) = path {
+        eprintln!("  \x1b[1m{}\x1b[0m", p.display());
+    }
+    for d in diags {
+        let (label, color) = match d.severity {
+            Severity::Error => ("error", "\x1b[31m"),
+            Severity::Warning => ("warn ", "\x1b[33m"),
+        };
+        let who = d
+            .component
+            .as_deref()
+            .map(|c| format!("{c}: "))
+            .unwrap_or_default();
+        eprintln!("  {color}{label}\x1b[0m  {who}{}", d.message);
     }
 }
 
@@ -92,7 +131,7 @@ fn banner() {
     eprintln!();
 }
 
-fn process(path: &Path, out: Option<&Path>, sourcemap: bool, verbose: bool) {
+fn process(path: &Path, out: Option<&Path>, sourcemap: bool, strict: bool, verbose: bool) -> bool {
     let source = match fs::read_to_string(path) {
         Ok(s) => s,
         Err(e) => {
@@ -101,32 +140,50 @@ fn process(path: &Path, out: Option<&Path>, sourcemap: bool, verbose: bool) {
         }
     };
     match out {
-        Some(dir) => emit(dir, path, &source, sourcemap),
-        None if verbose => print_detail(path, &find_html_templates(&source)),
+        Some(dir) => emit(dir, path, &source, sourcemap, strict),
+        None if verbose => {
+            print_detail(path, &find_html_templates(&source));
+            true
+        }
         None => {
             let n = find_html_templates(&source).len();
             println!("{}: {n} template(s)", path.display());
+            true
         }
     }
 }
 
 /// Write the compiled source to `<dir>/<filename>`, plus a sidecar `.map` and a
-/// `sourceMappingURL` footer when `sourcemap` is set.
-fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool) {
-    fs::create_dir_all(dir).expect("create out dir");
+/// `sourceMappingURL` footer when `sourcemap` is set. With `strict`, an error
+/// diagnostic writes nothing and returns `false`; otherwise the best-effort
+/// output (error inlined as a `throw`) is written and `true` returned.
+fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool, strict: bool) -> bool {
     let name = src.file_name().expect("source has a file name");
     let dest = dir.join(name);
 
+    let (code, diags) = compile_diagnostics(source);
+    report(Some(src), &diags);
+    if strict && diagnostics::has_errors(&diags) {
+        eprintln!(
+            "  \x1b[31mcompile failed (strict)\x1b[0m — {} not written",
+            dest.display()
+        );
+        return false;
+    }
+
+    fs::create_dir_all(dir).expect("create out dir");
     if sourcemap {
-        let (mut compiled, map) = compile_with_map(source, &name.to_string_lossy());
+        let map = line_map(source, &code, &name.to_string_lossy());
         let map_name = format!("{}.map", name.to_string_lossy());
+        let mut compiled = code;
         compiled.push_str(&format!("\n//# sourceMappingURL={map_name}\n"));
         fs::write(dir.join(&map_name), map).expect("write source map");
         fs::write(&dest, compiled).expect("write emitted file");
     } else {
-        fs::write(&dest, compile(source)).expect("write emitted file");
+        fs::write(&dest, code).expect("write emitted file");
     }
     println!("emitted {}", dest.display());
+    true
 }
 
 fn print_detail(path: &Path, templates: &[FoundTemplate]) {
