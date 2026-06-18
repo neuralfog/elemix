@@ -186,7 +186,7 @@ fn compiles_a_directory_of_fixtures() {
         .unwrap()
         .filter_map(Result::ok)
         .collect();
-    assert_eq!(files.len(), 51);
+    assert_eq!(files.len(), 53);
 
     // no compiled file in the whole corpus leaks the html intrinsic or a directive
     for entry in files {
@@ -195,4 +195,64 @@ fn compiles_a_directory_of_fixtures() {
         assert!(!src.contains("tpl`"), "tpl` leaked in {name:?}");
         assert!(!src.contains("repeat("), "repeat( leaked in {name:?}");
     }
+}
+
+#[test]
+fn tolerant_by_default_emits_an_errored_component_with_an_inlined_throw() {
+    let dir = out_dir("tolerant");
+    let out = Command::new(bin())
+        .args(["--file", "tests/fixtures/ErrorApp.ts", "--out"])
+        .arg(&dir)
+        .output()
+        .unwrap();
+    // best-effort: succeeds and writes the file with the error inlined as a throw
+    assert!(out.status.success());
+    let compiled = std::fs::read_to_string(dir.join("ErrorApp.ts")).unwrap();
+    assert!(compiled.starts_with("throw new Error('[elemix] ErrorApp:"));
+    // the diagnostic is still reported on stderr
+    assert!(String::from_utf8_lossy(&out.stderr).contains("unknown pragma directive"));
+}
+
+#[test]
+fn strict_fails_and_writes_nothing_on_an_error() {
+    let dir = out_dir("strict-err");
+    let out = Command::new(bin())
+        .args(["--file", "tests/fixtures/ErrorApp.ts", "--strict", "--out"])
+        .arg(&dir)
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(1));
+    assert!(!dir.join("ErrorApp.ts").exists());
+    assert!(String::from_utf8_lossy(&out.stderr).contains("compile failed (strict)"));
+}
+
+#[test]
+fn strict_passes_a_clean_component() {
+    let dir = out_dir("strict-clean");
+    let status = Command::new(bin())
+        .args([
+            "--file",
+            "tests/fixtures/CounterApp.ts",
+            "--strict",
+            "--out",
+        ])
+        .arg(&dir)
+        .status()
+        .unwrap();
+    assert!(status.success());
+    assert!(dir.join("CounterApp.ts").exists());
+}
+
+#[test]
+fn strict_does_not_fail_on_a_warning() {
+    let dir = out_dir("strict-warn");
+    let status = Command::new(bin())
+        .args(["--file", "tests/fixtures/WarnApp.ts", "--strict", "--out"])
+        .arg(&dir)
+        .status()
+        .unwrap();
+    // a warning is not an error — strict still writes it and exits clean
+    assert!(status.success());
+    let compiled = std::fs::read_to_string(dir.join("WarnApp.ts")).unwrap();
+    assert!(compiled.contains("console.warn('[elemix] WarnApp:"));
 }

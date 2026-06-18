@@ -4,6 +4,7 @@
 //! Pipeline: locate → parse → classify → codegen → rewrite. See ARCHITECTURE.md.
 
 pub mod codegen;
+pub mod diagnostics;
 pub mod emit;
 pub mod grammar;
 pub mod imports;
@@ -18,6 +19,7 @@ pub mod template;
 #[cfg(feature = "wasm")]
 pub mod wasm;
 
+pub use diagnostics::Diagnostic;
 #[cfg(feature = "cli")]
 pub use locate::collect_ts_files;
 pub use locate::{find_html_templates, FoundTemplate};
@@ -27,16 +29,25 @@ pub use locate::{find_html_templates, FoundTemplate};
 /// into a compiled `view()`, hoisting the `template(...)` consts and wiring the
 /// runtime import.
 ///
-/// Pragma errors are surfaced as a leading comment rather than a panic — the
-/// compiler must stay alive for the in-browser playground (half-typed garbage
-/// passes through untouched).
+/// Any diagnostics are inlined into the output — errors as a module-scope
+/// `throw`, warnings as `console.warn` — so the compiler never panics and the
+/// in-browser playground stays alive (it compiles per keystroke). Callers that
+/// want to fail the build instead use [`compile_diagnostics`].
 pub fn compile(source: &str) -> String {
+    compile_diagnostics(source).0
+}
+
+/// Like [`compile`], but also returns the diagnostics it inlined so a build
+/// front-end can report them (and fail fast on errors).
+pub fn compile_diagnostics(source: &str) -> (String, Vec<Diagnostic>) {
     let spliced = splice::inline_helpers(source);
-    let expanded = match pragma::expand(&spliced) {
-        Ok(out) => out,
-        Err(e) => format!("// [ec] pragma error: {e}\n{spliced}"),
-    };
-    imports::merge_runtime_imports(&rewrite::rewrite(&expanded))
+    let diags = pragma::diagnose::collect(&spliced);
+    // Best-effort transform: a pragma error makes `expand` bail, so the
+    // pragmas pass through unexpanded — the inlined `throw` is what surfaces it.
+    let expanded = pragma::expand(&spliced).unwrap_or(spliced);
+    let compiled = imports::merge_runtime_imports(&rewrite::rewrite(&expanded));
+    let out = diagnostics::inline(&compiled, &diags);
+    (out, diags)
 }
 
 /// Compile + a line-level source map back to the original (`cli` feature).

@@ -1,0 +1,22 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/ErrorApp.ts
+---
+throw new Error('[elemix] ErrorApp: unknown pragma directive `#frobnicate`');
+import { template, clone } from '@neuralfog/elemix/runtime';
+// Diagnostic fixture: an UNKNOWN pragma directive. The compiler can't lower it,
+// so it inlines a module-scope `throw new Error('[elemix] …')` — the component
+// is left un-registerable, and importing the module throws loudly at load.
+
+import { Component } from '@neuralfog/elemix';
+
+// #component #frobnicate
+const _t0 = template('<button>boom</button>');
+
+export class ErrorApp extends Component {
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+return _r0;
+}
+}
