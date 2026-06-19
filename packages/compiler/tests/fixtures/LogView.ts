@@ -24,10 +24,9 @@ const css = `
         border-radius: 4px;
     }
     .entry .n { color: #64748b; margin-right: 8px; }
-    .beforeMount { color: #fbbf24; }
-    .onMount { color: #34d399; }
-    .onMutation { color: #60a5fa; }
-    .onDispose { color: #f87171; }
+    .before-1, .before-2 { color: #fbbf24; }
+    .mount-1, .mount-2 { color: #34d399; }
+    .dispose-1, .dispose-2 { color: #f87171; }
     .empty { font-size: 12px; color: #64748b; padding: 2px 6px; }
 `;
 

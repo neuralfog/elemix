@@ -65,7 +65,7 @@ const css = `
 `;
 
 const _s0 = sheet(css);
-const _t0 = template('<p class="note">Mounting and unmounting the child fires <code>beforeMount</code>, <code>onMount</code> and <code>onDispose</code>. Updating it re-renders and fires <code>onMutation</code>. Each hook appends to the log below.</p><div class="stage"><!----></div><div class="buttons"><button> </button><button>Update child</button><button class="ghost">Clear log</button></div><log-view></log-view>');
+const _t0 = template('<p class="note">Mounting and unmounting the child fires its <code>#before-mount</code>, <code>#mount</code> and <code>#dispose</code> handlers — two of each, in source order — which append to the log below. Updating it re-renders the child and re-runs its <code>#effect</code>s.</p><div class="stage"><!----></div><div class="buttons"><button> </button><button>Update child</button><button class="ghost">Clear log</button></div><log-view></log-view>');
 const _t1 = templateEl('<lifecycle-child></lifecycle-child>');
 const _t2 = templateEl('<div class="empty">child unmounted</div>');
 

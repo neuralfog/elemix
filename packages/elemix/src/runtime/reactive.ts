@@ -158,8 +158,10 @@ export const trigger = (d: Dep): void => {
     if (subs === null) return;
     if (Array.isArray(subs)) {
         const copy = subs.slice();
-        for (let i = 0; i < copy.length; i++) runScope(copy[i]);
-    } else {
+        for (let i = 0; i < copy.length; i++) {
+            if (copy[i] !== activeScope) runScope(copy[i]);
+        }
+    } else if (subs !== activeScope) {
         runScope(subs);
     }
 };

@@ -81,10 +81,10 @@ export class LifecycleApp extends Component {
 
     template = (): Template => tpl`
         <p class="note">
-            Mounting and unmounting the child fires <code>beforeMount</code>,
-            <code>onMount</code> and <code>onDispose</code>. Updating it
-            re-renders and fires <code>onMutation</code>. Each hook appends to
-            the log below.
+            Mounting and unmounting the child fires its <code>#before-mount</code>,
+            <code>#mount</code> and <code>#dispose</code> handlers — two of each,
+            in source order — which append to the log below. Updating it
+            re-renders the child and re-runs its <code>#effect</code>s.
         </p>
         <div class="stage">
             ${

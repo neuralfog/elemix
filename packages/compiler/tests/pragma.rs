@@ -446,3 +446,59 @@ fn effect_on_a_class_is_an_error() {
         )))
     );
 }
+
+// --- #before-mount / #mount / #dispose ---------------------------------------
+
+#[test]
+fn lifecycle_pragmas_synthesize_the_matching_hooks() {
+    let src = "// #component\nclass Foo extends Component {\n    // #before-mount\n    setup(): void {}\n    // #mount\n    ready(): void {}\n    // #dispose\n    teardown(): void {}\n}";
+    let out = expand(src).unwrap();
+    assert!(out.contains("beforeMount(): void {"));
+    assert!(out.contains("this.setup();"));
+    assert!(out.contains("onMount(): void {"));
+    assert!(out.contains("this.ready();"));
+    assert!(out.contains("onDispose(): void {"));
+    assert!(out.contains("this.teardown();"));
+    // the tagged methods stay; the markers are stripped.
+    assert!(out.contains("setup(): void {}"));
+    assert!(!out.contains("// #before-mount"));
+    assert!(!out.contains("// #mount"));
+    assert!(!out.contains("// #dispose"));
+}
+
+#[test]
+fn lifecycle_wiring_pulls_in_no_runtime_import() {
+    // The base already calls these hooks by name, so lifecycle on its own (no
+    // #component/#state/#effect) needs no `/runtime` import.
+    let src = "class Foo extends Component {\n    // #mount\n    ready(): void {}\n}";
+    let out = expand(src).unwrap();
+    assert!(out.contains("onMount(): void {"));
+    assert!(!out.contains("from '@neuralfog/elemix/runtime'"));
+}
+
+#[test]
+fn many_mount_methods_share_one_hook_in_source_order() {
+    let src = "// #component\nclass Foo extends Component {\n    // #mount\n    a(): void {}\n    // #mount\n    b(): void {}\n}";
+    let out = expand(src).unwrap();
+    assert_eq!(out.matches("onMount(): void {").count(), 1);
+    let hook = &out[out.find("onMount(): void {").unwrap()..];
+    assert!(hook.find("this.a();").unwrap() < hook.find("this.b();").unwrap());
+}
+
+#[test]
+fn lifecycle_works_on_arrow_fields() {
+    let src = "// #component\nclass Foo extends Component {\n    // #mount\n    ready = (): void => {};\n}";
+    let out = expand(src).unwrap();
+    assert!(out.contains("onMount(): void {"));
+    assert!(out.contains("this.ready();"));
+}
+
+#[test]
+fn lifecycle_pragma_on_a_class_is_an_error() {
+    assert_eq!(
+        expand("// #mount\nclass Foo extends Component {}"),
+        Err(ExpandError::Resolve(PragmaError::OnClass(
+            "mount".to_string()
+        )))
+    );
+}

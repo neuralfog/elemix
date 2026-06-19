@@ -10,6 +10,12 @@ import {
 import { sheet } from '../runtime/dom';
 import type { Template } from '../types';
 
+type LifecycleHooks = {
+    beforeMount?(): void;
+    onMount?(): void;
+    onDispose?(): void;
+};
+
 export class Component<ComponentProps = unknown> extends HTMLElement {
     public static formAssociated?: boolean;
     public static __sheets?: CSSStyleSheet[];
@@ -49,10 +55,6 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     public view?(): DocumentFragment;
     public effects?(): void;
 
-    public beforeMount?(): void;
-    public onMount?(): void;
-    public onDispose?(): void;
-
     connectedCallback(): void {
         if (this.connected) return;
         this.connected = true;
@@ -61,7 +63,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
             this.adoptStyles();
             this.attachFormInternals();
             this.initProps();
-            this.beforeMount?.();
+            (this as LifecycleHooks).beforeMount?.();
 
             if (this.view) {
                 const view = this.view;
@@ -77,7 +79,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
             }
 
             this.removeAttribute('data-cloak');
-            this.onMount?.();
+            (this as LifecycleHooks).onMount?.();
         });
 
         this.isMounted = true;
@@ -99,7 +101,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
                 this.scopes = null;
                 dispose(this.effectScopes);
                 this.effectScopes = null;
-                this.onDispose?.();
+                (this as LifecycleHooks).onDispose?.();
             });
             this.isMounted = false;
         });

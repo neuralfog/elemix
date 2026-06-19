@@ -32,11 +32,14 @@ const _t0 = template('<div class="stars"><!----></div>');
 const _t1 = templateEl('<button type="button">★</button>');
 
 export class RatingInput extends Component {
+    beforeMount(): void {
+        this.initFormValue();
+    }
     static formAssociated = true;
 
     state = state<State>({ value: 0 });
 
-    beforeMount(): void {
+    initFormValue(): void {
         this.internals.setFormValue(String(this.state.value));
     }
 

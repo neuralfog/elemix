@@ -81,7 +81,9 @@ pub fn resolve(directives: &[Directive]) -> Result<ComponentMeta, PragmaError> {
             }
             "form" => meta.form = true,
             "no-shadow" => meta.no_shadow = true,
-            "styles" | "state" | "effect" => return Err(PragmaError::OnClass(d.name.clone())),
+            "styles" | "state" | "effect" | "before-mount" | "mount" | "dispose" => {
+                return Err(PragmaError::OnClass(d.name.clone()))
+            }
             other => return Err(PragmaError::Unknown(other.to_string())),
         }
     }
