@@ -172,13 +172,33 @@ export const _child = (anchor: Node, get: Getter<unknown>): void => {
     });
 };
 
+const removeRange = (
+    parent: Node,
+    first: Node,
+    last: Node,
+    after: Node,
+): void => {
+    if (
+        first === parent.firstChild &&
+        (last as ChildNode).nextSibling === after &&
+        after.nextSibling === null
+    ) {
+        (parent as Element).replaceChildren(after);
+    } else {
+        const range = document.createRange();
+        range.setStartBefore(first);
+        range.setEndAfter(last);
+        range.deleteContents();
+    }
+};
+
 export const _list = <T>(
     anchor: Node,
     items: Getter<readonly T[]>,
     keyFn: (item: T, index: number) => unknown,
     render: (item: T, index: number) => Node,
 ): void => {
-    let nodes = new Map<unknown, Node>();
+    const nodes = new Map<unknown, Node>();
     const rowScopes = new Map<unknown, Scope | null>();
     let order: unknown[] = [];
     effect(() => {
@@ -193,164 +213,189 @@ export const _list = <T>(
         });
         const oldKeys = order;
         order = keys;
+        const oldLen = oldKeys.length;
 
-        if (len > 0) {
-            let s = 0;
-            let oe = oldKeys.length - 1;
-            let ne = len - 1;
-            while (s <= oe && s <= ne && oldKeys[s] === keys[s]) s++;
-            while (s <= oe && s <= ne && oldKeys[oe] === keys[ne]) {
-                oe--;
-                ne--;
+        if (len === 0) {
+            if (oldLen > 0) {
+                removeRange(
+                    parent,
+                    nodes.get(oldKeys[0]) as Node,
+                    nodes.get(oldKeys[oldLen - 1]) as Node,
+                    anchor,
+                );
+                untrack(() => {
+                    for (const sc of rowScopes.values()) dispose(sc);
+                });
+                rowScopes.clear();
+                nodes.clear();
             }
-            if (s > oe) {
-                if (s <= ne) {
-                    const ref =
-                        ne + 1 < len
-                            ? (nodes.get(keys[ne + 1]) as Node)
-                            : anchor;
-                    const frag = document.createDocumentFragment();
-                    untrack(() => {
-                        for (let i = s; i <= ne; i++) {
-                            const node = collect(() => render(list[i], i));
-                            rowScopes.set(keys[i], takeScopes());
-                            nodes.set(keys[i], node);
-                            frag.appendChild(node);
-                        }
-                    });
-                    parent.insertBefore(frag, ref);
-                }
-                return;
-            }
-            if (s > ne) {
-                for (let i = s; i <= oe; i++) {
-                    const key = oldKeys[i];
-                    (nodes.get(key) as ChildNode).remove();
-                    dispose(rowScopes.get(key) ?? null);
-                    rowScopes.delete(key);
-                    nodes.delete(key);
-                }
-                return;
-            }
+            return;
         }
 
-        const next = new Map<unknown, Node>();
-        let survivors = 0;
-        untrack(() => {
-            for (let i = 0; i < len; i++) {
-                const key = keys[i];
-                let node = nodes.get(key);
-                if (!node) {
-                    node = collect(() => render(list[i], i));
-                    rowScopes.set(key, takeScopes());
-                } else {
-                    survivors++;
-                }
-                next.set(key, node);
-            }
-        });
+        let s = 0;
+        let oe = oldLen - 1;
+        let ne = len - 1;
+        while (s <= oe && s <= ne && oldKeys[s] === keys[s]) s++;
+        while (s <= oe && s <= ne && oldKeys[oe] === keys[ne]) {
+            oe--;
+            ne--;
+        }
 
-        if (nodes.size > 0 && survivors === 0) {
-            const first = nodes.get(oldKeys[0]) as Node;
-            const last = nodes.get(oldKeys[oldKeys.length - 1]) as Node;
-            if (
-                first === parent.firstChild &&
-                last.nextSibling === anchor &&
-                anchor.nextSibling === null
-            ) {
-                (parent as Element).replaceChildren(anchor);
-            } else {
-                const range = document.createRange();
-                range.setStartBefore(first);
-                range.setEndAfter(last);
-                range.deleteContents();
+        if (s > oe) {
+            if (s <= ne) {
+                const ref =
+                    ne + 1 < len ? (nodes.get(keys[ne + 1]) as Node) : anchor;
+                const frag = document.createDocumentFragment();
+                untrack(() => {
+                    for (let i = s; i <= ne; i++) {
+                        const node = collect(() => render(list[i], i));
+                        rowScopes.set(keys[i], takeScopes());
+                        nodes.set(keys[i], node);
+                        frag.appendChild(node);
+                    }
+                });
+                parent.insertBefore(frag, ref);
             }
-            for (const key of nodes.keys()) {
+            return;
+        }
+
+        if (s > ne) {
+            for (let i = s; i <= oe; i++) {
+                const key = oldKeys[i];
+                (nodes.get(key) as ChildNode).remove();
                 dispose(rowScopes.get(key) ?? null);
                 rowScopes.delete(key);
+                nodes.delete(key);
             }
-        } else if (survivors < nodes.size) {
-            for (const [key, node] of nodes) {
-                if (!next.has(key)) {
-                    (node as ChildNode).remove();
-                    dispose(rowScopes.get(key) ?? null);
-                    rowScopes.delete(key);
+            return;
+        }
+
+        if (
+            len === oldLen &&
+            keys[s] === oldKeys[ne] &&
+            keys[ne] === oldKeys[s]
+        ) {
+            let trans = true;
+            for (let i = s + 1; i < ne; i++) {
+                if (keys[i] !== oldKeys[i]) {
+                    trans = false;
+                    break;
                 }
+            }
+            if (trans) {
+                const a = nodes.get(oldKeys[ne]) as Node;
+                const b = nodes.get(oldKeys[s]) as Node;
+                const nextA = (a as ChildNode).nextSibling;
+                parent.insertBefore(a, b);
+                parent.insertBefore(b, nextA);
+                return;
             }
         }
 
-        if (survivors === 0) {
+        const toPatch = ne - s + 1;
+        const keyToNew = new Map<unknown, number>();
+        for (let i = s; i <= ne; i++) keyToNew.set(keys[i], i);
+
+        if (keyToNew.size !== toPatch) {
+            order = oldKeys;
+            return;
+        }
+
+        const newToOld = new Int32Array(toPatch);
+        const stale: unknown[] = [];
+        let patched = 0;
+        let moved = false;
+        let maxNew = -1;
+        for (let i = s; i <= oe; i++) {
+            const key = oldKeys[i];
+            const ni = patched < toPatch ? keyToNew.get(key) : undefined;
+            if (ni === undefined) {
+                stale.push(key);
+            } else {
+                newToOld[ni - s] = i + 1;
+                if (ni >= maxNew) maxNew = ni;
+                else moved = true;
+                patched++;
+            }
+        }
+
+        const ref = ne + 1 < len ? (nodes.get(keys[ne + 1]) as Node) : anchor;
+
+        if (patched === 0) {
+            for (let i = s; i <= ne; i++) {
+                if (nodes.has(keys[i])) {
+                    order = oldKeys;
+                    return;
+                }
+            }
+            removeRange(
+                parent,
+                nodes.get(oldKeys[s]) as Node,
+                nodes.get(oldKeys[oe]) as Node,
+                ref,
+            );
+            for (let q = 0; q < stale.length; q++) {
+                const key = stale[q];
+                dispose(rowScopes.get(key) ?? null);
+                rowScopes.delete(key);
+                nodes.delete(key);
+            }
             const frag = document.createDocumentFragment();
-            for (let k = 0; k < keys.length; k++)
-                frag.appendChild(next.get(keys[k]) as Node);
-            parent.insertBefore(frag, anchor);
-            nodes = next;
+            untrack(() => {
+                for (let i = s; i <= ne; i++) {
+                    const node = collect(() => render(list[i], i));
+                    rowScopes.set(keys[i], takeScopes());
+                    nodes.set(keys[i], node);
+                    frag.appendChild(node);
+                }
+            });
+            parent.insertBefore(frag, ref);
             return;
         }
 
-        const oldPos = new Map<unknown, number>();
-        for (let q = 0; q < oldKeys.length; q++) oldPos.set(oldKeys[q], q);
+        for (let q = 0; q < stale.length; q++) {
+            const key = stale[q];
+            (nodes.get(key) as ChildNode).remove();
+            dispose(rowScopes.get(key) ?? null);
+            rowScopes.delete(key);
+            nodes.delete(key);
+        }
 
-        const seq: number[] = [];
-        const seqPos: number[] = [];
-        const fresh = new Uint8Array(keys.length);
-        let ordered = true;
-        let lastOi = -1;
-        for (let i = 0; i < keys.length; i++) {
-            const oi = oldPos.get(keys[i]);
-            if (oi === undefined) {
-                fresh[i] = 1;
-            } else {
-                if (oi < lastOi) ordered = false;
-                lastOi = oi;
-                seq.push(oi);
-                seqPos.push(i);
+        let keep: Uint8Array | null = null;
+        if (moved) {
+            const seq: number[] = [];
+            const seqPos: number[] = [];
+            for (let i = 0; i < toPatch; i++) {
+                if (newToOld[i] !== 0) {
+                    seq.push(newToOld[i]);
+                    seqPos.push(i);
+                }
             }
-        }
-
-        if (ordered && seq.length === keys.length) {
-            nodes = next;
-            return;
-        }
-
-        const keep = new Uint8Array(keys.length);
-        if (ordered) {
-            for (let i = 0; i < keys.length; i++) if (!fresh[i]) keep[i] = 1;
-        } else {
             const lis = computeLIS(seq);
-            for (let i = 0; i < lis.length; i++) keep[seqPos[lis[i]]] = 1;
+            keep = new Uint8Array(toPatch);
+            for (let k = 0; k < lis.length; k++) keep[seqPos[lis[k]]] = 1;
         }
 
-        let i = keys.length - 1;
-        while (i >= 0) {
-            if (!fresh[i] && keep[i]) {
-                i--;
-                continue;
-            }
-            const ref =
-                i + 1 < keys.length ? (next.get(keys[i + 1]) as Node) : anchor;
-            if (fresh[i]) {
-                let j = i;
-                while (j - 1 >= 0 && fresh[j - 1]) j--;
-                if (j === i) {
-                    parent.insertBefore(next.get(keys[i]) as Node, ref);
+        untrack(() => {
+            for (let i = toPatch - 1; i >= 0; i--) {
+                const isFresh = newToOld[i] === 0;
+                if (!isFresh && (!moved || (keep as Uint8Array)[i] === 1)) {
+                    continue;
+                }
+                const ni = s + i;
+                const key = keys[ni];
+                const r =
+                    ni + 1 < len ? (nodes.get(keys[ni + 1]) as Node) : anchor;
+                if (isFresh) {
+                    const node = collect(() => render(list[ni], ni));
+                    rowScopes.set(key, takeScopes());
+                    nodes.set(key, node);
+                    parent.insertBefore(node, r);
                 } else {
-                    const frag = document.createDocumentFragment();
-                    for (let k = j; k <= i; k++)
-                        frag.appendChild(next.get(keys[k]) as Node);
-                    parent.insertBefore(frag, ref);
+                    parent.insertBefore(nodes.get(key) as Node, r);
                 }
-                i = j - 1;
-            } else {
-                const node = next.get(keys[i]) as Node;
-                if (node.nextSibling !== ref) {
-                    parent.insertBefore(node, ref);
-                }
-                i--;
             }
-        }
-
-        nodes = next;
+        });
     });
 };
 

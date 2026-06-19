@@ -2,19 +2,22 @@
 
 Target release of compiled templates `v0.9.0`
 
-![elemix speed benchmark](.roadmap/speed4.png)
+![elemix speed benchmark](.roadmap/speed5.png)
 
-***Final Round 🦇🦇🦇***
+![elemix speed benchmark](.roadmap/memory-transfer5.png)
 
-- There 🧐💪
-- Rerun benches for `vapor`, `elemix`, `solid`, `ivi` and `svelte` back to back 💨
-- Still taking it with a pinch of salt until submitting to the official repo and getting results
-  in a stable environment, this is good enough to eyeball it 👀👀
-- I am spent 😰😰😰 Now all energy into release... 🚀
+***Hunt never ends... 🌃🦇🌃***
+
+- Row swap gap was driving me insane 😡😡😡 The diffrence was inproportianal to the amount of work ⌛
+
+![flip table](.roadmap/flip-table.gif)
+
+- Managed to squize a bit more out of it 🍋‍🟩🍋‍🟩🤏
+- I think I can let go now... I am broken 🥲🧠🔨🤣
+
+GG 👊🥋✊
 
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
-
-🦇🦇🦇
 
 ## TODOS
 
@@ -33,6 +36,14 @@ Target release of compiled templates `v0.9.0`
 - [] Add template repo 📍
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
+
+***I'm Givin' Her All She's Got, Captain! 🚀⚙️🔥***
+
+- List reconciler one map instead of two ✌️ (fewer allocations)
+- Found a faster path for row swaps 🔀 it's just two nodes moving, so move two nodes and skip
+  the whole diff - ~1.1ms gone 💨 Puff...
+- Added a fuzz test - 800 rounds of random shuffles, swaps and inserts on lists 🎲
+- Can't find any lever for clearing rows 😭🤣
 
 ***Do Androids Dream of a Logo? 🤖🐑***
 
@@ -657,3 +668,13 @@ What went well:
 - Surrounded by good company 👌👏
 
 - [x] Now I need a logotype or logo FML ☹️
+
+![elemix speed benchmark](.roadmap/speed4.png)
+
+***Final Round 🦇🦇🦇***
+
+- There 🧐💪
+- Rerun benches for `vapor`, `elemix`, `solid`, `ivi` and `svelte` back to back 💨
+- Still taking it with a pinch of salt until submitting to the official repo and getting results
+  in a stable environment, this is good enough to eyeball it 👀👀
+- I am spent 😰😰😰 Now all energy into release... 🚀
