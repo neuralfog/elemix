@@ -25,7 +25,6 @@ Target release of compiled templates `v0.9.0`
 ### Phase 6 - Close the release of v0.9.0 ❎
 
 - [] A lot of structural changes, test the shite out of it 🔴🔴
-- [] Now I need a logotype or logo FML ☹️
 - [] Update playground with WASM compiler
   - [] Update all examples with updated API, add new and maybe remove some
   - [] Playground needs some cleanup, better file management for examples, atm just a giant file 🤮
@@ -34,6 +33,60 @@ Target release of compiled templates `v0.9.0`
 - [] Add template repo 📍
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
+
+***Do Androids Dream of a Logo? 🤖🐑***
+
+<img src=".assets/logo-roadmap.svg" alt="elemix logo" width="200" />
+
+- The rectangle is the `component` 📦 The lightning bolt is the speed ⚡
+
+***Lifecycle Methods In To Macros 🔁#⃣️***
+
+- Lifecycle methods have been stripped from the main `Component` class 🔥🔥
+- There was a bit of inconsistency there, split between methods and macros, so lifecycle methods into macros #⃣️#⃣️#⃣️
+
+```
+┌───────────────┬────────────────┬────────────────────────────┐
+│               │      tags      │            does            │
+├───────────────┼────────────────┼────────────────────────────┤
+│ #before-mount │ method / arrow │ beforeMount hook           │
+├───────────────┼────────────────┼────────────────────────────┤
+│ #mount        │ method / arrow │ onMount hook               │
+├───────────────┼────────────────┼────────────────────────────┤
+│ #dispose      │ method / arrow │ onDispose hook             │
+└───────────────┴────────────────┴────────────────────────────┘
+```
+
+- Multiple hints of lifecycle methods are allowed, the compiler will inline them in the source order they were declared ⬇️⬇️
+- So having multiple `// #mount` and so on is fine 😶‍🌫️😶‍🌫️
+
+```ts
+// #mount
+foo(): void {
+  // ...
+}
+
+// #mount
+bar(): void {
+  // ...
+}
+
+// Inlined as --> Component Instance
+
+onMount(): void {
+    this.foo();
+    this.bar();
+}
+```
+
+- Syntax for macros may change, not a biggie, purely cosmetic 🧐
+- Tried to come up with better management of `effects` and have them excluded from the `onMount` procedure, decided to have
+  effects fire any time an update is triggered including `onMount`, strictly speaking this is more correct and expected.
+  There is a convoluted escape hatch with `read` ➡️ `check mounted state` ➡️ `execute` 🤮 This is incredibly difficult
+  without disturbing the settled ecosystem. Effects are eager - it has to stay that way, foot is down 👟
+- So in an ideal world effects read reactive state, write to the outside world. The moment an effect writes back into reactive
+  state it reads, you're in recursion loop territory 💣💣 Don't do it...
+- Now an effect can't re-trigger itself off its own write, so that whole class of infinite loop is just gone 🛡️
 
 ***Final Hunt 🦇🦇🦇***
 
@@ -393,7 +446,7 @@ What went well:
 
 - `customElements` rocks!! 🎸🤘
 - Class based API depending on the point of view it's a strength or weakness, it does not bother me so `class`
-  it is, no module transpiltaion, what's the point ⁉️
+  it is, no module transpilation, what's the point ⁉️
 - This is not a framework, it's a library at best. Frameworks get in the way 🚷
 - Opt-in reactivity, drive your own updates if you like 🏇
 - `AOT` compiled templates with minimal runtime
@@ -404,7 +457,7 @@ What went well:
   the affairs and tooling 🤮
 - Full encapsulation with `ShadowDOM`
 - Will work in any environment, it is just augmented `HTML` node - Vue, React whatever 🤷
-- `css` is just a string that gets adopted, use what ever you want 🤷
+- `css` is just a string that gets adopted, use whatever you want 🤷
 - `Reactive Elements` - CustomElements are amazing, Google claimed `WebComponents` don't want to touch that 😒
 - Few primitives and you can do more than others. `state`, `ref` and `component` FINITO!! 🤌
   Anything else just write it, or `gitgood`
@@ -416,7 +469,7 @@ What went well:
 
 - High chances of clashing with native `HTMLElement` properties, not a biggy. Typescript catches it cleanly 🥅
 - Template primitives only work in the context of library, there is no issue with attributes
-  May add special `attr` that will redirect in to props of the `:host`, actually this should be EZ 🤌
+  May add special `attr` that will redirect into props of the `:host`, actually this should be EZ 🤌
 - At the moment still closely coupled with typescript, slowly going away from that so `js` should be supported
   sooner than later
 - SSR - I don't give a flying `&*%*%*&` - is not a problem at all. `customElements` are notoriously difficult
@@ -545,8 +598,8 @@ What went well:
     - [x] Automatic component registration with tags derived from component classes, no more issue with name `mangling`
       after bundling
 - [x] Release pipeline is junky ♻️ Mostly works... The order is not correct
-  - [x] Organize workflows in to nicer dependency chain
-- [x] Do I need concept of `computed(() => {})` ⁉️🧐 Don't really want it... Dig in to it 🪏 Proof the
+  - [x] Organize workflows into a nicer dependency chain
+- [x] Do I need concept of `computed(() => {})` ⁉️🧐 Don't really want it... Dig into it 🪏 Proof the
   concept, otherwise add `computed` 🤮 The issue here - architecture has changed, the concept of computation
   was not needed before 🧐
 - [x] Object destructuring in template procedure, this should already work 🤔
@@ -602,3 +655,5 @@ What went well:
 - This is at the floor now, fast enough in my books 🤓📖
 - On par with `svelte` 🔥🔥🔥🥳
 - Surrounded by good company 👌👏
+
+- [x] Now I need a logotype or logo FML ☹️

@@ -47,10 +47,14 @@ impl std::fmt::Display for ExpandError {
 pub fn expand(source: &str) -> Result<String, ExpandError> {
     let located = locate(source).map_err(ExpandError::Locate)?;
     let no_pragmas = located.states.is_empty()
-        && located
-            .classes
-            .iter()
-            .all(|c| c.directives.is_empty() && c.styles.is_empty() && c.effects.is_empty());
+        && located.classes.iter().all(|c| {
+            c.directives.is_empty()
+                && c.styles.is_empty()
+                && c.effects.is_empty()
+                && c.before_mounts.is_empty()
+                && c.mounts.is_empty()
+                && c.disposes.is_empty()
+        });
     if no_pragmas {
         return Ok(source.to_string());
     }
@@ -76,7 +80,13 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
     let needs_state = !located.states.is_empty();
 
     for class in &located.classes {
-        if class.directives.is_empty() && class.styles.is_empty() && class.effects.is_empty() {
+        if class.directives.is_empty()
+            && class.styles.is_empty()
+            && class.effects.is_empty()
+            && class.before_mounts.is_empty()
+            && class.mounts.is_empty()
+            && class.disposes.is_empty()
+        {
             continue;
         }
         let meta = resolve(&class.directives).map_err(ExpandError::Resolve)?;
@@ -141,6 +151,29 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
                 class.body_open,
                 class.body_open,
                 format!("\n    effects(): void {{{calls}\n    }}"),
+            ));
+        }
+
+        // #before-mount / #mount / #dispose → synthesize the lifecycle hook the
+        // base already invokes, calling each tagged method in source order. No
+        // runtime import: the base calls `beforeMount`/`onMount`/`onDispose` by
+        // name. Tagging many methods just adds more calls to the one hook.
+        for (hook, methods) in [
+            ("beforeMount", &class.before_mounts),
+            ("onMount", &class.mounts),
+            ("onDispose", &class.disposes),
+        ] {
+            if methods.is_empty() {
+                continue;
+            }
+            let calls: String = methods
+                .iter()
+                .map(|name| format!("\n        this.{name}();"))
+                .collect();
+            edits.push((
+                class.body_open,
+                class.body_open,
+                format!("\n    {hook}(): void {{{calls}\n    }}"),
             ));
         }
 

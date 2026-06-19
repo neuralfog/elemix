@@ -22,16 +22,50 @@ export class LifecycleChild extends Component<ChildProps> {
     // #styles
     styles = css;
 
-    beforeMount(): void {
-        record('beforeMount');
+    // #before-mount
+    prepareA(): void {
+        record('before-1');
     }
 
-    onMount(): void {
-        record('onMount');
+    // #before-mount
+    prepareB(): void {
+        record('before-2');
     }
 
-    onDispose(): void {
-        record('onDispose');
+    // #effect
+    trackA(): void {
+        this.setAttribute(
+            'data-fx',
+            (this.getAttribute('data-fx') ?? '') + `A${this.props.tick}`,
+        );
+    }
+
+    // #effect
+    trackB(): void {
+        this.setAttribute(
+            'data-fx',
+            (this.getAttribute('data-fx') ?? '') + `B${this.props.tick}`,
+        );
+    }
+
+    // #mount
+    readyA(): void {
+        record('mount-1');
+    }
+
+    // #mount
+    readyB(): void {
+        record('mount-2');
+    }
+
+    // #dispose
+    cleanupA(): void {
+        record('dispose-1');
+    }
+
+    // #dispose
+    cleanupB(): void {
+        record('dispose-2');
     }
 
     template = (): Template =>

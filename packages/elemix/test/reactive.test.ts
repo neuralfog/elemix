@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { bind } from '../src/runtime/reactive';
+import { bind, effect } from '../src/runtime/reactive';
 import { depOf, state } from '../src/runtime/state';
 
 // Phase 0 of compile-time reactivity: the runtime primitives the compiler will
@@ -54,5 +54,34 @@ describe('compile-reactivity primitives (depOf + bind)', () => {
         expect(seen).toEqual([2]);
         s.a = 100; // declared dep → re-run, now reads raw a=100, b=100
         expect(seen).toEqual([2, 200]);
+    });
+});
+
+describe('effect self-recursion guard', () => {
+    test('an effect that writes a dep it reads does not loop on its own write', () => {
+        const s = state({ count: 0 });
+        let runs = 0;
+        // Reads AND writes `count`. Without the guard, its own write would
+        // re-enter the running effect → infinite loop. The guard skips the
+        // currently-active scope, so the self-write is a no-op re-trigger.
+        effect(() => {
+            runs++;
+            s.count = s.count + 1;
+        });
+        expect(runs).toBe(1);
+        expect(s.count).toBe(1);
+    });
+
+    test('the guard suppresses only self-trigger, not external changes', () => {
+        const s = state({ count: 0 });
+        let runs = 0;
+        effect(() => {
+            runs++;
+            s.count = s.count + 1;
+        });
+        expect(runs).toBe(1);
+        s.count = 10; // external write (no active scope) → re-runs once
+        expect(runs).toBe(2);
+        expect(s.count).toBe(11);
     });
 });

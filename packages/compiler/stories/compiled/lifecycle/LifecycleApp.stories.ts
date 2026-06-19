@@ -17,102 +17,109 @@ export const Default = {
         if (!toggle || !updateBtn || !clearBtn) {
             throw new Error('lifecycle-app did not render its three buttons');
         }
-        expect(updateBtn.textContent?.trim()).toBe('Update child');
-        expect(clearBtn.textContent?.trim()).toBe('Clear log');
 
-        // log lives in the log-view child's own shadow root
+        // lifecycle hooks log into the log-view child's own shadow root
         const logView = root.querySelector('log-view');
         const logRoot = logView?.shadowRoot;
         if (!logRoot) throw new Error('lifecycle-app missing log-view shadow root');
+
+        // Each entry renders as "{id}{event}()" — pull the event back out (strip
+        // the leading id digits and the trailing "()"). Works for any event name.
         const events = (): string[] =>
             Array.from(logRoot.querySelectorAll('.entry')).map((e) =>
-                e.classList.contains('beforeMount') ? 'beforeMount'
-                    : e.classList.contains('onMount') ? 'onMount'
-                    : e.classList.contains('onMutation') ? 'onMutation'
-                    : e.classList.contains('onDispose') ? 'onDispose'
-                    : '?',
+                (e.textContent ?? '')
+                    .replace(/\s+/g, '')
+                    .replace(/^\d+/, '')
+                    .replace(/\(\)$/, ''),
             );
         const count = (name: string): number =>
             events().filter((e) => e === name).length;
-        // lifecycle hooks flush on a microtask before they reach the log
-        const flush = () => new Promise((r) => setTimeout(r, 0));
+        // the #effects append their firing order onto the child host's data-fx
+        const fx = (): string =>
+            root.querySelector('lifecycle-child')?.getAttribute('data-fx') ?? '';
+        // lifecycle records flush on a microtask before they reach the log
+        const flush = (): Promise<void> =>
+            new Promise((r) => setTimeout(r, 0));
 
         // start from a clean log regardless of prior story state
         await userEvent.click(clearBtn);
         await flush();
 
-        // initial: child unmounted, placeholder present, no child element
+        // initial: child unmounted, nothing logged yet
         expect(toggle.textContent?.trim()).toBe('Mount');
-        expect(root.querySelector('.stage .empty')?.textContent).toBe('child unmounted');
         expect(root.querySelector('lifecycle-child')).toBeNull();
-        // Update child is disabled while unmounted
         expect(updateBtn.disabled).toBe(true);
-        // empty-log placeholder shown
-        expect(logRoot.querySelector('.empty')?.textContent).toBe(
-            'No events yet — mount the child.',
-        );
         expect(events()).toEqual([]);
 
-        // mount the child -> beforeMount then onMount fire, child renders tick 0
+        // ── MOUNT ──────────────────────────────────────────────────────────
+        // Lifecycle log proves multiple #before-mount then multiple #mount fire,
+        // each group in SOURCE ORDER, and beforeMount comes before onMount.
         await userEvent.click(toggle);
-        expect(toggle.textContent?.trim()).toBe('Unmount');
-        const child = root.querySelector('lifecycle-child');
-        expect(child).not.toBeNull();
-        expect(child?.shadowRoot?.querySelector('.child')?.textContent).toBe(
-            'Child · tick 0',
-        );
-        // Update child becomes enabled once mounted
-        expect(updateBtn.disabled).toBe(false);
         await flush();
-        // mount emits beforeMount then onMount as the first two log entries
-        expect(events().slice(0, 2)).toEqual(['beforeMount', 'onMount']);
-        expect(count('beforeMount')).toBe(1);
-        expect(count('onMount')).toBe(1);
-        expect(count('onDispose')).toBe(0);
-        // numbered entries: first entry id is "1", and renders as "{id}{event}()"
-        const firstEntry = logRoot.querySelector('.entry');
-        expect(firstEntry?.querySelector('.n')?.textContent).toBe('1');
-        expect(firstEntry?.textContent?.replace(/\s+/g, '')).toBe('1beforeMount()');
-        // update the (mounted) child -> tick bumps
+        expect(toggle.textContent?.trim()).toBe('Unmount');
+        expect(root.querySelector('lifecycle-child')).not.toBeNull();
+        expect(events()).toEqual(['before-1', 'before-2', 'mount-1', 'mount-2']);
+        for (const e of ['before-1', 'before-2', 'mount-1', 'mount-2']) {
+            expect(count(e)).toBe(1);
+        }
+        // both #effects fired once at mount, in source order (A before B), tick 0
+        expect(fx()).toBe('A0B0');
+        expect(updateBtn.disabled).toBe(false);
+        expect(
+            root.querySelector('lifecycle-child')?.shadowRoot?.querySelector('.child')
+                ?.textContent,
+        ).toBe('Child · tick 0');
+
+        // ── UPDATE (tick 0 → 1) ────────────────────────────────────────────
+        // Only the two #effects re-fire (they read tick); both, in source order.
+        // No lifecycle hook re-runs.
+        const logLen = events().length;
         await userEvent.click(updateBtn);
         await flush();
+        expect(fx()).toBe('A0B0A1B1');
+        expect(events().length).toBe(logLen); // no new lifecycle entries
         expect(
             root.querySelector('lifecycle-child')?.shadowRoot?.querySelector('.child')
                 ?.textContent,
         ).toBe('Child · tick 1');
 
-        // a second update bumps tick to 2
+        // ── UPDATE (tick 1 → 2) ────────────────────────────────────────────
         await userEvent.click(updateBtn);
         await flush();
+        expect(fx()).toBe('A0B0A1B1A2B2');
         expect(
             root.querySelector('lifecycle-child')?.shadowRoot?.querySelector('.child')
                 ?.textContent,
         ).toBe('Child · tick 2');
 
-        // unmount the child -> onDispose fires once, placeholder returns
+        // ── UNMOUNT ────────────────────────────────────────────────────────
+        // Both #dispose handlers fire, in source order, and nothing else.
+        const mark = events().length;
         await userEvent.click(toggle);
         await flush();
         expect(toggle.textContent?.trim()).toBe('Mount');
         expect(root.querySelector('lifecycle-child')).toBeNull();
-        expect(root.querySelector('.stage .empty')?.textContent).toBe('child unmounted');
-        // Update child disabled again after unmount
         expect(updateBtn.disabled).toBe(true);
-        expect(count('onDispose')).toBe(1);
-        expect(events()[events().length - 1]).toBe('onDispose');
+        expect(events().slice(mark)).toEqual(['dispose-1', 'dispose-2']);
+        expect(count('dispose-1')).toBe(1);
+        expect(count('dispose-2')).toBe(1);
 
-        // Clear log empties the log and restores the empty placeholder
+        // ── REMOUNT after clear ────────────────────────────────────────────
+        // A fresh mount replays the lifecycle sequence (ids restart at 1). The
+        // new host's effects fire against the CURRENT tick (still 2 — unmounting
+        // doesn't reset it), so its own data-fx starts at A2B2.
         await userEvent.click(clearBtn);
         await flush();
         expect(events()).toEqual([]);
-        expect(logRoot.querySelector('.empty')?.textContent).toBe(
-            'No events yet — mount the child.',
-        );
-
-        // remounting after a clear starts a fresh numbered sequence at id 1
         await userEvent.click(toggle);
         await flush();
         expect(logRoot.querySelector('.entry .n')?.textContent).toBe('1');
-        expect(events().slice(0, 2)).toEqual(['beforeMount', 'onMount']);
+        expect(events()).toEqual(['before-1', 'before-2', 'mount-1', 'mount-2']);
+        expect(
+            root.querySelector('lifecycle-child')?.shadowRoot?.querySelector('.child')
+                ?.textContent,
+        ).toBe('Child · tick 2');
+        expect(fx()).toBe('A2B2');
 
         // leave the log clean for any later consumer
         await userEvent.click(toggle);

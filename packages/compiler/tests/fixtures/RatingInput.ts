@@ -31,7 +31,8 @@ export class RatingInput extends Component {
     // #state
     state: State = { value: 0 };
 
-    beforeMount(): void {
+    // #before-mount
+    initFormValue(): void {
         this.internals.setFormValue(String(this.state.value));
     }
 

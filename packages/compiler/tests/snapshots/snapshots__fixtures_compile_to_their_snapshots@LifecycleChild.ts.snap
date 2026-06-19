@@ -26,17 +26,59 @@ const _s0 = sheet(css);
 const _t0 = template('<div class="child">Child · tick <!----></div>');
 
 export class LifecycleChild extends Component<ChildProps> {
-
-    beforeMount(): void {
-        record('beforeMount');
-    }
-
-    onMount(): void {
-        record('onMount');
-    }
-
     onDispose(): void {
-        record('onDispose');
+        this.cleanupA();
+        this.cleanupB();
+    }
+    onMount(): void {
+        this.readyA();
+        this.readyB();
+    }
+    beforeMount(): void {
+        this.prepareA();
+        this.prepareB();
+    }
+    effects(): void {
+        effect(() => this.trackA());
+        effect(() => this.trackB());
+    }
+
+    prepareA(): void {
+        record('before-1');
+    }
+
+    prepareB(): void {
+        record('before-2');
+    }
+
+    trackA(): void {
+        this.setAttribute(
+            'data-fx',
+            (this.getAttribute('data-fx') ?? '') + `A${this.props.tick}`,
+        );
+    }
+
+    trackB(): void {
+        this.setAttribute(
+            'data-fx',
+            (this.getAttribute('data-fx') ?? '') + `B${this.props.tick}`,
+        );
+    }
+
+    readyA(): void {
+        record('mount-1');
+    }
+
+    readyB(): void {
+        record('mount-2');
+    }
+
+    cleanupA(): void {
+        record('dispose-1');
+    }
+
+    cleanupB(): void {
+        record('dispose-2');
     }
 
     view(): DocumentFragment {

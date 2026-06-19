@@ -4,11 +4,15 @@
 //! Walks `program.comments`, keeps the line comments whose content is a pragma
 //! (`#…`), and binds each to the nearest following declaration that sits on the
 //! *immediately* next line (no blank line between):
-//! - on a class → `#component`/`#tag`/`#form` directives;
+//! - on a class → `#component`/`#tag`/`#form`/`#no-shadow` directives;
 //! - on a class **field** → `#styles` (the field value is the stylesheet,
 //!   inlined into `sheet(...)` and the field stripped);
 //! - on a class field **or** module `const` → `#state` (wrap the initializer in
-//!   `state<T>(…)`, lifting the type annotation into the generic).
+//!   `state<T>(…)`, lifting the type annotation into the generic);
+//! - on a class **method** (or arrow field) → `#effect` (register a reactive
+//!   effect) and the lifecycle markers `#before-mount`/`#mount`/`#dispose`,
+//!   which synthesize the `beforeMount`/`onMount`/`onDispose` hook the base
+//!   already calls — many tagged methods fold into one hook, in source order.
 //!
 //! The values stay real, type-checked expressions on the declaration — never
 //! text in the comment.
@@ -55,6 +59,12 @@ pub struct ClassInfo {
     pub directives: Vec<Directive>,
     pub styles: Vec<StyleField>,
     pub effects: Vec<String>,
+    /// `#before-mount`-tagged methods, in source order.
+    pub before_mounts: Vec<String>,
+    /// `#mount`-tagged methods, in source order.
+    pub mounts: Vec<String>,
+    /// `#dispose`-tagged methods, in source order.
+    pub disposes: Vec<String>,
 }
 
 /// Everything the lowering needs. `#state` declarations resolve `state` from
@@ -153,6 +163,9 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                 directives: Vec::new(),
                 styles: Vec::new(),
                 effects: Vec::new(),
+                before_mounts: Vec::new(),
+                mounts: Vec::new(),
+                disposes: Vec::new(),
             });
         } else if let Some(target) = as_const(stmt) {
             targets.push(target);
@@ -213,11 +226,35 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                     classes[*class_idx].effects.push(name.clone());
                     strips.push((line, cend));
                 }
+                "before-mount" => {
+                    classes[*class_idx].before_mounts.push(name.clone());
+                    strips.push((line, cend));
+                }
+                "mount" => {
+                    classes[*class_idx].mounts.push(name.clone());
+                    strips.push((line, cend));
+                }
+                "dispose" => {
+                    classes[*class_idx].disposes.push(name.clone());
+                    strips.push((line, cend));
+                }
                 other => return Err(LocateError::OnField(other.to_string())),
             },
             Kind::Method { class_idx, name } => match directive_name(&directives)? {
                 "effect" => {
                     classes[*class_idx].effects.push(name.clone());
+                    strips.push((line, cend));
+                }
+                "before-mount" => {
+                    classes[*class_idx].before_mounts.push(name.clone());
+                    strips.push((line, cend));
+                }
+                "mount" => {
+                    classes[*class_idx].mounts.push(name.clone());
+                    strips.push((line, cend));
+                }
+                "dispose" => {
+                    classes[*class_idx].disposes.push(name.clone());
                     strips.push((line, cend));
                 }
                 other => return Err(LocateError::OnField(other.to_string())),
