@@ -2,16 +2,15 @@
 
 Target release of compiled templates `v0.9.0`
 
-![elemix speed benchmark](.roadmap/speed3.png)
+![elemix speed benchmark](.roadmap/speed4.png)
 
-![elemix memory benchmark](.roadmap/memory-transfer3.png)
+***Final Round 🦇🦇🦇***
 
-***Round 4*** 🏆🏆🏆
-
-- This is an absolute blood bath, I love it 😍 Fighting for every millisecond 🥋👊😂
-- This is at the floor now, fast enough in my books 🤓📖
-- On par with `svelte` 🔥🔥🔥🥳
-- Surrounded by good company 👌👏
+- There 🧐💪
+- Rerun benches for `vapor`, `elemix`, `solid`, `ivi` and `svelte` back to back 💨
+- Still taking it with a pinch of salt until submitting to the official repo and getting results
+  in a stable environment, this is good enough to eyeball it 👀👀
+- I am spent 😰😰😰 Now all energy into release... 🚀
 
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
@@ -25,6 +24,7 @@ Target release of compiled templates `v0.9.0`
 
 ### Phase 6 - Close the release of v0.9.0 ❎
 
+- [] A lot of structural changes, test the shite out of it 🔴🔴
 - [] Now I need a logotype or logo FML ☹️
 - [] Update playground with WASM compiler
   - [] Update all examples with updated API, add new and maybe remove some
@@ -34,6 +34,16 @@ Target release of compiled templates `v0.9.0`
 - [] Add template repo 📍
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
+
+***Final Hunt 🦇🦇🦇***
+
+- Added two ended diff in the list reconciler which I found by going through the `vue-vapor` repo ♥️
+- Fixed a reconciler bug 😬 The list effect was subscribing to all 1000 row ids on every reconcile
+  (moved the key reads inside untrack). Correctness + dead weight gone 🚀
+- Closing the last gap means going shallow ref and losing deep reactivity, not worth it 🪑
+- Nested proxy allocates more - every object in the tree gets wrapped + tracked, a shallow ref
+  is just one box 📦 From my testing, going shallow ref I can drop row creation on 10k rows going
+  down to about ~490 - 495ms. Not worth it... ☹️
 
 ***Compiler Errors ⚙️➡️🕸***
 
@@ -581,3 +591,14 @@ What went well:
 - Final bottleneck to close the gap - creating rows is too slow 😒
 - I think I can close the gap there 🧐🧐🧐
 - Can I compile away reactivity layer ⁉️ I don't know 🤷
+
+![elemix speed benchmark](.roadmap/speed3.png)
+
+![elemix memory benchmark](.roadmap/memory-transfer3.png)
+
+***Round 4*** 🏆🏆🏆
+
+- This is an absolute blood bath, I love it 😍 Fighting for every millisecond 🥋👊😂
+- This is at the floor now, fast enough in my books 🤓📖
+- On par with `svelte` 🔥🔥🔥🥳
+- Surrounded by good company 👌👏

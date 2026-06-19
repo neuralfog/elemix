@@ -180,22 +180,66 @@ export const _list = <T>(
 ): void => {
     let nodes = new Map<unknown, Node>();
     const rowScopes = new Map<unknown, Scope | null>();
+    let order: unknown[] = [];
     effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
         const list = items();
         const rawList = toRaw(list);
         const len = rawList.length;
-        const next = new Map<unknown, Node>();
         const keys: unknown[] = new Array(len);
+        untrack(() => {
+            for (let i = 0; i < len; i++) keys[i] = keyFn(rawList[i] as T, i);
+        });
+        const oldKeys = order;
+        order = keys;
 
+        if (len > 0) {
+            let s = 0;
+            let oe = oldKeys.length - 1;
+            let ne = len - 1;
+            while (s <= oe && s <= ne && oldKeys[s] === keys[s]) s++;
+            while (s <= oe && s <= ne && oldKeys[oe] === keys[ne]) {
+                oe--;
+                ne--;
+            }
+            if (s > oe) {
+                if (s <= ne) {
+                    const ref =
+                        ne + 1 < len
+                            ? (nodes.get(keys[ne + 1]) as Node)
+                            : anchor;
+                    const frag = document.createDocumentFragment();
+                    untrack(() => {
+                        for (let i = s; i <= ne; i++) {
+                            const node = collect(() => render(list[i], i));
+                            rowScopes.set(keys[i], takeScopes());
+                            nodes.set(keys[i], node);
+                            frag.appendChild(node);
+                        }
+                    });
+                    parent.insertBefore(frag, ref);
+                }
+                return;
+            }
+            if (s > ne) {
+                for (let i = s; i <= oe; i++) {
+                    const key = oldKeys[i];
+                    (nodes.get(key) as ChildNode).remove();
+                    dispose(rowScopes.get(key) ?? null);
+                    rowScopes.delete(key);
+                    nodes.delete(key);
+                }
+                return;
+            }
+        }
+
+        const next = new Map<unknown, Node>();
         let survivors = 0;
-        const initial = nodes.size === 0;
         untrack(() => {
             for (let i = 0; i < len; i++) {
-                const key = keyFn(rawList[i] as T, i);
-                keys[i] = key;
-                let node = initial ? undefined : nodes.get(key);
+                const key = keys[i];
+                let node = nodes.get(key);
                 if (!node) {
                     node = collect(() => render(list[i], i));
                     rowScopes.set(key, takeScopes());
@@ -207,22 +251,18 @@ export const _list = <T>(
         });
 
         if (nodes.size > 0 && survivors === 0) {
-            let first: Node | undefined;
-            let last: Node | undefined;
-            for (const node of nodes.values()) {
-                if (!first) first = node;
-                last = node;
-            }
+            const first = nodes.get(oldKeys[0]) as Node;
+            const last = nodes.get(oldKeys[oldKeys.length - 1]) as Node;
             if (
                 first === parent.firstChild &&
-                (last as Node).nextSibling === anchor &&
+                last.nextSibling === anchor &&
                 anchor.nextSibling === null
             ) {
                 (parent as Element).replaceChildren(anchor);
             } else {
                 const range = document.createRange();
-                range.setStartBefore(first as Node);
-                range.setEndAfter(last as Node);
+                range.setStartBefore(first);
+                range.setEndAfter(last);
                 range.deleteContents();
             }
             for (const key of nodes.keys()) {
@@ -249,8 +289,7 @@ export const _list = <T>(
         }
 
         const oldPos = new Map<unknown, number>();
-        let p = 0;
-        for (const key of nodes.keys()) oldPos.set(key, p++);
+        for (let q = 0; q < oldKeys.length; q++) oldPos.set(oldKeys[q], q);
 
         const seq: number[] = [];
         const seqPos: number[] = [];
