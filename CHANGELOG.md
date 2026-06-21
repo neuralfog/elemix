@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.4] - 2026-06-22
+
+### Added
+
+- Compiler hints: `#component`/`#tag`/`#form`/`#no-shadow`/`#styles`/`#state`/`#effect` + lifecycle `#before-mount`/`#mount`/`#dispose`
+- Reactive primitives in component `#state` (`count = 0` stays reactive)
+- Component inheritance — hooks/effects chain through `super`, stylesheets merge
+- Collections in reactive state (`Set`/`Map`/`WeakSet`/`WeakMap`), classes in state, `raw()` helper
+- Source maps back to the original source
+- Inlined compiler diagnostics with `--strict`; CLI version banner
+
+### Changed
+
+- Performance optimisations
+
+### Fixed
+
+- Nested arrays in deep state, template-less pragma components, statements before `return`, dangling `Cargo.lock`
+
 ## [0.9.0-dev.3] - 2026-06-16
 
 ### Added

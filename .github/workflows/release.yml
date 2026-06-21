@@ -62,6 +62,12 @@ jobs:
     needs: changelog
     name: build ${{ matrix.pkg }}
     runs-on: ${{ matrix.os }}
+    env:
+      # Cargo's curl downloader intermittently dies mid crates.io fetch on the
+      # Windows runners with "[16] Error in the HTTP2 framing layer". Drop HTTP/2
+      # multiplexing (→ HTTP/1.1) and give cargo more retries to ride out the flake.
+      CARGO_HTTP_MULTIPLEXING: false
+      CARGO_NET_RETRY: 10
     strategy:
       fail-fast: false
       matrix:
