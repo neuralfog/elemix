@@ -21,7 +21,8 @@ use crate::pragma::parse::{is_pragma, split_directives};
 use crate::pragma::Directive;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
-    BindingPattern, Class, ClassElement, Declaration, MethodDefinitionKind, PropertyKey, Statement,
+    BindingPattern, Class, ClassElement, Declaration, Expression, MethodDefinitionKind,
+    PropertyKey, Statement,
 };
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
@@ -74,6 +75,10 @@ pub struct ClassInfo {
     pub mounts: Vec<String>,
     /// `#dispose`-tagged methods, in source order.
     pub disposes: Vec<String>,
+    /// The superclass identifier (`extends X`). `None`, or `Some("Component")`,
+    /// means a base component; anything else is a component extending another
+    /// component, so lifecycle hooks + `__sheets` must chain through `super`.
+    pub super_class: Option<String>,
 }
 
 /// Everything the lowering needs. `#state` declarations resolve `state` from
@@ -177,6 +182,10 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                 before_mounts: Vec::new(),
                 mounts: Vec::new(),
                 disposes: Vec::new(),
+                super_class: class.super_class.as_ref().and_then(|e| match e {
+                    Expression::Identifier(id) => Some(id.name.to_string()),
+                    _ => None,
+                }),
             });
         } else if let Some(target) = as_const(stmt) {
             targets.push(target);
