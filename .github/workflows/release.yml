@@ -44,7 +44,7 @@ jobs:
   test:
     uses: ./.github/workflows/test.yml
 
-  # ── gate 2: every package's top changelog entry == <version>, well-formed ───
+  # ── gate 2: the root changelog's top entry == <version>, well-formed ────────
   changelog:
     needs: [test, version]
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - name: Check changelogs
+      - name: Check changelog
         run: node scripts/changelog.mjs check "${{ needs.version.outputs.value }}"
 
   # ── the one build the test gate can't cover: the 6 cross-platform binaries.
@@ -172,8 +172,9 @@ jobs:
         run: node packages/compiler/npm/version.mjs "${{ needs.version.outputs.value }}"
 
       # Ship the changelog inside the launcher package (its `files` lists it).
+      # Single source of truth is the root CHANGELOG.md, copied in at publish time.
       - name: Stage changelog into launcher
-        run: cp packages/compiler/CHANGELOG.md packages/compiler/npm/elemix-compiler/CHANGELOG.md
+        run: cp CHANGELOG.md packages/compiler/npm/elemix-compiler/CHANGELOG.md
 
       # Platform packages first, then the launcher that depends on them.
       - name: Publish
@@ -273,6 +274,10 @@ jobs:
       - name: Build
         run: pnpm --filter @neuralfog/elemix build
 
+      # Ship the changelog (its `files` lists it) — staged from the root source.
+      - name: Stage changelog
+        run: cp CHANGELOG.md packages/elemix/CHANGELOG.md
+
       - name: Publish
         working-directory: packages/elemix
         env:
@@ -345,6 +350,10 @@ jobs:
           echo "::error::@neuralfog/elemix@$DEP did not propagate in time"
           exit 1
 
+      # Ship the changelog (its `files` lists it) — staged from the root source.
+      - name: Stage changelog
+        run: cp CHANGELOG.md packages/storybook/CHANGELOG.md
+
       - name: Publish
         working-directory: packages/storybook
         env:
@@ -412,6 +421,10 @@ jobs:
           echo "::error::@neuralfog/elemix-compiler@$DEP did not propagate in time"
           exit 1
 
+      # Ship the changelog (its `files` lists it) — staged from the root source.
+      - name: Stage changelog
+        run: cp CHANGELOG.md packages/vite/CHANGELOG.md
+
       - name: Publish
         working-directory: packages/vite
         env:
@@ -423,7 +436,7 @@ jobs:
           echo "publishing @neuralfog/elemix-vite@$VERSION under dist-tag: $TAG"
           npm publish --access public --provenance --tag "$TAG"
 
-  # ── after everything is on npm: one GitHub Release from the changelogs ──────
+  # ── after everything is on npm: one GitHub Release from the changelog ───────
   release-notes:
     name: GitHub Release
     needs:

@@ -37,6 +37,10 @@ GG 👊🥋✊
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
+***Chores 🥣🧽***
+
+- One changelog for all packages, less bureaucracy 🗂️
+
 ***My Subclass Has Daddy Issues 👨‍👦***
 
 - Component inheritance now works correctly 🧬

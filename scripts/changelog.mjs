@@ -1,13 +1,9 @@
 import { existsSync, readFileSync } from 'node:fs';
 
-// Per-package changelogs, in the order they appear in release notes. Each maps a
-// package directory (where CHANGELOG.md lives) to the npm package it ships as.
-const PACKAGES = [
-    { dir: 'packages/elemix', npm: '@neuralfog/elemix' },
-    { dir: 'packages/storybook', npm: '@neuralfog/elemix-storybook' },
-    { dir: 'packages/compiler', npm: '@neuralfog/elemix-compiler' },
-    { dir: 'packages/vite', npm: '@neuralfog/elemix-vite' },
-];
+// One changelog for the whole toolchain. Every package shares a version and
+// releases together, so they share this single root CHANGELOG.md — a copy is
+// staged into each package at publish time (release.yml) so npm ships it.
+const CHANGELOG = 'CHANGELOG.md';
 
 // Keep a Changelog: a version heading is `## [x.y.z] - YYYY-MM-DD` (prereleases
 // allowed) or `## [Unreleased]`; section headings come from a fixed vocabulary.
@@ -20,8 +16,6 @@ const SECTIONS = new Set([
     'Fixed',
     'Security',
 ]);
-
-const changelogPath = (dir) => `${dir}/CHANGELOG.md`;
 
 // The newest released version in a changelog — the first numeric `## [x.y.z]`
 // heading, skipping `## [Unreleased]`.
@@ -69,44 +63,40 @@ const lintFormat = (file, text) => {
     return errors;
 };
 
-const readEach = () =>
-    PACKAGES.map((p) => {
-        const file = changelogPath(p.dir);
-        if (!existsSync(file)) {
-            console.error(`missing changelog: ${file}`);
-            process.exit(1);
-        }
-        return { ...p, file, text: readFileSync(file, 'utf8') };
-    });
+const read = () => {
+    if (!existsSync(CHANGELOG)) {
+        console.error(`missing changelog: ${CHANGELOG}`);
+        process.exit(1);
+    }
+    return readFileSync(CHANGELOG, 'utf8');
+};
 
 const cmd = process.argv[2];
 const arg = process.argv[3];
 
 if (cmd === 'lint') {
-    const errors = readEach().flatMap((c) => lintFormat(c.file, c.text));
+    const errors = lintFormat(CHANGELOG, read());
     if (errors.length) {
         console.error('changelog format errors:');
         for (const e of errors) console.error(`  ${e}`);
         process.exit(1);
     }
-    console.log(`changelog format OK (${PACKAGES.length} packages)`);
+    console.log('changelog format OK');
 } else if (cmd === 'check') {
     const expected = arg ?? JSON.parse(readFileSync('package.json', 'utf8')).version;
-    const all = readEach();
-    const errors = all.flatMap((c) => lintFormat(c.file, c.text));
-    for (const c of all) {
-        const top = topVersion(c.text);
-        if (top !== expected)
-            errors.push(
-                `${c.file} top entry is [${top ?? 'none'}], expected [${expected}]`,
-            );
-    }
+    const text = read();
+    const errors = lintFormat(CHANGELOG, text);
+    const top = topVersion(text);
+    if (top !== expected)
+        errors.push(
+            `${CHANGELOG} top entry is [${top ?? 'none'}], expected [${expected}]`,
+        );
     if (errors.length) {
         console.error(`changelog check failed for ${expected}:`);
         for (const e of errors) console.error(`  ${e}`);
         process.exit(1);
     }
-    console.log(`changelog versions match ${expected} (${PACKAGES.length} packages)`);
+    console.log(`changelog top entry matches ${expected}`);
 } else {
     console.error('usage: node scripts/changelog.mjs <lint | check [version]>');
     process.exit(1);

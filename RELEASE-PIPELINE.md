@@ -3,7 +3,7 @@
 One version, one tag, everything ships — **gated**. `pnpm bump` locksteps every version
 in the repo, `pnpm tag` pushes a single `v<version>` tag, and **one** CI workflow
 (`release.yml`) runs the whole toolchain through a fail-fast pipeline: nothing reaches
-npm unless the tests pass, the changelogs are in order, and every binary built.
+npm unless the tests pass, the changelog is in order, and every binary built.
 
 ```
    pnpm bump <ver>      git commit      pnpm tag         push v<ver>      release.yml (one gated DAG)
@@ -59,7 +59,7 @@ test  ────┤  GATE 1 — reuses test.yml (workflow_call): pnpm install 
           │           every lib + wasm conformance) · lint · full test suite.
           ▼
 changelog ─  GATE 2 — node scripts/changelog.mjs check <version>
-          ▼           (every package's top entry == <version>, well-formed)
+          ▼           (the root changelog's top entry == <version>, well-formed)
 build-compiler (matrix · 6 targets)   ← the ONE build the test gate can't cover
    linux-x64 · linux-arm64   musl, zig-cross on ubuntu
    darwin-x64 · darwin-arm64 cross on Apple Silicon (universal SDK)
@@ -82,7 +82,7 @@ publish-compiler   publish-wasm   publish-elemix        (rebuild-in-publish, opt
                                                                     (pin compiler = <ver>,
                                                                      short CDN wait)
         ▼
-release-notes  needs: ALL publishes — assemble per-package changelog sections +
+release-notes  needs: ALL publishes — the root changelog's <ver> section +
                npm links → one GitHub Release (--prerelease when <ver> has a hyphen).
                No artifacts attached; the packages already live on npm.
 ```
@@ -117,8 +117,8 @@ carries a `repository` field so the provenance attestation verifies.
 
 ```bash
 # stable release
-# 1. add a `## [0.9.0] - <date>` section to each packages/*/CHANGELOG.md
-pnpm changelog:check 0.9.0                # verify every top entry == 0.9.0 (run before tagging)
+# 1. add a `## [0.9.0] - <date>` section to the root CHANGELOG.md
+pnpm changelog:check 0.9.0                # verify the top entry == 0.9.0 (run before tagging)
 pnpm bump 0.9.0
 git commit -am "release: v0.9.0"
 pnpm tag                                  # push v0.9.0 → CI publishes everything @0.9.0

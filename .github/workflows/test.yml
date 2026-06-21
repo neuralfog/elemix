@@ -39,7 +39,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Lint changelogs
+      - name: Lint changelog
         run: node scripts/changelog.mjs lint
 
       # Browser for the compiler's Storybook conformance plays (headless chromium).

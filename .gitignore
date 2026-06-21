@@ -6,3 +6,8 @@ coverage
 .DS_Store
 target
 *:Zone.Identifier
+
+# Single source of truth is the root CHANGELOG.md; a copy is staged into each
+# package at publish time (release.yml) so npm ships it. Never commit those.
+packages/*/CHANGELOG.md
+packages/compiler/npm/elemix-compiler/CHANGELOG.md

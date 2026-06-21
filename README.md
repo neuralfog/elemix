@@ -25,15 +25,17 @@ its Storybook integration, the compiler binaries, the wasm build, and the Vite p
 — to npm.
 
 ```bash
-# add a `## [<version>] - <date>` section to each packages/*/CHANGELOG.md first
+# add a `## [<version>] - <date>` section to the root CHANGELOG.md first
 pnpm bump <version | major | minor | patch>   # sync the version everywhere
 git commit -am "release: v<version>"
 pnpm tag                                       # push v<version> → CI publishes everything
 ```
 
-Each package keeps its own `CHANGELOG.md` (shipped on npm). The same tag builds a
-GitHub Release from those entries, linking each published package — `pnpm changelog:lint`
-checks the format, and the release gates on every top entry matching the version.
+The whole toolchain shares one version, so it shares one root `CHANGELOG.md` — copied
+into every package at publish time, so each ships it on npm. The same tag builds a
+GitHub Release from that version's section, linking each published package —
+`pnpm changelog:lint` checks the format, and the release gates on the top entry
+matching the version.
 
 ### Dev releases
 
@@ -59,4 +61,4 @@ Install a dev build with `pnpm add @neuralfog/elemix@dev`. To re-trigger a botch
 run, `pnpm tag-remove` then `pnpm tag` again.
 
 See **[RELEASE-PIPELINE.md](RELEASE-PIPELINE.md)** for the full picture — the bump
-fan-out, the CI workflows, changelogs, ordering, dist-tags, and provenance.
+fan-out, the CI workflows, the changelog, ordering, dist-tags, and provenance.

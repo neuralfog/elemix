@@ -1,12 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs';
 
-// Same package set / order as changelog.mjs. Kept local so this script has no
-// import side effects (it is piped straight into `gh release create`).
+// The whole toolchain shares one version and one root CHANGELOG.md. Release notes
+// are that version's section, followed by links to every package published at it.
+const CHANGELOG = 'CHANGELOG.md';
 const PACKAGES = [
-    { dir: 'packages/elemix', npm: '@neuralfog/elemix' },
-    { dir: 'packages/storybook', npm: '@neuralfog/elemix-storybook' },
-    { dir: 'packages/compiler', npm: '@neuralfog/elemix-compiler' },
-    { dir: 'packages/vite', npm: '@neuralfog/elemix-vite' },
+    '@neuralfog/elemix',
+    '@neuralfog/elemix-storybook',
+    '@neuralfog/elemix-compiler',
+    '@neuralfog/elemix-vite',
 ];
 
 const version = process.argv[2];
@@ -27,22 +28,18 @@ const section = (text, v) => {
 
 const npmLink = (npm) => `https://www.npmjs.com/package/${npm}/v/${version}`;
 
-const blocks = [];
-for (const p of PACKAGES) {
-    const file = `${p.dir}/CHANGELOG.md`;
-    if (!existsSync(file)) continue;
-    const body = section(readFileSync(file, 'utf8'), version);
-    if (!body) {
-        console.error(`note: ${p.npm} has no [${version}] section — skipping`);
-        continue;
-    }
-    blocks.push(`## [\`${p.npm}\`](${npmLink(p.npm)})\n\n${body}`);
-}
-
-if (blocks.length === 0) {
-    console.error(`no changelog entries found for ${version}`);
+if (!existsSync(CHANGELOG)) {
+    console.error(`missing changelog: ${CHANGELOG}`);
     process.exit(1);
 }
 
+const body = section(readFileSync(CHANGELOG, 'utf8'), version);
+if (!body) {
+    console.error(`no changelog entry found for ${version}`);
+    process.exit(1);
+}
+
+const links = PACKAGES.map((npm) => `- [\`${npm}\`](${npmLink(npm)})`).join('\n');
+
 // Published to npm — nothing to attach. The packages are the artifacts.
-process.stdout.write(`${blocks.join('\n\n')}\n`);
+process.stdout.write(`${body}\n\n### Packages\n\n${links}\n`);
