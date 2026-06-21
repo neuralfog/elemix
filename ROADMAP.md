@@ -8,11 +8,11 @@ Target release of compiled templates `v0.9.0`
 
 ***Hunt never ends... 🌃🦇🌃***
 
-- Row swap gap was driving me insane 😡😡😡 The diffrence was inproportianal to the amount of work ⌛
+- Row swap gap was driving me insane 😡😡😡 The difference was disproportionate to the amount of work ⌛
 
 ![flip table](.roadmap/flip-table.gif)
 
-- Managed to squize a bit more out of it 🍋‍🟩🍋‍🟩🤏
+- Managed to squeeze a bit more out of it 🍋‍🟩🍋‍🟩🤏
 - I think I can let go now... I am broken 🥲🧠🔨🤣
 
 GG 👊🥋✊
@@ -36,6 +36,23 @@ GG 👊🥋✊
 - [] Add template repo 📍
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
+
+- [] Deal with component inheritance 🤮🧐 This is a pandora box, do I even go there... It has to work though...
+
+***Make It So 🖖***
+
+- Component state now can have primitives assigned, following through on a single concept of state 🧱✨
+
+```ts
+// #state
+count = 0; // ← stays reactive
+```
+
+- Compiler lowers the primitives to a set of tracked getters and setters ⚙️🪄
+- For now module-level states (stores) can only have objects assigned, this is enforced by a compiler error 🛑
+- This may change in the future if I can find a clean solution without a prescan of all files 🤔 At the same
+  time it makes sense for stores to have state as an object, so maybe this is not an issue at all... 🤷📦
+- Fixed an issue with a dangling `Cargo.lock` after a release 🐛
 
 ***I'm Givin' Her All She's Got, Captain! 🚀⚙️🔥***
 

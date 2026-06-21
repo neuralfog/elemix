@@ -117,6 +117,34 @@ fn render_prefixes_elemix_and_component() {
     assert_eq!(f.render(), "[elemix] loose");
 }
 
+const PRIMITIVE_MODULE_STATE: &str = "// #state\nexport const count = 0;";
+const OBJECT_MODULE_STATE: &str = "// #state\nexport const store = { count: 0 };";
+
+#[test]
+fn module_level_primitive_state_is_an_error() {
+    let out = compile(PRIMITIVE_MODULE_STATE);
+    assert!(out.contains("throw new Error('[elemix] module-level `#state` must be an object"));
+    let (_, diags) = compile_diagnostics(PRIMITIVE_MODULE_STATE);
+    assert_eq!(diags.len(), 1);
+    assert_eq!(diags[0].severity, Severity::Error);
+    assert!(has_errors(&diags));
+}
+
+#[test]
+fn module_level_object_state_is_clean() {
+    let (_, diags) = compile_diagnostics(OBJECT_MODULE_STATE);
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn class_field_primitive_state_is_clean() {
+    // bare primitives ARE allowed as class fields (they lower to an accessor),
+    // so they must never trip the module-state error.
+    let src = "import { Component } from '@neuralfog/elemix';\nexport class Foo extends Component {\n    // #state\n    count = 0;\n}";
+    let (_, diags) = compile_diagnostics(src);
+    assert!(diags.is_empty());
+}
+
 #[test]
 fn inline_is_identity_without_diagnostics() {
     assert_eq!(inline("CODE", &[]), "CODE");

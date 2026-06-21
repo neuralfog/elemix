@@ -37,13 +37,22 @@ pub struct StyleField {
     pub comment: (usize, usize),
 }
 
-/// A `#state` rewrite: replace `[start, end)` (from the binding name's end through
-/// the initializer's end) with ` = state<T>(init)`.
+/// A `#state` rewrite: replace `[start, end)` with `repl`. For an object/array
+/// initializer (or a module const) this wraps the value in `state<T>(…)`. For a
+/// bare primitive class field it instead emits a get/set accessor backed by a
+/// per-instance `dep()` (`accessor = true`), so `this.foo` itself is reactive.
+///
+/// `module_primitive` flags a module-level `#state` const with a bare primitive
+/// initializer — illegal, because a module export has no `this` to hang an
+/// accessor on and can't be reactive single-file. `diagnose` turns it into an
+/// error steering to an object store.
 #[derive(Debug, PartialEq)]
 pub struct StateEdit {
     pub start: usize,
     pub end: usize,
     pub repl: String,
+    pub accessor: bool,
+    pub module_primitive: bool,
 }
 
 /// A top-level class with whatever pragma directives + styles fields tag it.
@@ -92,6 +101,7 @@ enum Kind {
     Field {
         class_idx: usize,
         name: String,
+        name_start: usize,
         name_end: usize,
         type_span: Option<Span>,
         value: Span,
@@ -132,6 +142,7 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                                 Kind::Field {
                                     class_idx: idx,
                                     name: key_name(&prop.key),
+                                    name_start: prop.span.start as usize,
                                     name_end: prop.key.span().end as usize,
                                     type_span: prop
                                         .type_annotation
@@ -208,6 +219,7 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
             Kind::Field {
                 class_idx,
                 name,
+                name_start,
                 name_end,
                 type_span,
                 value,
@@ -219,7 +231,14 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                     comment: (line, cend + usize::from(source[cend..].starts_with('\n'))),
                 }),
                 "state" => {
-                    states.push(state_edit(source, *name_end, *type_span, *value));
+                    states.push(field_state_edit(
+                        source,
+                        name,
+                        *name_start,
+                        *name_end,
+                        *type_span,
+                        *value,
+                    ));
                     strips.push((line, cend));
                 }
                 "effect" => {
@@ -297,12 +316,79 @@ fn directive_name(directives: &[Directive]) -> Result<&str, LocateError> {
 }
 
 /// `[name_end, value_end)` → ` = state<Type>(value)` (generic omitted if untyped).
+/// A module const with a bare-primitive initializer is flagged `module_primitive`
+/// for `diagnose` to reject — it would compile to a dead, non-reactive value.
 fn state_edit(source: &str, name_end: usize, type_span: Option<Span>, value: Span) -> StateEdit {
+    let init = slice(source, value);
     let generic = type_span.map_or(String::new(), |t| format!("<{}>", slice(source, t)));
+    let trimmed = init.trim_start();
+    let module_primitive = !(trimmed.starts_with('{') || trimmed.starts_with('['));
     StateEdit {
         start: name_end,
         end: value.end as usize,
-        repl: format!(" = state{generic}({})", slice(source, value)),
+        repl: format!(" = state{generic}({init})"),
+        accessor: false,
+        module_primitive,
+    }
+}
+
+/// A `#state` class field. An object/array initializer keeps the cheap field
+/// form (`= state<T>(…)`). A bare primitive (or any non-literal) initializer is
+/// lowered to a get/set accessor over a private backing field + per-instance
+/// `dep()`, making `this.<name>` itself reactive without a `.value` box.
+fn field_state_edit(
+    source: &str,
+    name: &str,
+    name_start: usize,
+    name_end: usize,
+    type_span: Option<Span>,
+    value: Span,
+) -> StateEdit {
+    let init = slice(source, value);
+    let generic = type_span.map_or(String::new(), |t| format!("<{}>", slice(source, t)));
+
+    let trimmed = init.trim_start();
+    if trimmed.starts_with('{') || trimmed.starts_with('[') {
+        return StateEdit {
+            start: name_end,
+            end: value.end as usize,
+            repl: format!(" = state{generic}({init})"),
+            accessor: false,
+            module_primitive: false,
+        };
+    }
+
+    // Swallow the field's own trailing `;` so the generated accessor block
+    // doesn't leave a stray empty statement after the `set` method.
+    let bytes = source.as_bytes();
+    let mut end = value.end as usize;
+    let mut j = end;
+    while j < bytes.len() && matches!(bytes[j], b' ' | b'\t') {
+        j += 1;
+    }
+    if j < bytes.len() && bytes[j] == b';' {
+        end = j + 1;
+    }
+
+    let ann = type_span.map_or(String::new(), |t| format!(": {}", slice(source, t)));
+    let repl = format!(
+        "#{name}{ann} = state{generic}({init});\n    \
+         #{name}_dep = dep();\n    \
+         get {name}(){ann} {{\n        \
+         track(this.#{name}_dep);\n        \
+         return this.#{name};\n    }}\n    \
+         set {name}(value{ann}) {{\n        \
+         const next = state{generic}(value);\n        \
+         if (this.#{name} === next) return;\n        \
+         this.#{name} = next;\n        \
+         trigger(this.#{name}_dep);\n    }}"
+    );
+    StateEdit {
+        start: name_start,
+        end,
+        repl,
+        accessor: true,
+        module_primitive: false,
     }
 }
 

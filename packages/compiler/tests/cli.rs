@@ -186,7 +186,7 @@ fn compiles_a_directory_of_fixtures() {
         .unwrap()
         .filter_map(Result::ok)
         .collect();
-    assert_eq!(files.len(), 53);
+    assert_eq!(files.len(), 55);
 
     // no compiled file in the whole corpus leaks the html intrinsic or a directive
     for entry in files {
