@@ -94,6 +94,14 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         }
         let meta = resolve(&class.directives).map_err(ExpandError::Resolve)?;
 
+        // A component extending ANOTHER component (not the base `Component`) must
+        // chain through `super`: lifecycle hooks/effects would otherwise shadow
+        // the base's, and `__sheets` would replace rather than merge them.
+        let inherits = class
+            .super_class
+            .as_deref()
+            .is_some_and(|s| s != "Component");
+
         // #styles fields → strip each, hoist a `sheet(<value>)` (deduped) + __sheets.
         // Under #no-shadow there's no shadow root to adopt into, so skip the sheet
         // entirely — strip only the marker comment, leave the field (keeping its
@@ -145,6 +153,11 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         // separately from the view) registering one effect per tagged method.
         if !class.effects.is_empty() {
             needs_effect = true;
+            let sup = if inherits {
+                "\n        super.effects?.();"
+            } else {
+                ""
+            };
             let calls: String = class
                 .effects
                 .iter()
@@ -153,7 +166,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             edits.push((
                 class.body_open,
                 class.body_open,
-                format!("\n    effects(): void {{{calls}\n    }}"),
+                format!("\n    effects(): void {{{sup}{calls}\n    }}"),
             ));
         }
 
@@ -173,10 +186,19 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
                 .iter()
                 .map(|name| format!("\n        this.{name}();"))
                 .collect();
+            // Chain the base hook when inheriting: setup runs base-first
+            // (super before own); teardown reverses (own before super).
+            let body = if !inherits {
+                calls
+            } else if hook == "onDispose" {
+                format!("{calls}\n        super.{hook}?.();")
+            } else {
+                format!("\n        super.{hook}?.();{calls}")
+            };
             edits.push((
                 class.body_open,
                 class.body_open,
-                format!("\n    {hook}(): void {{{calls}\n    }}"),
+                format!("\n    {hook}(): void {{{body}\n    }}"),
             ));
         }
 
@@ -188,7 +210,16 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
                 .map(|v| format!("...{v}"))
                 .collect::<Vec<_>>()
                 .join(", ");
-            after.push_str(&format!("\n{}.__sheets = [{spread}];", class.name));
+            let name = &class.name;
+            // When inheriting, merge the base's sheets (read off the prototype at
+            // runtime) so the derived component adopts both — no cross-file lookup.
+            if inherits {
+                after.push_str(&format!(
+                    "\n{name}.__sheets = [...(Object.getPrototypeOf({name}).__sheets ?? []), {spread}];"
+                ));
+            } else {
+                after.push_str(&format!("\n{name}.__sheets = [{spread}];"));
+            }
         }
         if meta.register {
             needs_define = true;

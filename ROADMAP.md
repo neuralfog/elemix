@@ -37,7 +37,12 @@ GG 👊🥋✊
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
-- [] Deal with component inheritance 🤮🧐 This is a pandora box, do I even go there... It has to work though...
+***My Subclass Has Daddy Issues 👨‍👦***
+
+- Component inheritance now works correctly 🧬
+- Turned out most stuff just already worked 😅🍀
+- Lifecycle hooks + effects were shadowing the base - now they chain through `super` ⛓️
+- Styles were replacing instead of merging - derived now adopts base sheets plus its own 🎨
 
 ***Make It So 🖖***
 
@@ -277,7 +282,7 @@ save() {
 
 - Statements before return in template procedure had been stripped, this has been fixed with
   prelude in rewrite stage 🥇
-- So far hasn't seen any issues related to hoisting post compilation 🤔
+- So far haven't seen any issues related to hoisting post compilation 🤔
 - Multiple components per file are allowed now
 - Parameterized helper templates 🎉 `${this.row(item)}` now inlines - splice substitutes the
   helper's param for the call's arg (identifier-aware, skips strings + property names) and splices
@@ -695,3 +700,5 @@ What went well:
 - Still taking it with a pinch of salt until submitting to the official repo and getting results
   in a stable environment, this is good enough to eyeball it 👀👀
 - I am spent 😰😰😰 Now all energy into release... 🚀
+
+- [x] Deal with component inheritance 🤮🧐 This is a pandora box, do I even go there... It has to work though...

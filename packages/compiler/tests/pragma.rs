@@ -543,6 +543,56 @@ fn lifecycle_works_on_arrow_fields() {
     assert!(out.contains("this.ready();"));
 }
 
+// --- component inheritance ---------------------------------------------------
+
+#[test]
+fn inheriting_component_chains_super_before_own_in_setup_hooks() {
+    let src = "// #component\nclass Derived extends Base {\n    // #mount\n    ready(): void {}\n}";
+    let out = expand(src).unwrap();
+    let hook = &out[out.find("onMount(): void {").unwrap()..];
+    // setup runs base-first: super before own
+    assert!(hook.find("super.onMount?.();").unwrap() < hook.find("this.ready();").unwrap());
+}
+
+#[test]
+fn inheriting_component_disposes_own_before_super() {
+    let src =
+        "// #component\nclass Derived extends Base {\n    // #dispose\n    teardown(): void {}\n}";
+    let out = expand(src).unwrap();
+    let hook = &out[out.find("onDispose(): void {").unwrap()..];
+    // teardown reverses: own before super
+    assert!(hook.find("this.teardown();").unwrap() < hook.find("super.onDispose?.();").unwrap());
+}
+
+#[test]
+fn inheriting_component_chains_super_effects() {
+    let src = "// #component\nclass Derived extends Base {\n    // #effect\n    fx(): void {}\n}";
+    let out = expand(src).unwrap();
+    let hook = &out[out.find("effects(): void {").unwrap()..];
+    assert!(
+        hook.find("super.effects?.();").unwrap() < hook.find("effect(() => this.fx());").unwrap()
+    );
+}
+
+#[test]
+fn inheriting_component_merges_super_sheets() {
+    let src = "// #component\nclass Derived extends Base {\n    // #styles\n    s = `x`;\n}";
+    let out = expand(src).unwrap();
+    assert!(
+        out.contains("Derived.__sheets = [...(Object.getPrototypeOf(Derived).__sheets ?? []), ...")
+    );
+}
+
+#[test]
+fn base_component_extending_component_does_not_chain_super() {
+    // a plain component (extends the base `Component`) must be untouched.
+    let src = "// #component\nclass Foo extends Component {\n    // #mount\n    ready(): void {}\n    // #styles\n    s = `x`;\n}";
+    let out = expand(src).unwrap();
+    assert!(!out.contains("super.onMount"));
+    assert!(!out.contains("Object.getPrototypeOf"));
+    assert!(out.contains("Foo.__sheets = [..."));
+}
+
 #[test]
 fn lifecycle_pragma_on_a_class_is_an_error() {
     assert_eq!(

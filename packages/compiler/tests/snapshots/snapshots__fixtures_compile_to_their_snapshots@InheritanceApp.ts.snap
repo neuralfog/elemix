@@ -1,0 +1,82 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: tests/fixtures/InheritanceApp.ts
+---
+import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+// Component inheritance: `InheritDerived extends InheritBase`. State, the
+// template and methods come for free via the prototype; the compiler chains
+// `super` so the base's lifecycle hooks still fire and both stylesheets get
+// adopted (merged off the prototype), not replaced.
+
+// base styles the button red; the derived sheet adds bold on top — both target
+// `.btn` directly (a <button> resets inherited color/font, so :host wouldn't show)
+const baseCss =
+    ':host { display: block; } .btn { background: rgb(220, 38, 38); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; }';
+const derivedCss = '.btn { font-weight: 700; }';
+
+const _s0 = sheet(baseCss);
+const _t0 = template('<button class="btn">count <!----></button>');
+
+export class InheritBase extends Component {
+    onMount(): void {
+        this.baseMounted();
+    }
+    effects(): void {
+        effect(() => this.mirrorBase());
+    }
+
+    state = state({ count: 0 });
+
+    baseMounted(): void {
+        this.setAttribute('data-base', 'on');
+    }
+
+    mirrorBase(): void {
+        this.setAttribute('data-base-fx', String(this.state.count));
+    }
+
+    bump = (): void => {
+        this.state.count++;
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.nextSibling!;
+_event(_n1, 'click', this.bump);
+const _x3 = document.createTextNode('');
+_n2.replaceWith(_x3);
+effect(() => {
+_setText(_x3, (this.state.count));
+});
+return _r0;
+}
+}
+InheritBase.__sheets = [..._s0];
+defineComponent('inherit-base', InheritBase);
+
+const _s1 = sheet(derivedCss);
+export class InheritDerived extends InheritBase {
+    onMount(): void {
+        super.onMount?.();
+        this.derivedMounted();
+    }
+    effects(): void {
+        super.effects?.();
+        effect(() => this.mirrorDerived());
+    }
+
+    derivedMounted(): void {
+        this.setAttribute('data-derived', 'on');
+    }
+
+    mirrorDerived(): void {
+        this.setAttribute('data-derived-fx', String(this.state.count));
+    }
+}
+InheritDerived.__sheets = [...(Object.getPrototypeOf(InheritDerived).__sheets ?? []), ..._s1];
+defineComponent('inherit-derived', InheritDerived);
