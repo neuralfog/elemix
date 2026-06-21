@@ -388,6 +388,56 @@ fn state_runtime_import_merges_with_define_component() {
 }
 
 #[test]
+fn state_bare_primitive_lowers_to_a_reactive_accessor() {
+    // a bare primitive can't be proxied — it becomes a get/set accessor over a
+    // private backing field + per-instance dep, so `this.count` itself reacts.
+    let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    count = 0;\n}";
+    let out = expand(src).unwrap();
+    assert!(out.contains("#count = state(0);"));
+    assert!(out.contains("#count_dep = dep();"));
+    assert!(out.contains("get count() {"));
+    assert!(out.contains("track(this.#count_dep);"));
+    assert!(out.contains("return this.#count;"));
+    assert!(out.contains("set count(value) {"));
+    assert!(out.contains("if (this.#count === next) return;"));
+    assert!(out.contains("trigger(this.#count_dep);"));
+    // no stray field assignment and no leftover empty statement
+    assert!(!out.contains("count = state(0)\n"));
+    assert!(!out.contains("// #state"));
+}
+
+#[test]
+fn state_bare_primitive_carries_the_type_annotation() {
+    let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    active: boolean = true;\n}";
+    let out = expand(src).unwrap();
+    assert!(out.contains("#active: boolean = state<boolean>(true);"));
+    assert!(out.contains("get active(): boolean {"));
+    assert!(out.contains("set active(value: boolean) {"));
+    assert!(out.contains("const next = state<boolean>(value);"));
+}
+
+#[test]
+fn state_object_literal_keeps_the_cheap_field_form() {
+    // object/array initializers stay on the plain `= state(...)` field form —
+    // no accessor, so the deep-proxy hot path is untouched.
+    let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
+    let out = expand(src).unwrap();
+    assert!(out.contains("s = state({ n: 0 });"));
+    assert!(!out.contains("get s("));
+    assert!(!out.contains("dep()"));
+}
+
+#[test]
+fn state_primitive_imports_reactive_helpers_from_runtime() {
+    let src = "// #component\nclass Foo extends Component {\n    // #state\n    count = 0;\n}";
+    let out = expand(src).unwrap();
+    assert!(out.contains("dep"));
+    assert!(out.contains("track"));
+    assert!(out.contains("trigger"));
+    assert_eq!(out.matches("from '@neuralfog/elemix/runtime'").count(), 1);
+}
+
+#[test]
 fn state_on_a_class_is_an_error() {
     assert_eq!(
         expand("// #state\nclass Foo extends Component {}"),

@@ -23,6 +23,21 @@ pub fn collect(source: &str) -> Vec<Diagnostic> {
         }
     };
 
+    // A module-level `#state` const can't be a bare primitive — there's no
+    // `this` to make it reactive single-file. Steer to an object store.
+    for st in &located.states {
+        if st.module_primitive {
+            out.push(Diagnostic::error(
+                None,
+                "module-level `#state` must be an object — a bare primitive \
+                 export can't be reactive. Wrap it in a store object, e.g. \
+                 `export const store = { count: 0 };` and read `store.count`. \
+                 (Bare primitives are reactive only as component class fields.)"
+                    .to_string(),
+            ));
+        }
+    }
+
     for class in &located.classes {
         if class.directives.is_empty() {
             continue;

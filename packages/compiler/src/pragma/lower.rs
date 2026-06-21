@@ -78,6 +78,9 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         edits.push((st.start, st.end, st.repl.clone()));
     }
     let needs_state = !located.states.is_empty();
+    // Accessor-form #state (bare primitives) also needs the reactive primitives
+    // `dep`/`track`/`trigger` to back the generated get/set pair.
+    let needs_reactive = located.states.iter().any(|st| st.accessor);
 
     for class in &located.classes {
         if class.directives.is_empty()
@@ -206,6 +209,11 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
     }
     if needs_state {
         names.push("state");
+    }
+    if needs_reactive {
+        names.push("dep");
+        names.push("track");
+        names.push("trigger");
     }
     if needs_effect {
         names.push("effect");

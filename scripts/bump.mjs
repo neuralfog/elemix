@@ -60,3 +60,18 @@ if (existsSync(cargo)) {
     writeFileSync(cargo, text);
     console.log(`${cargo} -> ${next}`);
 }
+
+// Keep Cargo.lock in lockstep with Cargo.toml. Without this the lockfile's
+// `elemix-compiler` entry stays on the old version, and the next `cargo`
+// invocation (CI, release, clippy) rewrites it — leaving a dangling,
+// uncommitted Cargo.lock change after the bump. Scoped to the workspace
+// crate's own block (the only package named `elemix-compiler`).
+const cargoLock = 'packages/compiler/Cargo.lock';
+if (existsSync(cargoLock)) {
+    const text = readFileSync(cargoLock, 'utf8').replace(
+        /(name = "elemix-compiler"\nversion = ")[^"]+(")/,
+        `$1${next}$2`,
+    );
+    writeFileSync(cargoLock, text);
+    console.log(`${cargoLock} -> ${next}`);
+}

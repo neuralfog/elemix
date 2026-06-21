@@ -1,0 +1,141 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: tests/fixtures/PrimitiveStateApp.ts
+---
+import { template, clone, _event, effect, _setText, defineComponent, sheet, state, dep, track, trigger } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+// Proof that a BARE primitive is reactive state — no object wrapper, no
+// `.value` box. `// #state count = 0` makes `this.count` itself reactive: the
+// compiler lowers each primitive field to a get/set accessor over a private
+// backing field + a per-instance `dep()`. Number, boolean and string each get
+// their own slice and re-render only their own binding.
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 420px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 14px 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+    .count { font-size: 26px; font-weight: 800; color: var(--accent); min-width: 40px; }
+    .active {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #dcfce7;
+        color: #166534;
+    }
+    .label { font-size: 16px; font-weight: 600; }
+    button {
+        font: inherit;
+        font-size: 13px;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 8px;
+        background: #e2e8f0;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    button:hover { background: #cbd5e1; }
+`;
+
+const _s0 = sheet(css);
+const _t0 = template('<div class="row"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="row"><span class="active"> </span><button>toggle</button></div><div class="row"><strong class="label"> </strong><button>rename</button></div>');
+
+export class PrimitiveStateApp extends Component {
+
+    #count = state(0);
+    #count_dep = dep();
+    get count() {
+        track(this.#count_dep);
+        return this.#count;
+    }
+    set count(value) {
+        const next = state(value);
+        if (this.#count === next) return;
+        this.#count = next;
+        trigger(this.#count_dep);
+    }
+
+    #active: boolean = state<boolean>(true);
+    #active_dep = dep();
+    get active(): boolean {
+        track(this.#active_dep);
+        return this.#active;
+    }
+    set active(value: boolean) {
+        const next = state<boolean>(value);
+        if (this.#active === next) return;
+        this.#active = next;
+        trigger(this.#active_dep);
+    }
+
+    #label = state('idle');
+    #label_dep = dep();
+    get label() {
+        track(this.#label_dep);
+        return this.#label;
+    }
+    set label(value) {
+        const next = state(value);
+        if (this.#label === next) return;
+        this.#label = next;
+        trigger(this.#label_dep);
+    }
+
+    increment = (): void => {
+        this.count++;
+    };
+
+    reset = (): void => {
+        this.count = 0;
+    };
+
+    toggle = (): void => {
+        this.active = !this.active;
+    };
+
+    rename = (): void => {
+        this.label = this.label === 'idle' ? 'busy' : 'idle';
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.firstChild!.firstChild!;
+const _n5 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.firstChild!;
+const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+_event(_n2, 'click', this.increment);
+_event(_n3, 'click', this.reset);
+_event(_n5, 'click', this.toggle);
+_event(_n7, 'click', this.rename);
+effect(() => {
+_setText(_n1, (this.count));
+});
+effect(() => {
+_setText(_n4, (this.active ? 'on' : 'off'));
+});
+effect(() => {
+_setText(_n6, (this.label));
+});
+return _r0;
+}
+}
+PrimitiveStateApp.__sheets = [..._s0];
+defineComponent('primitive-state-app', PrimitiveStateApp);
