@@ -23,11 +23,9 @@ GG 👊🥋✊
 
 - [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
 - [] Add elemix to official benchmarks
-- [] WASM package needs its own readme 🤔
 
 ### Phase 6 - Close the release of v0.9.0 ❎
 
-- [] A lot of structural changes, test the shite out of it 🔴🔴
 - [] Update playground with WASM compiler
   - [] Update all examples with updated API, add new and maybe remove some
   - [] Playground needs some cleanup, better file management for examples, atm just a giant file 🤮
@@ -42,6 +40,7 @@ GG 👊🥋✊
 - One changelog for all packages, less bureaucracy 🗂️
 - Fixed compiler hint detection in the Vite plugin 🚪
 - GitHub releases now ship all binaries as downloadable assets 📦⬇️
+- WASM package ships its own readme now 🕸️📄
 
 ***My Subclass Has Daddy Issues 👨‍👦***
 
@@ -708,3 +707,5 @@ What went well:
 - I am spent 😰😰😰 Now all energy into release... 🚀
 
 - [x] Deal with component inheritance 🤮🧐 This is a pandora box, do I even go there... It has to work though...
+- [x] WASM package needs its own readme 🤔
+- [x] A lot of structural changes, test the shite out of it 🔴🔴

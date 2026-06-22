@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.7] - 2026-06-22
+
+### Changed
+
+- WASM package ships its own README
+
 ## [0.9.0-dev.6] - 2026-06-22
 
 ### Added
