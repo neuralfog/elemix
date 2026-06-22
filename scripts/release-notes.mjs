@@ -41,5 +41,9 @@ if (!body) {
 
 const links = PACKAGES.map((npm) => `- [\`${npm}\`](${npmLink(npm)})`).join('\n');
 
-// Published to npm — nothing to attach. The packages are the artifacts.
-process.stdout.write(`${body}\n\n### Packages\n\n${links}\n`);
+// Everything's on npm; the release-notes job also attaches all binaries below.
+const downloads = 'All binaries are attached as assets below.';
+
+process.stdout.write(
+    `${body}\n\n### Packages\n\n${links}\n\n### Downloads\n\n${downloads}\n`,
+);

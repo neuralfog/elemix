@@ -41,6 +41,7 @@ GG 👊🥋✊
 
 - One changelog for all packages, less bureaucracy 🗂️
 - Fixed compiler hint detection in the Vite plugin 🚪
+- GitHub releases now ship all binaries as downloadable assets 📦⬇️
 
 ***My Subclass Has Daddy Issues 👨‍👦***
 

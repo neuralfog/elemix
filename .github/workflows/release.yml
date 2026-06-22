@@ -233,6 +233,15 @@ jobs:
         working-directory: packages/compiler
         run: node scripts/wasm-pkg.mjs "${{ needs.version.outputs.value }}"
 
+      # Hand the built wasm package to release-notes so it can be attached to the
+      # GitHub Release alongside the native binaries (same as the npm-* artifacts).
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wasm-pkg
+          path: packages/compiler/pkg
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Publish
         working-directory: packages/compiler/pkg
         env:
@@ -461,6 +470,40 @@ jobs:
         with:
           node-version: 24
 
+      # Every binary built this run, restored from the build/publish jobs:
+      #   npm-<pkg>  → the 6 native binaries   |   wasm-pkg → the wasm build.
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: npm-*
+          path: artifacts
+      - uses: actions/download-artifact@v8
+        with:
+          name: wasm-pkg
+          path: wasm
+
+      # Pack each platform into a downloadable archive so the GitHub Release ships
+      # the prebuilt binaries, not just npm links. tar for unix (preserves the
+      # exec bit), zip for the Windows .exe, and a SHA256SUMS for verification.
+      - name: Package prebuilt binaries
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.version.outputs.value }}"
+          mkdir -p dist-assets
+          for dir in artifacts/npm-*; do
+            pkg="${dir#artifacts/npm-}"
+            if [ -f "$dir/elemix-compiler.exe" ]; then
+              ( cd "$dir" && zip -qj "$GITHUB_WORKSPACE/dist-assets/elemix-compiler-$VERSION-$pkg.zip" elemix-compiler.exe )
+            else
+              # upload-artifact zips files and drops the Unix exec bit — restore it
+              # so the tarball's binary is runnable straight out of the download.
+              chmod +x "$dir/elemix-compiler"
+              tar -czf "dist-assets/elemix-compiler-$VERSION-$pkg.tar.gz" -C "$dir" elemix-compiler
+            fi
+          done
+          tar -czf "dist-assets/elemix-compiler-$VERSION-wasm.tar.gz" -C wasm .
+          ( cd dist-assets && sha256sum elemix-compiler-* > SHA256SUMS.txt )
+          ls -l dist-assets
+
       - name: Assemble release notes
         run: node scripts/release-notes.mjs "${{ needs.version.outputs.value }}" > RELEASE_NOTES.md
 
@@ -479,3 +522,5 @@ jobs:
           else
             gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md "${PRERELEASE[@]}"
           fi
+          # Attach (or replace) the prebuilt binaries on the release.
+          gh release upload "$TAG" dist-assets/* --clobber
