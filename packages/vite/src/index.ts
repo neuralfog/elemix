@@ -5,6 +5,32 @@ import type { Plugin } from 'vite';
 
 const require = createRequire(import.meta.url);
 
+// Every elemix compiler hint. A file is compiled if it carries ANY of them, so
+// this list IS the gate — drop one and that pragma silently bleeds through
+// uncompiled (a module-level `// #state` store would stay a dead plain object).
+export const PRAGMAS = [
+    'component',
+    'tag',
+    'form',
+    'no-shadow',
+    'styles',
+    'state',
+    'effect',
+    'before-mount',
+    'mount',
+    'dispose',
+] as const;
+
+const PRAGMA = new RegExp(`^\\s*//\\s*#(${PRAGMAS.join('|')})\\b`, 'm');
+
+/**
+ * Whether a module needs the elemix compiler run on it: it has a `tpl` template,
+ * or any pragma comment (including a template-less `// #state` store / pragma
+ * component). Exported so the gate stays under test for every pragma.
+ */
+export const needsCompile = (code: string): boolean =>
+    code.includes('tpl`') || PRAGMA.test(code);
+
 // Resolve the host's prebuilt `elemix-compiler` binary from its platform package
 // (the same scheme the `ec` launcher uses).
 const resolveBin = (): string => {
@@ -77,17 +103,14 @@ export const elemix = (options: ElemixPluginOptions = {}): Plugin => {
         enforce: 'pre',
         async transform(code, id) {
             const file = id.split('?', 1)[0];
-            if (file.includes('/node_modules/') || !file.endsWith('.ts')) {
+            if (
+                file.includes('/node_modules/') ||
+                !file.endsWith('.ts') ||
+                file.endsWith('.d.ts')
+            ) {
                 return null;
             }
-            // Compile a file if it has a template (`tpl`) OR a `//` pragma
-            // comment (e.g. a template-less `// #component` wrapper) — both lower
-            // to runtime calls.
-            if (
-                file.endsWith('.d.ts') ||
-                (!code.includes('tpl`') &&
-                    !/^\s*\/\/\s*#(component|tag|styles|form)\b/m.test(code))
-            ) {
+            if (!needsCompile(code)) {
                 return null;
             }
             if (!bin) bin = resolveBin();

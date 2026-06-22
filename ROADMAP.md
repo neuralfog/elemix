@@ -40,6 +40,7 @@ GG 👊🥋✊
 ***Chores 🥣🧽***
 
 - One changelog for all packages, less bureaucracy 🗂️
+- Fixed compiler hint detection in the Vite plugin 🚪
 
 ***My Subclass Has Daddy Issues 👨‍👦***
 

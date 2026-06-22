@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.5] - 2026-06-22
+
+### Fixed
+
+- Compiler hint detection in the Vite plugin
+
 ## [0.9.0-dev.4] - 2026-06-22
 
 ### Added
