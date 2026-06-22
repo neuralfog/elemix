@@ -1,9 +1,8 @@
 # Changelog
 
-All notable changes to elemix and its companion packages — `@neuralfog/elemix`,
-`@neuralfog/elemix-storybook`, `@neuralfog/elemix-compiler`, and `@neuralfog/elemix-vite`
-— are documented here. They share one version and release together, so they share one
-changelog. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+All notable changes to elemix and its companion packages are documented here. They
+share one version and release together, so they share one changelog. The format
+follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
