@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-compiler",
-  "version": "0.9.0-dev.4",
+  "version": "0.9.0-dev.5",
   "description": "Ahead-of-time compiler for Elemix tpl templates",
   "license": "MIT",
   "author": "brownhounds",
@@ -19,11 +19,11 @@
     "CHANGELOG.md"
   ],
   "optionalDependencies": {
-    "@neuralfog/elemix-compiler-linux-x64": "0.9.0-dev.4",
-    "@neuralfog/elemix-compiler-linux-arm64": "0.9.0-dev.4",
-    "@neuralfog/elemix-compiler-darwin-x64": "0.9.0-dev.4",
-    "@neuralfog/elemix-compiler-darwin-arm64": "0.9.0-dev.4",
-    "@neuralfog/elemix-compiler-win32-x64": "0.9.0-dev.4",
-    "@neuralfog/elemix-compiler-win32-arm64": "0.9.0-dev.4"
+    "@neuralfog/elemix-compiler-linux-x64": "0.9.0-dev.5",
+    "@neuralfog/elemix-compiler-linux-arm64": "0.9.0-dev.5",
+    "@neuralfog/elemix-compiler-darwin-x64": "0.9.0-dev.5",
+    "@neuralfog/elemix-compiler-darwin-arm64": "0.9.0-dev.5",
+    "@neuralfog/elemix-compiler-win32-x64": "0.9.0-dev.5",
+    "@neuralfog/elemix-compiler-win32-arm64": "0.9.0-dev.5"
   }
 }
