@@ -8,6 +8,7 @@ const PACKAGES = [
     '@neuralfog/elemix-storybook',
     '@neuralfog/elemix-compiler',
     '@neuralfog/elemix-compiler-wasm',
+    '@neuralfog/elemix-analyzer',
     '@neuralfog/elemix-vite',
 ];
 

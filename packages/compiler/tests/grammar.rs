@@ -3,12 +3,15 @@
 
 use elemix_compiler::grammar::{classify, BindingKind};
 use elemix_compiler::template::node::{Hole, Slot, Step};
+use oxc_span::Span;
 
 fn attr(name: &str, expr: &str) -> Hole {
     Hole {
         path: vec![Step::Child(0)],
         slot: Slot::Attr(name.into()),
         expr: expr.into(),
+        span: Span::default(),
+        tag: None,
     }
 }
 
@@ -17,6 +20,8 @@ fn content(expr: &str) -> Hole {
         path: vec![Step::ChildNode(0)],
         slot: Slot::Content,
         expr: expr.into(),
+        span: Span::default(),
+        tag: None,
     }
 }
 

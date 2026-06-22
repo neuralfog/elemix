@@ -24,7 +24,7 @@ GG 👊🥋✊
 - [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
 - [] Add elemix to official benchmarks
 
-### Phase 6 - Close the release of v0.9.0 ❎
+### Phase 7 - Close the release of v0.9.0 ❎
 
 - [] Update playground with WASM compiler
   - [] Update all examples with updated API, add new and maybe remove some
@@ -32,6 +32,89 @@ GG 👊🥋✊
 - [] Put a website at `elemix.dev`
 - [] Update all `README` files at the moment is just autocomplete filler from the `minion` 🤖
 - [] Add template repo 📍
+
+### Phase 6 - Analyzer 📊
+
+***Out Of This World Output 🌌🎨***
+
+<img src=".roadmap/analyzer.png" alt="analyzer output" />
+
+***Hints With A Conscience 🧿#⃣️***
+
+- The analyzer now validates every `// #...`
+
+What it nails 🔨
+
+- Unknown directive — `// #componnt` → unknown pragma directive 🕵️
+- Bad #tag - conflicting #tag values, or #tag on the wrong thing 🏷️
+- Invalid custom-element name — every way it can be wrong: no hyphen, uppercase, reserved SVG/MathML name (font-face),
+  bad start char (1-card), illegal char (my-c@rd) - each with its specific reason 🚫 A tag that throws at customElements.define
+  is broken 💥💥💥
+- Module #state - a store must be an object, not a bare primitive 📦
+- Lifecycle / effect targets — #effect/#mount/#before-mount/#dispose may tag a method or arrow field only, never a plain value ⚡
+- #state targets - the inverse: #state tags reactive data, never a function or a method 🪞
+
+***The Ghost Elements 👻📦***
+
+- Custom elements only register when their module loads — #component fires defineComponent as an import side effect.
+  So <user-card> with no import to its module renders... nothing 🤬
+- It's a warning, not an error - project could still load the module elsewhere 🟡
+- When working with bundler is a good practice to import modules wherever component used in template, imports will
+  be tree shaken 🌳
+
+***Bindings On A Leash 🦮⚡***
+
+- `@event` / `:ref` / `~model` / `~onmodel` get type-checked against the runtime actual contract 🔗
+
+The contracts 📜
+
+- `@event` → the handler, typed per the specific DOM event 🎯 @click wants a PointerEvent, @keydown a KeyboardEvent,
+  @input an Event. Keyed off `HTMLElementEventMap`, so @click=${(e: KeyboardEvent) => …} gets flagged 💥
+  A generic (e: Event) => void still works everywhere.
+- `:ref` → `{ value }` shape ✅
+- `~model` → `{ value: string }` (two-way bind needs a string box) 🪣
+- `~onmodel` → `(value: string) => string` transform ⚙️
+- Custom event names (@my-thing) fall back to Event instead of erroring 🛟
+
+***Props That Can't Lie 🎯🔍***
+
+- The analyzer now type-checks every :prop=${expr} against the component's actual prop type - cross-component, resolved by tag 🏷️
+  A template hole is an opaque string to `tsc`, so it never sees these. Now it does.
+- Type judgment is the one thing oxc can't do, so it's delegated to the project's own `tsc` 🔮
+
+What it catches 🎣
+
+- Value mismatch - :name=${42} when name: string 💥
+- Unknown / typo'd prop - :naem=${x} → <user-card> has no prop 'naem' 🕵️
+- Missing required prop - even a bare <card></card> with no props gets every required one flagged ✅ Optionals omitted stay clean.
+- Enums, unions, generics, branded types - all check for free, because it's real tsc judging real types 🆓
+- Checked in scope, so a prop fed from `this.state`, a getter, a local, or a list-row param is validated exactly the same 🔬
+
+***Static Analysis For Templates 🔍📈📉***
+
+- Analyzer shipping as separate package 📦
+- CLI:
+    - `--dirs` - sources to scan, directories (recursive) or globs, mix as many as you like 📂
+    - `--dirs` src → whole dir, recursive
+    - `--dirs` 'src/**/*.ts' → explicit glob (quote it so the shell doesn't eat it)
+    - `--dirs` src tests 'lib/**/*.ts' → dirs + globs together
+
+  `--root` - project root with node_modules + tsconfig.json, where the project's own tsc resolves 🌳 (defaults to .)
+
+  `--lsp` - spit out LSP-shaped JSON instead of the pretty caret report, for editors/CI 🔌
+
+  And the bits worth a line each:
+  - ea short alias, elemix-analyzer long - same binary 🥷
+  - needs node + the project's typescript; pure-Rust checks (hints/tags/imports) run without it ⚙️
+  - NO_COLOR kills colour, COLORTERM=truecolor lights up 24-bit; auto-plain when piped 🎨
+
+- `--lsp` mode has been implemented with proper formatting (JSON), this should work as one shot tool.
+  `nvim` has `vim.diagnostic` and can integrate on `BufWritePost`. `vscode` has `onDidSaveTextDocument`
+  and can `child_process.execFile`. This is first iteration which is dumb, scan all files on every run.
+  Adding full blown `lsp` server should be not that difficult in the future. For now editor should be
+  able to show diagnostics post save 📝
+- Transient files for typechecking did not work 💥💥 The trick: build a virtual overlay of the file (in tsc)
+  and wrap each hole in place - `${__ck<UserCard,'name'>(expr)}` 🪄
 
 ### Phase 5 - General Polish And Wrinkle Ironing ⛓️‍💥
 
@@ -75,6 +158,7 @@ count = 0; // ← stays reactive
 ***Do Androids Dream of a Logo? 🤖🐑***
 
 <img src=".assets/logo-roadmap.svg" alt="elemix logo" width="200" />
+
 
 - The rectangle is the `component` 📦 The lightning bolt is the speed ⚡
 

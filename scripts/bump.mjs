@@ -75,3 +75,32 @@ if (existsSync(cargoLock)) {
     writeFileSync(cargoLock, text);
     console.log(`${cargoLock} -> ${next}`);
 }
+
+// The analyzer is its own crate + npm package set + Cargo.lock — bump it exactly
+// like the compiler so the whole toolchain releases at one version.
+const analyzerStamp = 'packages/analyzer/npm/version.mjs';
+if (existsSync(analyzerStamp)) {
+    execFileSync('node', [analyzerStamp, next], { stdio: 'inherit' });
+}
+
+const analyzerCargo = 'packages/analyzer/Cargo.toml';
+if (existsSync(analyzerCargo)) {
+    const text = readFileSync(analyzerCargo, 'utf8').replace(
+        /^version = "[^"]+"/m,
+        `version = "${next}"`,
+    );
+    writeFileSync(analyzerCargo, text);
+    console.log(`${analyzerCargo} -> ${next}`);
+}
+
+// The analyzer's lockfile carries TWO workspace entries: its own and the
+// `elemix-compiler` path dependency (pinned to the compiler's version). Bump
+// both, or the next `cargo` run rewrites them and leaves a dangling change.
+const analyzerLock = 'packages/analyzer/Cargo.lock';
+if (existsSync(analyzerLock)) {
+    const text = readFileSync(analyzerLock, 'utf8')
+        .replace(/(name = "elemix-analyzer"\nversion = ")[^"]+(")/, `$1${next}$2`)
+        .replace(/(name = "elemix-compiler"\nversion = ")[^"]+(")/, `$1${next}$2`);
+    writeFileSync(analyzerLock, text);
+    console.log(`${analyzerLock} -> ${next}`);
+}

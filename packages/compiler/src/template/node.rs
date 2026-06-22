@@ -1,5 +1,7 @@
 //! Node tree types + path addressing for `clone()`-then-grab codegen.
 
+use oxc_span::Span;
+
 /// One step from a parent toward a binding-bearing child node. Rendered by the
 /// emitter as `.children[i]` / `.childNodes[i]` / `.firstChild`.
 #[derive(Debug, Clone, PartialEq)]
@@ -37,4 +39,13 @@ pub struct Hole {
     pub path: NodePath,
     pub slot: Slot,
     pub expr: String,
+    /// Absolute byte span of the `${...}` expression in the ORIGINAL source. The
+    /// compile path doesn't need this (it works on the expr string), so it's
+    /// [`Span::default`] there; the analyzer feeds real oxc spans via
+    /// [`super::parse::parse_spanned`] to caret prop errors at the exact hole.
+    pub span: Span,
+    /// For an `Slot::Attr` hole, the tag of the element bearing it (e.g.
+    /// `user-card`) — the analyzer needs it to resolve `<tag>` back to its class.
+    /// `None` for content/text holes.
+    pub tag: Option<String>,
 }

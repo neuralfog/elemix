@@ -35,6 +35,12 @@ pub struct Binding {
     /// Text binding whose node is baked into the markup (`Slot::Text`): grab and
     /// write directly, skipping the `createTextNode`/`replaceWith` anchor swap.
     pub baked: bool,
+    /// Absolute byte span of the `${...}` expression (analyzer carets); empty on
+    /// the compile path. Carried verbatim from the [`Hole`].
+    pub span: oxc_span::Span,
+    /// Owning element tag for an attribute binding (prop/attr resolution); `None`
+    /// for content/text bindings. Carried verbatim from the [`Hole`].
+    pub tag: Option<String>,
 }
 
 /// Classify a parsed hole into a binding via (Slot × sigil × value-shape).
@@ -53,6 +59,8 @@ pub fn classify(hole: &Hole) -> Binding {
         name,
         expr: hole.expr.clone(),
         baked,
+        span: hole.span,
+        tag: hole.tag.clone(),
     }
 }
 

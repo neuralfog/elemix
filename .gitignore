@@ -11,3 +11,4 @@ target
 # package at publish time (release.yml) so npm ships it. Never commit those.
 packages/*/CHANGELOG.md
 packages/compiler/npm/elemix-compiler/CHANGELOG.md
+packages/analyzer/npm/elemix-analyzer/CHANGELOG.md

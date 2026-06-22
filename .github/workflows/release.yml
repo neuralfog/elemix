@@ -140,6 +140,85 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # ── the analyzer's 6 cross-platform binaries (same matrix as the compiler).
+  #    Native-only — it spawns node + the project's tsc, so there's no wasm here.
+  #    It depends on the compiler crate as a library (path dep), built alongside. ─
+  build-analyzer:
+    needs: changelog
+    name: build analyzer ${{ matrix.pkg }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
+      CARGO_NET_RETRY: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pkg: linux-x64
+            target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          - pkg: linux-arm64
+            target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          - pkg: darwin-x64
+            target: x86_64-apple-darwin
+            os: macos-latest
+          - pkg: darwin-arm64
+            target: aarch64-apple-darwin
+            os: macos-latest
+          - pkg: win32-x64
+            target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - pkg: win32-arm64
+            target: aarch64-pc-windows-msvc
+            os: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/analyzer
+          key: analyzer-${{ matrix.target }}
+
+      - uses: mlugg/setup-zig@v2
+        if: ${{ matrix.zig }}
+      - name: Install cargo-zigbuild
+        if: ${{ matrix.zig }}
+        run: cargo install --locked cargo-zigbuild
+
+      - name: Build (zig)
+        if: ${{ matrix.zig }}
+        working-directory: packages/analyzer
+        run: cargo zigbuild --release --target ${{ matrix.target }}
+
+      - name: Build (native)
+        if: ${{ !matrix.zig }}
+        working-directory: packages/analyzer
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Stage binary into platform package
+        working-directory: packages/analyzer
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp "target/${{ matrix.target }}/release/elemix-analyzer.exe" "npm/${{ matrix.pkg }}/elemix-analyzer.exe"
+          else
+            cp "target/${{ matrix.target }}/release/elemix-analyzer" "npm/${{ matrix.pkg }}/elemix-analyzer"
+            chmod +x "npm/${{ matrix.pkg }}/elemix-analyzer"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ea-npm-${{ matrix.pkg }}
+          path: packages/analyzer/npm/${{ matrix.pkg }}
+          if-no-files-found: error
+          retention-days: 1
+
   # ── publish: nothing here runs unless build-compiler (⇒ changelog ⇒ test) is
   #    fully green. That's the "publish only if everything built" guarantee. ────
 
@@ -196,6 +275,60 @@ jobs:
             npm publish "./$pkg" --access public --provenance --tag "$TAG"
           done
           npm publish ./elemix-compiler --access public --provenance --tag "$TAG"
+
+  publish-analyzer:
+    name: publish analyzer to npm
+    needs: [build-analyzer, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      # Restore each platform package (now carrying its binary) over the scaffold.
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: ea-npm-*
+          path: artifacts
+
+      - name: Place binaries
+        run: |
+          for dir in artifacts/ea-npm-*; do
+            pkg="${dir#artifacts/ea-npm-}"
+            cp -r "$dir/." "packages/analyzer/npm/$pkg/"
+          done
+          # upload-artifact drops the Unix exec bit — restore it so the published
+          # tarball ships an executable binary (npm preserves modes).
+          chmod +x packages/analyzer/npm/*/elemix-analyzer 2>/dev/null || true
+
+      - name: Stamp version
+        run: node packages/analyzer/npm/version.mjs "${{ needs.version.outputs.value }}"
+
+      # Ship the changelog inside the launcher (its `files` lists it), from the
+      # single source of truth — the root CHANGELOG.md.
+      - name: Stage changelog into launcher
+        run: cp CHANGELOG.md packages/analyzer/npm/elemix-analyzer/CHANGELOG.md
+
+      # Platform packages first, then the launcher that depends on them.
+      - name: Publish
+        working-directory: packages/analyzer/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing analyzer $VERSION under dist-tag: $TAG"
+          for pkg in linux-x64 linux-arm64 darwin-x64 darwin-arm64 win32-x64 win32-arm64; do
+            npm publish "./$pkg" --access public --provenance --tag "$TAG"
+          done
+          npm publish ./elemix-analyzer --access public --provenance --tag "$TAG"
 
   publish-wasm:
     name: publish wasm to npm
@@ -457,6 +590,7 @@ jobs:
     needs:
       - version
       - publish-compiler
+      - publish-analyzer
       - publish-wasm
       - publish-elemix
       - publish-storybook
@@ -471,11 +605,15 @@ jobs:
           node-version: 24
 
       # Every binary built this run, restored from the build/publish jobs:
-      #   npm-<pkg>  → the 6 native binaries   |   wasm-pkg → the wasm build.
+      #   npm-<pkg> → compiler binaries | ea-npm-<pkg> → analyzer binaries | wasm-pkg → wasm.
       - uses: actions/download-artifact@v8
         with:
           pattern: npm-*
           path: artifacts
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: ea-npm-*
+          path: artifacts-ea
       - uses: actions/download-artifact@v8
         with:
           name: wasm-pkg
@@ -489,19 +627,22 @@ jobs:
           set -euo pipefail
           VERSION="${{ needs.version.outputs.value }}"
           mkdir -p dist-assets
-          for dir in artifacts/npm-*; do
-            pkg="${dir#artifacts/npm-}"
-            if [ -f "$dir/elemix-compiler.exe" ]; then
-              ( cd "$dir" && zip -qj "$GITHUB_WORKSPACE/dist-assets/elemix-compiler-$VERSION-$pkg.zip" elemix-compiler.exe )
+          # tool = elemix-compiler | elemix-analyzer, from its artifact dir.
+          pack() {
+            local tool="$1" dir="$2" pkg="$3"
+            if [ -f "$dir/$tool.exe" ]; then
+              ( cd "$dir" && zip -qj "$GITHUB_WORKSPACE/dist-assets/$tool-$VERSION-$pkg.zip" "$tool.exe" )
             else
               # upload-artifact zips files and drops the Unix exec bit — restore it
               # so the tarball's binary is runnable straight out of the download.
-              chmod +x "$dir/elemix-compiler"
-              tar -czf "dist-assets/elemix-compiler-$VERSION-$pkg.tar.gz" -C "$dir" elemix-compiler
+              chmod +x "$dir/$tool"
+              tar -czf "dist-assets/$tool-$VERSION-$pkg.tar.gz" -C "$dir" "$tool"
             fi
-          done
+          }
+          for dir in artifacts/npm-*; do pack elemix-compiler "$dir" "${dir#artifacts/npm-}"; done
+          for dir in artifacts-ea/ea-npm-*; do pack elemix-analyzer "$dir" "${dir#artifacts-ea/ea-npm-}"; done
           tar -czf "dist-assets/elemix-compiler-$VERSION-wasm.tar.gz" -C wasm .
-          ( cd dist-assets && sha256sum elemix-compiler-* > SHA256SUMS.txt )
+          ( cd dist-assets && sha256sum elemix-* > SHA256SUMS.txt )
           ls -l dist-assets
 
       - name: Assemble release notes

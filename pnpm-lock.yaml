@@ -11,6 +11,15 @@ importers:
 
   .: {}
 
+  packages/analyzer:
+    devDependencies:
+      '@neuralfog/elemix':
+        specifier: workspace:*
+        version: link:../elemix
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/compiler:
     devDependencies:
       '@neuralfog/elemix':

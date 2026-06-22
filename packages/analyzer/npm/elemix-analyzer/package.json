@@ -1,0 +1,29 @@
+{
+  "name": "@neuralfog/elemix-analyzer",
+  "version": "0.9.0-dev.7",
+  "description": "Template prop typechecker for Elemix (ec-analyzer)",
+  "license": "MIT",
+  "author": "brownhounds",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neuralfog/elemix.git"
+  },
+  "type": "module",
+  "bin": {
+    "ea": "bin/elemix-analyzer.mjs",
+    "elemix-analyzer": "bin/elemix-analyzer.mjs"
+  },
+  "files": [
+    "bin/elemix-analyzer.mjs",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "optionalDependencies": {
+    "@neuralfog/elemix-analyzer-linux-x64": "0.9.0-dev.7",
+    "@neuralfog/elemix-analyzer-linux-arm64": "0.9.0-dev.7",
+    "@neuralfog/elemix-analyzer-darwin-x64": "0.9.0-dev.7",
+    "@neuralfog/elemix-analyzer-darwin-arm64": "0.9.0-dev.7",
+    "@neuralfog/elemix-analyzer-win32-x64": "0.9.0-dev.7",
+    "@neuralfog/elemix-analyzer-win32-arm64": "0.9.0-dev.7"
+  }
+}
