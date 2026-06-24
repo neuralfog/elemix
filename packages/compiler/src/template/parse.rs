@@ -14,6 +14,15 @@
 //! the grammar's job.
 
 use super::node::{Hole, NodePath, Slot, Step};
+use oxc_span::Span;
+
+/// A hole expression paired with its absolute span in the original source — the
+/// span-aware input to [`parse_spanned`]. The plain [`parse`] entry uses
+/// [`Span::default`] for every hole (the compile path ignores spans).
+pub struct SpannedHole {
+    pub expr: String,
+    pub span: Span,
+}
 
 /// Output of stage 2: static markup + holes resolved to a node path and slot.
 #[derive(Debug)]
@@ -37,20 +46,20 @@ const VOID: &[&str] = &[
 /// A piece of an attribute value: literal text or an interpolated expression.
 enum Part {
     Static(String),
-    Hole(String),
+    Hole(String, Span),
 }
 
 /// A node in the parsed tree.
 enum Child {
     Elem(El),
     Text(String),
-    Anchor(String), // content-hole expression
+    Anchor(String, Span), // content-hole expression + its span
 }
 
 struct El {
     tag: String,
     static_attrs: String, // serialized, e.g. ` class="x" type="text"`
-    attr_holes: Vec<(String, String)>, // (name-with-sigil, reconstructed expr)
+    attr_holes: Vec<(String, String, Span)>, // (name-with-sigil, reconstructed expr, span)
     children: Vec<Child>,
     self_closing: bool,
 }
@@ -146,9 +155,9 @@ impl Parser {
                 self.a_parts
                     .push(Part::Static(std::mem::take(&mut self.a_val)));
             }
-            let expr = reconstruct(&self.a_parts);
+            let (expr, span) = reconstruct(&self.a_parts);
             let name = self.a_name.clone();
-            self.cur.attr_holes.push((name, expr));
+            self.cur.attr_holes.push((name, expr, span));
         } else {
             self.cur.static_attrs.push(' ');
             self.cur.static_attrs.push_str(&self.a_name);
@@ -329,18 +338,20 @@ impl Parser {
     }
 
     /// Handle a `${...}` hole arriving between two static segments.
-    fn feed_hole(&mut self, expr: &str) {
+    fn feed_hole(&mut self, expr: &str, span: Span) {
         match self.st {
             St::Text => {
                 self.flush_text();
-                self.parent().children.push(Child::Anchor(expr.to_string()));
+                self.parent()
+                    .children
+                    .push(Child::Anchor(expr.to_string(), span));
             }
             St::BeforeValue | St::ValueUnquoted | St::ValueQuoted => {
                 if !self.a_val.is_empty() {
                     self.a_parts
                         .push(Part::Static(std::mem::take(&mut self.a_val)));
                 }
-                self.a_parts.push(Part::Hole(expr.to_string()));
+                self.a_parts.push(Part::Hole(expr.to_string(), span));
                 self.a_has_hole = true;
                 if self.st == St::BeforeValue {
                     // a bare `name=${x}` value; the next static terminates it
@@ -354,17 +365,26 @@ impl Parser {
     }
 }
 
-/// Build the value expression for a dynamic attribute. A single bare hole stays
-/// raw; statics mixed with holes reconstruct a template literal.
-fn reconstruct(parts: &[Part]) -> String {
-    if let [Part::Hole(e)] = parts {
-        return e.clone();
+/// Build the value expression for a dynamic attribute, with a representative
+/// span. A single bare hole stays raw and carries its exact span; statics mixed
+/// with holes reconstruct a template literal and carry the first hole's span
+/// (good enough — mixed attrs are string-coercible and the analyzer skips them).
+fn reconstruct(parts: &[Part]) -> (String, Span) {
+    if let [Part::Hole(e, span)] = parts {
+        return (e.clone(), *span);
     }
+    let first = parts
+        .iter()
+        .find_map(|p| match p {
+            Part::Hole(_, span) => Some(*span),
+            _ => None,
+        })
+        .unwrap_or_default();
     let mut out = String::from("`");
     for p in parts {
         match p {
             Part::Static(s) => out.push_str(&escape_tmpl(s)),
-            Part::Hole(e) => {
+            Part::Hole(e, _) => {
                 out.push_str("${");
                 out.push_str(e);
                 out.push('}');
@@ -372,7 +392,7 @@ fn reconstruct(parts: &[Part]) -> String {
         }
     }
     out.push('`');
-    out
+    (out, first)
 }
 
 fn escape_tmpl(s: &str) -> String {
@@ -396,7 +416,7 @@ fn normalize(children: &mut Vec<Child>) {
         match ch {
             Child::Text(t) => *t = collapse_ws(t),
             Child::Elem(e) => normalize(&mut e.children),
-            Child::Anchor(_) => {}
+            Child::Anchor(..) => {}
         }
     }
     if let Some(Child::Text(t)) = children.first_mut() {
@@ -413,11 +433,11 @@ fn normalize(children: &mut Vec<Child>) {
             Child::Text(t) if t == " " => {
                 let left_inline = idx
                     .checked_sub(1)
-                    .map(|j| matches!(children[j], Child::Anchor(_)))
+                    .map(|j| matches!(children[j], Child::Anchor(..)))
                     .unwrap_or(false);
                 let right_inline = children
                     .get(idx + 1)
-                    .map(|c| matches!(c, Child::Anchor(_)))
+                    .map(|c| matches!(c, Child::Anchor(..)))
                     .unwrap_or(false);
                 !(left_inline || right_inline)
             }
@@ -462,7 +482,7 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                 markup.push_str(t);
                 node_count += 1;
             }
-            Child::Anchor(expr) => {
+            Child::Anchor(expr, span) => {
                 let mut p = path.clone();
                 p.push(Step::ChildNode(node_count));
                 if sole && crate::grammar::is_text_content(expr) {
@@ -471,6 +491,8 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                         path: p,
                         slot: Slot::Text,
                         expr: expr.clone(),
+                        span: *span,
+                        tag: None,
                     });
                 } else {
                     markup.push_str("<!---->");
@@ -478,6 +500,8 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                         path: p,
                         slot: Slot::Content,
                         expr: expr.clone(),
+                        span: *span,
+                        tag: None,
                     });
                 }
                 node_count += 1;
@@ -485,11 +509,13 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
             Child::Elem(el) => {
                 let mut elem_path = path.clone();
                 elem_path.push(Step::Child(node_count));
-                for (name, expr) in &el.attr_holes {
+                for (name, expr, span) in &el.attr_holes {
                     holes.push(Hole {
                         path: elem_path.clone(),
                         slot: Slot::Attr(name.clone()),
                         expr: expr.clone(),
+                        span: *span,
+                        tag: Some(el.tag.clone()),
                     });
                 }
                 markup.push('<');
@@ -518,13 +544,28 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
     }
 }
 
-/// Parse a located template into static markup plus positioned holes.
+/// Parse a located template into static markup plus positioned holes. Hole spans
+/// default to empty — the compile path works on expr strings and never reads
+/// them. The analyzer wants real spans, so it calls [`parse_spanned`].
 pub fn parse(statics: &[String], holes: &[String]) -> ParsedTemplate {
+    let spanned: Vec<SpannedHole> = holes
+        .iter()
+        .map(|e| SpannedHole {
+            expr: e.clone(),
+            span: Span::default(),
+        })
+        .collect();
+    parse_spanned(statics, &spanned)
+}
+
+/// Like [`parse`], but each hole carries its absolute source span so located
+/// holes can be caret-mapped back to the original template (the analyzer path).
+pub fn parse_spanned(statics: &[String], holes: &[SpannedHole]) -> ParsedTemplate {
     let mut p = Parser::new();
     for (i, s) in statics.iter().enumerate() {
         p.feed_static(s);
-        if i < holes.len() {
-            p.feed_hole(&holes[i]);
+        if let Some(hole) = holes.get(i) {
+            p.feed_hole(&hole.expr, hole.span);
         }
     }
     p.flush_text();

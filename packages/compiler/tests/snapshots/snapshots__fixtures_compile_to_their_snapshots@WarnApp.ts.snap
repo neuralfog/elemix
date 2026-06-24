@@ -3,12 +3,11 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/WarnApp.ts
 ---
-console.warn('[elemix] WarnApp: tag `warnapp` is not a valid custom element name — custom elements must contain a hyphen, so `customElements.define` will throw at registration');
+console.warn('[elemix] WarnApp: tag `warnapp` is not a valid custom element name — it must contain a hyphen');
 import { template, clone, defineComponent } from '@neuralfog/elemix/runtime';
 // Diagnostic fixture: an explicit `#tag` with no hyphen. It compiles and
 // registers, but `warnapp` is not a valid custom-element name, so the compiler
-// inlines a `console.warn('[elemix] …')` (and `customElements.define` will throw
-// at registration — the warning predicts exactly that).
+// inlines a `console.warn('[elemix] …')` predicting the registration failure.
 
 import { Component } from '@neuralfog/elemix';
 

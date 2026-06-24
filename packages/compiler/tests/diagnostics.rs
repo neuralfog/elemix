@@ -47,7 +47,9 @@ fn unknown_pragma_inlines_a_throw_naming_the_component() {
 fn hyphenless_tag_warns_but_still_compiles() {
     let out = compile(HYPHENLESS);
     assert!(out.contains("console.warn('[elemix] Widget:"));
-    assert!(out.contains("not a valid custom element name"));
+    // derived tag → the message explains the derivation + how to fix it.
+    assert!(out.contains("derives the tag `widget`"));
+    assert!(out.contains("must contain a hyphen"));
     // a warning never blocks: the component is still registered + has a view
     assert!(!out.contains("throw new Error("));
     assert!(out.contains("defineComponent('widget', Widget)"));

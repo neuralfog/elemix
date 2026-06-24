@@ -1,0 +1,23 @@
+[package]
+name = "elemix-analyzer"
+version = "0.9.0-dev.7"
+edition = "2021"
+publish = false
+description = "Template prop typechecker for Elemix (ec-analyzer)."
+license = "MIT"
+repository = "https://github.com/neuralfog/elemix"
+
+[[bin]]
+name = "elemix-analyzer"
+path = "src/main.rs"
+
+# The compiler as a LIBRARY only — its oxc frontend (pragma scan + spanned
+# template locate via `scan`), with NO `cli`/`wasm` features. The analyzer is
+# native-only (it spawns node + the project's tsc), so it must never drag the
+# compiler's subprocess/wasm surface into the pure crate.
+[dependencies]
+elemix-compiler = { path = "../compiler", default-features = false }
+clap = { version = "4.6.1", features = ["derive"] }
+glob = "0.3.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

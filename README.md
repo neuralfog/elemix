@@ -12,6 +12,7 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | --- | --- | --- |
 | `@neuralfog/elemix` | Reactive Elements (CustomElements). | [README](packages/elemix/README.md) |
 | `@neuralfog/elemix-compiler` | Rust Compiler. | [README](packages/compiler/README.md) |
+| `@neuralfog/elemix-analyzer` | Static Analysis For Elemix. | [README](packages/analyzer/README.md) |
 | `@neuralfog/elemix-vite` | Vite Compiler plugin. | [README](packages/vite/README.md) |
 | `@neuralfog/elemix-storybook` | Storybook Integration For Elemix. | [README](packages/storybook/README.md) |
 

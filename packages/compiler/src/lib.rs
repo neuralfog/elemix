@@ -12,6 +12,7 @@ mod locate;
 pub mod lower;
 pub mod pragma;
 pub mod rewrite;
+pub mod scan;
 #[cfg(feature = "cli")]
 pub mod sourcemap;
 pub mod splice;
@@ -23,6 +24,11 @@ pub use diagnostics::Diagnostic;
 #[cfg(feature = "cli")]
 pub use locate::collect_ts_files;
 pub use locate::{find_html_templates, FoundTemplate};
+pub use scan::{
+    scan_components, scan_element_uses, scan_hints, scan_imports, scan_props,
+    scan_special_bindings, ComponentDecl, ElementUse, HintDiagnostic, HintKind, HintSeverity,
+    Import, PropSite, SpecialBinding, SpecialKind,
+};
 
 /// Compile one source file: inline helper templates (Splice), expand `#`-pragma
 /// blocks (component registration + styles), then rewrite the `template` member

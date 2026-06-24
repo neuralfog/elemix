@@ -17,8 +17,9 @@
 //! The values stay real, type-checked expressions on the declaration — never
 //! text in the comment.
 
-use crate::pragma::parse::{is_pragma, split_directives};
+use crate::pragma::parse::{is_pragma, split_directives, split_directives_spanned};
 use crate::pragma::Directive;
+use crate::pragma::SpannedDirective;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
     BindingPattern, Class, ClassElement, Declaration, Expression, MethodDefinitionKind,
@@ -67,6 +68,9 @@ pub struct ClassInfo {
     /// Offset just inside the class body `{` — inject `#form`'s member here.
     pub body_open: usize,
     pub directives: Vec<Directive>,
+    /// Class-level directives WITH source spans (for precise hint carets). Parallel
+    /// to `directives` but kept separate so the transform path stays span-free.
+    pub directive_spans: Vec<SpannedDirective>,
     pub styles: Vec<StyleField>,
     pub effects: Vec<String>,
     /// `#before-mount`-tagged methods, in source order.
@@ -81,6 +85,32 @@ pub struct ClassInfo {
     pub super_class: Option<String>,
 }
 
+/// A directive tagging the wrong kind of member — what each can tag is fixed:
+/// the lifecycle/effect hooks need a method or arrow field; `#state` needs a data
+/// field (never a function or method). Non-fatal: the transform skips the binding
+/// and `diagnose`/the analyzer report it (with a caret on the member).
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum BindingProblem {
+    /// `#effect`/`#before-mount`/`#mount`/`#dispose` on a non-function field.
+    HookOnNonFunction,
+    /// `#state` on an arrow/function-valued field.
+    StateOnFunction,
+    /// `#state` on a method.
+    StateOnMethod,
+}
+
+/// A member directive bound to the wrong target (see [`BindingProblem`]), with
+/// the member-name span so a diagnostic can caret it.
+#[derive(Debug, PartialEq)]
+pub struct BindingIssue {
+    pub directive: String,
+    pub member: String,
+    pub class: String,
+    pub problem: BindingProblem,
+    pub start: usize,
+    pub end: usize,
+}
+
 /// Everything the lowering needs. `#state` declarations resolve `state` from
 /// `@neuralfog/elemix/runtime` (a compile target), so no public-import surgery.
 #[derive(Debug, PartialEq)]
@@ -88,6 +118,8 @@ pub struct Located {
     pub classes: Vec<ClassInfo>,
     pub states: Vec<StateEdit>,
     pub strips: Vec<(usize, usize)>,
+    /// Member directives bound to the wrong target (see [`BindingIssue`]).
+    pub binding_issues: Vec<BindingIssue>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -111,10 +143,15 @@ enum Kind {
         type_span: Option<Span>,
         value: Span,
         prop_end: usize,
+        /// Whether the field's value is a function (arrow or function expression)
+        /// — the gate for the lifecycle/effect hooks.
+        value_is_fn: bool,
     },
     Method {
         class_idx: usize,
         name: String,
+        name_start: usize,
+        name_end: usize,
     },
     Const {
         name_end: usize,
@@ -155,6 +192,11 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                                         .map(|t| t.type_annotation.span()),
                                     value: value.span(),
                                     prop_end: prop.span.end as usize,
+                                    value_is_fn: matches!(
+                                        value,
+                                        Expression::ArrowFunctionExpression(_)
+                                            | Expression::FunctionExpression(_)
+                                    ),
                                 },
                             ));
                         }
@@ -165,6 +207,8 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                             Kind::Method {
                                 class_idx: idx,
                                 name: key_name(&m.key),
+                                name_start: m.key.span().start as usize,
+                                name_end: m.key.span().end as usize,
                             },
                         ));
                     }
@@ -177,6 +221,7 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                 end: class.span.end as usize,
                 body_open: class.body.span.start as usize + 1,
                 directives: Vec::new(),
+                directive_spans: Vec::new(),
                 styles: Vec::new(),
                 effects: Vec::new(),
                 before_mounts: Vec::new(),
@@ -195,6 +240,7 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
 
     let mut states: Vec<StateEdit> = Vec::new();
     let mut strips: Vec<(usize, usize)> = Vec::new();
+    let mut binding_issues: Vec<BindingIssue> = Vec::new();
 
     for c in &ret.program.comments {
         if !c.is_line() {
@@ -223,6 +269,12 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
         match kind {
             Kind::Class(idx) => {
                 classes[*idx].directives.extend(directives);
+                classes[*idx]
+                    .directive_spans
+                    .extend(split_directives_spanned(
+                        &content,
+                        c.content_span().start as usize,
+                    ));
                 strips.push((line, cend));
             }
             Kind::Field {
@@ -233,42 +285,70 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                 type_span,
                 value,
                 prop_end,
+                value_is_fn,
             } => match directive_name(&directives)? {
                 "styles" => classes[*class_idx].styles.push(StyleField {
                     value: slice(source, *value),
                     strip: (line, field_block_end(source, *prop_end)),
                     comment: (line, cend + usize::from(source[cend..].starts_with('\n'))),
                 }),
+                // `#state` tags reactive DATA — never a function. An arrow/function
+                // field can't be wrapped in `state()` meaningfully; skip it and
+                // record a precise issue.
                 "state" => {
-                    states.push(field_state_edit(
-                        source,
-                        name,
-                        *name_start,
-                        *name_end,
-                        *type_span,
-                        *value,
-                    ));
+                    if *value_is_fn {
+                        binding_issues.push(BindingIssue {
+                            directive: "state".to_string(),
+                            member: name.clone(),
+                            class: classes[*class_idx].name.clone(),
+                            problem: BindingProblem::StateOnFunction,
+                            start: *name_start,
+                            end: *name_end,
+                        });
+                    } else {
+                        states.push(field_state_edit(
+                            source,
+                            name,
+                            *name_start,
+                            *name_end,
+                            *type_span,
+                            *value,
+                        ));
+                    }
                     strips.push((line, cend));
                 }
-                "effect" => {
-                    classes[*class_idx].effects.push(name.clone());
-                    strips.push((line, cend));
-                }
-                "before-mount" => {
-                    classes[*class_idx].before_mounts.push(name.clone());
-                    strips.push((line, cend));
-                }
-                "mount" => {
-                    classes[*class_idx].mounts.push(name.clone());
-                    strips.push((line, cend));
-                }
-                "dispose" => {
-                    classes[*class_idx].disposes.push(name.clone());
+                // Lifecycle/effect hooks: a field carries one only if its value is a
+                // function (arrow); otherwise the runtime has nothing to call — skip
+                // the binding and record a precise issue for diagnostics.
+                d @ ("effect" | "before-mount" | "mount" | "dispose") => {
+                    if *value_is_fn {
+                        match d {
+                            "effect" => classes[*class_idx].effects.push(name.clone()),
+                            "before-mount" => classes[*class_idx].before_mounts.push(name.clone()),
+                            "mount" => classes[*class_idx].mounts.push(name.clone()),
+                            "dispose" => classes[*class_idx].disposes.push(name.clone()),
+                            _ => unreachable!(),
+                        }
+                    } else {
+                        binding_issues.push(BindingIssue {
+                            directive: d.to_string(),
+                            member: name.clone(),
+                            class: classes[*class_idx].name.clone(),
+                            problem: BindingProblem::HookOnNonFunction,
+                            start: *name_start,
+                            end: *name_end,
+                        });
+                    }
                     strips.push((line, cend));
                 }
                 other => return Err(LocateError::OnField(other.to_string())),
             },
-            Kind::Method { class_idx, name } => match directive_name(&directives)? {
+            Kind::Method {
+                class_idx,
+                name,
+                name_start,
+                name_end,
+            } => match directive_name(&directives)? {
                 "effect" => {
                     classes[*class_idx].effects.push(name.clone());
                     strips.push((line, cend));
@@ -283,6 +363,18 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                 }
                 "dispose" => {
                     classes[*class_idx].disposes.push(name.clone());
+                    strips.push((line, cend));
+                }
+                // `#state` tags reactive data, not behaviour — never a method.
+                "state" => {
+                    binding_issues.push(BindingIssue {
+                        directive: "state".to_string(),
+                        member: name.clone(),
+                        class: classes[*class_idx].name.clone(),
+                        problem: BindingProblem::StateOnMethod,
+                        start: *name_start,
+                        end: *name_end,
+                    });
                     strips.push((line, cend));
                 }
                 other => return Err(LocateError::OnField(other.to_string())),
@@ -305,6 +397,7 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
         classes,
         states,
         strips,
+        binding_issues,
     })
 }
 

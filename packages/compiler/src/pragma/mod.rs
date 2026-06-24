@@ -32,6 +32,16 @@ pub struct Directive {
     pub args: Vec<String>,
 }
 
+/// A directive whose name and each arg carry an ABSOLUTE source span `(start,
+/// end)`, so a diagnostic can caret the exact offending token in the pragma
+/// comment (the bad directive name, or a `#tag`'s value) rather than the class.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SpannedDirective {
+    pub name: String,
+    pub name_span: (usize, usize),
+    pub args: Vec<(String, (usize, usize))>,
+}
+
 /// The typed meaning of a component's pragma (the directives that tag the class
 /// itself). `#styles` is NOT here — it tags a class field whose value is the
 /// stylesheet (see [`locate`]/[`lower`]).
@@ -99,10 +109,8 @@ fn single_word(d: &Directive) -> Option<String> {
 
 /// Derive a custom-element tag from a class name: PascalCase → kebab-case,
 /// treating runs of capitals as acronyms (`PfXMLBuilder` → `pf-xml-builder`).
-/// Validity (the required hyphen, reserved names) is intentionally NOT checked
-/// here — `customElements.define` is the canonical validator and throws at
-/// registration, so a hyphenless result like `Button` → `button` is emitted
-/// verbatim and fails loudly at runtime.
+/// Derivation does NOT validate — [`tag_problem`] is the validator (a warning),
+/// and `customElements.define` is the canonical one that throws at registration.
 pub fn kebab(class_name: &str) -> String {
     let chars: Vec<char> = class_name.chars().collect();
     let mut out = String::new();
@@ -126,4 +134,56 @@ pub fn kebab(class_name: &str) -> String {
         }
     }
     out
+}
+
+/// Names that contain a hyphen and pass the production but are reserved by other
+/// specs (SVG/MathML) — `customElements.define` rejects them.
+const RESERVED_TAGS: &[&str] = &[
+    "annotation-xml",
+    "color-profile",
+    "font-face",
+    "font-face-src",
+    "font-face-uri",
+    "font-face-format",
+    "font-face-name",
+    "missing-glyph",
+];
+
+/// Why `tag` is NOT a valid custom-element name — a reason phrase that reads after
+/// "it …" (e.g. "must contain a hyphen") — or `None` when it is valid. Mirrors the
+/// WHATWG "valid custom element name" rules closely enough to predict exactly when
+/// `customElements.define` throws at registration. Checked most-specific first.
+pub fn tag_problem(tag: &str) -> Option<String> {
+    if tag.is_empty() {
+        return Some("is empty".to_string());
+    }
+    if RESERVED_TAGS.contains(&tag) {
+        return Some("is a name reserved by SVG/MathML".to_string());
+    }
+    // Safe: non-empty checked above.
+    let first = tag.chars().next().unwrap();
+    if !first.is_ascii_lowercase() {
+        return Some("must start with a lowercase ASCII letter (a–z)".to_string());
+    }
+    if !tag.contains('-') {
+        return Some("must contain a hyphen".to_string());
+    }
+    if tag.chars().any(|c| c.is_ascii_uppercase()) {
+        return Some("must not contain uppercase letters".to_string());
+    }
+    if let Some(bad) = tag.chars().find(|&c| !is_tag_char(c)) {
+        return Some(format!("contains an invalid character `{bad}`"));
+    }
+    None
+}
+
+/// A character allowed in a custom-element name. The spec's `PCENChar` permits
+/// many Unicode ranges, so to avoid false positives we accept any non-ASCII char
+/// and restrict only the ASCII set to `[a-z0-9._-]` (uppercase caught above).
+fn is_tag_char(c: char) -> bool {
+    if c.is_ascii() {
+        matches!(c, 'a'..='z' | '0'..='9' | '-' | '.' | '_')
+    } else {
+        true
+    }
 }

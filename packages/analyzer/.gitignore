@@ -1,0 +1,6 @@
+/target
+# Prebuilt binaries are dropped into the platform packages by CI at release time.
+npm/*/elemix-analyzer
+npm/*/elemix-analyzer.exe
+# The launcher's changelog is copied in from the root CHANGELOG.md at release.
+npm/elemix-analyzer/CHANGELOG.md
