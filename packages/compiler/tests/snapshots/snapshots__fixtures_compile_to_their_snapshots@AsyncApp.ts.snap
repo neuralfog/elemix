@@ -1,0 +1,70 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/AsyncApp.ts
+---
+import { template, clone, _event, effect, _setText, defineComponent, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { phase: string; ticks: number };
+
+const _t0 = template('<div class="async"><span class="phase"> </span><span class="ticks"> </span><button class="bump">+1</button></div>');
+
+export class AsyncApp extends Component {
+    onDispose(): void {
+        this.teardown();
+    }
+    onMount(): void {
+        this.load();
+    }
+    beforeMount(): void {
+        this.prepare();
+    }
+    effects(): void {
+        effect(() => this.mirror());
+    }
+    state = state<State>({ phase: 'init', ticks: 0 });
+
+    async prepare(): Promise<void> {
+        this.setAttribute('data-prepared', 'sync');
+        await Promise.resolve();
+        this.setAttribute('data-prepared', 'async');
+    }
+
+    async load(): Promise<void> {
+        this.state.phase = 'loading';
+        await Promise.resolve();
+        this.state.phase = 'ready';
+    }
+
+    async mirror(): Promise<void> {
+        const phase = this.state.phase;
+        await Promise.resolve();
+        this.setAttribute('data-phase', phase);
+    }
+
+    bump = (): void => {
+        this.state.ticks++;
+    };
+
+    async teardown(): Promise<void> {
+        await Promise.resolve();
+        this.removeAttribute('data-phase');
+    }
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+_event(_n3, 'click', this.bump);
+effect(() => {
+_setText(_n1, (this.state.phase));
+});
+effect(() => {
+_setText(_n2, (this.state.ticks));
+});
+return _r0;
+}
+}
+defineComponent('async-app', AsyncApp);

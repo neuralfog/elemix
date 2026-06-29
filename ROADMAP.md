@@ -45,18 +45,18 @@ GG 👊🥋✊
 
 What it nails 🔨
 
-- Unknown directive — `// #componnt` → unknown pragma directive 🕵️
+- Unknown directive - `// #componnt` → unknown pragma directive 🕵️
 - Bad #tag - conflicting #tag values, or #tag on the wrong thing 🏷️
-- Invalid custom-element name — every way it can be wrong: no hyphen, uppercase, reserved SVG/MathML name (font-face),
+- Invalid custom-element name - every way it can be wrong: no hyphen, uppercase, reserved SVG/MathML name (font-face),
   bad start char (1-card), illegal char (my-c@rd) - each with its specific reason 🚫 A tag that throws at customElements.define
   is broken 💥💥💥
 - Module #state - a store must be an object, not a bare primitive 📦
-- Lifecycle / effect targets — #effect/#mount/#before-mount/#dispose may tag a method or arrow field only, never a plain value ⚡
+- Lifecycle / effect targets - #effect/#mount/#before-mount/#dispose may tag a method or arrow field only, never a plain value ⚡
 - #state targets - the inverse: #state tags reactive data, never a function or a method 🪞
 
 ***The Ghost Elements 👻📦***
 
-- Custom elements only register when their module loads — #component fires defineComponent as an import side effect.
+- Custom elements only register when their module loads - #component fires defineComponent as an import side effect.
   So <user-card> with no import to its module renders... nothing 🤬
 - It's a warning, not an error - project could still load the module elsewhere 🟡
 - When working with bundler is a good practice to import modules wherever component used in template, imports will
@@ -120,6 +120,7 @@ What it catches 🎣
 
 ***Chores 🥣🧽***
 
+- Prove async 🔂
 - One changelog for all packages, less bureaucracy 🗂️
 - Fixed compiler hint detection in the Vite plugin 🚪
 - GitHub releases now ship all binaries as downloadable assets 📦⬇️
@@ -272,7 +273,7 @@ onMount(): void {
 
 ```
 #no-shadow on → #styles is skipped, no sheet code emitted (just the dangling css string)
-#no-shadow off → #styles lights back up — sheet(css) + __sheets + adopted into the shadow root
+#no-shadow off → #styles lights back up - sheet(css) + __sheets + adopted into the shadow root
 ```
 
 All Compiler Hints:
