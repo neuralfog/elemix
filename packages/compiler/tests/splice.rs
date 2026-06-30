@@ -115,3 +115,47 @@ fn helper_on_a_non_first_component_is_inlined() {
     // both components still compiled
     assert_eq!(out.matches("view(): DocumentFragment").count(), 2);
 }
+
+// The main template written as a METHOD `template() { return tpl`…`; }` (not the
+// arrow field) — the splice must still discover it and inline its helpers.
+const METHOD_MAIN_HELPER: &str = r#"import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class PanelApp extends Component {
+    cell = (k: string): Template => tpl`<td>${k}</td>`;
+    template(): Template {
+        return tpl`<tr>${this.cell('a')}${this.cell('b')}</tr>`;
+    }
+}
+defineComponent('panel-app', PanelApp);
+"#;
+
+#[test]
+fn method_form_template_inlines_its_helpers() {
+    let out = compile(METHOD_MAIN_HELPER);
+    // helper member gone, no runtime call survives, no tpl bleeds, view emitted
+    assert!(!out.contains("cell ="));
+    assert!(!out.contains("this.cell("));
+    assert!(!out.contains("tpl`"));
+    assert!(out.contains("view(): DocumentFragment"));
+}
+
+// A helper call buried inside a NESTED template literal (a ternary branch) — the
+// splice must recurse into the nested template's holes, not copy it verbatim.
+const NESTED_HELPER_CALL: &str = r#"import { Component, defineComponent, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class PanelApp extends Component {
+    on = true;
+    chip = (k: string): Template => tpl`<i>${k}</i>`;
+    template = (): Template => tpl`<div>${this.on ? tpl`<p>${this.chip('a')}${this.chip('b')}</p>` : tpl``}</div>`;
+}
+defineComponent('panel-app', PanelApp);
+"#;
+
+#[test]
+fn helper_call_inside_a_nested_template_is_inlined() {
+    let out = compile(NESTED_HELPER_CALL);
+    assert!(!out.contains("chip ="));
+    assert!(!out.contains("this.chip("));
+    assert!(!out.contains("tpl`"));
+    assert!(out.contains("view(): DocumentFragment"));
+}

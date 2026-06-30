@@ -23,6 +23,9 @@ GG 👊🥋✊
 
 - Fixed a bug where the compiler would only lower arrow function definition for template definition, now it will work
   with both function definition and method 🐛🐞
+- Another sneaky one from the wikipulse migration 🕵️ helper templates only inlined in the arrow field form, so a
+  `${this.row(x)}` helper in a `template() {}` method (or tucked inside a nested template) got left as a runtime call and
+  blew up 💥 Sorted - helpers inline wherever you call them now 🪄🐛
 
 - [x] Update playground with WASM compiler
   - [x] Update all examples with updated API

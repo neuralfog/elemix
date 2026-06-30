@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-analyzer-linux-x64",
-  "version": "0.9.0-dev.9",
+  "version": "0.9.0-dev.10",
   "description": "Prebuilt elemix-analyzer binary for linux x64 (static musl).",
   "license": "MIT",
   "author": "brownhounds",

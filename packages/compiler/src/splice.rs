@@ -15,8 +15,8 @@ use crate::lower::{
 };
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
-    ArrowFunctionExpression, Class, ClassElement, Declaration, Expression, PropertyKey, Statement,
-    TaggedTemplateExpression,
+    ArrowFunctionExpression, Class, ClassElement, Declaration, Expression, MethodDefinitionKind,
+    PropertyKey, Statement, TaggedTemplateExpression,
 };
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType};
@@ -78,27 +78,52 @@ fn class_edits(source: &str, class: &Class, edits: &mut Vec<(usize, usize, Strin
     let mut main: Option<MainTemplate> = None;
 
     for element in &class.body.body {
-        let ClassElement::PropertyDefinition(prop) = element else {
-            continue;
-        };
-        let PropertyKey::StaticIdentifier(key) = &prop.key else {
-            continue;
-        };
-        let Some(Expression::ArrowFunctionExpression(arrow)) = &prop.value else {
-            continue;
-        };
-
-        if key.name == "template" {
-            main = analyze_main(arrow, source);
-        } else if let Some(html) = expression_html(arrow) {
-            helpers.insert(
-                key.name.to_string(),
-                Helper {
-                    params: arrow_params(arrow),
-                    source: slice(source, html.span()),
-                },
-            );
-            member_removals.push((prop.span.start as usize, prop.span.end as usize));
+        match element {
+            ClassElement::PropertyDefinition(prop) => {
+                let PropertyKey::StaticIdentifier(key) = &prop.key else {
+                    continue;
+                };
+                let Some(Expression::ArrowFunctionExpression(arrow)) = &prop.value else {
+                    continue;
+                };
+                if key.name == "template" {
+                    main = analyze_main(arrow, source);
+                } else if let Some(html) = expression_html(arrow) {
+                    helpers.insert(
+                        key.name.to_string(),
+                        Helper {
+                            params: arrow_params(arrow),
+                            source: slice(source, html.span()),
+                        },
+                    );
+                    member_removals.push((prop.span.start as usize, prop.span.end as usize));
+                }
+            }
+            // Method-form `template() { …; return tpl`…`; }` — inline helpers the
+            // same way, but replace only the returned template so the method's
+            // prelude + braces survive; drop any local `const X = tpl`…`` helpers.
+            ClassElement::MethodDefinition(m)
+                if m.kind == MethodDefinitionKind::Method
+                    && matches!(&m.key, PropertyKey::StaticIdentifier(k) if k.name == "template") =>
+            {
+                if let Some(body) = &m.value.body {
+                    let (locals, const_removals, ret) = collect_block(&body.statements, source);
+                    if let Some(html) = ret {
+                        let (statics, holes) = extract(html, source);
+                        main = Some(MainTemplate {
+                            statics,
+                            holes,
+                            body: (html.span().start as usize, html.span().end as usize),
+                            local_helpers: locals,
+                        });
+                        for (s, e) in const_removals {
+                            let e = e + trailing_newline(source, e);
+                            edits.push((s, e, String::new()));
+                        }
+                    }
+                }
+            }
+            _ => {}
         }
     }
 
@@ -179,6 +204,58 @@ fn analyze_main(arrow: &ArrowFunctionExpression, source: &str) -> Option<MainTem
     })
 }
 
+/// A block body's local `const X = tpl`…`` helpers, the spans of those `const`
+/// declarations (to delete), and the returned `tpl`…``.
+type BlockParts<'a> = (
+    HashMap<String, Helper>,
+    Vec<(usize, usize)>,
+    Option<&'a TaggedTemplateExpression<'a>>,
+);
+
+/// Collect a block body's local `const X = tpl`…`` helpers (with their statement
+/// spans, for removal) and the returned `tpl`…``. Used by the method-form
+/// `template()` path, which keeps the method block and replaces only the return.
+fn collect_block<'a>(statements: &'a [Statement<'a>], source: &str) -> BlockParts<'a> {
+    let mut local_helpers = HashMap::new();
+    let mut const_removals = Vec::new();
+    let mut ret = None;
+    for stmt in statements {
+        match stmt {
+            Statement::VariableDeclaration(decl) => {
+                let mut has_helper = false;
+                for d in &decl.declarations {
+                    if let (Some(name), Some(Expression::TaggedTemplateExpression(html))) =
+                        (d.id.get_identifier_name(), &d.init)
+                    {
+                        if is_html(html, source) {
+                            local_helpers.insert(
+                                name.to_string(),
+                                Helper {
+                                    params: Vec::new(),
+                                    source: slice(source, html.span()),
+                                },
+                            );
+                            has_helper = true;
+                        }
+                    }
+                }
+                if has_helper {
+                    const_removals.push((decl.span.start as usize, decl.span.end as usize));
+                }
+            }
+            Statement::ReturnStatement(r) => {
+                if let Some(Expression::TaggedTemplateExpression(html)) = &r.argument {
+                    if is_html(html, source) {
+                        ret = Some(&**html);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    (local_helpers, const_removals, ret)
+}
+
 /// The `tpl`...`` of an expression-bodied arrow `() => tpl`...``.
 fn expression_html<'a>(
     arrow: &'a ArrowFunctionExpression<'a>,
@@ -257,8 +334,12 @@ fn inline_calls(expr: &str, helpers: &HashMap<String, Helper>) -> String {
             out.extend(c[i..j].iter());
             i = j;
         } else if ch == '`' {
+            // A nested template literal (e.g. a ternary branch `cond ? tpl`…` :
+            // tpl```): keep its static text verbatim, but recurse into its holes
+            // so a `${this.row(x)}` helper call inside still inlines.
             let j = tl_end(&c, i) + 1;
-            out.extend(c[i..j].iter());
+            let lit: String = c[i..j].iter().collect();
+            out.push_str(&inline_template_literal(&lit, helpers));
             i = j;
         } else if is_ident_start(ch) && (i == 0 || !is_ident_char(c[i - 1])) {
             if let Some((end, repl)) = try_call(&c, i, helpers) {
@@ -273,6 +354,24 @@ fn inline_calls(expr: &str, helpers: &HashMap<String, Helper>) -> String {
             i += 1;
         }
     }
+    out
+}
+
+/// Inline helper calls inside the holes of a nested template literal, leaving its
+/// static text untouched. Rebuilds the `` `…` `` so a helper call buried in a
+/// conditional/nested template (a hole within a hole) still gets inlined.
+fn inline_template_literal(lit: &str, helpers: &HashMap<String, Helper>) -> String {
+    let (statics, holes) = split_template_literal(lit);
+    let mut out = String::from("`");
+    for (i, s) in statics.iter().enumerate() {
+        out.push_str(s);
+        if let Some(hole) = holes.get(i) {
+            out.push_str("${");
+            out.push_str(&inline_calls(hole, helpers));
+            out.push('}');
+        }
+    }
+    out.push('`');
     out
 }
 

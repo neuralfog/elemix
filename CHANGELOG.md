@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.10] - 2026-06-30
+
+### Fixed
+
+- Compiler: helper templates are now inlined inside a method-form `template()` (the splice pre-pass previously only saw the `template = () =>` arrow field, so helpers in a method template were left as runtime calls returning uncompiled `tpl` and threw)
+- Compiler: a helper call nested inside another template (e.g. a `${cond ? tpl\`…${this.row(x)}…\` : tpl\`\`}` branch) is now inlined; the splice recurses into nested template holes instead of copying them verbatim
+
 ## [0.9.0-dev.9] - 2026-06-30
 
 ### Fixed
