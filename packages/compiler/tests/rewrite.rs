@@ -107,3 +107,104 @@ fn block_body_prelude_survives_into_view() {
     assert!(view_at < destruct_at && destruct_at < clone_at);
     assert!(!out.contains("tpl`"));
 }
+
+// --- method-form `template()` lowers like the arrow field ---
+
+const METHOD_FORM: &str = r#"import { Component, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class MethodApp extends Component {
+    inc = (): void => {};
+    template(): Template {
+        return tpl`<button @click=${this.inc}>${this.count}</button>`;
+    }
+}
+defineComponent('method-app', MethodApp);
+"#;
+
+const METHOD_PRELUDE: &str = r#"import { Component, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class MethodDestructApp extends Component {
+    inc = (): void => {};
+    template(): Template {
+        const { inc } = this;
+        return tpl`<button @click=${inc}>${this.count}</button>`;
+    }
+}
+defineComponent('method-destruct-app', MethodDestructApp);
+"#;
+
+const METHOD_WITH_GETTER: &str = r#"import { Component, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class GetterApp extends Component {
+    private get cls(): string {
+        return 'box';
+    }
+    template(): Template {
+        return tpl`<div class=${this.cls}>hi</div>`;
+    }
+}
+defineComponent('getter-app', GetterApp);
+"#;
+
+#[test]
+fn method_form_template_lowers() {
+    // `template() { return tpl`…`; }` must lower like `template = () => tpl`…``:
+    // the method signature is replaced by `view()` and the `tpl` tag is erased.
+    let out = compile(METHOD_FORM);
+    assert_eq!(out.matches("view(): DocumentFragment").count(), 1);
+    assert!(!out.contains("template(): Template"));
+    assert!(!out.contains("tpl`"));
+    // the holes still bound — proof the template was actually compiled
+    assert!(out.contains("_event("));
+}
+
+#[test]
+fn method_form_prelude_survives_into_view() {
+    // Same block-body prelude guarantee as the arrow form, but for a method.
+    let out = compile(METHOD_PRELUDE);
+    assert!(out.contains("view(): DocumentFragment {"));
+    assert!(out.contains("const { inc } = this;"));
+    let view_at = out.find("view(): DocumentFragment").unwrap();
+    let destruct_at = out.find("const { inc } = this;").unwrap();
+    let clone_at = out.find("clone(").unwrap();
+    assert!(view_at < destruct_at && destruct_at < clone_at);
+    assert!(!out.contains("tpl`"));
+}
+
+#[test]
+fn method_template_lowers_alongside_a_getter() {
+    // A `get` accessor must not be mistaken for the template, and is left intact
+    // (mirrors real components that pair a getter with a method template).
+    let out = compile(METHOD_WITH_GETTER);
+    assert!(out.contains("view(): DocumentFragment {"));
+    assert!(out.contains("get cls(): string"));
+    assert!(!out.contains("tpl`"));
+}
+
+#[test]
+fn method_and_arrow_forms_lower_identically() {
+    // The two authoring forms of the same template must produce the byte-identical
+    // `view()` (and everything after it).
+    const ARROW: &str = r#"import { Component, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class W extends Component {
+    template = (): Template => tpl`<button @click=${this.inc}>${this.count}</button>`;
+}
+defineComponent('w-el', W);
+"#;
+    const METHOD: &str = r#"import { Component, tpl } from '@neuralfog/elemix';
+import type { Template } from '@neuralfog/elemix/types';
+export class W extends Component {
+    template(): Template {
+        return tpl`<button @click=${this.inc}>${this.count}</button>`;
+    }
+}
+defineComponent('w-el', W);
+"#;
+    let view = |src| {
+        let out = compile(src);
+        let at = out.find("view(): DocumentFragment").expect("a view");
+        out[at..].to_string()
+    };
+    assert_eq!(view(ARROW), view(METHOD));
+}

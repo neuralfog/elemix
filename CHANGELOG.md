@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.9] - 2026-06-30
+
+### Fixed
+
+- Compiler: a `template()` method now lowers to `view()` like the `template = () =>` arrow field; previously only the arrow field was compiled, so the method form was left uncompiled and threw at runtime
+
 ## [0.9.0-dev.8] - 2026-06-24
 
 ### Added

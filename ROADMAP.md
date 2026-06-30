@@ -19,19 +19,26 @@ GG 👊🥋✊
 
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
-## TODOS
-
-- [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
-- [] Add elemix to official benchmarks
-
 ### Phase 7 - Close the release of v0.9.0 ❎
 
-- [] Update playground with WASM compiler
-  - [] Update all examples with updated API, add new and maybe remove some
-  - [] Playground needs some cleanup, better file management for examples, atm just a giant file 🤮
+- Fixed a bug where the compiler would only lower arrow function definition for template definition, now it will work
+  with both function definition and method 🐛🐞
+
+- [x] Update playground with WASM compiler
+  - [x] Update all examples with updated API
+  - [x] Playground needs some cleanup, better file management for examples, atm just a giant file 🤮
+  - [] Add new examples to cover full usage
+- [] Conformance (potential bug fixing)
+  - [] Convert wikipulse app
+  - [] Convert stealth app (over 200 components)
 - [] Put a website at `elemix.dev`
-- [] Update all `README` files at the moment is just autocomplete filler from the `minion` 🤖
+  - [] Landing page
+  - [] Documentation driven by markdow files
+  - [] Selectable verion same as Laravel docs
+- [] Update all `README` files at the moment are just autocomplete filler from the `minion` 🤖
 - [] Add template repo 📍
+- [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
+- [] Add elemix to official benchmarks
 
 ### Phase 6 - Analyzer 📊
 
@@ -59,7 +66,7 @@ What it nails 🔨
 - Custom elements only register when their module loads - #component fires defineComponent as an import side effect.
   So <user-card> with no import to its module renders... nothing 🤬
 - It's a warning, not an error - project could still load the module elsewhere 🟡
-- When working with bundler is a good practice to import modules wherever component used in template, imports will
+- When working with a bundler it's good practice to import modules wherever a component is used in a template, imports will
   be tree shaken 🌳
 
 ***Bindings On A Leash 🦮⚡***
@@ -108,10 +115,10 @@ What it catches 🎣
   - needs node + the project's typescript; pure-Rust checks (hints/tags/imports) run without it ⚙️
   - NO_COLOR kills colour, COLORTERM=truecolor lights up 24-bit; auto-plain when piped 🎨
 
-- `--lsp` mode has been implemented with proper formatting (JSON), this should work as one shot tool.
+- `--lsp` mode has been implemented with proper formatting (JSON), this should work as a one-shot tool.
   `nvim` has `vim.diagnostic` and can integrate on `BufWritePost`. `vscode` has `onDidSaveTextDocument`
   and can `child_process.execFile`. This is first iteration which is dumb, scan all files on every run.
-  Adding full blown `lsp` server should be not that difficult in the future. For now editor should be
+  Adding a full-blown `lsp` server should not be that difficult in the future. For now editor should be
   able to show diagnostics post save 📝
 - Transient files for typechecking did not work 💥💥 The trick: build a virtual overlay of the file (in tsc)
   and wrap each hole in place - `${__ck<UserCard,'name'>(expr)}` 🪄
@@ -255,13 +262,13 @@ onMount(): void {
 - I can throw almost anything at the state and it will just work ✅
 - Compiling reactivity experiment 🔬 - can be done with shallow refs but not worth the effort, too many
   restrictions and massive complexity added to the compiler. One of which is typescript dependency
-  and forcing explicit typed state all over the place, limitations of what I can throw at the state.
+  and forcing explicitly typed state all over the place, limitations of what I can throw at the state.
   Generated code had too many corner cases and weird limitations I would have to explain 🫨🫨🫨
 - I think there may be another way, basically coming up with highly specialized data structure for the
   compiler to spit out, similar to what `ivi` does, not todays me problem 🔮 Atm proxy at runtime
   is as optimal as it gets for this particular use case 🎯🎯🎯
 - Btw what the hell React is doing, official benchmarks showing that React 19 with a compiler is
-  slower than normal React app 😂😂😂 What is the point, what are they doing ⁉️⁉️🤷🤷
+  slower than a normal React app 😂😂😂 What is the point, what are they doing ⁉️⁉️🤷🤷
 
 ***Don't underestimate the power of the dark side 🌑☀️*** 
 

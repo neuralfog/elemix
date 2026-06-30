@@ -12,7 +12,8 @@ use crate::emit::TsEmitter;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
     ArrowFunctionExpression, Class, ClassElement, Declaration, Expression,
-    ImportDeclarationSpecifier, ModuleExportName, PropertyKey, Statement, TaggedTemplateExpression,
+    ImportDeclarationSpecifier, MethodDefinitionKind, ModuleExportName, PropertyKey, Statement,
+    TaggedTemplateExpression,
 };
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
@@ -195,22 +196,31 @@ fn plan(source: &str) -> Plan {
     }
 }
 
-/// A `Comp` for a class IFF it has a `template = () => tpl`…`` member.
+/// A `Comp` for a class IFF it has a `template` member returning a `tpl`…`` —
+/// either the arrow field `template = () => tpl`…`` or the method
+/// `template() { return tpl`…`; }`. Both lower to the same `view()`.
 fn component(source: &str, class_start: usize, class: &Class) -> Option<Comp> {
     for element in &class.body.body {
-        let ClassElement::PropertyDefinition(prop) = element else {
-            continue;
+        let (member, prelude, tt) = match element {
+            ClassElement::PropertyDefinition(prop) if is_template_key(&prop.key) => {
+                let Some(Expression::ArrowFunctionExpression(arrow)) = &prop.value else {
+                    return None;
+                };
+                (
+                    prop.span,
+                    arrow_prelude(source, arrow),
+                    template_tag(arrow)?,
+                )
+            }
+            ClassElement::MethodDefinition(m)
+                if m.kind == MethodDefinitionKind::Method && is_template_key(&m.key) =>
+            {
+                let body = m.value.body.as_ref()?;
+                let stmts = &body.statements;
+                (m.span, block_prelude(source, stmts), return_tag(stmts)?)
+            }
+            _ => continue,
         };
-        let PropertyKey::StaticIdentifier(id) = &prop.key else {
-            continue;
-        };
-        if id.name.as_str() != "template" {
-            continue;
-        }
-        let Some(Expression::ArrowFunctionExpression(arrow)) = &prop.value else {
-            return None;
-        };
-        let tt = template_tag(arrow)?;
         if !is_tpl(source, tt) {
             return None;
         }
@@ -228,8 +238,8 @@ fn component(source: &str, class_start: usize, class: &Class) -> Option<Comp> {
             .collect();
         return Some(Comp {
             class_start,
-            member: (prop.span.start as usize, prop.span.end as usize),
-            prelude: arrow_prelude(source, arrow),
+            member: (member.start as usize, member.end as usize),
+            prelude,
             statics,
             holes,
         });
@@ -237,8 +247,12 @@ fn component(source: &str, class_start: usize, class: &Class) -> Option<Comp> {
     None
 }
 
-/// The `tpl`…`` a `template()` returns — directly (expression body) or via the
-/// `return` (block body).
+fn is_template_key(key: &PropertyKey) -> bool {
+    matches!(key, PropertyKey::StaticIdentifier(id) if id.name.as_str() == "template")
+}
+
+/// The `tpl`…`` an arrow `template` returns — directly (expression body) or via
+/// the `return` (block body).
 fn template_tag<'a>(
     arrow: &'a ArrowFunctionExpression,
 ) -> Option<&'a TaggedTemplateExpression<'a>> {
@@ -251,14 +265,20 @@ fn template_tag<'a>(
             _ => None,
         }
     } else {
-        let ret = arrow.body.statements.iter().rev().find_map(|s| match s {
-            Statement::ReturnStatement(r) => Some(r),
-            _ => None,
-        })?;
-        match ret.argument.as_ref()? {
-            Expression::TaggedTemplateExpression(tt) => Some(tt),
-            _ => None,
-        }
+        return_tag(&arrow.body.statements)
+    }
+}
+
+/// The `tpl`…`` returned by the last `return` in a block of statements (the
+/// shared block-body case for arrows and methods).
+fn return_tag<'a>(stmts: &'a [Statement<'a>]) -> Option<&'a TaggedTemplateExpression<'a>> {
+    let ret = stmts.iter().rev().find_map(|s| match s {
+        Statement::ReturnStatement(r) => Some(r),
+        _ => None,
+    })?;
+    match ret.argument.as_ref()? {
+        Expression::TaggedTemplateExpression(tt) => Some(tt),
+        _ => None,
     }
 }
 
@@ -266,20 +286,23 @@ fn is_tpl(source: &str, tt: &TaggedTemplateExpression) -> bool {
     matches!(&tt.tag, Expression::Identifier(id) if slice(source, id.span) == "tpl")
 }
 
-/// For a block-bodied `template = () => { …prelude…; return tpl`…`; }`, the
+/// For a block body `{ …prelude…; return tpl`…`; }` (arrow or method), the
 /// source of the statements before the `return` — they must survive into
 /// `view()` (e.g. a `const { inc } = this` destructure the holes reference).
-fn arrow_prelude(source: &str, arrow: &ArrowFunctionExpression) -> String {
-    if arrow.expression {
-        return String::new();
-    }
-    let stmts = &arrow.body.statements;
+fn block_prelude(source: &str, stmts: &[Statement]) -> String {
     if stmts.len() <= 1 {
         return String::new();
     }
     let start = stmts[0].span().start as usize;
     let end = stmts[stmts.len() - 2].span().end as usize;
     source[start..end].to_string()
+}
+
+fn arrow_prelude(source: &str, arrow: &ArrowFunctionExpression) -> String {
+    if arrow.expression {
+        return String::new();
+    }
+    block_prelude(source, &arrow.body.statements)
 }
 
 fn slice(source: &str, span: Span) -> String {
