@@ -58,7 +58,7 @@ pub struct Generated {
 /// Generate the `decls` + `view()` body for one top-level template.
 pub fn generate(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> Generated {
     let mut ctx = Ctx::default();
-    let body = gen_template(statics, holes, &mut ctx, emitter, false);
+    let body = gen_template(statics, holes, &mut ctx, emitter, false, false);
     Generated {
         decls: ctx.decls,
         body,
@@ -76,7 +76,7 @@ pub fn generate_all(
     let mut ctx = Ctx::default();
     let bodies = templates
         .iter()
-        .map(|(statics, holes)| gen_template(statics, holes, &mut ctx, emitter, false))
+        .map(|(statics, holes)| gen_template(statics, holes, &mut ctx, emitter, false, false))
         .collect();
     (ctx.decls, bodies)
 }
@@ -89,13 +89,16 @@ pub fn codegen(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> S
 }
 
 /// Generate one template body. `builder` switches the return between the whole
-/// fragment (a view) and its first node (an embedded builder).
+/// fragment (a view) and an embedded builder. `multi_root` keeps the whole
+/// fragment for a builder used as a `_child` value (which can mount many roots);
+/// a `_list` row leaves it false so a multi-root row collapses to its first node.
 fn gen_template(
     statics: &[String],
     holes: &[String],
     ctx: &mut Ctx,
     emitter: &dyn Emitter,
     builder: bool,
+    multi_root: bool,
 ) -> String {
     let parsed = parse(statics, holes);
     let bindings: Vec<_> = parsed.holes.iter().map(classify).collect();
@@ -281,7 +284,7 @@ fn gen_template(
         }
     }
 
-    lines.push(emitter.ret(&root, builder, el));
+    lines.push(emitter.ret(&root, builder, el, multi_root));
     let mut body = lines.join("\n");
     body.push('\n');
     body
@@ -338,7 +341,7 @@ fn lower_list(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) ->
     if let Some(r) = reactive {
         ctx.reactive.push(r);
     }
-    let render = substitute_html(&args[1], ctx, emitter);
+    let render = substitute_html(&args[1], ctx, emitter, false);
     if pushed {
         ctx.reactive.pop();
     }
@@ -363,13 +366,13 @@ fn lower_child(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -
     let getter = if trimmed.starts_with("when(") {
         let args = split_call_args(expr);
         let cond = args.first().cloned().unwrap_or_default();
-        let body = substitute_html(&arrow_body(args.get(1)), ctx, emitter);
+        let body = substitute_html(&arrow_body(args.get(1)), ctx, emitter, true);
         format!("{cond} ? {body} : ''")
     } else if trimmed.starts_with("choose(") {
         lower_choose(expr, ctx, emitter)
     } else {
         // a ternary or direct template
-        substitute_html(expr, ctx, emitter)
+        substitute_html(expr, ctx, emitter, true)
     };
     vec![emitter.child(anchor, &getter)]
 }
@@ -408,7 +411,7 @@ fn lower_repeat_ternary(
     if let Some(r) = reactive {
         ctx.reactive.push(r);
     }
-    let render = substitute_html(&args[1], ctx, emitter);
+    let render = substitute_html(&args[1], ctx, emitter, false);
     if pushed {
         ctx.reactive.pop();
     }
@@ -416,7 +419,7 @@ fn lower_repeat_ternary(
         .get(2)
         .cloned()
         .unwrap_or_else(|| "(_: unknown, i: number) => i".into());
-    let other = substitute_html(other_src, ctx, emitter);
+    let other = substitute_html(other_src, ctx, emitter, true);
 
     let list_anchor = ctx.var("a");
     let items = if then_is_repeat {
@@ -449,7 +452,7 @@ fn lower_choose(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
     for pair in split_commas(&inner).into_iter().rev() {
         let parts = split_commas(&strip_brackets(&pair));
         let cond = parts.first().cloned().unwrap_or_default();
-        let body = substitute_html(&arrow_body(parts.get(1)), ctx, emitter);
+        let body = substitute_html(&arrow_body(parts.get(1)), ctx, emitter, true);
         chain = format!("{cond} ? {body} : {chain}");
     }
     chain
@@ -469,7 +472,9 @@ fn arrow_body(factory: Option<&String>) -> String {
 }
 
 /// Replace each top-level `tpl` template in `expr` with an inline IIFE builder.
-fn substitute_html(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
+/// `multi_root` is true when the builder feeds a `_child` value (a conditional
+/// branch can mount many roots) and false when it feeds a `_list` row.
+fn substitute_html(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, multi_root: bool) -> String {
     let spans = find_html_spans(expr);
     if spans.is_empty() {
         return expr.to_string();
@@ -481,7 +486,7 @@ fn substitute_html(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
         out.push_str(&slice(expr, last, start));
         let html_src = slice(expr, start, end);
         let (statics, holes) = split_template_literal(&html_src);
-        let inner = gen_template(&statics, &holes, ctx, emitter, true);
+        let inner = gen_template(&statics, &holes, ctx, emitter, true, multi_root);
         out.push_str(&format!("(() => {{\n{inner}}})()"));
         last = end;
     }

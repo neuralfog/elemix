@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.11] - 2026-06-30
+
+### Fixed
+
+- Compiler: multi-root conditional branches now render every root (only the first was kept before)
+
 ## [0.9.0-dev.10] - 2026-06-30
 
 ### Fixed

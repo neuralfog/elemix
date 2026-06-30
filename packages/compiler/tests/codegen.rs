@@ -180,6 +180,28 @@ fn template_ternary_lowers_to_child() {
 }
 
 #[test]
+fn multi_root_child_branch_returns_the_whole_fragment() {
+    // a conditional value can mount many roots; `_child` ranges over the fragment,
+    // so the builder returns the fragment, not just its first node
+    let out = gen(&["<div>", "</div>"], &["c ? tpl`<a></a><b></b>` : ''"]);
+    assert!(out.contains("clone(_t1)"));
+    assert!(out.contains("return _r2;"));
+    assert!(!out.contains("_r2.firstChild!"));
+}
+
+#[test]
+fn multi_root_list_row_collapses_to_its_first_node() {
+    // `_list` tracks one node per key, so a multi-root row still collapses to its
+    // first node rather than returning a fragment the reconciler cannot key
+    let out = gen(
+        &["<div>", "</div>"],
+        &["repeat(items, (e) => tpl`<a></a><b></b>`, (e) => e.id)"],
+    );
+    assert!(out.contains("_list("));
+    assert!(out.contains("return _r2.firstChild!;"));
+}
+
+#[test]
 fn ternary_with_empty_branch_is_preserved() {
     let out = gen(&["<div>", "</div>"], &["c ? tpl`<a></a>` : ''"]);
     assert!(out.contains("_child(_n1, () => (c"));

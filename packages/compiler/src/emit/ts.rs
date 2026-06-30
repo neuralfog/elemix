@@ -47,8 +47,8 @@ impl Emitter for TsEmitter {
         format!("const {var} = document.createComment('');\n{sibling}.before({var});")
     }
 
-    fn ret(&self, root: &str, builder: bool, el: bool) -> String {
-        if builder && !el {
+    fn ret(&self, root: &str, builder: bool, el: bool, multi_root: bool) -> String {
+        if builder && !el && !multi_root {
             format!("return {root}.firstChild!;")
         } else {
             format!("return {root};")

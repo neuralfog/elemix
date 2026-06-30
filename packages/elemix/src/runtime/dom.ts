@@ -147,6 +147,7 @@ export const _ref = (el: Element, ref: { value: unknown }): void => {
 
 export const _child = (anchor: Node, get: Getter<unknown>): void => {
     let current: Node | null = null;
+    let range: Node[] | null = null;
     let scopes: Scope | null = null;
     effect(() => {
         const parent = anchor.parentNode;
@@ -163,12 +164,32 @@ export const _child = (anchor: Node, get: Getter<unknown>): void => {
         }
         dispose(scopes);
         scopes = fresh;
-        if (current) {
-            parent.replaceChild(next, current);
+
+        const frag = next instanceof DocumentFragment;
+        if (!range && !frag) {
+            if (current) {
+                parent.replaceChild(next, current);
+            } else {
+                parent.insertBefore(next, anchor);
+            }
+            current = next;
+            return;
+        }
+
+        if (range) {
+            for (const n of range) parent.removeChild(n);
+            range = null;
+        } else if (current) {
+            parent.removeChild(current);
+        }
+        current = null;
+        if (frag) {
+            range = [...next.childNodes];
+            parent.insertBefore(next, anchor);
         } else {
             parent.insertBefore(next, anchor);
+            current = next;
         }
-        current = next;
     });
 };
 

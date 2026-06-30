@@ -28,9 +28,10 @@ pub trait Emitter {
     /// Insert a fresh comment anchor before `sibling`; binds `var` (used to give
     /// a `repeat`-in-ternary its own `_list` anchor next to the `_child` one).
     fn comment_anchor(&self, var: &str, sibling: &str) -> String;
-    /// `return <root>` (view, or an element-cloned builder) or
-    /// `return <root>.firstChild!` (fragment-cloned nested builder).
-    fn ret(&self, root: &str, builder: bool, el: bool) -> String;
+    /// `return <root>` (view, an element-cloned builder, or a multi-root child
+    /// value) or `return <root>.firstChild!` (a fragment-cloned single-node row
+    /// for `_list`, which tracks one node per key).
+    fn ret(&self, root: &str, builder: bool, el: bool, multi_root: bool) -> String;
     /// A marker for a binding the codegen cannot yet lower.
     fn pending(&self, note: &str) -> String;
 
