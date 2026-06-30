@@ -138,7 +138,17 @@ export const _event = (
     name: string,
     handler: EventListener,
 ): void => {
-    (el as unknown as Record<string, EventListener>)[`on${name}`] = handler;
+    const key = `on${name}`;
+    if (key in el) {
+        (el as unknown as Record<string, EventListener>)[key] = handler;
+        return;
+    }
+    const store = el as unknown as Record<string, EventListener | undefined>;
+    const slot = `__ev_${name}`;
+    if (store[slot] === undefined) {
+        el.addEventListener(name, (e) => store[slot]?.(e));
+    }
+    store[slot] = handler;
 };
 
 export const _ref = (el: Element, ref: { value: unknown }): void => {

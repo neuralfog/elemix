@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.12] - 2026-06-30
+
+### Fixed
+
+- Runtime: custom events (`@my-event`) now work; `_event` falls back to `addEventListener` when there is no `on*` property
+
 ## [0.9.0-dev.11] - 2026-06-30
 
 ### Fixed

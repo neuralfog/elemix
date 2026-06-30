@@ -1,0 +1,38 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/CustomEventApp.ts
+---
+import { template, clone, _event, effect, _setText, defineComponent, state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { caught: number };
+
+const _t0 = template('<button class="fire">fire</button><span class="caught"> </span>');
+
+export class CustomEventApp extends Component {
+    state = state<State>({ caught: 0 });
+
+    fire = (e: Event): void => {
+        (e.currentTarget as Element).dispatchEvent(
+            new CustomEvent('ping', { detail: 1 }),
+        );
+    };
+
+    onPing = (e: Event): void => {
+        this.state.caught += (e as CustomEvent<number>).detail;
+    };
+
+    view(): DocumentFragment {
+const _r0 = clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
+_event(_n1, 'click', this.fire);
+_event(_n1, 'ping', this.onPing);
+effect(() => {
+_setText(_n2, (this.state.caught));
+});
+return _r0;
+}
+}
+defineComponent('custom-event-app', CustomEventApp);
