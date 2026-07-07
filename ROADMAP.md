@@ -51,6 +51,24 @@ GG 👊🥋✊
 - Fixed multi-root conditional branches now render every root (only the first was kept before) 🪄🐛
 - Fixed custom events (`@my-event`) now fire (`_event` falls back to `addEventListener`) 🪄🐛
 
+- [] Fix compiler output for tracked getters and setters, there is a high chance of clashing with private properties,
+  solution move `#count` => `#__count` and so on, this is just a matter of time before this bites hard 🥲💥💥💥
+
+```ts
+    #count = state(0);
+    #count_dep = dep();
+    get count() {
+        track(this.#count_dep);
+        return this.#count;
+    }
+    set count(value) {
+        const next = state(value);
+        if (this.#count === next) return;
+        this.#count = next;
+        trigger(this.#count_dep);
+    }
+```
+
 - [] Additional polish of playground examples, organize examples better or not 🤔
 - [] Conformance (potential bug fixing)
   - [x] Convert wikipulse app
