@@ -19,8 +19,20 @@ GG 👊🥋✊
 
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
+### Post v0.9.0 Release
+
+- [] Focus on proper editor support
+  - [] Full-blown LSP server in `analyzer`
+  - [] Focus on VS Code as the target
+  - [] Extension for template highlighting of `tpl`
+  - [] Linting extension based on the `analyzer` LSP mode
+  - [] Possibly combine into a single one for easier release
+  - [] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
+- [] Add currated `clanker` skill, include it in monoropro, add it to `elemix.dev`
+
 ### Phase 7 - Close the release of v0.9.0 ❎
 
+- Added a [starter template](https://github.com/neuralfog/elemix-template) repo at https://github.com/neuralfog/elemix-template 🧩🚀
 - Added [Compiler Explorer](https://compiler-explorer.elemix.dev/) and linked on landing page https://compiler-explorer.elemix.dev/ ⚙️
 - Added `createApp()` - an optional app bootstrap with chainable `.config()` / `.mount()`; app config lives on
   `window.__elemix__` 🚀
@@ -39,6 +51,7 @@ GG 👊🥋✊
 - Fixed multi-root conditional branches now render every root (only the first was kept before) 🪄🐛
 - Fixed custom events (`@my-event`) now fire (`_event` falls back to `addEventListener`) 🪄🐛
 
+- [] Additional polish of playground examples, organize examples better or not 🤔
 - [] Conformance (potential bug fixing)
   - [x] Convert wikipulse app
   - [] Convert stealth app (over 200 components)
@@ -48,7 +61,6 @@ GG 👊🥋✊
   - [x] Selectable verion same as Laravel docs
   - [] Write the actual docs 😒
 - [] Update all `README` files at the moment are just autocomplete filler from the `minion` 🤖
-- [] Add template repo 📍
 - [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
 - [] Add elemix to official benchmarks
 
@@ -818,3 +830,5 @@ What went well:
   - [x] Update all examples with updated API
   - [x] Playground needs some cleanup, better file management for examples, atm just a giant file 🤮
   - [x] Add new examples to cover full usage
+
+- [x] Add template repo 📍
