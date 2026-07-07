@@ -1,8 +1,4 @@
-import type {
-    StoryContext,
-    Parameters,
-    Meta,
-} from '@storybook/web-components-vite';
+import type { StoryContext, Parameters, Meta } from '@storybook/html-vite';
 
 export type ElemixTeardown = () => void;
 

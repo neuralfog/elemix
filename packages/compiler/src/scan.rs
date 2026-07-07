@@ -535,6 +535,7 @@ fn error_span(e: &PragmaError, class: &ClassInfo) -> Option<(u32, u32)> {
     let name = match e {
         PragmaError::Unknown(n) | PragmaError::OnClass(n) => n.as_str(),
         PragmaError::TagArity | PragmaError::DuplicateTag(_, _) => "tag",
+        PragmaError::ShadowConflict => "shadow",
     };
     class
         .directive_spans

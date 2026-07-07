@@ -21,6 +21,16 @@ GG 👊🥋✊
 
 ### Phase 7 - Close the release of v0.9.0 ❎
 
+- Added [Compiler Explorer](https://compiler-explorer.elemix.dev/) and linked on landing page https://compiler-explorer.elemix.dev/ ⚙️
+- Added `createApp()` - an optional app bootstrap with chainable `.config()` / `.mount()`; app config lives on
+  `window.__elemix__` 🚀
+- Added built-in cloaking - elemix auto-adopts a `[data-cloak], :not(:defined)` sheet so elements don't flash before they
+  upgrade and mount, swap the rule with `config({ cloak })` 🫥✨
+- Added `config({ shadow: false })` to render light DOM by default, plus a new `#shadow` hint to force a shadow
+  root - `#shadow` and `#no-shadow` together errors in both the compiler and the analyzer 🌗🚫
+- Divorced `@storybook/web-components-vite` from storybook - moved the storybook to `@storybook/html-vite` and ripped web
+  components out of the dependency tree entirely (it always rendered plain string/Node, so what's the point ⁉️) 🔥
+
 - Fixed a bug where the compiler would only lower arrow function definition for template definition, now it will work
   with both function definition and method 🐛🐞
 - Fixed issue where helper templates only inlined in the arrow field form, so a `${this.row(x)}` helper in a `template() {}`
@@ -29,17 +39,14 @@ GG 👊🥋✊
 - Fixed multi-root conditional branches now render every root (only the first was kept before) 🪄🐛
 - Fixed custom events (`@my-event`) now fire (`_event` falls back to `addEventListener`) 🪄🐛
 
-- [x] Update playground with WASM compiler
-  - [x] Update all examples with updated API
-  - [x] Playground needs some cleanup, better file management for examples, atm just a giant file 🤮
-  - [] Add new examples to cover full usage
 - [] Conformance (potential bug fixing)
-  - [] Convert wikipulse app
+  - [x] Convert wikipulse app
   - [] Convert stealth app (over 200 components)
 - [] Put a website at `elemix.dev`
-  - [] Landing page
-  - [] Documentation driven by markdow files
-  - [] Selectable verion same as Laravel docs
+  - [x] Landing page
+  - [x] Documentation driven by markdow files
+  - [x] Selectable verion same as Laravel docs
+  - [] Write the actual docs 😒
 - [] Update all `README` files at the moment are just autocomplete filler from the `minion` 🤖
 - [] Add template repo 📍
 - [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
@@ -68,8 +75,8 @@ What it nails 🔨
 
 ***The Ghost Elements 👻📦***
 
-- Custom elements only register when their module loads - #component fires defineComponent as an import side effect.
-  So <user-card> with no import to its module renders... nothing 🤬
+- Custom elements only register when their module loads - `#component` fires defineComponent as an import side effect.
+  So `<user-card>` with no import to its module renders... nothing 🤬
 - It's a warning, not an error - project could still load the module elsewhere 🟡
 - When working with a bundler it's good practice to import modules wherever a component is used in a template, imports will
   be tree shaken 🌳
@@ -80,9 +87,9 @@ What it nails 🔨
 
 The contracts 📜
 
-- `@event` → the handler, typed per the specific DOM event 🎯 @click wants a PointerEvent, @keydown a KeyboardEvent,
-  @input an Event. Keyed off `HTMLElementEventMap`, so @click=${(e: KeyboardEvent) => …} gets flagged 💥
-  A generic (e: Event) => void still works everywhere.
+- `@event` → the handler, typed per the specific DOM event 🎯 `@click` wants a PointerEvent, `@keydown` a `KeyboardEvent`,
+  @input an Event. Keyed off `HTMLElementEventMap`, so `@click=${(e: KeyboardEvent) => …}` gets flagged 💥
+  A generic `(e: Event) => void` still works everywhere.
 - `:ref` → `{ value }` shape ✅
 - `~model` → `{ value: string }` (two-way bind needs a string box) 🪣
 - `~onmodel` → `(value: string) => string` transform ⚙️
@@ -806,3 +813,8 @@ What went well:
 - [x] Deal with component inheritance 🤮🧐 This is a pandora box, do I even go there... It has to work though...
 - [x] WASM package needs its own readme 🤔
 - [x] A lot of structural changes, test the shite out of it 🔴🔴
+
+- [x] Update playground with WASM compiler
+  - [x] Update all examples with updated API
+  - [x] Playground needs some cleanup, better file management for examples, atm just a giant file 🤮
+  - [x] Add new examples to cover full usage

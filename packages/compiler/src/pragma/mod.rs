@@ -58,6 +58,9 @@ pub struct ComponentMeta {
     /// `#no-shadow` — render to light DOM (skip `attachShadow`); `#styles`
     /// adoption becomes a noop without a shadow root.
     pub no_shadow: bool,
+    /// `#shadow` — force a shadow root even when the app default is light DOM
+    /// (`config({ shadow: false })`). Mutually exclusive with `#no-shadow`.
+    pub shadow: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -70,6 +73,8 @@ pub enum PragmaError {
     TagArity,
     /// A declaration-level directive (`#styles`) found on a class pragma.
     OnClass(String),
+    /// `#shadow` and `#no-shadow` on the same component (mutually exclusive).
+    ShadowConflict,
 }
 
 /// Fold a class pragma's directives into typed meaning. **The extension point**
@@ -91,11 +96,15 @@ pub fn resolve(directives: &[Directive]) -> Result<ComponentMeta, PragmaError> {
             }
             "form" => meta.form = true,
             "no-shadow" => meta.no_shadow = true,
+            "shadow" => meta.shadow = true,
             "styles" | "state" | "effect" | "before-mount" | "mount" | "dispose" => {
                 return Err(PragmaError::OnClass(d.name.clone()))
             }
             other => return Err(PragmaError::Unknown(other.to_string())),
         }
+    }
+    if meta.shadow && meta.no_shadow {
+        return Err(PragmaError::ShadowConflict);
     }
     Ok(meta)
 }

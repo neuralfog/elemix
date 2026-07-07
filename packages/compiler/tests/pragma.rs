@@ -62,6 +62,7 @@ fn resolves_component_and_tag() {
             tag: Some("pf-builder".to_string()),
             form: false,
             no_shadow: false,
+            shadow: false,
         })
     );
 }
@@ -83,6 +84,30 @@ fn no_shadow_injects_the_static_flag() {
     let out = expand("// #component #no-shadow\nclass Foo extends Component {}").unwrap();
     assert!(out.contains("static __noShadow = true;"));
     assert!(out.contains("defineComponent('foo', Foo);"));
+}
+
+#[test]
+fn shadow_resolves_to_a_flag() {
+    assert!(resolve(&[dir("shadow", &[])]).unwrap().shadow);
+    assert!(!resolve(&[dir("component", &[])]).unwrap().shadow);
+}
+
+#[test]
+fn shadow_injects_the_static_flag() {
+    let out = expand("// #component #shadow\nclass Foo extends Component {}").unwrap();
+    assert!(out.contains("static __shadow = true;"));
+}
+
+#[test]
+fn shadow_and_no_shadow_are_mutually_exclusive() {
+    assert_eq!(
+        resolve(&[dir("shadow", &[]), dir("no-shadow", &[])]),
+        Err(PragmaError::ShadowConflict)
+    );
+    assert!(matches!(
+        expand("// #component #shadow #no-shadow\nclass Foo extends Component {}"),
+        Err(ExpandError::Resolve(PragmaError::ShadowConflict))
+    ));
 }
 
 #[test]

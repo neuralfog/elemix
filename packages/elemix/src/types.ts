@@ -5,3 +5,5 @@ export type Template = {
 };
 
 export type Ref<Value> = { value: Value };
+
+export type { ElemixApp, ElemixConfig } from './createApp';

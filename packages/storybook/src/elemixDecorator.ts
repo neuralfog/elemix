@@ -1,4 +1,4 @@
-import type { Decorator } from '@storybook/web-components-vite';
+import type { Decorator } from '@storybook/html-vite';
 import type { ElemixParams, ElemixTeardown } from '#src/elemixStory';
 
 const setupTeardowns = new Map<string, ElemixTeardown | undefined>();

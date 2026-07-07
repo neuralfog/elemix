@@ -16,10 +16,29 @@ type LifecycleHooks = {
     onDispose?(): void;
 };
 
+const DEFAULT_CLOAK = '[data-cloak],:not(:defined){visibility:hidden}';
+
+let cloakSheet: CSSStyleSheet | undefined;
+
+const cloak = (): CSSStyleSheet => {
+    if (!cloakSheet) {
+        cloakSheet = new CSSStyleSheet();
+        cloakSheet.replaceSync(
+            window.__elemix__?.config?.cloak ?? DEFAULT_CLOAK,
+        );
+        document.adoptedStyleSheets = [
+            ...(document.adoptedStyleSheets ?? []),
+            cloakSheet,
+        ];
+    }
+    return cloakSheet;
+};
+
 export class Component<ComponentProps = unknown> extends HTMLElement {
     public static formAssociated?: boolean;
     public static __sheets?: CSSStyleSheet[];
     public static __noShadow?: boolean;
+    public static __shadow?: boolean;
     public $props?: Record<string, unknown>;
     private connected = false;
     private scopes: Scope | null = null;
@@ -45,7 +64,13 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
     constructor() {
         super();
-        if (!(this.constructor as typeof Component).__noShadow) {
+        const ctor = this.constructor as typeof Component;
+        const useShadow = ctor.__shadow
+            ? true
+            : ctor.__noShadow
+              ? false
+              : (window.__elemix__?.config?.shadow ?? true);
+        if (useShadow) {
             this.attachShadow({ mode: 'open' });
         }
         this.setAttribute('data-cloak', '');
@@ -118,6 +143,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     public adoptStyles(
         input?: string | CSSStyleSheet | ReadonlyArray<string | CSSStyleSheet>,
     ): void {
+        cloak();
         const sheets =
             input !== undefined
                 ? sheet(input)

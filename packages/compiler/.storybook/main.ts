@@ -1,9 +1,9 @@
-import type { StorybookConfig } from '@storybook/web-components-vite';
+import type { StorybookConfig } from '@storybook/html-vite';
 
 const config: StorybookConfig = {
     stories: ['../stories/**/*.stories.@(ts|tsx)'],
     addons: ['@storybook/addon-vitest'],
-    framework: '@storybook/web-components-vite',
+    framework: '@storybook/html-vite',
 };
 
 export default config;

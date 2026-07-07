@@ -1,6 +1,4 @@
-import './silence-lit';
-
-import type { Decorator, Preview } from '@storybook/web-components-vite';
+import type { Decorator, Preview } from '@storybook/html-vite';
 
 // Mount the story result (a custom-element tag string, or a Node) into a host.
 // The compiled component registers itself via the story's side-effect import,

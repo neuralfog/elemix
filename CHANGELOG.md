@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.13] - 2026-07-07
+
+### Added
+
+- Runtime: `createApp(root?)` bootstrap with chainable `.config({ … })` / `.mount(target?)`; app-wide config lives on `window.__elemix__` (the root and both calls are optional, so `createApp().config({ … })` is valid)
+- Runtime: automatic cloaking - elemix adopts a `[data-cloak], :not(:defined) { visibility: hidden }` stylesheet so elements don't flash before they upgrade and mount, with no per-app CSS; `config({ cloak: '…' })` replaces the rule with a custom CSS string
+- Runtime: `config({ shadow: false })` makes components render to light DOM by default (shadow DOM stays the default otherwise)
+- Compiler: new `#shadow` hint forces a shadow root even under a light-DOM default; it is mutually exclusive with `#no-shadow`, and using both on one component is a compile error
+- Analyzer: reports `#shadow` and `#no-shadow` on the same component as an error
+
+### Changed
+
+- Storybook: ditched lit - `@neuralfog/elemix-storybook` and the storybook config now run on `@storybook/html-vite` instead of `@storybook/web-components-vite`, dropping lit-html from the dependency tree entirely (elemix always rendered plain string/Node, so lit was never used)
+
 ## [0.9.0-dev.12] - 2026-06-30
 
 ### Fixed
@@ -37,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- `@neuralfog/elemix-analyzer` — static analysis tool for elemix
+- `@neuralfog/elemix-analyzer` - static analysis tool for elemix
 
 ## [0.9.0-dev.7] - 2026-06-22
 
@@ -63,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Compiler hints: `#component`/`#tag`/`#form`/`#no-shadow`/`#styles`/`#state`/`#effect` + lifecycle `#before-mount`/`#mount`/`#dispose`
 - Reactive primitives in component `#state` (`count = 0` stays reactive)
-- Component inheritance — hooks/effects chain through `super`, stylesheets merge
+- Component inheritance - hooks/effects chain through `super`, stylesheets merge
 - Collections in reactive state (`Set`/`Map`/`WeakSet`/`WeakMap`), classes in state, `raw()` helper
 - Source maps back to the original source
 - Inlined compiler diagnostics with `--strict`; CLI version banner

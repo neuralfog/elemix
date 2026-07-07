@@ -39,6 +39,9 @@ impl std::fmt::Display for ExpandError {
             ExpandError::Resolve(PragmaError::OnClass(n)) => {
                 write!(f, "`#{n}` must tag a declaration, not a class")
             }
+            ExpandError::Resolve(PragmaError::ShadowConflict) => {
+                write!(f, "`#shadow` and `#no-shadow` are mutually exclusive")
+            }
         }
     }
 }
@@ -146,6 +149,15 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
                 class.body_open,
                 class.body_open,
                 "\n    static __noShadow = true;".to_string(),
+            ));
+        }
+
+        // #shadow → force a shadow root even when the app default is light DOM.
+        if meta.shadow {
+            edits.push((
+                class.body_open,
+                class.body_open,
+                "\n    static __shadow = true;".to_string(),
             ));
         }
 
