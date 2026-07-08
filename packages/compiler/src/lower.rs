@@ -81,6 +81,46 @@ pub fn split_commas(src: &str) -> Vec<String> {
     parts
 }
 
+/// Split an object literal `{ k1: v1, k2: v2 }` into its `(key, value)` pairs,
+/// both verbatim. Respects nesting (strings, templates, `()`/`[]`/`{}`), so arrow
+/// bodies, nested `tpl` templates and computed `[Expr]` keys stay intact. Entries
+/// without a top-level `:` (spreads, shorthand) are dropped.
+pub fn split_object_entries(src: &str) -> Vec<(String, String)> {
+    let t = src.trim();
+    let inner = t
+        .strip_prefix('{')
+        .and_then(|x| x.strip_suffix('}'))
+        .unwrap_or(t);
+    split_commas(inner)
+        .into_iter()
+        .filter_map(|e| split_at_top_colon(&e))
+        .collect()
+}
+
+/// Split one object entry at its first top-level `:` into `(key, value)`,
+/// skipping colons inside strings, templates, `()`, `[]` and `{}` (so `[E.A]:`
+/// computed keys and `(m: T) =>` param annotations don't fool it).
+fn split_at_top_colon(entry: &str) -> Option<(String, String)> {
+    let c: Vec<char> = entry.chars().collect();
+    let mut i = 0;
+    while i < c.len() {
+        match c[i] {
+            '\'' | '"' => i = skip_string(&c, i, c[i]),
+            '`' => i = tl_end(&c, i) + 1,
+            '(' => i = skip_to_close(&c, i + 1, ')'),
+            '[' => i = skip_to_close(&c, i + 1, ']'),
+            '{' => i = skip_to_close(&c, i + 1, '}'),
+            ':' => {
+                let key: String = c[..i].iter().collect();
+                let val: String = c[i + 1..].iter().collect();
+                return Some((key.trim().to_string(), val.trim().to_string()));
+            }
+            _ => i += 1,
+        }
+    }
+    None
+}
+
 /// Split a conditional expression `cond ? then : else` at its top-level `?`/`:`,
 /// skipping optional-chaining `?.`, nullish `??`, and nested ternaries/brackets.
 /// Returns `None` if `src` is not a ternary.

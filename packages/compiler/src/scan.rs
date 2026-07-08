@@ -242,6 +242,44 @@ fn special_into(snippet: &str, base: u32, out: &mut Vec<SpecialBinding>) {
     }
 }
 
+/// One `match(...)` content hole: the verbatim call expression and its absolute
+/// span. The exhaustiveness / narrowing / typed-value checks all ride on the
+/// `match` overload types, so the analyzer only needs the site's coordinates to
+/// attribute tsc's diagnostic back to the hole.
+#[derive(Debug, PartialEq)]
+pub struct MatchSite {
+    pub expr: String,
+    pub start: u32,
+    pub end: u32,
+}
+
+/// Every `match(...)` content hole in every template, with absolute spans —
+/// recursing into nested templates like [`scan_props`].
+pub fn scan_match_sites(source: &str) -> Vec<MatchSite> {
+    let mut out = Vec::new();
+    match_into(source, 0, &mut out);
+    out
+}
+
+fn match_into(snippet: &str, base: u32, out: &mut Vec<MatchSite>) {
+    for tpl in outermost_templates(snippet) {
+        let parsed = parse_spanned(&tpl.statics, &tpl.holes);
+        for binding in parsed.holes.iter().map(classify) {
+            if binding.kind == BindingKind::Child && binding.expr.trim_start().starts_with("match(")
+            {
+                out.push(MatchSite {
+                    expr: binding.expr.clone(),
+                    start: base + binding.span.start,
+                    end: base + binding.span.end,
+                });
+            }
+            if binding.expr.contains("tpl`") {
+                match_into(&binding.expr, base + binding.span.start, out);
+            }
+        }
+    }
+}
+
 /// Every element usage in every template, with the prop set it provides — the
 /// input to REQUIRED-prop checking. Found by enumerating every `<tag` open across
 /// all templates (so zero-prop usages count too) and assigning each `:prop` hole

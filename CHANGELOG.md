@@ -3,10 +3,17 @@
 All notable changes to elemix and its companion packages are documented here. They
 share one version and release together, so they share one changelog. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
-and this project adheres to [Semantic Versioning](https://semver.org/).
+and this project adheres to [Semantic Versioning](https://semver.org/) when it suits me 😂😂😂.
 
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
+
+## [0.9.0-dev.14] - 2026-07-08
+
+### Added
+
+- Runtime: new `match` directive - exhaustive pattern matching for templates. Works on string unions, enums, and tagged object unions (each branch gets the narrowed value)
+- Analyzer: flags a missing case, a wrong case, or a non-finite value (like a plain `string`). Use `choose` for open conditions
 
 ## [0.9.0-dev.13] - 2026-07-07
 

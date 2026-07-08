@@ -32,10 +32,28 @@ GG 👊🥋✊
 
 ### Phase 7 - Close the release of v0.9.0 ❎
 
+***This Is The Way 🚀👽***
+
+- So initially I thought I'd support vanilla JS and TypeScript. Changed my mind - don't care, and I won't be compromising my
+  values trying to solve other people's problems, that is how you end up with `React` 🤣🤣 Who am I to tell people that by
+  using `js` in 2026 they are doing it wrong 🤷🤷 Foot is down 🥾 `typescript` is the de facto standard right now 💡✨
+- I will keep a good distance from coupling the compiler too much to TypeScript 🔥🔥
+
+***Gotta Match 'Em All 🥅🦕***
+
+- Added `match(value, cases)` - exhaustive, type-checked pattern matching, the strict sibling of `choose` directive 🎯 Two forms: a
+  literal-union or enum value matched directly, and a discriminated object union matched on a key, where each arm is handed
+  the member narrowed to that case 🧬
+- The analyzer has its back 🤝
+
+<img src=".roadmap/pattern-matching.png" alt="exhaustive match analyzer output" />
+
+***Loot Drop 🪅🔨***
+
 - Added a [starter template](https://github.com/neuralfog/elemix-template) repo at https://github.com/neuralfog/elemix-template 🧩🚀
 - Added [Compiler Explorer](https://compiler-explorer.elemix.dev/) and linked on landing page https://compiler-explorer.elemix.dev/ ⚙️
 - Added `createApp()` - an optional app bootstrap with chainable `.config()` / `.mount()`; app config lives on
-  `window.__elemix__` 🚀
+  `window.__elemix__` 🪟🚀
 - Added built-in cloaking - elemix auto-adopts a `[data-cloak], :not(:defined)` sheet so elements don't flash before they
   upgrade and mount, swap the rule with `config({ cloak })` 🫥✨
 - Added `config({ shadow: false })` to render light DOM by default, plus a new `#shadow` hint to force a shadow
@@ -51,8 +69,8 @@ GG 👊🥋✊
 - Fixed multi-root conditional branches now render every root (only the first was kept before) 🪄🐛
 - Fixed custom events (`@my-event`) now fire (`_event` falls back to `addEventListener`) 🪄🐛
 
-- [] Fix compiler output for tracked getters and setters, there is a high chance of clashing with private properties,
-  solution move `#count` => `#__count` and so on, this is just a matter of time before this bites hard 🥲💥💥💥
+- [] Fix compiler output for tracked getters and setters - there is a high chance of clashing with private properties.
+  The solution: move `#count` => `#__count` and so on. It is just a matter of time before this bites hard 🥲💥💥💥
 
 ```ts
     #count = state(0);

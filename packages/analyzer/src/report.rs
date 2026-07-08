@@ -190,6 +190,8 @@ pub enum Subject {
     Tag { class: String },
     /// A malformed compiler hint, optionally attributed to a class.
     Hint { class: Option<String> },
+    /// A `match(...)` directive hole (exhaustiveness / narrowing / typed value).
+    Match,
 }
 
 /// A located, render-ready diagnostic — a prop type error or a compiler-hint
@@ -240,10 +242,15 @@ pub fn attribute(raw: &[RawDiagnostic], overlays: &[FileOverlay]) -> Vec<Finding
             continue;
         }
 
+        // Pick the INNERMOST wrapper containing the diagnostic: a `match` map spans
+        // its whole call, so a nested `:prop` wrap inside an arm (narrower) must win
+        // for that arm's errors, leaving `match` to claim exhaustiveness / narrowing
+        // / typed-value errors that fall outside every inner wrap.
         let Some(h) = ov
             .holes
             .iter()
-            .find(|h| (d.start as usize) >= h.wrap_start && (d.start as usize) < h.wrap_end)
+            .filter(|h| (d.start as usize) >= h.wrap_start && (d.start as usize) < h.wrap_end)
+            .min_by_key(|h| h.wrap_end - h.wrap_start)
         else {
             continue;
         };
@@ -294,6 +301,24 @@ pub fn attribute(raw: &[RawDiagnostic], overlays: &[FileOverlay]) -> Vec<Finding
                     tag: h.tag.clone(),
                 },
             ),
+            // The whole `match(...)` type-checks itself; reframe the common cases
+            // into match-specific language, pass anything else (e.g. a bad narrowed
+            // member read) through verbatim.
+            BindKind::Match => {
+                let msg = if let Some(missing) = parse_missing(&d.message) {
+                    let plural = if missing.len() == 1 { "" } else { "s" };
+                    format!(
+                        "non-exhaustive match - missing case{plural}: {}",
+                        missing.join(", ")
+                    )
+                } else if d.message.contains("must be a finite literal-union or enum") {
+                    "match() needs a finite value (a literal union or enum) - use choose() for open conditions"
+                        .to_string()
+                } else {
+                    d.message.clone()
+                };
+                (msg, Subject::Match)
+            }
         };
         out.push(Finding {
             file: d.file.clone(),
@@ -531,6 +556,7 @@ fn subject_line(subject: &Subject, p: &Palette) -> String {
         Subject::Hint { class: Some(c) } => {
             format!("{} {}", p.dim("compiler hint in class"), p.cls(c))
         }
+        Subject::Match => format!("{} {}", p.prop("match()"), p.dim("directive")),
         Subject::Hint { class: None } => p.dim("compiler hint"),
     }
 }
@@ -635,6 +661,7 @@ fn lsp_suffix(subject: &Subject) -> String {
         Subject::Missing { tag } | Subject::Component { tag } => format!(" (<{tag}>)"),
         Subject::Tag { class } => format!(" (class {class})"),
         Subject::Hint { class: Some(c) } => format!(" (<{c}>)"),
+        Subject::Match => " (match)".to_string(),
         Subject::Hint { class: None } => String::new(),
     }
 }
