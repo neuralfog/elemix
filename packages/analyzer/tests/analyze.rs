@@ -11,6 +11,10 @@ fn fixtures() -> String {
     format!("{}/tests/fixtures", env!("CARGO_MANIFEST_DIR"))
 }
 
+fn fixtures_match() -> String {
+    format!("{}/tests/fixtures-match", env!("CARGO_MANIFEST_DIR"))
+}
+
 fn run(args: &[&str]) -> (String, Option<i32>) {
     let out = Command::new(env!("CARGO_BIN_EXE_elemix-analyzer"))
         .args(args)
@@ -202,6 +206,67 @@ fn flags_exactly_the_bad_prop_holes() {
         let sev = d["severity"].as_u64();
         assert!(sev == Some(1) || sev == Some(2), "unexpected severity: {d}");
         assert_eq!(d["source"].as_str(), Some("elemix-analyzer"));
+    }
+}
+
+#[test]
+fn flags_match_directive_problems() {
+    let fx = fixtures_match();
+    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--lsp"]);
+
+    let value: serde_json::Value = serde_json::from_str(&stdout)
+        .unwrap_or_else(|e| panic!("expected JSON, got {stdout:?}: {e}"));
+    let items = value.as_array().expect("a JSON array");
+
+    // Exactly the four bad `match(...)` holes — the two exhaustive fixtures
+    // (MatchOk, MatchEnumOk incl. a numeric enum) must stay clean.
+    assert_eq!(items.len(), 4, "expected exactly 4 findings, got: {stdout}");
+
+    let messages: Vec<&str> = items
+        .iter()
+        .map(|d| d["message"].as_str().unwrap())
+        .collect();
+
+    // Non-exhaustive: a union member left unhandled.
+    assert!(
+        messages
+            .iter()
+            .any(|m| m.contains("non-exhaustive match - missing case") && m.contains("failed")),
+        "missing the non-exhaustive diagnostic: {messages:?}"
+    );
+    // Unknown/typo case — tsc's excess-property error, passed through.
+    assert!(
+        messages
+            .iter()
+            .any(|m| m.contains("'c'") && m.contains("does not exist")),
+        "missing the excess-case diagnostic: {messages:?}"
+    );
+    // Typed-value-only: a widened `string` value is rejected.
+    assert!(
+        messages
+            .iter()
+            .any(|m| m.contains("match() needs a finite value")),
+        "missing the widened-value diagnostic: {messages:?}"
+    );
+    // Per-branch narrowing: the arm param is narrowed, so a bad member read errors.
+    assert!(
+        messages
+            .iter()
+            .any(|m| m.contains("'nope'") && m.contains("k: \"busy\"")),
+        "missing the narrowing diagnostic: {messages:?}"
+    );
+
+    // Every match finding is a tsc-judged error attributed to the match hole.
+    for d in items {
+        assert_eq!(
+            d["severity"].as_u64(),
+            Some(1),
+            "match findings are errors: {d}"
+        );
+        assert!(
+            d["code"].as_str().unwrap_or("").starts_with("TS"),
+            "match findings carry a TS code: {d}"
+        );
     }
 }
 

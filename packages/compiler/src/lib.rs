@@ -25,9 +25,9 @@ pub use diagnostics::Diagnostic;
 pub use locate::collect_ts_files;
 pub use locate::{find_html_templates, FoundTemplate};
 pub use scan::{
-    scan_components, scan_element_uses, scan_hints, scan_imports, scan_props,
+    scan_components, scan_element_uses, scan_hints, scan_imports, scan_match_sites, scan_props,
     scan_special_bindings, ComponentDecl, ElementUse, HintDiagnostic, HintKind, HintSeverity,
-    Import, PropSite, SpecialBinding, SpecialKind,
+    Import, MatchSite, PropSite, SpecialBinding, SpecialKind,
 };
 
 /// Compile one source file: inline helper templates (Splice), expand `#`-pragma

@@ -3,7 +3,8 @@
 //! from each wrapped hole back to its original source span.
 
 use elemix_compiler::{
-    scan_components, scan_element_uses, scan_props, scan_special_bindings, SpecialKind,
+    scan_components, scan_element_uses, scan_match_sites, scan_props, scan_special_bindings,
+    SpecialKind,
 };
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -47,6 +48,9 @@ pub enum BindKind {
     Model,
     /// `~onmodel`.
     OnModel,
+    /// A `match(...)` directive hole — its whole call is type-checked in place,
+    /// so no wrapper is inserted; the map just claims tsc's diagnostics for it.
+    Match,
 }
 
 /// A wrapped hole's overlay range paired with its ORIGINAL source span — what
@@ -199,7 +203,13 @@ pub fn build_overlay(
     // element against a FIXED type, so no registry lookup and no import.
     let specials = scan_special_bindings(src);
 
-    if holes.is_empty() && elements_info.is_empty() && specials.is_empty() {
+    // `match(...)` holes type-check themselves in place (their whole call is a
+    // real expression in the verbatim overlay), so they carry no wrapper — only a
+    // map claiming tsc's exhaustiveness / narrowing / typed-value diagnostics.
+    let match_sites = scan_match_sites(src);
+
+    if holes.is_empty() && elements_info.is_empty() && specials.is_empty() && match_sites.is_empty()
+    {
         return None;
     }
 
@@ -296,6 +306,39 @@ pub fn build_overlay(
         });
     }
     content.push_str(&src[cursor..]);
+
+    // `match(...)` holes aren't wrapped, so map each original span to its overlay
+    // position by adding the prefix plus every wrapper insertion that lands before
+    // it (a wrapper straddling the point contributes only its opener). The range
+    // covers the whole call, so its self-checked diagnostics (missing/typo case,
+    // widened value, bad narrowed read) fall inside it - and since attribution
+    // picks the innermost hole, nested `:prop` wraps in the arms still win.
+    let prefix_len = imports.len() + helper.len();
+    let overlay_of = |orig: usize| -> usize {
+        let inserted: usize = wraps
+            .iter()
+            .map(|w| {
+                if w.orig_end <= orig {
+                    w.open.len() + 1
+                } else if w.orig_start < orig {
+                    w.open.len()
+                } else {
+                    0
+                }
+            })
+            .sum();
+        prefix_len + orig + inserted
+    };
+    for m in &match_sites {
+        maps.push(HoleMap {
+            wrap_start: overlay_of(m.start as usize),
+            wrap_end: overlay_of(m.end as usize),
+            orig_start: m.start as usize,
+            orig_end: m.end as usize,
+            tag: String::new(),
+            kind: BindKind::Match,
+        });
+    }
 
     // Append one module-level completeness check per checkable usage. Each only
     // names a component type + string-literal keys, so module scope suffices —

@@ -159,7 +159,7 @@ checksum = "fd8e701084c37e7ef62d3f9e453b618130cbc0ef3573847785952a3ac3f746bf"
 
 [[package]]
 name = "elemix-analyzer"
-version = "0.9.0-dev.13"
+version = "0.9.0-dev.14"
 dependencies = [
  "clap",
  "elemix-compiler",
@@ -170,7 +170,7 @@ dependencies = [
 
 [[package]]
 name = "elemix-compiler"
-version = "0.9.0-dev.13"
+version = "0.9.0-dev.14"
 dependencies = [
  "oxc_allocator",
  "oxc_ast",

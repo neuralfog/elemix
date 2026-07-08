@@ -249,3 +249,39 @@ fn choose_lowers_to_a_ternary_chain() {
     assert!(out.contains(": ''));"));
     assert!(!out.contains("(() => (() =>"));
 }
+
+#[test]
+fn match_form1_lowers_to_an_equality_chain() {
+    let out = gen(
+        &["<div>", "</div>"],
+        &["match(this.s, { idle: () => tpl`<x></x>`, busy: () => tpl`<y></y>` })"],
+    );
+    // value === 'key' ? build : … : '' — identifier keys quoted into strings.
+    assert!(out.contains("_child(_n1, () => (this.s === 'idle' ? (() => {"));
+    assert!(out.contains("this.s === 'busy' ? (() => {"));
+    assert!(out.contains(": ''));"));
+}
+
+#[test]
+fn match_form1_quotes_computed_and_passes_string_keys() {
+    let out = gen(
+        &["<div>", "</div>"],
+        &["match(this.c, { [Color.Red]: () => tpl`<x></x>`, 'lit': () => tpl`<y></y>` })"],
+    );
+    // computed [Expr] → (Expr); an already-quoted key passes through.
+    assert!(out.contains("this.c === (Color.Red) ?"));
+    assert!(out.contains("this.c === 'lit' ?"));
+}
+
+#[test]
+fn match_form2_dispatches_on_key_and_binds_the_member() {
+    let out = gen(
+        &["<div>", "</div>"],
+        &["match(this.load, 'k', { idle: () => tpl`<x></x>`, busy: (m) => tpl`<y>${m.pct}</y>` })"],
+    );
+    // (value)[key] === caseKey, and each arm is CALLED with the value so the
+    // narrowed member param stays bound.
+    assert!(out.contains("(this.load)['k'] === 'idle' ?"));
+    assert!(out.contains("(this.load)['k'] === 'busy' ?"));
+    assert!(out.contains(")(this.load)"));
+}

@@ -6,7 +6,8 @@
 use crate::emit::Emitter;
 use crate::grammar::{classify, BindingKind};
 use crate::lower::{
-    find_html_spans, slice, split_call_args, split_commas, split_template_literal, split_ternary,
+    find_html_spans, slice, split_call_args, split_commas, split_object_entries,
+    split_template_literal, split_ternary,
 };
 use crate::template::node::NodePath;
 use crate::template::parse::parse;
@@ -370,6 +371,8 @@ fn lower_child(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -
         format!("{cond} ? {body} : ''")
     } else if trimmed.starts_with("choose(") {
         lower_choose(expr, ctx, emitter)
+    } else if trimmed.starts_with("match(") {
+        lower_match(expr, ctx, emitter)
     } else {
         // a ternary or direct template
         substitute_html(expr, ctx, emitter, true)
@@ -456,6 +459,57 @@ fn lower_choose(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
         chain = format!("{cond} ? {body} : {chain}");
     }
     chain
+}
+
+/// `match(value, { k: () => tpl.. })` (form 1, literal/enum value) or
+/// `match(value, key, { k: (m) => tpl.. })` (form 2, discriminated object union)
+/// → a right-folded equality-ternary chain. Form 1 compares `value === key`;
+/// form 2 compares `value[key] === caseKey` and passes the (narrowed) value into
+/// each arm so member reads stay bound. Exhaustiveness is a type-level guarantee
+/// (see the `match` overloads), so the fallthrough seed is `''`.
+fn lower_match(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
+    let args = split_call_args(expr);
+    let Some(value) = args.first().cloned() else {
+        return "''".into();
+    };
+    let keyed = args.len() >= 3;
+    let (dispatch, cases_idx) = if keyed {
+        let key = args[1].trim();
+        (format!("({value})[{key}]"), 2)
+    } else {
+        (value.clone(), 1)
+    };
+    let Some(cases) = args.get(cases_idx) else {
+        return "''".into();
+    };
+    let mut chain = String::from("''");
+    for (key, val) in split_object_entries(cases).into_iter().rev() {
+        let rhs = key_compare_rhs(&key);
+        let body = if keyed {
+            let sub = substitute_html(&val, ctx, emitter, true);
+            format!("({sub})({value})")
+        } else {
+            substitute_html(&arrow_body(Some(&val)), ctx, emitter, true)
+        };
+        chain = format!("{dispatch} === {rhs} ? {body} : {chain}");
+    }
+    chain
+}
+
+/// The right-hand side of a `value === …` comparison for an object case key:
+/// a computed `[Expr]` unwraps to `(Expr)`, string/numeric literals pass through,
+/// and a bare identifier is quoted into a string literal.
+fn key_compare_rhs(key: &str) -> String {
+    let k = key.trim();
+    let quoted = k.starts_with('\'') || k.starts_with('"') || k.starts_with('`');
+    let numeric = !k.is_empty() && k.chars().all(|c| c.is_ascii_digit());
+    if k.len() >= 2 && k.starts_with('[') && k.ends_with(']') {
+        format!("({})", k[1..k.len() - 1].trim())
+    } else if quoted || numeric {
+        k.to_string()
+    } else {
+        format!("'{k}'")
+    }
 }
 
 /// The body of a zero-arg factory `() => EXPR`. Falls back to calling a
