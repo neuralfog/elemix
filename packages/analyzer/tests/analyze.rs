@@ -15,6 +15,10 @@ fn fixtures_match() -> String {
     format!("{}/tests/fixtures-match", env!("CARGO_MANIFEST_DIR"))
 }
 
+fn fixtures_alias() -> String {
+    format!("{}/tests/fixtures-alias", env!("CARGO_MANIFEST_DIR"))
+}
+
 fn run(args: &[&str]) -> (String, Option<i32>) {
     let out = Command::new(env!("CARGO_BIN_EXE_elemix-analyzer"))
         .args(args)
@@ -275,4 +279,26 @@ fn pretty_mode_exits_nonzero_when_errors_found() {
     let fx = fixtures();
     let (_, code) = run(&["--dirs", &fx, "--root", &fx]);
     assert_eq!(code, Some(1), "errors must fail the process for CI");
+}
+
+#[test]
+fn tsconfig_path_alias_resolves_a_side_effect_import() {
+    // `al-widget` is imported through the `#al/*` tsconfig alias, `al-orphan`
+    // is not imported at all. The alias must resolve like a relative import, so
+    // ONLY `al-orphan` earns the unimported-module warning.
+    let fx = fixtures_alias();
+    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--lsp"]);
+
+    assert!(
+        stdout.contains("is used but its module is not imported"),
+        "expected an unimported warning: {stdout}"
+    );
+    assert!(
+        stdout.contains("al-orphan"),
+        "al-orphan (never imported) must warn: {stdout}"
+    );
+    assert!(
+        !stdout.contains("al-widget"),
+        "al-widget is imported via the #al/* alias and must NOT warn: {stdout}"
+    );
 }

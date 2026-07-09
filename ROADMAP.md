@@ -34,6 +34,8 @@ GG 👊🥋✊
 
 ***Shields Up 🛡️🖖***
 
+- The analyzer now reads `tsconfig` `paths`, so an aliased component import (`import '#src/components/Card'`) resolves like a
+  relative one and no longer trips the "module not imported" warning 🛡️🗺️
 - Every runtime function the compiled output imports is now `$__` prefixed (`$__template`, `$__setText`, `$__state` etc) so
   it can never clash with a user's own module-scope names - also unified the old `_event`/`_setText` mix into one consistent
   scheme 🛡️🔧

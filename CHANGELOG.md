@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.16] - 2026-07-09
+
+### Fixed
+
+- Analyzer: `#`/aliased imports from tsconfig `paths` now resolve, so an aliased component import no longer reads as a missing module
+
 ## [0.9.0-dev.15] - 2026-07-09
 
 ### Changed

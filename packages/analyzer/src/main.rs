@@ -97,7 +97,7 @@ fn main() -> ExitCode {
     }
 
     // Unimported-component warnings — also pure-Rust (an import-graph walk).
-    findings.extend(imports::unimported_warnings(&files, &registry));
+    findings.extend(imports::unimported_warnings(&files, &registry, &root));
 
     // Prop type-judgment is delegated to the project's tsc via the oracle — only
     // needed when there are prop holes to check (hint-only projects skip node).
