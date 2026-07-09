@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/StepperWidget.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { count: number };
@@ -51,11 +52,11 @@ const css = `
 // An explicit `#tag` that overrides the derived one (`StepperWidget` would
 // otherwise become `stepper-widget`). The pragma is a plain `//` comment bound
 // to the class on the next line.
-const _s0 = sheet(css);
-const _t0 = template('<div class="stepper"><button>−</button><span class="count"> </span><button>+</button></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="stepper"><button>−</button><span class="count"> </span><button>+</button></div>');
 
 export class StepperWidget extends Component {
-    state = state<State>({ count: 0 });
+    state = $__state<State>({ count: 0 });
 
     dec = (): void => {
         this.state.count--;
@@ -66,14 +67,14 @@ export class StepperWidget extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-_event(_n1, 'click', this.dec);
-_event(_n3, 'click', this.inc);
-effect(() => {
-_setText(_n2, (this.state.count));
+$__event(_n1, 'click', this.dec);
+$__event(_n3, 'click', this.inc);
+$__effect(() => {
+$__setText(_n2, (this.state.count));
 });
 return _r0;
 }

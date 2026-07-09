@@ -2,11 +2,11 @@ import {
     type Scope,
     collect,
     dispose,
-    effect,
+    $__effect,
     takeScopes,
-    untrack,
+    $__untrack,
 } from './reactive';
-import { toRaw } from './state';
+import { $__toRaw } from './state';
 
 type Getter<T> = () => T;
 
@@ -51,23 +51,23 @@ const computeLIS = (arr: number[]): number[] => {
     return lis;
 };
 
-export const template = (markup: string): DocumentFragment => {
+export const $__template = (markup: string): DocumentFragment => {
     const tpl = document.createElement('template');
     tpl.innerHTML = markup;
     return document.importNode(tpl.content, true);
 };
 
-export const clone = (master: DocumentFragment): DocumentFragment =>
+export const $__clone = (master: DocumentFragment): DocumentFragment =>
     master.cloneNode(true) as DocumentFragment;
 
-export const templateEl = (markup: string): Element => {
+export const $__templateEl = (markup: string): Element => {
     const tpl = document.createElement('template');
     tpl.innerHTML = markup;
     const el = tpl.content.firstElementChild as Element;
     return document.importNode(el, true) as Element;
 };
 
-export const cloneEl = (master: Element): Element =>
+export const $__cloneEl = (master: Element): Element =>
     master.cloneNode(true) as Element;
 
 const sheetCache = new Map<string, CSSStyleSheet>();
@@ -83,7 +83,7 @@ const toSheet = (value: string | CSSStyleSheet): CSSStyleSheet => {
     return cached;
 };
 
-export const sheet = (
+export const $__sheet = (
     input: string | CSSStyleSheet | ReadonlyArray<string | CSSStyleSheet>,
 ): CSSStyleSheet[] =>
     Array.isArray(input)
@@ -108,11 +108,11 @@ type OnModelEl = HTMLInputElement & {
     __onmodel?: (value: string) => string;
 };
 
-export const _model = (
+export const $__model = (
     el: HTMLInputElement,
     get: Getter<{ value: string }>,
 ): void => {
-    effect(() => {
+    $__effect(() => {
         const ref = get();
         if (el.value === ref.value) return;
         el.value = ref.value;
@@ -126,14 +126,14 @@ export const _model = (
     };
 };
 
-export const _onmodel = (
+export const $__onmodel = (
     el: HTMLInputElement,
     transform: (value: string) => string,
 ): void => {
     (el as OnModelEl).__onmodel = transform;
 };
 
-export const _event = (
+export const $__event = (
     el: Element,
     name: string,
     handler: EventListener,
@@ -151,15 +151,15 @@ export const _event = (
     store[slot] = handler;
 };
 
-export const _ref = (el: Element, ref: { value: unknown }): void => {
+export const $__ref = (el: Element, ref: { value: unknown }): void => {
     ref.value = el;
 };
 
-export const _child = (anchor: Node, get: Getter<unknown>): void => {
+export const $__child = (anchor: Node, get: Getter<unknown>): void => {
     let current: Node | null = null;
     let range: Node[] | null = null;
     let scopes: Scope | null = null;
-    effect(() => {
+    $__effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
         const value = collect(() => get());
@@ -223,7 +223,7 @@ const removeRange = (
     }
 };
 
-export const _list = <T>(
+export const $__list = <T>(
     anchor: Node,
     items: Getter<readonly T[]>,
     keyFn: (item: T, index: number) => unknown,
@@ -232,14 +232,14 @@ export const _list = <T>(
     const nodes = new Map<unknown, Node>();
     const rowScopes = new Map<unknown, Scope | null>();
     let order: unknown[] = [];
-    effect(() => {
+    $__effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
         const list = items();
-        const rawList = toRaw(list);
+        const rawList = $__toRaw(list);
         const len = rawList.length;
         const keys: unknown[] = new Array(len);
-        untrack(() => {
+        $__untrack(() => {
             for (let i = 0; i < len; i++) keys[i] = keyFn(rawList[i] as T, i);
         });
         const oldKeys = order;
@@ -254,7 +254,7 @@ export const _list = <T>(
                     nodes.get(oldKeys[oldLen - 1]) as Node,
                     anchor,
                 );
-                untrack(() => {
+                $__untrack(() => {
                     for (const sc of rowScopes.values()) dispose(sc);
                 });
                 rowScopes.clear();
@@ -277,7 +277,7 @@ export const _list = <T>(
                 const ref =
                     ne + 1 < len ? (nodes.get(keys[ne + 1]) as Node) : anchor;
                 const frag = document.createDocumentFragment();
-                untrack(() => {
+                $__untrack(() => {
                     for (let i = s; i <= ne; i++) {
                         const node = collect(() => render(list[i], i));
                         rowScopes.set(keys[i], takeScopes());
@@ -372,7 +372,7 @@ export const _list = <T>(
                 nodes.delete(key);
             }
             const frag = document.createDocumentFragment();
-            untrack(() => {
+            $__untrack(() => {
                 for (let i = s; i <= ne; i++) {
                     const node = collect(() => render(list[i], i));
                     rowScopes.set(keys[i], takeScopes());
@@ -407,7 +407,7 @@ export const _list = <T>(
             for (let k = 0; k < lis.length; k++) keep[seqPos[lis[k]]] = 1;
         }
 
-        untrack(() => {
+        $__untrack(() => {
             for (let i = toPatch - 1; i >= 0; i--) {
                 const isFresh = newToOld[i] === 0;
                 if (!isFresh && (!moved || (keep as Uint8Array)[i] === 1)) {
@@ -434,7 +434,7 @@ type Cache = { __t?: string; __c?: string; __s?: string };
 
 const attrKeys = new Map<string, string>();
 
-export const _setText = (node: Text, value: unknown): void => {
+export const $__setText = (node: Text, value: unknown): void => {
     const next =
         typeof value === 'string'
             ? value
@@ -447,7 +447,7 @@ export const _setText = (node: Text, value: unknown): void => {
     node.data = next;
 };
 
-export const _setAttr = (el: Element, name: string, value: unknown): void => {
+export const $__setAttr = (el: Element, name: string, value: unknown): void => {
     let key = attrKeys.get(name);
     if (key === undefined) {
         key = `__a_${name}`;
@@ -478,7 +478,7 @@ const dedupeClasses = (value: string): string => {
     return out;
 };
 
-export const _setClass = (
+export const $__setClass = (
     el: Element,
     _initial: string,
     value: unknown,
@@ -503,7 +503,7 @@ export const _setClass = (
     el.setAttribute('class', next);
 };
 
-export const _setStyle = (el: HTMLElement, value: unknown): void => {
+export const $__setStyle = (el: HTMLElement, value: unknown): void => {
     let css = '';
     if (typeof value === 'string') {
         css = value;
@@ -522,7 +522,7 @@ export const _setStyle = (el: HTMLElement, value: unknown): void => {
     el.style.cssText = css;
 };
 
-export const _setProp = (el: Element, name: string, value: unknown): void => {
+export const $__setProp = (el: Element, name: string, value: unknown): void => {
     const target = el as unknown as PropTarget;
     if (target.props) {
         target.props[name] = value;

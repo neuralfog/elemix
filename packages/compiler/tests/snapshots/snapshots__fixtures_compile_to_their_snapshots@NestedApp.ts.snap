@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/NestedApp.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Item = { id: string; name: string };
@@ -69,14 +70,14 @@ const css = `
     }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note"><code>repeat</code> nests: the outer loop renders categories, each with its own inner <code>repeat</code> of items. Both levels are keyed, so adding an item patches only that one list.</p><div class="tree"><!----></div>');
-const _t1 = templateEl('<div class="category"><div class="head"><strong> </strong><button>+ item</button></div><ul><!----></ul></div>');
-const _t2 = templateEl('<li> </li>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note"><code>repeat</code> nests: the outer loop renders categories, each with its own inner <code>repeat</code> of items. Both levels are keyed, so adding an item patches only that one list.</p><div class="tree"><!----></div>');
+const _t1 = $__templateEl('<div class="category"><div class="head"><strong> </strong><button>+ item</button></div><ul><!----></ul></div>');
+const _t2 = $__templateEl('<li> </li>');
 
 export class NestedApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         categories: [
             {
                 id: 'fruit',
@@ -101,24 +102,24 @@ export class NestedApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
-_list(_n1, () => (this.state.categories), (category) => category.id, (category) => (() => {
-const _r2 = cloneEl(_t1);
+$__list(_n1, () => (this.state.categories), (category) => category.id, (category) => (() => {
+const _r2 = $__cloneEl(_t1);
 const _n3 = _r2.firstChild!.firstChild!.firstChild!;
 const _n4 = _r2.firstChild!.firstChild!.nextSibling!;
 const _n5 = _r2.firstChild!.nextSibling!.firstChild!;
-_event(_n4, 'click', () => this.addItem(category));
-_list(_n5, () => (category.items), (item) => item.id, (item) => (() => {
-const _r6 = cloneEl(_t2);
+$__event(_n4, 'click', () => this.addItem(category));
+$__list(_n5, () => (category.items), (item) => item.id, (item) => (() => {
+const _r6 = $__cloneEl(_t2);
 const _n7 = _r6.firstChild!;
-effect(() => {
-_setText(_n7, (item.name));
+$__effect(() => {
+$__setText(_n7, (item.name));
 });
 return _r6;
 })());
-effect(() => {
-_setText(_n3, (category.name));
+$__effect(() => {
+$__setText(_n3, (category.name));
 });
 return _r2;
 })());

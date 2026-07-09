@@ -1,13 +1,13 @@
 import {
-    reactive,
+    $__reactive,
     collect,
     takeScopes,
     rerun,
     dispose,
-    untrack,
+    $__untrack,
     type Scope,
 } from '../runtime/reactive';
-import { sheet } from '../runtime/dom';
+import { $__sheet } from '../runtime/dom';
 import type { Template } from '../types';
 
 type LifecycleHooks = {
@@ -58,7 +58,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         const el = this as unknown as {
             __pendingProps?: Record<string, unknown>;
         };
-        this.$props = reactive(el.__pendingProps ?? {});
+        this.$props = $__reactive(el.__pendingProps ?? {});
         el.__pendingProps = undefined;
     }
 
@@ -84,7 +84,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         if (this.connected) return;
         this.connected = true;
 
-        untrack(() => {
+        $__untrack(() => {
             this.adoptStyles();
             this.attachFormInternals();
             this.initProps();
@@ -121,7 +121,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     disconnectedCallback(): void {
         queueMicrotask(() => {
             if (this.isConnected) return;
-            untrack(() => {
+            $__untrack(() => {
                 dispose(this.scopes);
                 this.scopes = null;
                 dispose(this.effectScopes);
@@ -146,7 +146,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         cloak();
         const sheets =
             input !== undefined
-                ? sheet(input)
+                ? $__sheet(input)
                 : (this.constructor as typeof Component).__sheets;
         if (this.shadowRoot && sheets && sheets.length) {
             this.shadowRoot.adoptedStyleSheets = sheets;

@@ -12,16 +12,16 @@
 import { test } from 'vitest';
 import { Component } from './src/component/Component';
 import {
-    _list,
-    _setAttr,
-    _setClass,
-    _setText,
-    clone,
+    $__list as _list,
+    $__setAttr as _setAttr,
+    $__setClass as _setClass,
+    $__setText as _setText,
+    $__clone as clone,
     defineComponent,
-    effect,
-    template,
+    $__effect as effect,
+    $__template as template,
 } from './src/runtime';
-import { state } from './src/runtime/state';
+import { $__state as state } from './src/runtime/state';
 
 type Item = { id: number; label: string; selected: boolean };
 

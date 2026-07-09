@@ -1,17 +1,18 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/MethodApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { count: number };
 
-const _t0 = template('<div class="method"><span class="lbl"> </span><span class="count"> </span><button class="inc">+1</button></div>');
+const _t0 = $__template('<div class="method"><span class="lbl"> </span><span class="count"> </span><button class="inc">+1</button></div>');
 
 export class MethodApp extends Component {
-    state = state<State>({ count: 0 });
+    state = $__state<State>({ count: 0 });
 
     inc = (): void => {
         this.state.count++;
@@ -19,16 +20,16 @@ export class MethodApp extends Component {
 
     view(): DocumentFragment {
 const label = 'count';
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-_event(_n3, 'click', this.inc);
-effect(() => {
-_setText(_n1, (label));
+$__event(_n3, 'click', this.inc);
+$__effect(() => {
+$__setText(_n1, (label));
 });
-effect(() => {
-_setText(_n2, (this.state.count));
+$__effect(() => {
+$__setText(_n2, (this.state.count));
 });
 return _r0;
 }

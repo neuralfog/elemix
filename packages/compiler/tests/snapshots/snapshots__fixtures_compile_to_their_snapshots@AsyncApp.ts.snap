@@ -1,14 +1,15 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/AsyncApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { phase: string; ticks: number };
 
-const _t0 = template('<div class="async"><span class="phase"> </span><span class="ticks"> </span><button class="bump">+1</button></div>');
+const _t0 = $__template('<div class="async"><span class="phase"> </span><span class="ticks"> </span><button class="bump">+1</button></div>');
 
 export class AsyncApp extends Component {
     onDispose(): void {
@@ -21,9 +22,9 @@ export class AsyncApp extends Component {
         this.prepare();
     }
     effects(): void {
-        effect(() => this.mirror());
+        $__effect(() => this.mirror());
     }
-    state = state<State>({ phase: 'init', ticks: 0 });
+    state = $__state<State>({ phase: 'init', ticks: 0 });
 
     async prepare(): Promise<void> {
         this.setAttribute('data-prepared', 'sync');
@@ -53,16 +54,16 @@ export class AsyncApp extends Component {
     }
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-_event(_n3, 'click', this.bump);
-effect(() => {
-_setText(_n1, (this.state.phase));
+$__event(_n3, 'click', this.bump);
+$__effect(() => {
+$__setText(_n1, (this.state.phase));
 });
-effect(() => {
-_setText(_n2, (this.state.ticks));
+$__effect(() => {
+$__setText(_n2, (this.state.ticks));
 });
 return _r0;
 }

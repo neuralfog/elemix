@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/StatusApp.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _child, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Status = 'idle' | 'loading' | 'ready' | 'failed';
@@ -87,17 +88,17 @@ const css = `
     }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note"><code>choose</code> renders the first branch whose condition is truthy — use <code>[true, ...]</code> as the fallback. <code>when</code> renders one branch or nothing. Both take lazy factory functions, so only the chosen branch is ever built.</p><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage"><!----></div><button class="link"><!----> log</button> <!---->');
-const _t1 = templateEl('<div class="card idle">Pick a status above</div>');
-const _t2 = templateEl('<div class="card failed">✕ Build failed</div>');
-const _t3 = templateEl('<div class="card ready">✓ Deployed</div>');
-const _t4 = templateEl('<div class="card loading"><span class="spinner"></span>Working…</div>');
-const _t5 = templateEl('<pre class="log">status = <!----></pre>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note"><code>choose</code> renders the first branch whose condition is truthy — use <code>[true, ...]</code> as the fallback. <code>when</code> renders one branch or nothing. Both take lazy factory functions, so only the chosen branch is ever built.</p><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage"><!----></div><button class="link"><!----> log</button> <!---->');
+const _t1 = $__templateEl('<div class="card idle">Pick a status above</div>');
+const _t2 = $__templateEl('<div class="card failed">✕ Build failed</div>');
+const _t3 = $__templateEl('<div class="card ready">✓ Deployed</div>');
+const _t4 = $__templateEl('<div class="card loading"><span class="spinner"></span>Working…</div>');
+const _t5 = $__templateEl('<pre class="log">status = <!----></pre>');
 
 export class StatusApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         status: 'idle',
         showLog: false,
     });
@@ -111,7 +112,7 @@ export class StatusApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
@@ -120,38 +121,38 @@ const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
 const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n7 = _n6.firstChild!;
 const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-_event(_n1, 'click', () => this.set('idle'));
-_event(_n2, 'click', () => this.set('loading'));
-_event(_n3, 'click', () => this.set('ready'));
-_event(_n4, 'click', () => this.set('failed'));
-_child(_n5, () => (this.state.status === 'loading' ? (() => {
-const _r12 = cloneEl(_t4);
+$__event(_n1, 'click', () => this.set('idle'));
+$__event(_n2, 'click', () => this.set('loading'));
+$__event(_n3, 'click', () => this.set('ready'));
+$__event(_n4, 'click', () => this.set('failed'));
+$__child(_n5, () => (this.state.status === 'loading' ? (() => {
+const _r12 = $__cloneEl(_t4);
 return _r12;
 })() : this.state.status === 'ready' ? (() => {
-const _r11 = cloneEl(_t3);
+const _r11 = $__cloneEl(_t3);
 return _r11;
 })() : this.state.status === 'failed' ? (() => {
-const _r10 = cloneEl(_t2);
+const _r10 = $__cloneEl(_t2);
 return _r10;
 })() : true ? (() => {
-const _r9 = cloneEl(_t1);
+const _r9 = $__cloneEl(_t1);
 return _r9;
 })() : ''));
-_event(_n6, 'click', this.toggleLog);
+$__event(_n6, 'click', this.toggleLog);
 const _x13 = document.createTextNode('');
 _n7.replaceWith(_x13);
-_child(_n8, () => (this.state.showLog ? (() => {
-const _r14 = cloneEl(_t5);
+$__child(_n8, () => (this.state.showLog ? (() => {
+const _r14 = $__cloneEl(_t5);
 const _n15 = _r14.firstChild!.nextSibling!;
 const _x16 = document.createTextNode('');
 _n15.replaceWith(_x16);
-effect(() => {
-_setText(_x16, (this.state.status));
+$__effect(() => {
+$__setText(_x16, (this.state.status));
 });
 return _r14;
 })() : ''));
-effect(() => {
-_setText(_x13, (this.state.showLog ? 'Hide' : 'Show'));
+$__effect(() => {
+$__setText(_x13, (this.state.showLog ? 'Hide' : 'Show'));
 });
 return _r0;
 }

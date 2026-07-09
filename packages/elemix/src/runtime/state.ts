@@ -1,4 +1,4 @@
-import { type Dep, dep, track, trigger } from './reactive';
+import { type Dep, $__dep, $__track, $__trigger } from './reactive';
 
 const RAW = Symbol();
 const ARRAY = Symbol();
@@ -26,18 +26,18 @@ const depFor = (target: object, key: PropertyKey): Dep => {
     }
     let d = map.get(key);
     if (!d) {
-        d = dep();
+        d = $__dep();
         map.set(key, d);
     }
     return d;
 };
 
-export const depOf = (obj: object, key: PropertyKey): Dep => {
+export const $__depOf = (obj: object, key: PropertyKey): Dep => {
     const t = (obj as Record<PropertyKey, unknown>)[RAW];
     return depFor((t as object) ?? obj, key);
 };
 
-export const toRaw = <T>(obj: T): T => {
+export const $__toRaw = <T>(obj: T): T => {
     const t =
         obj == null ? undefined : (obj as Record<PropertyKey, unknown>)[RAW];
     return (t as T) ?? obj;
@@ -52,20 +52,20 @@ const objectHandler: ProxyHandler<Target> = {
         if (key === RAW) return target;
         const value = target[key];
         if (value === null || typeof value !== 'object') {
-            if (typeof key !== 'symbol') track(depFor(target, key));
+            if (typeof key !== 'symbol') $__track(depFor(target, key));
             return value;
         }
         if (typeof key !== 'symbol') {
-            track(depFor(target, key));
-            if (Array.isArray(value)) track(depFor(value, ARRAY));
+            $__track(depFor(target, key));
+            if (Array.isArray(value)) $__track(depFor(value, ARRAY));
         }
-        return reactive(value);
+        return $__reactive(value);
     },
     set(target, key, value) {
         const prev = target[key];
         if (prev === value) return true;
         target[key] = value;
-        if (typeof key !== 'symbol') trigger(depFor(target, key));
+        if (typeof key !== 'symbol') $__trigger(depFor(target, key));
         return true;
     },
 };
@@ -77,20 +77,20 @@ const classHandler: ProxyHandler<Target> = {
             ? target[key]
             : Reflect.get(target, key, receiver);
         if (value === null || typeof value !== 'object') {
-            if (typeof key !== 'symbol') track(depFor(target, key));
+            if (typeof key !== 'symbol') $__track(depFor(target, key));
             return value;
         }
         if (typeof key !== 'symbol') {
-            track(depFor(target, key));
-            if (Array.isArray(value)) track(depFor(value, ARRAY));
+            $__track(depFor(target, key));
+            if (Array.isArray(value)) $__track(depFor(value, ARRAY));
         }
-        return reactive(value);
+        return $__reactive(value);
     },
     set(target, key, value) {
         const prev = target[key];
         if (prev === value) return true;
         target[key] = value;
-        if (typeof key !== 'symbol') trigger(depFor(target, key));
+        if (typeof key !== 'symbol') $__trigger(depFor(target, key));
         return true;
     },
 };
@@ -102,18 +102,18 @@ const arrayHandler: ProxyHandler<Target> = {
             return (...args: unknown[]): unknown => {
                 const fn = target[key] as (...a: unknown[]) => unknown;
                 const result = fn.apply(target, args);
-                trigger(depFor(target, ARRAY));
+                $__trigger(depFor(target, ARRAY));
                 return result;
             };
         }
         const value = target[key];
-        if (Array.isArray(value)) track(depFor(value, ARRAY));
-        return reactive(value);
+        if (Array.isArray(value)) $__track(depFor(value, ARRAY));
+        return $__reactive(value);
     },
     set(target, key, value) {
         const prev = target[key];
         target[key] = value;
-        if (prev !== value) trigger(depFor(target, ARRAY));
+        if (prev !== value) $__trigger(depFor(target, ARRAY));
         return true;
     },
 };
@@ -129,7 +129,7 @@ const iterate = (
     key: PropertyKey,
     pair: boolean,
 ): IterableIterator<unknown> => {
-    track(depFor(target, COLLECTION));
+    $__track(depFor(target, COLLECTION));
     const inner = (target as Record<PropertyKey, () => Iterator<unknown>>)[
         key
     ]();
@@ -142,10 +142,10 @@ const iterate = (
                 done: false,
                 value: pair
                     ? [
-                          reactive((value as unknown[])[0]),
-                          reactive((value as unknown[])[1]),
+                          $__reactive((value as unknown[])[0]),
+                          $__reactive((value as unknown[])[1]),
                       ]
-                    : reactive(value),
+                    : $__reactive(value),
             };
         },
         [Symbol.iterator](): IterableIterator<unknown> {
@@ -162,23 +162,23 @@ const collectionHandler: ProxyHandler<Target> = {
 
         switch (key) {
             case 'size':
-                track(depFor(target, COLLECTION));
+                $__track(depFor(target, COLLECTION));
                 return map.size;
             case 'get':
                 return (k: unknown): unknown => {
-                    track(depFor(target, COLLECTION));
-                    return reactive(map.get(k));
+                    $__track(depFor(target, COLLECTION));
+                    return $__reactive(map.get(k));
                 };
             case 'has':
                 return (k: unknown): boolean => {
-                    track(depFor(target, COLLECTION));
+                    $__track(depFor(target, COLLECTION));
                     return map.has(k);
                 };
             case 'add':
                 return (v: unknown): unknown => {
                     if (!map.has(v)) {
                         (target as unknown as Set<unknown>).add(v);
-                        trigger(depFor(target, COLLECTION));
+                        $__trigger(depFor(target, COLLECTION));
                     }
                     return proxies.get(target);
                 };
@@ -188,7 +188,7 @@ const collectionHandler: ProxyHandler<Target> = {
                     const prev = map.get(k);
                     if (!had || prev !== v) {
                         map.set(k, v);
-                        trigger(depFor(target, COLLECTION));
+                        $__trigger(depFor(target, COLLECTION));
                     }
                     return proxies.get(target);
                 };
@@ -196,14 +196,14 @@ const collectionHandler: ProxyHandler<Target> = {
                 return (k: unknown): boolean => {
                     const had = map.has(k);
                     const result = map.delete(k);
-                    if (had) trigger(depFor(target, COLLECTION));
+                    if (had) $__trigger(depFor(target, COLLECTION));
                     return result;
                 };
             case 'clear':
                 return (): void => {
                     if (map.size > 0) {
                         map.clear();
-                        trigger(depFor(target, COLLECTION));
+                        $__trigger(depFor(target, COLLECTION));
                     }
                 };
             case 'forEach':
@@ -211,10 +211,10 @@ const collectionHandler: ProxyHandler<Target> = {
                     cb: (v: unknown, k: unknown, c: unknown) => void,
                     thisArg?: unknown,
                 ): void => {
-                    track(depFor(target, COLLECTION));
+                    $__track(depFor(target, COLLECTION));
                     const proxy = proxies.get(target);
                     map.forEach((v, k) => {
-                        cb.call(thisArg, reactive(v), reactive(k), proxy);
+                        cb.call(thisArg, $__reactive(v), $__reactive(k), proxy);
                     });
                 };
             case 'keys':
@@ -241,7 +241,7 @@ const isPlain = (obj: object): boolean => {
     return proto === Object.prototype || proto === null;
 };
 
-const reactive = (value: unknown): unknown => {
+const $__reactive = (value: unknown): unknown => {
     if (value === null || typeof value !== 'object') return value;
     const obj = value as Target;
     if (obj[RAW] !== undefined) return obj;
@@ -260,4 +260,5 @@ const reactive = (value: unknown): unknown => {
     return p;
 };
 
-export const state = <T extends object>(source: T): T => reactive(source) as T;
+export const $__state = <T extends object>(source: T): T =>
+    $__reactive(source) as T;

@@ -1,22 +1,23 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SecondHelper.ts
 ---
-import { template, clone, templateEl, cloneEl, _child, defineComponent } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // Two components — the SECOND one uses a helper template (`this.heading()`).
 // Splice must inline helpers for every class, not just the first, or the
 // non-first component's `${this.heading()}` never gets inlined.
 
-const _t0 = template('<span class="plain">plain</span>');
-const _t1 = template('<div class="card"><!----><p class="body">body</p></div>');
-const _t2 = templateEl('<h2 class="heading">Title</h2>');
+const _t0 = $__template('<span class="plain">plain</span>');
+const _t1 = $__template('<div class="card"><!----><p class="body">body</p></div>');
+const _t2 = $__templateEl('<h2 class="heading">Title</h2>');
 
 export class PlainNote extends Component {
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 return _r0;
 }
 }
@@ -25,10 +26,10 @@ defineComponent('plain-note', PlainNote);
 export class TitledNote extends Component {
     
     view(): DocumentFragment {
-const _r1 = clone(_t1);
+const _r1 = $__clone(_t1);
 const _n2 = _r1.firstChild!.firstChild!;
-_child(_n2, () => ((() => {
-const _r3 = cloneEl(_t2);
+$__child(_n2, () => ((() => {
+const _r3 = $__cloneEl(_t2);
 return _r3;
 })()));
 return _r1;

@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/ParamHelper.ts
 ---
-import { template, clone, templateEl, cloneEl, toRaw, _event, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Row = { id: number; name: string };
@@ -27,12 +28,12 @@ const css = `
 // A parameterized helper template — `row` takes an item and returns a template,
 // called as `this.row(r)` inside a repeat. Splice must inline it, substituting
 // the helper param `item` for the call's arg `r`, so the holes become r.id / r.name.
-const _s0 = sheet(css);
-const _t0 = template('<div><button class="add">add row</button><ul class="list"><!----></ul></div>');
-const _t1 = templateEl('<li class="row"> </li>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div><button class="add">add row</button><ul class="list"><!----></ul></div>');
+const _t1 = $__templateEl('<li class="row"> </li>');
 
 export class RowList extends Component {
-    state = state<{ rows: Row[] }>({
+    state = $__state<{ rows: Row[] }>({
         rows: [
             { id: 1, name: 'alpha' },
             { id: 2, name: 'beta' },
@@ -45,16 +46,16 @@ export class RowList extends Component {
 
     
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-_event(_n1, 'click', this.add);
-_list(_n2, () => (this.state.rows), (r) => r.id, (r) => (() => {
-const _r3 = cloneEl(_t1);
+$__event(_n1, 'click', this.add);
+$__list(_n2, () => (this.state.rows), (r) => r.id, (r) => (() => {
+const _r3 = $__cloneEl(_t1);
 const _n4 = _r3.firstChild!;
-_r3.setAttribute('data-id', (toRaw(r).id));
-effect(() => {
-_setText(_n4, (r.name));
+_r3.setAttribute('data-id', ($__toRaw(r).id));
+$__effect(() => {
+$__setText(_n4, (r.name));
 });
 return _r3;
 })());

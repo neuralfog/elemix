@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/RatingInput.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _list, effect, _setClass, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setClass, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -27,9 +28,9 @@ const css = `
     button.star:hover { color: #fbbf24; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<div class="stars"><!----></div>');
-const _t1 = templateEl('<button type="button">★</button>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="stars"><!----></div>');
+const _t1 = $__templateEl('<button type="button">★</button>');
 
 export class RatingInput extends Component {
     beforeMount(): void {
@@ -37,7 +38,7 @@ export class RatingInput extends Component {
     }
     static formAssociated = true;
 
-    state = state<State>({ value: 0 });
+    state = $__state<State>({ value: 0 });
 
     initFormValue(): void {
         this.internals.setFormValue(String(this.state.value));
@@ -49,13 +50,13 @@ export class RatingInput extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-_list(_n1, () => ([1, 2, 3, 4, 5]), (n) => String(n), (n) => (() => {
-const _r2 = cloneEl(_t1);
-_event(_r2, 'click', () => this.set(n));
-effect(() => {
-_setClass(_r2, '', ({ star: true, on: n <= this.state.value }));
+$__list(_n1, () => ([1, 2, 3, 4, 5]), (n) => String(n), (n) => (() => {
+const _r2 = $__cloneEl(_t1);
+$__event(_r2, 'click', () => this.set(n));
+$__effect(() => {
+$__setClass(_r2, '', ({ star: true, on: n <= this.state.value }));
 });
 return _r2;
 })());

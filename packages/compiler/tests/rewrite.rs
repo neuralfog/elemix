@@ -6,7 +6,7 @@ use elemix_compiler::compile;
 const COUNTER: &str = r#"import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 export class CounterApp extends Component {
-    state = state({ count: 0 });
+    state = $__state({ count: 0 });
     template = (): Template => tpl`<button @click=${this.inc}>${this.state.count}</button>`;
 }
 defineComponent('counter-app', CounterApp);
@@ -16,7 +16,7 @@ const WITH_REPEAT: &str = r#"import { Component, defineComponent, state, tpl } f
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 export class ListApp extends Component {
-    state = state({ rows: [] as { id: number }[] });
+    state = $__state({ rows: [] as { id: number }[] });
     template = (): Template => tpl`<ul>${repeat(this.state.rows, (r) => tpl`<li>${r.id}</li>`, (r) => r.id)}</ul>`;
 }
 defineComponent('list-app', ListApp);
@@ -89,8 +89,8 @@ fn multiple_components_per_file_each_compile() {
     assert_eq!(out.matches("view(): DocumentFragment").count(), 2);
     assert!(!out.contains("tpl`"));
     // their hoisted template consts are unique (no _t0/_t0 collision)
-    assert!(out.contains("const _t0 = template("));
-    assert!(out.contains("const _t1 = template("));
+    assert!(out.contains("const _t0 = $__template("));
+    assert!(out.contains("const _t1 = $__template("));
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn block_body_prelude_survives_into_view() {
     // and it lands inside view(), before the clone — not left in dead template().
     let view_at = out.find("view(): DocumentFragment").unwrap();
     let destruct_at = out.find("const { inc } = this;").unwrap();
-    let clone_at = out.find("clone(").unwrap();
+    let clone_at = out.find("$__clone(").unwrap();
     assert!(view_at < destruct_at && destruct_at < clone_at);
     assert!(!out.contains("tpl`"));
 }
@@ -155,7 +155,7 @@ fn method_form_template_lowers() {
     assert!(!out.contains("template(): Template"));
     assert!(!out.contains("tpl`"));
     // the holes still bound — proof the template was actually compiled
-    assert!(out.contains("_event("));
+    assert!(out.contains("$__event("));
 }
 
 #[test]
@@ -166,7 +166,7 @@ fn method_form_prelude_survives_into_view() {
     assert!(out.contains("const { inc } = this;"));
     let view_at = out.find("view(): DocumentFragment").unwrap();
     let destruct_at = out.find("const { inc } = this;").unwrap();
-    let clone_at = out.find("clone(").unwrap();
+    let clone_at = out.find("$__clone(").unwrap();
     assert!(view_at < destruct_at && destruct_at < clone_at);
     assert!(!out.contains("tpl`"));
 }

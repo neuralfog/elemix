@@ -6,7 +6,7 @@ use elemix_compiler::compile_with_map;
 
 const SOURCE: &str = r#"import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
 export class CounterApp extends Component {
-    state = state({ count: 0 });
+    state = $__state({ count: 0 });
     increment = () => { this.state.count++; };
     template = () => tpl`<button @click=${this.increment}>${this.state.count}</button>`;
 }
@@ -120,7 +120,7 @@ fn generated_lines_map_to_nothing() {
     for (gen, _) in &pairs {
         let line = out_lines[*gen];
         assert!(
-            !line.contains("view(): DocumentFragment") && !line.contains("= template("),
+            !line.contains("view(): DocumentFragment") && !line.contains("= $__template("),
             "a generated line ({line}) was mapped to the source"
         );
     }

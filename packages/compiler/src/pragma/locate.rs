@@ -428,7 +428,7 @@ fn state_edit(source: &str, name_end: usize, type_span: Option<Span>, value: Spa
     StateEdit {
         start: name_end,
         end: value.end as usize,
-        repl: format!(" = state{generic}({init})"),
+        repl: format!(" = $__state{generic}({init})"),
         accessor: false,
         module_primitive,
     }
@@ -454,7 +454,7 @@ fn field_state_edit(
         return StateEdit {
             start: name_end,
             end: value.end as usize,
-            repl: format!(" = state{generic}({init})"),
+            repl: format!(" = $__state{generic}({init})"),
             accessor: false,
             module_primitive: false,
         };
@@ -474,16 +474,16 @@ fn field_state_edit(
 
     let ann = type_span.map_or(String::new(), |t| format!(": {}", slice(source, t)));
     let repl = format!(
-        "#__{name}{ann} = state{generic}({init});\n    \
-         #__{name}_dep = dep();\n    \
+        "#__{name}{ann} = $__state{generic}({init});\n    \
+         #__{name}_dep = $__dep();\n    \
          get {name}(){ann} {{\n        \
-         track(this.#__{name}_dep);\n        \
+         $__track(this.#__{name}_dep);\n        \
          return this.#__{name};\n    }}\n    \
          set {name}(value{ann}) {{\n        \
-         const next = state{generic}(value);\n        \
+         const next = $__state{generic}(value);\n        \
          if (this.#__{name} === next) return;\n        \
          this.#__{name} = next;\n        \
-         trigger(this.#__{name}_dep);\n    }}"
+         $__trigger(this.#__{name}_dep);\n    }}"
     );
     StateEdit {
         start: name_start,

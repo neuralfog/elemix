@@ -18,15 +18,15 @@ fn gen(statics: &[&str], holes: &[&str]) -> String {
 #[test]
 fn declares_template_clones_and_returns_root() {
     let out = gen(&["<div>x</div>"], &[]);
-    assert!(out.contains("const _t0 = template('<div>x</div>');"));
-    assert!(out.contains("const _r0 = clone(_t0);"));
+    assert!(out.contains("const _t0 = $__template('<div>x</div>');"));
+    assert!(out.contains("const _r0 = $__clone(_t0);"));
     assert!(out.trim_end().ends_with("return _r0;"));
 }
 
 #[test]
 fn markup_is_escaped_as_a_js_string() {
     let out = gen(&["<p>can't</p>"], &[]);
-    assert!(out.contains("template('<p>can\\'t</p>');"));
+    assert!(out.contains("$__template('<p>can\\'t</p>');"));
 }
 
 #[test]
@@ -44,10 +44,10 @@ fn nested_path_renders_member_accessors() {
 fn text_bakes_a_node_for_a_sole_content_hole() {
     let out = gen(&["<div>", "</div>"], &["this.state.count"]);
     // a lone text hole bakes a real text node into the markup — no anchor swap
-    assert!(out.contains("template('<div> </div>')"));
+    assert!(out.contains("$__template('<div> </div>')"));
     assert!(!out.contains("document.createTextNode('');"));
     assert!(!out.contains(".replaceWith("));
-    assert!(out.contains("_setText("));
+    assert!(out.contains("$__setText("));
     assert!(out.contains("(this.state.count));"));
 }
 
@@ -59,38 +59,38 @@ fn text_swaps_anchor_when_not_a_sole_hole() {
     assert!(out.contains("<!---->"));
     assert!(out.contains("document.createTextNode('');"));
     assert!(out.contains(".replaceWith("));
-    assert!(out.contains("_setText("));
+    assert!(out.contains("$__setText("));
 }
 
 #[test]
 fn attr_template_literal_is_reactive() {
     let out = gen(&["<a href=\"/users/", "\">x</a>"], &["this.state.userId"]);
-    assert!(out.contains("_setAttr(_n1, 'href', (`/users/${this.state.userId}`));"));
+    assert!(out.contains("$__setAttr(_n1, 'href', (`/users/${this.state.userId}`));"));
 }
 
 #[test]
 fn class_object_literal_is_parenthesized() {
     let out = gen(&["<tr class=", "></tr>"], &["{ danger: x }"]);
-    assert!(out.contains("_setClass(_n1, "));
+    assert!(out.contains("$__setClass(_n1, "));
     assert!(out.contains("({ danger: x }));"));
 }
 
 #[test]
 fn style_casts_to_html_element() {
     let out = gen(&["<div style=", "></div>"], &["{ color: c }"]);
-    assert!(out.contains("_setStyle(_n1 as HTMLElement, ({ color: c }));"));
+    assert!(out.contains("$__setStyle(_n1 as HTMLElement, ({ color: c }));"));
 }
 
 #[test]
 fn prop_keeps_name_and_thunk() {
     let out = gen(&["<x :counter=", " />"], &["this.c"]);
-    assert!(out.contains("_setProp(_n1, 'counter', (this.c));"));
+    assert!(out.contains("$__setProp(_n1, 'counter', (this.c));"));
 }
 
 #[test]
 fn model_casts_and_thunks() {
     let out = gen(&["<input ~model=", " />"], &["this.r"]);
-    assert!(out.contains("_model(_n1 as HTMLInputElement, () => (this.r));"));
+    assert!(out.contains("$__model(_n1 as HTMLInputElement, () => (this.r));"));
 }
 
 // ---------------------------------------------------------------------------
@@ -100,7 +100,7 @@ fn model_casts_and_thunks() {
 #[test]
 fn event_handler_is_raw() {
     let out = gen(&["<button @click=", ">go</button>"], &["this.go"]);
-    assert!(out.contains("_event(_n1, 'click', this.go);"));
+    assert!(out.contains("$__event(_n1, 'click', this.go);"));
     assert!(!out.contains("() => this.go"));
 }
 
@@ -110,13 +110,13 @@ fn onmodel_is_raw_and_cast() {
         &["<input ~model=", " ~onmodel=", " />"],
         &["this.r", "clamp"],
     );
-    assert!(out.contains("_onmodel(_n1 as HTMLInputElement, clamp);"));
+    assert!(out.contains("$__onmodel(_n1 as HTMLInputElement, clamp);"));
 }
 
 #[test]
 fn ref_is_raw() {
     let out = gen(&["<input :ref=", " />"], &["this.input"]);
-    assert!(out.contains("_ref(_n1, this.input);"));
+    assert!(out.contains("$__ref(_n1, this.input);"));
 }
 
 // ---------------------------------------------------------------------------
@@ -127,8 +127,8 @@ fn ref_is_raw() {
 fn bindings_on_one_element_grab_it_once() {
     let out = gen(&["<a href=", " @click=", ">x</a>"], &["u", "this.go"]);
     assert_eq!(out.matches("= _r0.firstChild!;").count(), 1);
-    assert!(out.contains("_setAttr(_n1, 'href', (u));"));
-    assert!(out.contains("_event(_n1, 'click', this.go);"));
+    assert!(out.contains("$__setAttr(_n1, 'href', (u));"));
+    assert!(out.contains("$__event(_n1, 'click', this.go);"));
 }
 
 // ---------------------------------------------------------------------------
@@ -142,12 +142,12 @@ fn repeat_lowers_to_list_with_an_iife_builder() {
         &["repeat(this.rows, (r) => tpl`<li>${r.t}</li>`, (r) => r.id)"],
     );
     // single-root row → element-clone master (templateEl), lone text hole baked
-    assert!(out.contains("const _t1 = templateEl('<li> </li>');"));
-    // args reordered: _list(anchor, () => (items), key, render)
-    assert!(out.contains("_list(_n1, () => (this.rows), (r) => r.id, (r) => (() => {"));
+    assert!(out.contains("const _t1 = $__templateEl('<li> </li>');"));
+    // args reordered: $__list(anchor, () => (items), key, render)
+    assert!(out.contains("$__list(_n1, () => (this.rows), (r) => r.id, (r) => (() => {"));
     // the builder clones the row ELEMENT directly and returns it (no fragment)
-    assert!(out.contains("cloneEl(_t1)"));
-    assert!(out.contains("_setText("));
+    assert!(out.contains("$__cloneEl(_t1)"));
+    assert!(out.contains("$__setText("));
     assert!(out.contains("(r.t));"));
 }
 
@@ -157,11 +157,11 @@ fn nested_repeat_recurses() {
         &["<ul>", "</ul>"],
         &["repeat(cats, (c) => tpl`<li>${repeat(c.items, (i) => tpl`<b>${i.n}</b>`, (i) => i.id)}</li>`, (c) => c.id)"],
     );
-    assert!(out.contains("const _t0 = template(")); // the <ul> view (fragment)
-    assert!(out.contains("const _t1 = templateEl(")); // single-root <li> row
-    assert!(out.contains("const _t2 = templateEl(")); // single-root <b> row
-                                                      // two list calls, one nested inside the other's builder
-    assert_eq!(out.matches("_list(").count(), 2);
+    assert!(out.contains("const _t0 = $__template(")); // the <ul> view (fragment)
+    assert!(out.contains("const _t1 = $__templateEl(")); // single-root <li> row
+    assert!(out.contains("const _t2 = $__templateEl(")); // single-root <b> row
+                                                         // two list calls, one nested inside the other's builder
+    assert_eq!(out.matches("$__list(").count(), 2);
     assert!(out.contains("() => (cats)"));
     assert!(out.contains("() => (c.items)"));
 }
@@ -173,10 +173,10 @@ fn nested_repeat_recurses() {
 #[test]
 fn template_ternary_lowers_to_child() {
     let out = gen(&["<div>", "</div>"], &["c ? tpl`<a></a>` : tpl`<b></b>`"]);
-    assert!(out.contains("_child(_n1, () => (c"));
+    assert!(out.contains("$__child(_n1, () => (c"));
     assert!(out.contains("? (() => {"));
-    assert!(out.contains("cloneEl(_t1)"));
-    assert!(out.contains("cloneEl(_t2)"));
+    assert!(out.contains("$__cloneEl(_t1)"));
+    assert!(out.contains("$__cloneEl(_t2)"));
 }
 
 #[test]
@@ -184,7 +184,7 @@ fn multi_root_child_branch_returns_the_whole_fragment() {
     // a conditional value can mount many roots; `_child` ranges over the fragment,
     // so the builder returns the fragment, not just its first node
     let out = gen(&["<div>", "</div>"], &["c ? tpl`<a></a><b></b>` : ''"]);
-    assert!(out.contains("clone(_t1)"));
+    assert!(out.contains("$__clone(_t1)"));
     assert!(out.contains("return _r2;"));
     assert!(!out.contains("_r2.firstChild!"));
 }
@@ -197,14 +197,14 @@ fn multi_root_list_row_collapses_to_its_first_node() {
         &["<div>", "</div>"],
         &["repeat(items, (e) => tpl`<a></a><b></b>`, (e) => e.id)"],
     );
-    assert!(out.contains("_list("));
+    assert!(out.contains("$__list("));
     assert!(out.contains("return _r2.firstChild!;"));
 }
 
 #[test]
 fn ternary_with_empty_branch_is_preserved() {
     let out = gen(&["<div>", "</div>"], &["c ? tpl`<a></a>` : ''"]);
-    assert!(out.contains("_child(_n1, () => (c"));
+    assert!(out.contains("$__child(_n1, () => (c"));
     assert!(out.trim_end().contains(": ''));"));
 }
 
@@ -214,7 +214,7 @@ fn when_lowers_to_child_without_a_double_iife() {
         &["<div>", "</div>"],
         &["when(this.show, () => tpl`<a></a>`)"],
     );
-    assert!(out.contains("_child(_n1, () => (this.show ? (() => {"));
+    assert!(out.contains("$__child(_n1, () => (this.show ? (() => {"));
     assert!(out.contains(": ''));"));
     assert!(!out.contains("(() => (() =>"));
 }
@@ -229,10 +229,10 @@ fn repeat_in_a_ternary_becomes_list_plus_child() {
     assert!(out.contains("document.createComment('')"));
     assert!(out.contains(".before("));
     // keyed list, guarded by the condition
-    assert!(out.contains("_list("));
+    assert!(out.contains("$__list("));
     assert!(out.contains("log.len ? items : []"));
     // child for the else branch
-    assert!(out.contains("_child("));
+    assert!(out.contains("$__child("));
     assert!(out.contains("log.len ? '' : "));
     // the repeat call itself is erased
     assert!(!out.contains("repeat("));
@@ -244,7 +244,7 @@ fn choose_lowers_to_a_ternary_chain() {
         &["<div>", "</div>"],
         &["choose([[a, () => tpl`<x></x>`], [true, () => tpl`<y></y>`]])"],
     );
-    assert!(out.contains("_child(_n1, () => (a ? (() => {"));
+    assert!(out.contains("$__child(_n1, () => (a ? (() => {"));
     assert!(out.contains("true ? (() => {"));
     assert!(out.contains(": ''));"));
     assert!(!out.contains("(() => (() =>"));
@@ -257,7 +257,7 @@ fn match_form1_lowers_to_an_equality_chain() {
         &["match(this.s, { idle: () => tpl`<x></x>`, busy: () => tpl`<y></y>` })"],
     );
     // value === 'key' ? build : … : '' — identifier keys quoted into strings.
-    assert!(out.contains("_child(_n1, () => (this.s === 'idle' ? (() => {"));
+    assert!(out.contains("$__child(_n1, () => (this.s === 'idle' ? (() => {"));
     assert!(out.contains("this.s === 'busy' ? (() => {"));
     assert!(out.contains(": ''));"));
 }

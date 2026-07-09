@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/ProofDestructuring.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { count: number };
@@ -38,11 +39,11 @@ const css = `
 // `const { inc, dec } = this`) when it lowers the body into view() — otherwise
 // inc/dec would be undefined. Reactivity is unaffected: count is still read as
 // this.state.count inside the effect.
-const _s0 = sheet(css);
-const _t0 = template('<div><button class="dec">−</button><span class="count"> </span><button class="inc">+</button></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div><button class="dec">−</button><span class="count"> </span><button class="inc">+</button></div>');
 
 export class ProofDestructuring extends Component {
-    state = state<State>({ count: 0 });
+    state = $__state<State>({ count: 0 });
 
     inc = (): void => {
         this.state.count++;
@@ -54,14 +55,14 @@ export class ProofDestructuring extends Component {
 
     view(): DocumentFragment {
 const { inc, dec } = this;
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-_event(_n1, 'click', dec);
-_event(_n3, 'click', inc);
-effect(() => {
-_setText(_n2, (this.state.count));
+$__event(_n1, 'click', dec);
+$__event(_n3, 'click', inc);
+$__effect(() => {
+$__setText(_n2, (this.state.count));
 });
 return _r0;
 }

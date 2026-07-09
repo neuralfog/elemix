@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/ProfileCard.ts
 ---
-import { template, clone, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Props = {
@@ -31,30 +32,30 @@ const css = `
     .likes { margin-left: auto; font-size: 15px; font-weight: 600; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<div class="card"><div class="avatar"> </div><div class="info"><strong> </strong><span> </span></div><div class="likes">❤️ <!----></div></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="card"><div class="avatar"> </div><div class="info"><strong> </strong><span> </span></div><div class="likes">❤️ <!----></div></div>');
 
 export class ProfileCard extends Component<Props> {
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
 const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
 const _x5 = document.createTextNode('');
 _n4.replaceWith(_x5);
-effect(() => {
-_setText(_n1, (this.props.name.charAt(0)));
+$__effect(() => {
+$__setText(_n1, (this.props.name.charAt(0)));
 });
-effect(() => {
-_setText(_n2, (this.props.name));
+$__effect(() => {
+$__setText(_n2, (this.props.name));
 });
-effect(() => {
-_setText(_n3, (this.props.role));
+$__effect(() => {
+$__setText(_n3, (this.props.role));
 });
-effect(() => {
-_setText(_x5, (this.props.likes));
+$__effect(() => {
+$__setText(_x5, (this.props.likes));
 });
 return _r0;
 }

@@ -115,7 +115,7 @@ fn no_shadow_skips_styles_emission() {
     let src = "const css = `x`;\n// #component #no-shadow\nclass Foo extends Component {\n    // #styles\n    styles = css;\n}";
     let out = expand(src).unwrap();
     assert!(out.contains("static __noShadow = true;"));
-    assert!(!out.contains("sheet(")); // no stylesheet emitted
+    assert!(!out.contains("$__sheet(")); // no stylesheet emitted
     assert!(!out.contains("__sheets"));
     assert!(out.contains("styles = css;")); // field kept → `css` stays referenced
     assert!(!out.contains("// #styles")); // marker stripped
@@ -289,9 +289,9 @@ fn imports_before_a_pragma_are_fine() {
 fn lowers_a_full_component() {
     let src = "const css = `c`;\n// #component\nclass Foo extends Component {\n    // #styles\n    styles = css;\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("import { defineComponent, sheet } from '@neuralfog/elemix/runtime';"));
+    assert!(out.contains("import { defineComponent, $__sheet } from '@neuralfog/elemix/runtime';"));
     assert!(out.contains("const css = `c`;")); // the referenced const stays in place
-    assert!(out.contains("const _s0 = sheet(css);")); // field value inlined by name
+    assert!(out.contains("const _s0 = $__sheet(css);")); // field value inlined by name
     assert!(out.contains("Foo.__sheets = [..._s0];"));
     assert!(out.contains("defineComponent('foo', Foo);"));
     assert!(!out.contains("styles = css")); // the styles field is stripped
@@ -320,7 +320,7 @@ fn styles_only_no_registration() {
     .unwrap();
     assert!(out.contains("Foo.__sheets = [..._s0];"));
     assert!(!out.contains("defineComponent"));
-    assert!(out.contains("import { sheet } from '@neuralfog/elemix/runtime';"));
+    assert!(out.contains("import { $__sheet } from '@neuralfog/elemix/runtime';"));
 }
 
 #[test]
@@ -329,8 +329,8 @@ fn multiple_styles_accumulate_onto_a_class() {
         "const base = `a`;\nconst theme = `b`;\n// #component\nclass Foo extends Component {\n    // #styles\n    a = base;\n    // #styles\n    b = theme;\n}",
     )
     .unwrap();
-    assert!(out.contains("const _s0 = sheet(base);"));
-    assert!(out.contains("const _s1 = sheet(theme);"));
+    assert!(out.contains("const _s0 = $__sheet(base);"));
+    assert!(out.contains("const _s1 = $__sheet(theme);"));
     assert!(out.contains("Foo.__sheets = [..._s0, ..._s1];"));
 }
 
@@ -373,7 +373,7 @@ fn form_injects_form_associated_into_the_class_body() {
 fn state_field_wraps_the_initializer_and_lifts_the_annotation() {
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s: AppState = { n: 0 };\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("s = state<AppState>({ n: 0 });")); // annotation → generic
+    assert!(out.contains("s = $__state<AppState>({ n: 0 });")); // annotation → generic
     assert!(!out.contains("// #state"));
     assert!(!out.contains("s: AppState"));
 }
@@ -382,14 +382,14 @@ fn state_field_wraps_the_initializer_and_lifts_the_annotation() {
 fn state_without_an_annotation_infers() {
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("s = state({ n: 0 });")); // no generic
+    assert!(out.contains("s = $__state({ n: 0 });")); // no generic
 }
 
 #[test]
 fn state_works_on_a_module_const() {
     let src = "import { Component } from '@neuralfog/elemix';\n// #state\nexport const cart: CartState = { items: [] };\nclass Foo extends Component {}";
     let out = expand(src).unwrap();
-    assert!(out.contains("export const cart = state<CartState>({ items: [] });"));
+    assert!(out.contains("export const cart = $__state<CartState>({ items: [] });"));
 }
 
 #[test]
@@ -397,8 +397,8 @@ fn state_is_imported_from_runtime_not_the_public_barrel() {
     // `state` is a compile target now — never spliced into the public import.
     let src = "import { Component, tpl } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("import { state } from '@neuralfog/elemix/runtime';"));
-    assert!(!out.contains(", state } from '@neuralfog/elemix';"));
+    assert!(out.contains("import { $__state } from '@neuralfog/elemix/runtime';"));
+    assert!(!out.contains(", $__state } from '@neuralfog/elemix';"));
     assert!(!out.contains("{ state, "));
 }
 
@@ -418,16 +418,16 @@ fn state_bare_primitive_lowers_to_a_reactive_accessor() {
     // private backing field + per-instance dep, so `this.count` itself reacts.
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    count = 0;\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("#__count = state(0);"));
-    assert!(out.contains("#__count_dep = dep();"));
+    assert!(out.contains("#__count = $__state(0);"));
+    assert!(out.contains("#__count_dep = $__dep();"));
     assert!(out.contains("get count() {"));
-    assert!(out.contains("track(this.#__count_dep);"));
+    assert!(out.contains("$__track(this.#__count_dep);"));
     assert!(out.contains("return this.#__count;"));
     assert!(out.contains("set count(value) {"));
     assert!(out.contains("if (this.#__count === next) return;"));
-    assert!(out.contains("trigger(this.#__count_dep);"));
+    assert!(out.contains("$__trigger(this.#__count_dep);"));
     // no stray field assignment and no leftover empty statement
-    assert!(!out.contains("count = state(0)\n"));
+    assert!(!out.contains("count = $__state(0)\n"));
     assert!(!out.contains("// #state"));
 }
 
@@ -435,21 +435,21 @@ fn state_bare_primitive_lowers_to_a_reactive_accessor() {
 fn state_bare_primitive_carries_the_type_annotation() {
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    active: boolean = true;\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("#__active: boolean = state<boolean>(true);"));
+    assert!(out.contains("#__active: boolean = $__state<boolean>(true);"));
     assert!(out.contains("get active(): boolean {"));
     assert!(out.contains("set active(value: boolean) {"));
-    assert!(out.contains("const next = state<boolean>(value);"));
+    assert!(out.contains("const next = $__state<boolean>(value);"));
 }
 
 #[test]
 fn state_object_literal_keeps_the_cheap_field_form() {
-    // object/array initializers stay on the plain `= state(...)` field form —
+    // object/array initializers stay on the plain `= $__state(...)` field form —
     // no accessor, so the deep-proxy hot path is untouched.
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("s = state({ n: 0 });"));
+    assert!(out.contains("s = $__state({ n: 0 });"));
     assert!(!out.contains("get s("));
-    assert!(!out.contains("dep()"));
+    assert!(!out.contains("$__dep()"));
 }
 
 #[test]
@@ -490,7 +490,7 @@ fn effect_on_a_method_generates_an_effects_hook() {
         "// #component\nclass Foo extends Component {\n    // #effect\n    sync(): void {}\n}";
     let out = expand(src).unwrap();
     assert!(out.contains("effects(): void {"));
-    assert!(out.contains("effect(() => this.sync());"));
+    assert!(out.contains("$__effect(() => this.sync());"));
     assert!(out.contains("sync(): void {}")); // the method itself stays
     assert!(!out.contains("// #effect"));
     assert!(out.contains("from '@neuralfog/elemix/runtime'"));
@@ -500,7 +500,7 @@ fn effect_on_a_method_generates_an_effects_hook() {
 fn effect_works_on_an_arrow_field() {
     let src = "// #component\nclass Foo extends Component {\n    // #effect\n    sync = (): void => {};\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("effect(() => this.sync());"));
+    assert!(out.contains("$__effect(() => this.sync());"));
 }
 
 #[test]
@@ -508,8 +508,8 @@ fn multiple_effects_share_one_hook() {
     let src = "// #component\nclass Foo extends Component {\n    // #effect\n    a(): void {}\n    // #effect\n    b(): void {}\n}";
     let out = expand(src).unwrap();
     assert_eq!(out.matches("effects(): void {").count(), 1);
-    assert!(out.contains("effect(() => this.a());"));
-    assert!(out.contains("effect(() => this.b());"));
+    assert!(out.contains("$__effect(() => this.a());"));
+    assert!(out.contains("$__effect(() => this.b());"));
 }
 
 #[test]
@@ -595,7 +595,8 @@ fn inheriting_component_chains_super_effects() {
     let out = expand(src).unwrap();
     let hook = &out[out.find("effects(): void {").unwrap()..];
     assert!(
-        hook.find("super.effects?.();").unwrap() < hook.find("effect(() => this.fx());").unwrap()
+        hook.find("super.effects?.();").unwrap()
+            < hook.find("$__effect(() => this.fx());").unwrap()
     );
 }
 

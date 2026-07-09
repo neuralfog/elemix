@@ -10,7 +10,7 @@ export type Scope = {
     next: Scope | null;
 };
 
-export const dep = (): Dep => ({ subs: null, subSlots: 0 });
+export const $__dep = (): Dep => ({ subs: null, subSlots: 0 });
 
 let activeScope: Scope | null = null;
 let sink: Scope | null = null;
@@ -95,7 +95,7 @@ export const dispose = (head: Scope | null): void => {
     }
 };
 
-export const untrack = <T>(fn: () => T): T => {
+export const $__untrack = <T>(fn: () => T): T => {
     const prev = activeScope;
     activeScope = null;
     try {
@@ -129,7 +129,7 @@ const setDepSlot = (scope: Scope, sslot: number, dslot: number): void => {
     }
 };
 
-export const track = (d: Dep): void => {
+export const $__track = (d: Dep): void => {
     const scope = activeScope;
     if (scope === null) return;
     const subs = d.subs;
@@ -153,7 +153,7 @@ export const track = (d: Dep): void => {
     }
 };
 
-export const trigger = (d: Dep): void => {
+export const $__trigger = (d: Dep): void => {
     const subs = d.subs;
     if (subs === null) return;
     if (Array.isArray(subs)) {
@@ -166,7 +166,7 @@ export const trigger = (d: Dep): void => {
     }
 };
 
-export const effect = (fn: () => void): void => {
+export const $__effect = (fn: () => void): void => {
     const scope: Scope = { deps: null, depSlots: 0, fn, next: null };
     if (collecting) {
         scope.next = sink;
@@ -175,29 +175,29 @@ export const effect = (fn: () => void): void => {
     runScope(scope);
 };
 
-export const bind = (fn: () => void, sources: Dep[]): void => {
-    effect(() => {
-        for (let i = 0; i < sources.length; i++) track(sources[i]);
+export const $__bind = (fn: () => void, sources: Dep[]): void => {
+    $__effect(() => {
+        for (let i = 0; i < sources.length; i++) $__track(sources[i]);
         fn();
     });
 };
 
-export const reactive = <T extends object>(source: T): T => {
+export const $__reactive = <T extends object>(source: T): T => {
     const store = source as Record<string, unknown>;
     for (const key of Object.keys(store)) {
         let value = store[key];
-        const d = dep();
+        const d = $__dep();
         Object.defineProperty(store, key, {
             enumerable: true,
             configurable: true,
             get(): unknown {
-                track(d);
+                $__track(d);
                 return value;
             },
             set(next: unknown): void {
                 if (value === next) return;
                 value = next;
-                trigger(d);
+                $__trigger(d);
             },
         });
     }

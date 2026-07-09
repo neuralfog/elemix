@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/CollectionApp.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -19,14 +20,14 @@ const css = `
     button { font: inherit; cursor: pointer; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<section class="set"><span class="set-size"> </span><span class="set-has"> </span><span class="set-keys"> </span><span class="set-values"> </span><span class="set-entries"> </span><span class="set-iter"> </span><span class="set-foreach"> </span></section><section class="map"><span class="map-size"> </span><span class="map-get"> </span><span class="map-has"> </span><span class="map-keys"> </span><span class="map-values"> </span><span class="map-entries"> </span><span class="map-iter"> </span><span class="map-total"> </span></section><section class="weak"><span class="ws-has"> </span><span class="wm-has"> </span><span class="wm-get"> </span></section><div class="controls"><button class="add-tag">add tag</button><button class="remove-tag">remove tag</button><button class="clear-tags">clear tags</button><button class="bump-alice">bump</button><button class="set-bob">bob</button><button class="del-alice">del alice</button><button class="clear-scores">wipe</button><button class="add-seen">add seen</button><button class="del-seen">del seen</button><button class="set-meta">set meta</button><button class="del-meta">del meta</button></div><ul class="tags"><!----></ul><ul class="scores"><!----></ul>');
-const _t1 = templateEl('<li class="tag"> </li>');
-const _t2 = templateEl('<li class="score"><!---->: <!----></li>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<section class="set"><span class="set-size"> </span><span class="set-has"> </span><span class="set-keys"> </span><span class="set-values"> </span><span class="set-entries"> </span><span class="set-iter"> </span><span class="set-foreach"> </span></section><section class="map"><span class="map-size"> </span><span class="map-get"> </span><span class="map-has"> </span><span class="map-keys"> </span><span class="map-values"> </span><span class="map-entries"> </span><span class="map-iter"> </span><span class="map-total"> </span></section><section class="weak"><span class="ws-has"> </span><span class="wm-has"> </span><span class="wm-get"> </span></section><div class="controls"><button class="add-tag">add tag</button><button class="remove-tag">remove tag</button><button class="clear-tags">clear tags</button><button class="bump-alice">bump</button><button class="set-bob">bob</button><button class="del-alice">del alice</button><button class="clear-scores">wipe</button><button class="add-seen">add seen</button><button class="del-seen">del seen</button><button class="set-meta">set meta</button><button class="del-meta">del meta</button></div><ul class="tags"><!----></ul><ul class="scores"><!----></ul>');
+const _t1 = $__templateEl('<li class="tag"> </li>');
+const _t2 = $__templateEl('<li class="score"><!---->: <!----></li>');
 
 export class CollectionApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         tags: new Set<string>(['new', 'featured']),
         scores: new Map<string, number>([['alice', 10]]),
         seen: new WeakSet<object>(),
@@ -131,7 +132,7 @@ export class CollectionApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
@@ -163,95 +164,95 @@ const _n28 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.
 const _n29 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n30 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
 const _n31 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-_event(_n19, 'click', this.addTag);
-_event(_n20, 'click', this.removeTag);
-_event(_n21, 'click', this.clearTags);
-_event(_n22, 'click', this.bumpAlice);
-_event(_n23, 'click', this.setBob);
-_event(_n24, 'click', this.deleteAlice);
-_event(_n25, 'click', this.clearScores);
-_event(_n26, 'click', this.addSeen);
-_event(_n27, 'click', this.deleteSeen);
-_event(_n28, 'click', this.setMeta);
-_event(_n29, 'click', this.deleteMeta);
-_list(_n30, () => ([...this.state.tags]), (tag) => tag, (tag) => (() => {
-const _r32 = cloneEl(_t1);
+$__event(_n19, 'click', this.addTag);
+$__event(_n20, 'click', this.removeTag);
+$__event(_n21, 'click', this.clearTags);
+$__event(_n22, 'click', this.bumpAlice);
+$__event(_n23, 'click', this.setBob);
+$__event(_n24, 'click', this.deleteAlice);
+$__event(_n25, 'click', this.clearScores);
+$__event(_n26, 'click', this.addSeen);
+$__event(_n27, 'click', this.deleteSeen);
+$__event(_n28, 'click', this.setMeta);
+$__event(_n29, 'click', this.deleteMeta);
+$__list(_n30, () => ([...this.state.tags]), (tag) => tag, (tag) => (() => {
+const _r32 = $__cloneEl(_t1);
 const _n33 = _r32.firstChild!;
-effect(() => {
-_setText(_n33, (tag));
+$__effect(() => {
+$__setText(_n33, (tag));
 });
 return _r32;
 })());
-_list(_n31, () => ([...this.state.scores.keys()]), (name) => name, (name) =>
+$__list(_n31, () => ([...this.state.scores.keys()]), (name) => name, (name) =>
                     (() => {
-const _r34 = cloneEl(_t2);
+const _r34 = $__cloneEl(_t2);
 const _n35 = _r34.firstChild!;
 const _n36 = _r34.firstChild!.nextSibling!.nextSibling!;
 const _x37 = document.createTextNode('');
 _n35.replaceWith(_x37);
 const _x38 = document.createTextNode('');
 _n36.replaceWith(_x38);
-effect(() => {
-_setText(_x37, (name));
+$__effect(() => {
+$__setText(_x37, (name));
 });
-effect(() => {
-_setText(_x38, (this.state.scores.get(name)));
+$__effect(() => {
+$__setText(_x38, (this.state.scores.get(name)));
 });
 return _r34;
 })());
-effect(() => {
-_setText(_n1, (this.state.tags.size));
+$__effect(() => {
+$__setText(_n1, (this.state.tags.size));
 });
-effect(() => {
-_setText(_n2, (this.state.tags.has('vip')));
+$__effect(() => {
+$__setText(_n2, (this.state.tags.has('vip')));
 });
-effect(() => {
-_setText(_n3, (this.setKeys));
+$__effect(() => {
+$__setText(_n3, (this.setKeys));
 });
-effect(() => {
-_setText(_n4, (this.setValues));
+$__effect(() => {
+$__setText(_n4, (this.setValues));
 });
-effect(() => {
-_setText(_n5, (this.setEntries));
+$__effect(() => {
+$__setText(_n5, (this.setEntries));
 });
-effect(() => {
-_setText(_n6, (this.setIter));
+$__effect(() => {
+$__setText(_n6, (this.setIter));
 });
-effect(() => {
-_setText(_n7, (this.setForEach));
+$__effect(() => {
+$__setText(_n7, (this.setForEach));
 });
-effect(() => {
-_setText(_n8, (this.state.scores.size));
+$__effect(() => {
+$__setText(_n8, (this.state.scores.size));
 });
-effect(() => {
-_setText(_n9, (this.state.scores.get('alice')));
+$__effect(() => {
+$__setText(_n9, (this.state.scores.get('alice')));
 });
-effect(() => {
-_setText(_n10, (this.state.scores.has('alice')));
+$__effect(() => {
+$__setText(_n10, (this.state.scores.has('alice')));
 });
-effect(() => {
-_setText(_n11, (this.mapKeys));
+$__effect(() => {
+$__setText(_n11, (this.mapKeys));
 });
-effect(() => {
-_setText(_n12, (this.mapValues));
+$__effect(() => {
+$__setText(_n12, (this.mapValues));
 });
-effect(() => {
-_setText(_n13, (this.mapEntries));
+$__effect(() => {
+$__setText(_n13, (this.mapEntries));
 });
-effect(() => {
-_setText(_n14, (this.mapIter));
+$__effect(() => {
+$__setText(_n14, (this.mapIter));
 });
-effect(() => {
-_setText(_n15, (this.total));
+$__effect(() => {
+$__setText(_n15, (this.total));
 });
-effect(() => {
-_setText(_n16, (this.state.seen.has(this.token)));
+$__effect(() => {
+$__setText(_n16, (this.state.seen.has(this.token)));
 });
-effect(() => {
-_setText(_n17, (this.state.meta.has(this.token)));
+$__effect(() => {
+$__setText(_n17, (this.state.meta.has(this.token)));
 });
-effect(() => {
-_setText(_n18, (this.state.meta.get(this.token)));
+$__effect(() => {
+$__setText(_n18, (this.state.meta.get(this.token)));
 });
 return _r0;
 }

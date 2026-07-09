@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/PrimitiveStateApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet, state, dep, track, trigger } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state, $__dep, $__track, $__trigger } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // Proof that a BARE primitive is reactive state — no object wrapper, no
@@ -51,48 +52,48 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<div class="row"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="row"><span class="active"> </span><button>toggle</button></div><div class="row"><strong class="label"> </strong><button>rename</button></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="row"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="row"><span class="active"> </span><button>toggle</button></div><div class="row"><strong class="label"> </strong><button>rename</button></div>');
 
 export class PrimitiveStateApp extends Component {
 
-    #__count = state(0);
-    #__count_dep = dep();
+    #__count = $__state(0);
+    #__count_dep = $__dep();
     get count() {
-        track(this.#__count_dep);
+        $__track(this.#__count_dep);
         return this.#__count;
     }
     set count(value) {
-        const next = state(value);
+        const next = $__state(value);
         if (this.#__count === next) return;
         this.#__count = next;
-        trigger(this.#__count_dep);
+        $__trigger(this.#__count_dep);
     }
 
-    #__active: boolean = state<boolean>(true);
-    #__active_dep = dep();
+    #__active: boolean = $__state<boolean>(true);
+    #__active_dep = $__dep();
     get active(): boolean {
-        track(this.#__active_dep);
+        $__track(this.#__active_dep);
         return this.#__active;
     }
     set active(value: boolean) {
-        const next = state<boolean>(value);
+        const next = $__state<boolean>(value);
         if (this.#__active === next) return;
         this.#__active = next;
-        trigger(this.#__active_dep);
+        $__trigger(this.#__active_dep);
     }
 
-    #__label = state('idle');
-    #__label_dep = dep();
+    #__label = $__state('idle');
+    #__label_dep = $__dep();
     get label() {
-        track(this.#__label_dep);
+        $__track(this.#__label_dep);
         return this.#__label;
     }
     set label(value) {
-        const next = state(value);
+        const next = $__state(value);
         if (this.#__label === next) return;
         this.#__label = next;
-        trigger(this.#__label_dep);
+        $__trigger(this.#__label_dep);
     }
 
     increment = (): void => {
@@ -112,7 +113,7 @@ export class PrimitiveStateApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
@@ -120,18 +121,18 @@ const _n4 = _r0.firstChild!.nextSibling!.firstChild!.firstChild!;
 const _n5 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
 const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.firstChild!;
 const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-_event(_n2, 'click', this.increment);
-_event(_n3, 'click', this.reset);
-_event(_n5, 'click', this.toggle);
-_event(_n7, 'click', this.rename);
-effect(() => {
-_setText(_n1, (this.count));
+$__event(_n2, 'click', this.increment);
+$__event(_n3, 'click', this.reset);
+$__event(_n5, 'click', this.toggle);
+$__event(_n7, 'click', this.rename);
+$__effect(() => {
+$__setText(_n1, (this.count));
 });
-effect(() => {
-_setText(_n4, (this.active ? 'on' : 'off'));
+$__effect(() => {
+$__setText(_n4, (this.active ? 'on' : 'off'));
 });
-effect(() => {
-_setText(_n6, (this.label));
+$__effect(() => {
+$__setText(_n6, (this.label));
 });
 return _r0;
 }

@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/TodoApp.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _model, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__model, $__list, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
@@ -70,13 +71,13 @@ const css = `
     .remove:hover { background: rgba(239, 68, 68, 0.12); }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<h3>Todos</h3><div class="row"><input type="text" placeholder="What needs doing?"/><button class="add">Add</button></div><ul><!----></ul>');
-const _t1 = templateEl('<li><span> </span><button class="remove">×</button></li>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<h3>Todos</h3><div class="row"><input type="text" placeholder="What needs doing?"/><button class="add">Add</button></div><ul><!----></ul>');
+const _t1 = $__templateEl('<li><span> </span><button class="remove">×</button></li>');
 
 export class TodoApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         draft: ref(''),
         todos: [{ id: 't0', text: 'Learn Elemix' }],
     });
@@ -96,22 +97,22 @@ export class TodoApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
-_model(_n1 as HTMLInputElement, () => (this.state.draft));
-_event(_n1, 'keydown', (e: KeyboardEvent) => {
+$__model(_n1 as HTMLInputElement, () => (this.state.draft));
+$__event(_n1, 'keydown', (e: KeyboardEvent) => {
                     if (e.key === 'Enter') this.addItem();
                 });
-_event(_n2, 'click', this.addItem);
-_list(_n3, () => (this.state.todos), (todo) => todo.id, (todo) => (() => {
-const _r4 = cloneEl(_t1);
+$__event(_n2, 'click', this.addItem);
+$__list(_n3, () => (this.state.todos), (todo) => todo.id, (todo) => (() => {
+const _r4 = $__cloneEl(_t1);
 const _n5 = _r4.firstChild!.firstChild!;
 const _n6 = _r4.firstChild!.nextSibling!;
-_event(_n6, 'click', () => this.removeItem(todo.id));
-effect(() => {
-_setText(_n5, (todo.text));
+$__event(_n6, 'click', () => this.removeItem(todo.id));
+$__effect(() => {
+$__setText(_n5, (todo.text));
 });
 return _r4;
 })());

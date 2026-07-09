@@ -1,8 +1,9 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SignalStore.ts
 ---
-import { state } from '@neuralfog/elemix/runtime';
+import { $__state } from '@neuralfog/elemix/runtime';
 
-export const counter = state({ count: 0 });
+export const counter = $__state({ count: 0 });

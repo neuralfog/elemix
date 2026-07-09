@@ -4,7 +4,7 @@ assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/MatchApp.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _child, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Load =
@@ -64,18 +64,18 @@ const css = `
     .mode { font-size: 12px; color: var(--accent); }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage"><!----></div><button class="link">toggle mode</button> <!---->');
-const _t1 = templateEl('<div class="card failed">✕ <!----></div>');
-const _t2 = templateEl('<div class="card ready">✓ Deployed to <!----></div>');
-const _t3 = templateEl('<div class="card loading"><span class="spinner"></span>Working <!---->%</div>');
-const _t4 = templateEl('<div class="card idle">Pick a state above</div>');
-const _t5 = templateEl('<span class="mode">full view</span>');
-const _t6 = templateEl('<span class="mode">compact</span>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage"><!----></div><button class="link">toggle mode</button> <!---->');
+const _t1 = $__templateEl('<div class="card failed">✕ <!----></div>');
+const _t2 = $__templateEl('<div class="card ready">✓ Deployed to <!----></div>');
+const _t3 = $__templateEl('<div class="card loading"><span class="spinner"></span>Working <!---->%</div>');
+const _t4 = $__templateEl('<div class="card idle">Pick a state above</div>');
+const _t5 = $__templateEl('<span class="mode">full view</span>');
+const _t6 = $__templateEl('<span class="mode">compact</span>');
 
 export class MatchApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         load: { kind: 'idle' },
         mode: 'compact',
     });
@@ -101,7 +101,7 @@ export class MatchApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
@@ -109,47 +109,47 @@ const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n5 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n6 = _r0.firstChild!.nextSibling!.nextSibling!;
 const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-_event(_n1, 'click', this.idle);
-_event(_n2, 'click', this.loading);
-_event(_n3, 'click', this.ready);
-_event(_n4, 'click', this.failed);
-_child(_n5, () => ((this.state.load)['kind'] === 'idle' ? (() => (() => {
-const _r17 = cloneEl(_t4);
+$__event(_n1, 'click', this.idle);
+$__event(_n2, 'click', this.loading);
+$__event(_n3, 'click', this.ready);
+$__event(_n4, 'click', this.failed);
+$__child(_n5, () => ((this.state.load)['kind'] === 'idle' ? (() => (() => {
+const _r17 = $__cloneEl(_t4);
 return _r17;
 })())(this.state.load) : (this.state.load)['kind'] === 'loading' ? ((m) => (() => {
-const _r14 = cloneEl(_t3);
+const _r14 = $__cloneEl(_t3);
 const _n15 = _r14.firstChild!.nextSibling!.nextSibling!;
 const _x16 = document.createTextNode('');
 _n15.replaceWith(_x16);
-effect(() => {
-_setText(_x16, (m.pct));
+$__effect(() => {
+$__setText(_x16, (m.pct));
 });
 return _r14;
 })())(this.state.load) : (this.state.load)['kind'] === 'ready' ? ((m) => (() => {
-const _r11 = cloneEl(_t2);
+const _r11 = $__cloneEl(_t2);
 const _n12 = _r11.firstChild!.nextSibling!;
 const _x13 = document.createTextNode('');
 _n12.replaceWith(_x13);
-effect(() => {
-_setText(_x13, (m.url));
+$__effect(() => {
+$__setText(_x13, (m.url));
 });
 return _r11;
 })())(this.state.load) : (this.state.load)['kind'] === 'failed' ? ((m) => (() => {
-const _r8 = cloneEl(_t1);
+const _r8 = $__cloneEl(_t1);
 const _n9 = _r8.firstChild!.nextSibling!;
 const _x10 = document.createTextNode('');
 _n9.replaceWith(_x10);
-effect(() => {
-_setText(_x10, (m.error));
+$__effect(() => {
+$__setText(_x10, (m.error));
 });
 return _r8;
 })())(this.state.load) : ''));
-_event(_n6, 'click', this.toggleMode);
-_child(_n7, () => (this.state.mode === 'compact' ? (() => {
-const _r19 = cloneEl(_t6);
+$__event(_n6, 'click', this.toggleMode);
+$__child(_n7, () => (this.state.mode === 'compact' ? (() => {
+const _r19 = $__cloneEl(_t6);
 return _r19;
 })() : this.state.mode === 'full' ? (() => {
-const _r18 = cloneEl(_t5);
+const _r18 = $__cloneEl(_t5);
 return _r18;
 })() : ''));
 return _r0;

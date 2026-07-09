@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SignalValue.ts
 ---
-import { template, clone, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { counter } from './SignalStore';
@@ -24,16 +25,16 @@ const css = `
     }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<div class="value"> </div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="value"> </div>');
 
 export class SignalValue extends Component {
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-effect(() => {
-_setText(_n1, (counter.count));
+$__effect(() => {
+$__setText(_n1, (counter.count));
 });
 return _r0;
 }

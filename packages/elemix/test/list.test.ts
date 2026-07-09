@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { _list } from '../src/runtime/dom';
-import { state } from '../src/runtime/state';
+import { $__list as _list } from '../src/runtime/dom';
+import { $__state as state } from '../src/runtime/state';
 
 type Row = { id: number };
 const rows = (ids: number[]): Row[] => ids.map((id) => ({ id }));

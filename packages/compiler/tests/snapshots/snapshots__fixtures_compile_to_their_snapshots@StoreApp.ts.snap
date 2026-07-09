@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/StoreApp.ts
 ---
-import { template, clone, effect, _setText, _setProp, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__setProp, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './StoreControls';
@@ -41,24 +42,24 @@ const css = `
     .readout strong { font-size: 22px; color: var(--accent); }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note">The <code>counter</code> object lives in this parent\'s reactive state and is passed down as a prop. Objects are shared by reference, so when the child mutates <code>this.props.counter.value</code>, every component subscribed to that object re-renders — including this parent.</p><div class="readout">Parent reads: <strong> </strong></div><store-controls></store-controls>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note">The <code>counter</code> object lives in this parent\'s reactive state and is passed down as a prop. Objects are shared by reference, so when the child mutates <code>this.props.counter.value</code>, every component subscribed to that object re-renders — including this parent.</p><div class="readout">Parent reads: <strong> </strong></div><store-controls></store-controls>');
 
 export class StoreApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         counter: { value: 0 },
     });
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!;
-effect(() => {
-_setText(_n1, (this.state.counter.value));
+$__effect(() => {
+$__setText(_n1, (this.state.counter.value));
 });
-effect(() => {
-_setProp(_n2, 'counter', (this.state.counter));
+$__effect(() => {
+$__setProp(_n2, 'counter', (this.state.counter));
 });
 return _r0;
 }

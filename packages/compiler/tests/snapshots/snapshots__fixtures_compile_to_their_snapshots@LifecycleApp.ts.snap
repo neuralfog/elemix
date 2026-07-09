@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/LifecycleApp.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _child, effect, _setText, _setAttr, _setProp, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__setAttr, $__setProp, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './LifecycleChild';
@@ -64,14 +65,14 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note">Mounting and unmounting the child fires its <code>#before-mount</code>, <code>#mount</code> and <code>#dispose</code> handlers — two of each, in source order — which append to the log below. Updating it re-renders the child and re-runs its <code>#effect</code>s.</p><div class="stage"><!----></div><div class="buttons"><button> </button><button>Update child</button><button class="ghost">Clear log</button></div><log-view></log-view>');
-const _t1 = templateEl('<lifecycle-child></lifecycle-child>');
-const _t2 = templateEl('<div class="empty">child unmounted</div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note">Mounting and unmounting the child fires its <code>#before-mount</code>, <code>#mount</code> and <code>#dispose</code> handlers — two of each, in source order — which append to the log below. Updating it re-renders the child and re-runs its <code>#effect</code>s.</p><div class="stage"><!----></div><div class="buttons"><button> </button><button>Update child</button><button class="ghost">Clear log</button></div><log-view></log-view>');
+const _t1 = $__templateEl('<lifecycle-child></lifecycle-child>');
+const _t2 = $__templateEl('<div class="empty">child unmounted</div>');
 
 export class LifecycleApp extends Component {
 
-    state = state<State>({ mounted: false, tick: 0 });
+    state = $__state<State>({ mounted: false, tick: 0 });
 
     toggleMount = (): void => {
         this.state.mounted = !this.state.mounted;
@@ -86,32 +87,32 @@ export class LifecycleApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
 const _n3 = _n2.firstChild!;
 const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
 const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-_child(_n1, () => (this.state.mounted
+$__child(_n1, () => (this.state.mounted
                     ? (() => {
-const _r6 = cloneEl(_t1);
-effect(() => {
-_setProp(_r6, 'tick', (this.state.tick));
+const _r6 = $__cloneEl(_t1);
+$__effect(() => {
+$__setProp(_r6, 'tick', (this.state.tick));
 });
 return _r6;
 })()
                     : (() => {
-const _r7 = cloneEl(_t2);
+const _r7 = $__cloneEl(_t2);
 return _r7;
 })()));
-_event(_n2, 'click', this.toggleMount);
-_event(_n4, 'click', this.update);
-_event(_n5, 'click', this.clear);
-effect(() => {
-_setText(_n3, (this.state.mounted ? 'Unmount' : 'Mount'));
+$__event(_n2, 'click', this.toggleMount);
+$__event(_n4, 'click', this.update);
+$__event(_n5, 'click', this.clear);
+$__effect(() => {
+$__setText(_n3, (this.state.mounted ? 'Unmount' : 'Mount'));
 });
-effect(() => {
-_setAttr(_n4, 'disabled', (!this.state.mounted));
+$__effect(() => {
+$__setAttr(_n4, 'disabled', (!this.state.mounted));
 });
 return _r0;
 }

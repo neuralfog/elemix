@@ -4,7 +4,7 @@ assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/DeepInheritanceApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // Deep component inheritance across FOUR levels: `DeepLeaf extends DeepLeg
@@ -22,18 +22,18 @@ const middleCss = '.btn { font-weight: 700; }';
 const legCss = '.btn { font-style: italic; }';
 const leafCss = '.btn { text-decoration-line: underline; }';
 
-const _s0 = sheet(baseCss);
-const _t0 = template('<button class="btn">count <!----></button>');
+const _s0 = $__sheet(baseCss);
+const _t0 = $__template('<button class="btn">count <!----></button>');
 
 export class DeepBase extends Component {
     onMount(): void {
         this.baseMounted();
     }
     effects(): void {
-        effect(() => this.mirrorBase());
+        $__effect(() => this.mirrorBase());
     }
 
-    state = state({ count: 0 });
+    state = $__state({ count: 0 });
 
     baseMounted(): void {
         this.setAttribute('data-base', 'on');
@@ -48,14 +48,14 @@ export class DeepBase extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
 const _n2 = _n1.firstChild!.nextSibling!;
-_event(_n1, 'click', this.bump);
+$__event(_n1, 'click', this.bump);
 const _x3 = document.createTextNode('');
 _n2.replaceWith(_x3);
-effect(() => {
-_setText(_x3, (this.state.count));
+$__effect(() => {
+$__setText(_x3, (this.state.count));
 });
 return _r0;
 }
@@ -63,7 +63,7 @@ return _r0;
 DeepBase.__sheets = [..._s0];
 defineComponent('deep-base', DeepBase);
 
-const _s1 = sheet(middleCss);
+const _s1 = $__sheet(middleCss);
 export class DeepMiddle extends DeepBase {
     onMount(): void {
         super.onMount?.();
@@ -71,7 +71,7 @@ export class DeepMiddle extends DeepBase {
     }
     effects(): void {
         super.effects?.();
-        effect(() => this.mirrorMiddle());
+        $__effect(() => this.mirrorMiddle());
     }
 
     middleMounted(): void {
@@ -85,7 +85,7 @@ export class DeepMiddle extends DeepBase {
 DeepMiddle.__sheets = [...(Object.getPrototypeOf(DeepMiddle).__sheets ?? []), ..._s1];
 defineComponent('deep-middle', DeepMiddle);
 
-const _s2 = sheet(legCss);
+const _s2 = $__sheet(legCss);
 export class DeepLeg extends DeepMiddle {
     onMount(): void {
         super.onMount?.();
@@ -93,7 +93,7 @@ export class DeepLeg extends DeepMiddle {
     }
     effects(): void {
         super.effects?.();
-        effect(() => this.mirrorLeg());
+        $__effect(() => this.mirrorLeg());
     }
 
     legMounted(): void {
@@ -107,7 +107,7 @@ export class DeepLeg extends DeepMiddle {
 DeepLeg.__sheets = [...(Object.getPrototypeOf(DeepLeg).__sheets ?? []), ..._s2];
 defineComponent('deep-leg', DeepLeg);
 
-const _s3 = sheet(leafCss);
+const _s3 = $__sheet(leafCss);
 export class DeepLeaf extends DeepLeg {
     onMount(): void {
         super.onMount?.();
@@ -115,7 +115,7 @@ export class DeepLeaf extends DeepLeg {
     }
     effects(): void {
         super.effects?.();
-        effect(() => this.mirrorLeaf());
+        $__effect(() => this.mirrorLeaf());
     }
 
     leafMounted(): void {

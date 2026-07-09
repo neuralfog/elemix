@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { bind, effect } from '../src/runtime/reactive';
-import { depOf, state } from '../src/runtime/state';
+import { $__bind as bind, $__effect as effect } from '../src/runtime/reactive';
+import { $__depOf as depOf, $__state as state } from '../src/runtime/state';
 
 // Phase 0 of compile-time reactivity: the runtime primitives the compiler will
 // emit. `depOf` returns the exact Dep a Proxy write triggers; `bind` subscribes

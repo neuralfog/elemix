@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/ScssApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 // Vite compiles the `.scss` and `?inline` hands back the CSS as a string, which
 // the instance reassigns to a `#styles` field — so `sheet()` adopts it the same
@@ -14,26 +15,26 @@ type State = {
     count: number;
 };
 
-const _s0 = sheet(css);
-const _t0 = template('<div class="card"><h2>SCSS styles</h2><p>Imported from a <code>.scss</code> file as <code>?inline</code> and adopted via <code>#styles</code>.</p><button>count is <!----></button></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="card"><h2>SCSS styles</h2><p>Imported from a <code>.scss</code> file as <code>?inline</code> and adopted via <code>#styles</code>.</p><button>count is <!----></button></div>');
 
 export class ScssApp extends Component {
 
-    state = state<State>({ count: 0 });
+    state = $__state<State>({ count: 0 });
 
     inc = (): void => {
         this.state.count++;
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
 const _n2 = _n1.firstChild!.nextSibling!;
-_event(_n1, 'click', this.inc);
+$__event(_n1, 'click', this.inc);
 const _x3 = document.createTextNode('');
 _n2.replaceWith(_x3);
-effect(() => {
-_setText(_x3, (this.state.count));
+$__effect(() => {
+$__setText(_x3, (this.state.count));
 });
 return _r0;
 }

@@ -1,13 +1,14 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/LifecycleStore.ts
 ---
-import { state } from '@neuralfog/elemix/runtime';
+import { $__state } from '@neuralfog/elemix/runtime';
 
 export type LogEntry = { id: number; event: string };
 
-export const log = state<{ entries: LogEntry[] }>({ entries: [] });
+export const log = $__state<{ entries: LogEntry[] }>({ entries: [] });
 
 let seq = 0;
 

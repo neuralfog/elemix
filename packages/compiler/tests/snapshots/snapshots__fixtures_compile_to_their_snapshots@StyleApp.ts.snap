@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/StyleApp.ts
 ---
-import { template, clone, _event, effect, _setStyle, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setStyle, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -43,12 +44,12 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note"><code>style</code> binds an object of CSS properties (or a string). Each change re-applies only the style declaration.</p><div class="box">Styled box</div><button>color</button><button>size</button><button>background</button>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note"><code>style</code> binds an object of CSS properties (or a string). Each change re-applies only the style declaration.</p><div class="box">Styled box</div><button>color</button><button>size</button><button>background</button>');
 
 export class StyleApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         color: '#1e293b',
         size: 18,
         bg: '#e0e7ff',
@@ -67,16 +68,16 @@ export class StyleApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!;
 const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-_event(_n2, 'click', this.recolor);
-_event(_n3, 'click', this.resize);
-_event(_n4, 'click', this.shade);
-effect(() => {
-_setStyle(_n1 as HTMLElement, ({
+$__event(_n2, 'click', this.recolor);
+$__event(_n3, 'click', this.resize);
+$__event(_n4, 'click', this.shade);
+$__effect(() => {
+$__setStyle(_n1 as HTMLElement, ({
                 color: this.state.color,
                 'font-size': `${this.state.size}px`,
                 background: this.state.bg,

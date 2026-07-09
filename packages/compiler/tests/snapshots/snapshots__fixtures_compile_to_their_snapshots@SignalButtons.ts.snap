@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SignalButtons.ts
 ---
-import { template, clone, _event, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { counter } from './SignalStore';
@@ -25,8 +26,8 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<div class="buttons"><button>−</button><button>Reset</button><button>+</button></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="buttons"><button>−</button><button>Reset</button><button>+</button></div>');
 
 export class SignalButtons extends Component {
 
@@ -43,13 +44,13 @@ export class SignalButtons extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-_event(_n1, 'click', this.dec);
-_event(_n2, 'click', this.reset);
-_event(_n3, 'click', this.inc);
+$__event(_n1, 'click', this.dec);
+$__event(_n2, 'click', this.reset);
+$__event(_n3, 'click', this.inc);
 return _r0;
 }
 }

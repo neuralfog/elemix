@@ -633,7 +633,7 @@ fn is_static_key(expr: &str, ctx: &Ctx) -> bool {
 /// and dep lookup: `item.id` → `toRaw(item).id`.
 fn static_raw(expr: &str) -> String {
     match expr.split_once('.') {
-        Some((root, rest)) => format!("toRaw({root}).{rest}"),
+        Some((root, rest)) => format!("$__toRaw({root}).{rest}"),
         None => expr.to_string(),
     }
 }

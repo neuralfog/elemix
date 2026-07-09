@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/ModelApp.ts
 ---
-import { template, clone, _model, _onmodel, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__model, $__onmodel, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
@@ -68,34 +69,34 @@ const css = `
     .out:last-child { margin-bottom: 0; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note"><code>~model</code> two-way binds an input to a ref. <code>~onmodel</code> runs a transform on every keystroke before the value is stored — here it clamps the number to 0–100.</p><label>Name (<code>~model</code>) <input type="text"/></label><div class="out">Hello, <!----></div><label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"/></label><div class="out">Volume: <!----></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note"><code>~model</code> two-way binds an input to a ref. <code>~onmodel</code> runs a transform on every keystroke before the value is stored — here it clamps the number to 0–100.</p><label>Name (<code>~model</code>) <input type="text"/></label><div class="out">Hello, <!----></div><label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"/></label><div class="out">Volume: <!----></div>');
 
 export class ModelApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         name: ref('Ada'),
         volume: ref('50'),
     });
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-_model(_n1 as HTMLInputElement, () => (this.state.name));
+$__model(_n1 as HTMLInputElement, () => (this.state.name));
 const _x5 = document.createTextNode('');
 _n2.replaceWith(_x5);
-_model(_n3 as HTMLInputElement, () => (this.state.volume));
-_onmodel(_n3 as HTMLInputElement, clamp);
+$__model(_n3 as HTMLInputElement, () => (this.state.volume));
+$__onmodel(_n3 as HTMLInputElement, clamp);
 const _x6 = document.createTextNode('');
 _n4.replaceWith(_x6);
-effect(() => {
-_setText(_x5, (this.state.name.value || '…'));
+$__effect(() => {
+$__setText(_x5, (this.state.name.value || '…'));
 });
-effect(() => {
-_setText(_x6, (this.state.volume.value));
+$__effect(() => {
+$__setText(_x6, (this.state.volume.value));
 });
 return _r0;
 }

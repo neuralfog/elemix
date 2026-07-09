@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/DeepStateApp.ts
 ---
-import { template, clone, templateEl, cloneEl, toRaw, _event, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Geo = { lat: number; lng: number };
@@ -26,13 +27,13 @@ const css = `
     button { font: inherit; cursor: pointer; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<section class="readouts"><span class="city"> </span><span class="lat"> </span><span class="lng"> </span><span class="tags"> </span><span class="grid"> </span><span class="cell"> </span><span class="groups-str"> </span></section><div class="controls"><button class="rename-city">city</button><button class="move-lat">lat</button><button class="replace-geo">geo</button><button class="add-tag">tag</button><button class="set-cell">cell</button><button class="push-col">col</button><button class="add-row">row</button><button class="toggle-task">task</button><button class="add-task">+task</button><button class="add-group">+group</button></div><ul class="group-list"><!----></ul>');
-const _t1 = templateEl('<li class="group"><span class="gid"> </span><span class="tcount"> </span></li>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<section class="readouts"><span class="city"> </span><span class="lat"> </span><span class="lng"> </span><span class="tags"> </span><span class="grid"> </span><span class="cell"> </span><span class="groups-str"> </span></section><div class="controls"><button class="rename-city">city</button><button class="move-lat">lat</button><button class="replace-geo">geo</button><button class="add-tag">tag</button><button class="set-cell">cell</button><button class="push-col">col</button><button class="add-row">row</button><button class="toggle-task">task</button><button class="add-task">+task</button><button class="add-group">+group</button></div><ul class="group-list"><!----></ul>');
+const _t1 = $__templateEl('<li class="group"><span class="gid"> </span><span class="tcount"> </span></li>');
 
 export class DeepStateApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         profile: {
             name: 'Ada',
             address: { city: 'London', geo: { lat: 51, lng: 0 } },
@@ -116,7 +117,7 @@ export class DeepStateApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
@@ -135,46 +136,46 @@ const _n15 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.
 const _n16 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n17 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n18 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
-_event(_n8, 'click', this.renameCity);
-_event(_n9, 'click', this.moveLat);
-_event(_n10, 'click', this.replaceGeo);
-_event(_n11, 'click', this.addTag);
-_event(_n12, 'click', this.setCell);
-_event(_n13, 'click', this.pushCol);
-_event(_n14, 'click', this.addRowGrid);
-_event(_n15, 'click', this.toggleTask);
-_event(_n16, 'click', this.addTask);
-_event(_n17, 'click', this.addGroup);
-_list(_n18, () => (this.state.groups), (group) => group.id, (group) => (() => {
-const _r19 = cloneEl(_t1);
+$__event(_n8, 'click', this.renameCity);
+$__event(_n9, 'click', this.moveLat);
+$__event(_n10, 'click', this.replaceGeo);
+$__event(_n11, 'click', this.addTag);
+$__event(_n12, 'click', this.setCell);
+$__event(_n13, 'click', this.pushCol);
+$__event(_n14, 'click', this.addRowGrid);
+$__event(_n15, 'click', this.toggleTask);
+$__event(_n16, 'click', this.addTask);
+$__event(_n17, 'click', this.addGroup);
+$__list(_n18, () => (this.state.groups), (group) => group.id, (group) => (() => {
+const _r19 = $__cloneEl(_t1);
 const _n20 = _r19.firstChild!.firstChild!;
 const _n21 = _r19.firstChild!.nextSibling!.firstChild!;
-_n20.data = (toRaw(group).id);
-effect(() => {
-_setText(_n21, (group.tasks.length));
+_n20.data = ($__toRaw(group).id);
+$__effect(() => {
+$__setText(_n21, (group.tasks.length));
 });
 return _r19;
 })());
-effect(() => {
-_setText(_n1, (this.state.profile.address.city));
+$__effect(() => {
+$__setText(_n1, (this.state.profile.address.city));
 });
-effect(() => {
-_setText(_n2, (this.state.profile.address.geo.lat));
+$__effect(() => {
+$__setText(_n2, (this.state.profile.address.geo.lat));
 });
-effect(() => {
-_setText(_n3, (this.state.profile.address.geo.lng));
+$__effect(() => {
+$__setText(_n3, (this.state.profile.address.geo.lng));
 });
-effect(() => {
-_setText(_n4, (this.tagsStr));
+$__effect(() => {
+$__setText(_n4, (this.tagsStr));
 });
-effect(() => {
-_setText(_n5, (this.gridStr));
+$__effect(() => {
+$__setText(_n5, (this.gridStr));
 });
-effect(() => {
-_setText(_n6, (this.cell));
+$__effect(() => {
+$__setText(_n6, (this.cell));
 });
-effect(() => {
-_setText(_n7, (this.groupsStr));
+$__effect(() => {
+$__setText(_n7, (this.groupsStr));
 });
 return _r0;
 }

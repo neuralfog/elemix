@@ -1,11 +1,11 @@
 export * from './dom';
 export {
-    reactive,
-    effect,
-    untrack,
-    bind,
-    dep,
-    track,
-    trigger,
+    $__reactive,
+    $__effect,
+    $__untrack,
+    $__bind,
+    $__dep,
+    $__track,
+    $__trigger,
 } from './reactive';
-export { state, depOf, toRaw } from './state';
+export { $__state, $__depOf, $__toRaw } from './state';

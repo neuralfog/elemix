@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.15] - 2026-07-09
+
+### Changed
+
+- Compiler/Runtime: every runtime function the compiled output imports is now `$__` prefixed (`$__template`, `$__setText`, `$__state` etc) so it can't clash with a user's own module-scope names
+
 ## [0.9.0-dev.14] - 2026-07-08
 
 ### Added

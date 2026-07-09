@@ -32,6 +32,14 @@ GG 👊🥋✊
 
 ### Phase 7 - Close the release of v0.9.0 ❎
 
+***Shields Up 🛡️🖖***
+
+- Every runtime function the compiled output imports is now `$__` prefixed (`$__template`, `$__setText`, `$__state` etc) so
+  it can never clash with a user's own module-scope names - also unified the old `_event`/`_setText` mix into one consistent
+  scheme 🛡️🔧
+- Output for primitives in local state has changed - the backing fields for getters and setters are now prefixed
+  with `#__count` etc 🛡️
+
 ***This Is The Way 🚀👽***
 
 - So initially I thought I'd support vanilla JS and TypeScript. Changed my mind - don't care, and I won't be compromising my
@@ -50,8 +58,6 @@ GG 👊🥋✊
 
 ***Loot Drop 🪅🔨***
 
-- Compiler resilience: output for primitives in local state has changed - the backing fields for getters and setters are now prefixed
-  with `#__count` etc 🛡️
 - Added a [starter template](https://github.com/neuralfog/elemix-template) repo at https://github.com/neuralfog/elemix-template 🧩🚀
 - Added [Compiler Explorer](https://compiler-explorer.elemix.dev/) and linked on landing page https://compiler-explorer.elemix.dev/ ⚙️
 - Added `createApp()` - an optional app bootstrap with chainable `.config()` / `.mount()`; app config lives on

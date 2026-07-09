@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/RenderApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const css = `
@@ -53,8 +54,8 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note"><code>count</code> here is a plain field, not reactive state, so mutating it does not re-render. "Increment (silent)" changes the value behind the scenes; "Increment + render()" calls <code>this.render()</code> to manually flush it to the DOM — watch the silent increments catch up. This is ideal when you want full manual control over rendering, driving updates yourself without reactive state getting in the way.</p><div class="value"> </div><div class="buttons"><button class="ghost">Increment (silent)</button><button>Increment + render()</button></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note"><code>count</code> here is a plain field, not reactive state, so mutating it does not re-render. "Increment (silent)" changes the value behind the scenes; "Increment + render()" calls <code>this.render()</code> to manually flush it to the DOM — watch the silent increments catch up. This is ideal when you want full manual control over rendering, driving updates yourself without reactive state getting in the way.</p><div class="value"> </div><div class="buttons"><button class="ghost">Increment (silent)</button><button>Increment + render()</button></div>');
 
 export class RenderApp extends Component {
 
@@ -70,14 +71,14 @@ export class RenderApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-_event(_n2, 'click', this.silent);
-_event(_n3, 'click', this.withRender);
-effect(() => {
-_setText(_n1, (this.count));
+$__event(_n2, 'click', this.silent);
+$__event(_n3, 'click', this.withRender);
+$__effect(() => {
+$__setText(_n1, (this.count));
 });
 return _r0;
 }

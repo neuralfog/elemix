@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SubmitButton.ts
 ---
-import { template, clone, _event, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const css = `
@@ -20,8 +21,8 @@ const css = `
     button:hover { background: #4f46e5; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<button type="button"><slot></slot></button>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<button type="button"><slot></slot></button>');
 
 export class SubmitButton extends Component {
     static formAssociated = true;
@@ -31,9 +32,9 @@ export class SubmitButton extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
-_event(_n1, 'click', this.submit);
+$__event(_n1, 'click', this.submit);
 return _r0;
 }
 }

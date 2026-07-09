@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/FormApp.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _child, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './RatingInput';
@@ -66,13 +67,13 @@ const css = `
     }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note">With <code>static formAssociated = true</code>, Elemix attaches <code>ElementInternals</code>. Both the star rating and the submit button are custom elements that take part in the native form.</p><form><label>Name <input name="name" type="text" value="Ada"/></label><label>Rating <rating-input name="rating"></rating-input></label><submit-button>Submit</submit-button></form> <!---->');
-const _t1 = templateEl('<pre class="out"> </pre>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note">With <code>static formAssociated = true</code>, Elemix attaches <code>ElementInternals</code>. Both the star rating and the submit button are custom elements that take part in the native form.</p><form><label>Name <input name="name" type="text" value="Ada"/></label><label>Rating <rating-input name="rating"></rating-input></label><submit-button>Submit</submit-button></form> <!---->');
+const _t1 = $__templateEl('<pre class="out"> </pre>');
 
 export class FormApp extends Component {
 
-    state = state<State>({ result: '' });
+    state = $__state<State>({ result: '' });
 
     submit = (e: Event): void => {
         e.preventDefault();
@@ -81,16 +82,16 @@ export class FormApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-_event(_n1, 'submit', this.submit);
-_child(_n2, () => (this.state.result
+$__event(_n1, 'submit', this.submit);
+$__child(_n2, () => (this.state.result
                 ? (() => {
-const _r3 = cloneEl(_t1);
+const _r3 = $__cloneEl(_t1);
 const _n4 = _r3.firstChild!;
-effect(() => {
-_setText(_n4, (this.state.result));
+$__effect(() => {
+$__setText(_n4, (this.state.result));
 });
 return _r3;
 })()

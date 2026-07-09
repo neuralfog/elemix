@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/DerivedApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { qty: number; price: number };
@@ -40,11 +41,11 @@ const css = `
 // tracked `state`, so the effect subscribes and the getters re-evaluate on any
 // change — no memo primitive, no `.value`, nothing. `total` even derives from
 // another getter (`subtotal`), proving chained derivation works the same way.
-const _s0 = sheet(css);
-const _t0 = template('<div><div class="row"><button class="add-qty">qty +1</button><span class="num qty"> </span></div><div class="row"><button class="bump-price">price +5</button><span class="num price"> </span></div><div class="row"><span>subtotal</span><span class="num subtotal"> </span></div><div class="row"><span>total +20%</span><span class="num total"> </span></div></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div><div class="row"><button class="add-qty">qty +1</button><span class="num qty"> </span></div><div class="row"><button class="bump-price">price +5</button><span class="num price"> </span></div><div class="row"><span>subtotal</span><span class="num subtotal"> </span></div><div class="row"><span>total +20%</span><span class="num total"> </span></div></div>');
 
 export class DerivedApp extends Component {
-    state = state<State>({ qty: 2, price: 10 });
+    state = $__state<State>({ qty: 2, price: 10 });
 
     get subtotal(): number {
         return this.state.qty * this.state.price;
@@ -63,26 +64,26 @@ export class DerivedApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n4 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
 const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!;
 const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!;
-_event(_n1, 'click', this.addQty);
-_event(_n3, 'click', this.bumpPrice);
-effect(() => {
-_setText(_n2, (this.state.qty));
+$__event(_n1, 'click', this.addQty);
+$__event(_n3, 'click', this.bumpPrice);
+$__effect(() => {
+$__setText(_n2, (this.state.qty));
 });
-effect(() => {
-_setText(_n4, (this.state.price));
+$__effect(() => {
+$__setText(_n4, (this.state.price));
 });
-effect(() => {
-_setText(_n5, (this.subtotal));
+$__effect(() => {
+$__setText(_n5, (this.subtotal));
 });
-effect(() => {
-_setText(_n6, (this.total));
+$__effect(() => {
+$__setText(_n6, (this.total));
 });
 return _r0;
 }

@@ -45,7 +45,7 @@ fn compiles_a_single_file_to_the_out_dir() {
     let compiled = std::fs::read_to_string(dir.join("CounterApp.ts")).unwrap();
     assert!(compiled.contains("view(): DocumentFragment"));
     assert!(compiled.contains("from '@neuralfog/elemix/runtime'"));
-    assert!(compiled.contains("const _t0 = template("));
+    assert!(compiled.contains("const _t0 = $__template("));
     // the html intrinsic and the directive are fully lowered/erased
     assert!(!compiled.contains("tpl`"));
     assert!(!compiled.contains("repeat("));

@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/InterpApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -38,12 +39,12 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note">Interpolation edge cases: adjacent holes with no static text between, holes separated by static text, a <code>null</code> value (renders empty), and a numeric hole.</p><p class="full"><span class="k">full:</span> <!----><!----></p><p class="dash"><span class="k">dash:</span> <!---->-<!----></p><p class="middle"><span class="k">middle:</span> [<!---->]</p><p class="num"><span class="k">num:</span> <!----></p><button>swap</button><button>set middle</button><button>inc</button>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note">Interpolation edge cases: adjacent holes with no static text between, holes separated by static text, a <code>null</code> value (renders empty), and a numeric hole.</p><p class="full"><span class="k">full:</span> <!----><!----></p><p class="dash"><span class="k">dash:</span> <!---->-<!----></p><p class="middle"><span class="k">middle:</span> [<!---->]</p><p class="num"><span class="k">num:</span> <!----></p><button>swap</button><button>set middle</button><button>inc</button>');
 
 export class InterpApp extends Component {
 
-    state = state<State>({
+    state = $__state<State>({
         first: 'Ada',
         last: 'Lovelace',
         middle: null,
@@ -65,7 +66,7 @@ export class InterpApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
@@ -87,18 +88,18 @@ const _x16 = document.createTextNode('');
 _n5.replaceWith(_x16);
 const _x17 = document.createTextNode('');
 _n6.replaceWith(_x17);
-_event(_n7, 'click', this.swap);
-_event(_n8, 'click', this.clearMiddle);
-_event(_n9, 'click', this.inc);
-effect(() => {
+$__event(_n7, 'click', this.swap);
+$__event(_n8, 'click', this.clearMiddle);
+$__event(_n9, 'click', this.inc);
+$__effect(() => {
 const _v10 = (this.state.first);
 const _v11 = (this.state.last);
-_setText(_x12, (_v10));
-_setText(_x13, (_v11));
-_setText(_x14, (_v10));
-_setText(_x15, (_v11));
-_setText(_x16, (this.state.middle));
-_setText(_x17, (this.state.n));
+$__setText(_x12, (_v10));
+$__setText(_x13, (_v11));
+$__setText(_x14, (_v10));
+$__setText(_x15, (_v11));
+$__setText(_x16, (this.state.middle));
+$__setText(_x17, (this.state.n));
 });
 return _r0;
 }

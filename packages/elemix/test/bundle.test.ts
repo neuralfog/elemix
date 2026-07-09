@@ -44,35 +44,36 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
         // The bundle entry re-exports ./index + ./runtime. Every public name is
         // a function (Component is a class — still typeof 'function').
         const required = [
-            // index: component + registration + utilities + state
+            // index: component + registration + utilities
             'Component',
             'defineComponent',
             'ref',
-            'state',
             // the compile-only template tag (erased by the compiler at build time)
             'tpl',
-            // runtime: reactive core
-            'reactive',
-            'effect',
-            'untrack',
+            // runtime: reactive core (all $__-prefixed so compiled output can
+            // never clash with a user's own module-scope bindings)
+            '$__state',
+            '$__reactive',
+            '$__effect',
+            '$__untrack',
             // compile-reactivity primitives (codegen target for compiled bindings)
-            'bind',
-            'depOf',
+            '$__bind',
+            '$__depOf',
             // runtime: DOM-wiring primitives (the codegen contract)
-            'template',
-            'clone',
-            '_event',
-            '_model',
-            '_onmodel',
-            '_ref',
-            '_child',
-            '_list',
+            '$__template',
+            '$__clone',
+            '$__event',
+            '$__model',
+            '$__onmodel',
+            '$__ref',
+            '$__child',
+            '$__list',
             // grouped-write binders (one effect per template instance)
-            '_setText',
-            '_setAttr',
-            '_setClass',
-            '_setStyle',
-            '_setProp',
+            '$__setText',
+            '$__setAttr',
+            '$__setClass',
+            '$__setStyle',
+            '$__setProp',
         ];
 
         for (const name of required) {

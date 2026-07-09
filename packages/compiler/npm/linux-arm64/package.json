@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-compiler-linux-arm64",
-  "version": "0.9.0-dev.14",
+  "version": "0.9.0-dev.15",
   "description": "Prebuilt elemix-compiler binary for linux arm64 (static musl).",
   "license": "MIT",
   "author": "brownhounds",

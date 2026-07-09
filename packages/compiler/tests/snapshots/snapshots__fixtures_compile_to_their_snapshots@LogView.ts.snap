@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/LogView.ts
 ---
-import { template, clone, templateEl, cloneEl, _child, _list, effect, _setText, _setClass, defineComponent, sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__list, $__effect, $__setText, $__setClass, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { log } from './LifecycleStore';
@@ -34,37 +35,37 @@ const css = `
     .empty { font-size: 12px; color: #64748b; padding: 2px 6px; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<div class="log"><!----></div>');
-const _t1 = templateEl('<div><span class="n"> </span><!---->()</div>');
-const _t2 = templateEl('<div class="empty">No events yet — mount the child.</div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="log"><!----></div>');
+const _t1 = $__templateEl('<div><span class="n"> </span><!---->()</div>');
+const _t2 = $__templateEl('<div class="empty">No events yet — mount the child.</div>');
 
 export class LogView extends Component {
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _a7 = document.createComment('');
 _n1.before(_a7);
-_list(_a7, () => (log.entries.length ? log.entries : []), (e) => String(e.id), (e) => (() => {
-const _r2 = cloneEl(_t1);
+$__list(_a7, () => (log.entries.length ? log.entries : []), (e) => String(e.id), (e) => (() => {
+const _r2 = $__cloneEl(_t1);
 const _n3 = _r2.firstChild!.firstChild!;
 const _n4 = _r2.firstChild!.nextSibling!;
 const _x5 = document.createTextNode('');
 _n4.replaceWith(_x5);
-effect(() => {
-_setClass(_r2, '', ({ entry: true, [e.event]: true }));
+$__effect(() => {
+$__setClass(_r2, '', ({ entry: true, [e.event]: true }));
 });
-effect(() => {
-_setText(_n3, (e.id));
+$__effect(() => {
+$__setText(_n3, (e.id));
 });
-effect(() => {
-_setText(_x5, (e.event));
+$__effect(() => {
+$__setText(_x5, (e.event));
 });
 return _r2;
 })());
-_child(_n1, () => (log.entries.length ? '' : (() => {
-const _r6 = cloneEl(_t2);
+$__child(_n1, () => (log.entries.length ? '' : (() => {
+const _r6 = $__cloneEl(_t2);
 return _r6;
 })()));
 return _r0;

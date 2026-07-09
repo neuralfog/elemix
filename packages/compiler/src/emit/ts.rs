@@ -20,19 +20,19 @@ impl TsEmitter {
 
 impl Emitter for TsEmitter {
     fn template_decl(&self, id: &str, markup: &str) -> String {
-        format!("const {id} = template({});", js_string(markup))
+        format!("const {id} = $__template({});", js_string(markup))
     }
 
     fn template_el_decl(&self, id: &str, markup: &str) -> String {
-        format!("const {id} = templateEl({});", js_string(markup))
+        format!("const {id} = $__templateEl({});", js_string(markup))
     }
 
     fn clone_root(&self, root: &str, tpl: &str) -> String {
-        format!("const {root} = clone({tpl});")
+        format!("const {root} = $__clone({tpl});")
     }
 
     fn clone_el(&self, root: &str, tpl: &str) -> String {
-        format!("const {root} = cloneEl({tpl});")
+        format!("const {root} = $__cloneEl({tpl});")
     }
 
     fn grab(&self, var: &str, parent: &str, path: &NodePath) -> String {
@@ -60,31 +60,31 @@ impl Emitter for TsEmitter {
     }
 
     fn event(&self, node: &str, name: &str, handler: &str) -> String {
-        format!("_event({node}, '{name}', {handler});")
+        format!("$__event({node}, '{name}', {handler});")
     }
 
     fn model(&self, node: &str, expr: &str) -> String {
-        format!("_model({node} as HTMLInputElement, () => ({expr}));")
+        format!("$__model({node} as HTMLInputElement, () => ({expr}));")
     }
 
     fn onmodel(&self, node: &str, transform: &str) -> String {
-        format!("_onmodel({node} as HTMLInputElement, {transform});")
+        format!("$__onmodel({node} as HTMLInputElement, {transform});")
     }
 
     fn reference(&self, node: &str, target: &str) -> String {
-        format!("_ref({node}, {target});")
+        format!("$__ref({node}, {target});")
     }
 
     fn child(&self, anchor: &str, getter: &str) -> String {
-        format!("_child({anchor}, () => ({getter}));")
+        format!("$__child({anchor}, () => ({getter}));")
     }
 
     fn list(&self, anchor: &str, items: &str, key: &str, render: &str) -> String {
-        format!("_list({anchor}, () => ({items}), {key}, {render});")
+        format!("$__list({anchor}, () => ({items}), {key}, {render});")
     }
 
     fn set_text(&self, node: &str, expr: &str) -> String {
-        format!("_setText({node}, ({expr}));")
+        format!("$__setText({node}, ({expr}));")
     }
 
     fn set_text_direct(&self, node: &str, expr: &str) -> String {
@@ -96,19 +96,19 @@ impl Emitter for TsEmitter {
     }
 
     fn set_attr(&self, node: &str, name: &str, expr: &str) -> String {
-        format!("_setAttr({node}, '{name}', ({expr}));")
+        format!("$__setAttr({node}, '{name}', ({expr}));")
     }
 
     fn set_class(&self, node: &str, initial: &str, expr: &str) -> String {
-        format!("_setClass({node}, {initial}, ({expr}));")
+        format!("$__setClass({node}, {initial}, ({expr}));")
     }
 
     fn set_style(&self, node: &str, expr: &str) -> String {
-        format!("_setStyle({node} as HTMLElement, ({expr}));")
+        format!("$__setStyle({node} as HTMLElement, ({expr}));")
     }
 
     fn set_prop(&self, node: &str, name: &str, expr: &str) -> String {
-        format!("_setProp({node}, '{name}', ({expr}));")
+        format!("$__setProp({node}, '{name}', ({expr}));")
     }
 
     fn local(&self, var: &str, expr: &str) -> String {
@@ -116,7 +116,7 @@ impl Emitter for TsEmitter {
     }
 
     fn bind_group(&self, writes: &[String]) -> String {
-        format!("effect(() => {{\n{}\n}});", writes.join("\n"))
+        format!("$__effect(() => {{\n{}\n}});", writes.join("\n"))
     }
 }
 

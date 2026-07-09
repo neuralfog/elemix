@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/MultiStateApp.ts
 ---
-import { template, clone, _event, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type CounterState = { count: number };
@@ -65,13 +66,13 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<p class="note">A component can hold several independent <code>state()</code> slices. Each is deeply reactive on its own — mutating <code>counter</code> re-renders only the count, never the user card, and vice versa.</p><div class="slice"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="slice"><strong class="name"> </strong><span class="status"> </span><button>toggle status</button><button>rename</button></div>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="note">A component can hold several independent <code>state()</code> slices. Each is deeply reactive on its own — mutating <code>counter</code> re-renders only the count, never the user card, and vice versa.</p><div class="slice"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="slice"><strong class="name"> </strong><span class="status"> </span><button>toggle status</button><button>rename</button></div>');
 
 export class MultiStateApp extends Component {
 
-    counter = state<CounterState>({ count: 0 });
-    user = state<UserState>({ name: 'Ada', online: true });
+    counter = $__state<CounterState>({ count: 0 });
+    user = $__state<UserState>({ name: 'Ada', online: true });
 
     inc = (): void => {
         this.counter.count++;
@@ -90,7 +91,7 @@ export class MultiStateApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
@@ -98,18 +99,18 @@ const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.firstChild!;
 const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!;
 const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
 const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-_event(_n2, 'click', this.inc);
-_event(_n3, 'click', this.reset);
-_event(_n6, 'click', this.toggle);
-_event(_n7, 'click', this.rename);
-effect(() => {
-_setText(_n1, (this.counter.count));
+$__event(_n2, 'click', this.inc);
+$__event(_n3, 'click', this.reset);
+$__event(_n6, 'click', this.toggle);
+$__event(_n7, 'click', this.rename);
+$__effect(() => {
+$__setText(_n1, (this.counter.count));
 });
-effect(() => {
-_setText(_n4, (this.user.name));
+$__effect(() => {
+$__setText(_n4, (this.user.name));
 });
-effect(() => {
-_setText(_n5, (this.user.online ? 'online' : 'offline'));
+$__effect(() => {
+$__setText(_n5, (this.user.online ? 'online' : 'offline'));
 });
 return _r0;
 }

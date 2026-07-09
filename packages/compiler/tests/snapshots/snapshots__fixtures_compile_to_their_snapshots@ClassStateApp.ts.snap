@@ -1,9 +1,10 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/ClassStateApp.ts
 ---
-import { template, clone, templateEl, cloneEl, _event, _list, effect, _setText, defineComponent, sheet, state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 class Item {
@@ -68,13 +69,13 @@ const css = `
     button { font: inherit; cursor: pointer; }
 `;
 
-const _s0 = sheet(css);
-const _t0 = template('<section class="summary"><span class="count"> </span><span class="subtotal"> </span><span class="coupon"> </span><span class="total"> </span></section><div class="controls"><button class="add">add</button><button class="bump">bump</button><button class="coupon-btn">coupon</button><button class="remove">remove</button><button class="clear">clear</button></div><ul class="items"><!----></ul>');
-const _t1 = templateEl('<li class="item"><span class="name"> </span><span class="qty"> </span><span class="line"> </span></li>');
+const _s0 = $__sheet(css);
+const _t0 = $__template('<section class="summary"><span class="count"> </span><span class="subtotal"> </span><span class="coupon"> </span><span class="total"> </span></section><div class="controls"><button class="add">add</button><button class="bump">bump</button><button class="coupon-btn">coupon</button><button class="remove">remove</button><button class="clear">clear</button></div><ul class="items"><!----></ul>');
+const _t1 = $__templateEl('<li class="item"><span class="name"> </span><span class="qty"> </span><span class="line"> </span></li>');
 
 export class ClassStateApp extends Component {
 
-    state = state<{ cart: Cart }>({ cart: new Cart() });
+    state = $__state<{ cart: Cart }>({ cart: new Cart() });
 
     addCherry = (): void => {
         this.state.cart.add(new Item('p3', 'cherry', 5, 1));
@@ -98,7 +99,7 @@ export class ClassStateApp extends Component {
     };
 
     view(): DocumentFragment {
-const _r0 = clone(_t0);
+const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
@@ -109,38 +110,38 @@ const _n7 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
 const _n8 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n9 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n10 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
-_event(_n5, 'click', this.addCherry);
-_event(_n6, 'click', this.bumpApple);
-_event(_n7, 'click', this.applyCoupon);
-_event(_n8, 'click', this.removeBanana);
-_event(_n9, 'click', this.clearCart);
-_list(_n10, () => (this.state.cart.items), (item) => item.id, (item) => (() => {
-const _r11 = cloneEl(_t1);
+$__event(_n5, 'click', this.addCherry);
+$__event(_n6, 'click', this.bumpApple);
+$__event(_n7, 'click', this.applyCoupon);
+$__event(_n8, 'click', this.removeBanana);
+$__event(_n9, 'click', this.clearCart);
+$__list(_n10, () => (this.state.cart.items), (item) => item.id, (item) => (() => {
+const _r11 = $__cloneEl(_t1);
 const _n12 = _r11.firstChild!.firstChild!;
 const _n13 = _r11.firstChild!.nextSibling!.firstChild!;
 const _n14 = _r11.firstChild!.nextSibling!.nextSibling!.firstChild!;
-effect(() => {
-_setText(_n12, (item.name));
+$__effect(() => {
+$__setText(_n12, (item.name));
 });
-effect(() => {
-_setText(_n13, (item.qty));
+$__effect(() => {
+$__setText(_n13, (item.qty));
 });
-effect(() => {
-_setText(_n14, (item.lineTotal));
+$__effect(() => {
+$__setText(_n14, (item.lineTotal));
 });
 return _r11;
 })());
-effect(() => {
-_setText(_n1, (this.state.cart.count));
+$__effect(() => {
+$__setText(_n1, (this.state.cart.count));
 });
-effect(() => {
-_setText(_n2, (this.state.cart.subtotal));
+$__effect(() => {
+$__setText(_n2, (this.state.cart.subtotal));
 });
-effect(() => {
-_setText(_n3, (this.state.cart.coupon));
+$__effect(() => {
+$__setText(_n3, (this.state.cart.coupon));
 });
-effect(() => {
-_setText(_n4, (this.state.cart.total));
+$__effect(() => {
+$__setText(_n4, (this.state.cart.total));
 });
 return _r0;
 }

@@ -123,7 +123,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
                     let v = format!("_s{counter}");
                     counter += 1;
                     needs_sheet = true;
-                    hoist.push_str(&format!("const {v} = sheet({});\n", sf.value));
+                    hoist.push_str(&format!("const {v} = $__sheet({});\n", sf.value));
                     seen.insert(sf.value.clone(), v.clone());
                     v
                 }
@@ -173,7 +173,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             let calls: String = class
                 .effects
                 .iter()
-                .map(|name| format!("\n        effect(() => this.{name}());"))
+                .map(|name| format!("\n        $__effect(() => this.{name}());"))
                 .collect();
             edits.push((
                 class.body_open,
@@ -248,18 +248,18 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         names.push("defineComponent");
     }
     if needs_sheet {
-        names.push("sheet");
+        names.push("$__sheet");
     }
     if needs_state {
-        names.push("state");
+        names.push("$__state");
     }
     if needs_reactive {
-        names.push("dep");
-        names.push("track");
-        names.push("trigger");
+        names.push("$__dep");
+        names.push("$__track");
+        names.push("$__trigger");
     }
     if needs_effect {
-        names.push("effect");
+        names.push("$__effect");
     }
     if !names.is_empty() {
         edits.push((
