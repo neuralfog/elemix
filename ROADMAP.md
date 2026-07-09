@@ -79,6 +79,8 @@ GG 👊🥋✊
 - Fixed multi-root conditional branches now render every root (only the first was kept before) 🪄🐛
 - Fixed custom events (`@my-event`) now fire (`_event` falls back to `addEventListener`) 🪄🐛
 
+- [] There is a tooling gap 😒 String literal formatting for `tpl` - currently I use an augmented prettier setup, not happy with that 🤬🤬
+  Can I ship a native template formatter? Most likely yes 🤔 What kind of effort is this ⁉️⁉️
 - [] Additional polish of playground examples, organize examples better or not 🤔
 - [] Conformance (potential bug fixing)
   - [x] Convert wikipulse app
