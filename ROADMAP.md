@@ -50,12 +50,14 @@ GG 👊🥋✊
 
 ***Loot Drop 🪅🔨***
 
+- Compiler resilience: output for primitives in local state has changed - the backing fields for getters and setters are now prefixed
+  with `#__count` etc 🛡️
 - Added a [starter template](https://github.com/neuralfog/elemix-template) repo at https://github.com/neuralfog/elemix-template 🧩🚀
 - Added [Compiler Explorer](https://compiler-explorer.elemix.dev/) and linked on landing page https://compiler-explorer.elemix.dev/ ⚙️
 - Added `createApp()` - an optional app bootstrap with chainable `.config()` / `.mount()`; app config lives on
   `window.__elemix__` 🪟🚀
 - Added built-in cloaking - elemix auto-adopts a `[data-cloak], :not(:defined)` sheet so elements don't flash before they
-  upgrade and mount, swap the rule with `config({ cloak })` 🫥✨
+  upgrade and mount, swap the rule with `config({ cloak })` ✨
 - Added `config({ shadow: false })` to render light DOM by default, plus a new `#shadow` hint to force a shadow
   root - `#shadow` and `#no-shadow` together errors in both the compiler and the analyzer 🌗🚫
 - Divorced `@storybook/web-components-vite` from storybook - moved the storybook to `@storybook/html-vite` and ripped web
@@ -68,24 +70,6 @@ GG 👊🥋✊
   you call them now 🪄🐛
 - Fixed multi-root conditional branches now render every root (only the first was kept before) 🪄🐛
 - Fixed custom events (`@my-event`) now fire (`_event` falls back to `addEventListener`) 🪄🐛
-
-- [] Fix compiler output for tracked getters and setters - there is a high chance of clashing with private properties.
-  The solution: move `#count` => `#__count` and so on. It is just a matter of time before this bites hard 🥲💥💥💥
-
-```ts
-    #count = state(0);
-    #count_dep = dep();
-    get count() {
-        track(this.#count_dep);
-        return this.#count;
-    }
-    set count(value) {
-        const next = state(value);
-        if (this.#count === next) return;
-        this.#count = next;
-        trigger(this.#count_dep);
-    }
-```
 
 - [] Additional polish of playground examples, organize examples better or not 🤔
 - [] Conformance (potential bug fixing)
@@ -868,3 +852,21 @@ What went well:
   - [x] Add new examples to cover full usage
 
 - [x] Add template repo 📍
+
+- [x] Fix compiler output for tracked getters and setters - there is a high chance of clashing with private properties.
+  The solution: move `#count` => `#__count` and so on. It is just a matter of time before this bites hard 🥲💥💥💥
+
+```ts
+    #count = state(0);
+    #count_dep = dep();
+    get count() {
+        track(this.#count_dep);
+        return this.#count;
+    }
+    set count(value) {
+        const next = state(value);
+        if (this.#count === next) return;
+        this.#count = next;
+        trigger(this.#count_dep);
+    }
+```

@@ -474,16 +474,16 @@ fn field_state_edit(
 
     let ann = type_span.map_or(String::new(), |t| format!(": {}", slice(source, t)));
     let repl = format!(
-        "#{name}{ann} = state{generic}({init});\n    \
-         #{name}_dep = dep();\n    \
+        "#__{name}{ann} = state{generic}({init});\n    \
+         #__{name}_dep = dep();\n    \
          get {name}(){ann} {{\n        \
-         track(this.#{name}_dep);\n        \
-         return this.#{name};\n    }}\n    \
+         track(this.#__{name}_dep);\n        \
+         return this.#__{name};\n    }}\n    \
          set {name}(value{ann}) {{\n        \
          const next = state{generic}(value);\n        \
-         if (this.#{name} === next) return;\n        \
-         this.#{name} = next;\n        \
-         trigger(this.#{name}_dep);\n    }}"
+         if (this.#__{name} === next) return;\n        \
+         this.#__{name} = next;\n        \
+         trigger(this.#__{name}_dep);\n    }}"
     );
     StateEdit {
         start: name_start,

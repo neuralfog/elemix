@@ -418,14 +418,14 @@ fn state_bare_primitive_lowers_to_a_reactive_accessor() {
     // private backing field + per-instance dep, so `this.count` itself reacts.
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    count = 0;\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("#count = state(0);"));
-    assert!(out.contains("#count_dep = dep();"));
+    assert!(out.contains("#__count = state(0);"));
+    assert!(out.contains("#__count_dep = dep();"));
     assert!(out.contains("get count() {"));
-    assert!(out.contains("track(this.#count_dep);"));
-    assert!(out.contains("return this.#count;"));
+    assert!(out.contains("track(this.#__count_dep);"));
+    assert!(out.contains("return this.#__count;"));
     assert!(out.contains("set count(value) {"));
-    assert!(out.contains("if (this.#count === next) return;"));
-    assert!(out.contains("trigger(this.#count_dep);"));
+    assert!(out.contains("if (this.#__count === next) return;"));
+    assert!(out.contains("trigger(this.#__count_dep);"));
     // no stray field assignment and no leftover empty statement
     assert!(!out.contains("count = state(0)\n"));
     assert!(!out.contains("// #state"));
@@ -435,7 +435,7 @@ fn state_bare_primitive_lowers_to_a_reactive_accessor() {
 fn state_bare_primitive_carries_the_type_annotation() {
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    active: boolean = true;\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("#active: boolean = state<boolean>(true);"));
+    assert!(out.contains("#__active: boolean = state<boolean>(true);"));
     assert!(out.contains("get active(): boolean {"));
     assert!(out.contains("set active(value: boolean) {"));
     assert!(out.contains("const next = state<boolean>(value);"));

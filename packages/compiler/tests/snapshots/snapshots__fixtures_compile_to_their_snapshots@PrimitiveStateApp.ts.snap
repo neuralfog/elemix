@@ -1,6 +1,5 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/PrimitiveStateApp.ts
 ---
@@ -57,43 +56,43 @@ const _t0 = template('<div class="row"><span class="count"> </span><button>+1</b
 
 export class PrimitiveStateApp extends Component {
 
-    #count = state(0);
-    #count_dep = dep();
+    #__count = state(0);
+    #__count_dep = dep();
     get count() {
-        track(this.#count_dep);
-        return this.#count;
+        track(this.#__count_dep);
+        return this.#__count;
     }
     set count(value) {
         const next = state(value);
-        if (this.#count === next) return;
-        this.#count = next;
-        trigger(this.#count_dep);
+        if (this.#__count === next) return;
+        this.#__count = next;
+        trigger(this.#__count_dep);
     }
 
-    #active: boolean = state<boolean>(true);
-    #active_dep = dep();
+    #__active: boolean = state<boolean>(true);
+    #__active_dep = dep();
     get active(): boolean {
-        track(this.#active_dep);
-        return this.#active;
+        track(this.#__active_dep);
+        return this.#__active;
     }
     set active(value: boolean) {
         const next = state<boolean>(value);
-        if (this.#active === next) return;
-        this.#active = next;
-        trigger(this.#active_dep);
+        if (this.#__active === next) return;
+        this.#__active = next;
+        trigger(this.#__active_dep);
     }
 
-    #label = state('idle');
-    #label_dep = dep();
+    #__label = state('idle');
+    #__label_dep = dep();
     get label() {
-        track(this.#label_dep);
-        return this.#label;
+        track(this.#__label_dep);
+        return this.#__label;
     }
     set label(value) {
         const next = state(value);
-        if (this.#label === next) return;
-        this.#label = next;
-        trigger(this.#label_dep);
+        if (this.#__label === next) return;
+        this.#__label = next;
+        trigger(this.#__label_dep);
     }
 
     increment = (): void => {

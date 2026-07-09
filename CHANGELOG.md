@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 - Runtime: new `match` directive - exhaustive pattern matching for templates. Works on string unions, enums, and tagged object unions (each branch gets the narrowed value)
 - Analyzer: flags a missing case, a wrong case, or a non-finite value (like a plain `string`). Use `choose` for open conditions
 
+### Changed
+
+- Compiler: primitive `#state` backing fields are now prefixed (`#__count`) so they can't clash with your own private properties
+
 ## [0.9.0-dev.13] - 2026-07-07
 
 ### Added

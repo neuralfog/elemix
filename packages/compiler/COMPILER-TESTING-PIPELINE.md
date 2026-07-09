@@ -12,9 +12,8 @@ run means the compiler is correct, its output runs, and the fixtures are valid.
    ┌──────────────────────────────────────────────────────────────────────┐
    │ ① test:rust                                            cargo test    │
    │ ---------------------------------------------------------------------│
-   │   94 tests / 11 binaries                                             │
    │   parse · grammar · lower · codegen · splice · rewrite · cli         │
-   │   + snapshots (insta) — locks the emitted output of all 37 fixtures  │
+   │   + snapshots (insta) — locks the emitted output of every fixture    │
    │   CATCHES → codegen drift, stage-level correctness                   │
    └──────────────────────────────────────────────────────────────────────┘
                                   │ &&
@@ -22,9 +21,9 @@ run means the compiler is correct, its output runs, and the fixtures are valid.
    ┌──────────────────────────────────────────────────────────────────────┐
    │ ② test:wasm                          build:wasm + node harnesses     │
    │ ---------------------------------------------------------------------│
-   │   build:wasm   wasm-pack --target web → pkg (~697kb, wasm-opt)       │
-   │   conformance  wasm compile() == native, 37/37 byte-match (vs snaps) │
-   │   robustness   10 malformed inputs → graceful passthrough, 0 crashes │
+   │   build:wasm   wasm-pack --target web → pkg (wasm-opt)               │
+   │   conformance  wasm compile() == native, byte-match (vs snaps)       │
+   │   robustness   malformed inputs → graceful passthrough, 0 crashes    │
    │   CATCHES → wasm diverging from native, panics on half-typed input   │
    └──────────────────────────────────────────────────────────────────────┘
                                   │ &&
@@ -32,7 +31,7 @@ run means the compiler is correct, its output runs, and the fixtures are valid.
    ┌───────────────────────────────────────────────────────────────────────┐
    │ ③ test:types               tsc --noEmit -p tsconfig.fixtures.json     │
    │ --------------------------------------------------------------------- │
-   │   typecheck all 37 fixtures (real user-facing component source)       │
+   │   typecheck every fixture (real user-facing component source)         │
    │   CATCHES → invalid TypeScript in a fixture BEFORE it is ever compiled│
    └───────────────────────────────────────────────────────────────────────┘
                                   │ &&
@@ -40,9 +39,9 @@ run means the compiler is correct, its output runs, and the fixtures are valid.
    ┌──────────────────────────────────────────────────────────────────────┐
    │ ④ test:storybook          compile:stories + vitest (real chromium)   │
    │ ---------------------------------------------------------------------│
-   │   compile:stories  native binary compiles 37 fixtures → .emited      │
-   │   25 component plays  mount compiled custom elements, drive every    │
-   │                       button/model/state, assert across shadow roots │
+   │   compile:stories  native binary compiles the fixtures → .emited     │
+   │   component plays  mount compiled custom elements, drive every       │
+   │                    button/model/state, assert across shadow roots    │
    │   wasm story          compiles a component INSIDE the browser        │
    │   CATCHES → compiled output that emits fine but doesn't RUN / react  │
    └──────────────────────────────────────────────────────────────────────┘
@@ -51,12 +50,12 @@ run means the compiler is correct, its output runs, and the fixtures are valid.
                                 PASS ✅
 ```
 
-## One source of truth: `tests/fixtures/*.ts` (37 components)
+## One source of truth: `tests/fixtures/*.ts`
 
-The same 37 fixtures feed every gate — they are the spec. Nothing is mocked.
+The same fixtures feed every gate — they are the spec. Nothing is mocked.
 
 ```
-                 tests/fixtures/*.ts  (37 components)
+                      tests/fixtures/*.ts
                           │
       ┌───────────────────┼───────────────────┬───────────────────┐
       ▼                   ▼                   ▼                   ▼
@@ -75,7 +74,7 @@ Three independent angles prove the compiled output is correct:
                         │ same compiler logic          │ wasm must match it
                         │                              │
                   browser: it RUNS  ◄──────────  wasm compile()
-                (chromium, plays)            (node, 37/37 byte-match)
+                (chromium, plays)            (node, byte-match)
 ```
 
 - **native == snapshot** — `cargo test` (insta) locks the emitted code.
