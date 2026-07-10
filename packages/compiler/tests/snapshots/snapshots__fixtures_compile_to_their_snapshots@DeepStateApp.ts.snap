@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/DeepStateApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Geo = { lat: number; lng: number };
@@ -181,4 +180,4 @@ return _r0;
 }
 }
 DeepStateApp.__sheets = [..._s0];
-defineComponent('deep-state-app', DeepStateApp);
+$__defineComponent('deep-state-app', DeepStateApp);

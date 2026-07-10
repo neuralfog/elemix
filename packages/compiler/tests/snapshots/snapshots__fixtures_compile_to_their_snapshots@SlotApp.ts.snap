@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SlotApp.ts
 ---
-import { $__template, $__clone, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './AppCard';
@@ -47,4 +46,4 @@ return _r0;
 }
 }
 SlotApp.__sheets = [..._s0];
-defineComponent('slot-app', SlotApp);
+$__defineComponent('slot-app', SlotApp);

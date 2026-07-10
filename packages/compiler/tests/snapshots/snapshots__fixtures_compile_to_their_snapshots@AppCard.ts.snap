@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/AppCard.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const css = `
@@ -59,4 +58,4 @@ return _r0;
 }
 }
 AppCard.__sheets = [..._s0];
-defineComponent('app-card', AppCard);
+$__defineComponent('app-card', AppCard);

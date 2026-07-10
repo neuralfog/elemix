@@ -1,0 +1,9 @@
+---
+source: tests/snapshots.rs
+expression: first.output
+input_file: tests/cases/no-template.ts
+---
+export const config = {
+    name: 'x',
+    tags: `not a tpl ${value}`,
+};

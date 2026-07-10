@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/RawApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, raw } from '@neuralfog/elemix';
 
 class Stopwatch {
@@ -95,4 +94,4 @@ return _r0;
 }
 }
 RawApp.__sheets = [..._s0];
-defineComponent('raw-app', RawApp);
+$__defineComponent('raw-app', RawApp);

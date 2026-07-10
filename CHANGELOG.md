@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.17] - 2026-07-10
+
+### Added
+
+- Formatter: new `@neuralfog/elemix-template-formatter` (`etf`) - a native formatter for the HTML inside `tpl`` templates
+
+### Changed
+
+- Compiler: the emitted registration call is now `$__defineComponent`, completing the `$__` prefixing of runtime imports
+
 ## [0.9.0-dev.16] - 2026-07-09
 
 ### Fixed

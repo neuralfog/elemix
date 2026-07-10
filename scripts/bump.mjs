@@ -104,3 +104,31 @@ if (existsSync(analyzerLock)) {
     writeFileSync(analyzerLock, text);
     console.log(`${analyzerLock} -> ${next}`);
 }
+
+// The formatter is its own standalone crate + npm package set + Cargo.lock. Bump
+// it like the analyzer, but it is INDEPENDENT by design (no `elemix-compiler`
+// dependency), so its lockfile carries only its own workspace entry.
+const formatterStamp = 'packages/formatter/npm/version.mjs';
+if (existsSync(formatterStamp)) {
+    execFileSync('node', [formatterStamp, next], { stdio: 'inherit' });
+}
+
+const formatterCargo = 'packages/formatter/Cargo.toml';
+if (existsSync(formatterCargo)) {
+    const text = readFileSync(formatterCargo, 'utf8').replace(
+        /^version = "[^"]+"/m,
+        `version = "${next}"`,
+    );
+    writeFileSync(formatterCargo, text);
+    console.log(`${formatterCargo} -> ${next}`);
+}
+
+const formatterLock = 'packages/formatter/Cargo.lock';
+if (existsSync(formatterLock)) {
+    const text = readFileSync(formatterLock, 'utf8').replace(
+        /(name = "elemix-template-formatter"\nversion = ")[^"]+(")/,
+        `$1${next}$2`,
+    );
+    writeFileSync(formatterLock, text);
+    console.log(`${formatterLock} -> ${next}`);
+}

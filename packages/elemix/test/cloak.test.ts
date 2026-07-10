@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { Component } from '../src/component/Component';
-import { defineComponent } from '../src/runtime/dom';
+import { $__defineComponent as defineComponent } from '../src/runtime/dom';
 
 class CloakEl extends Component {}
 defineComponent('cloak-el', CloakEl);

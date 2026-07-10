@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { Component } from '../src/component/Component';
-import { defineComponent } from '../src/runtime/dom';
+import { $__defineComponent as defineComponent } from '../src/runtime/dom';
 
 window.__elemix__ = { config: { cloak: 'app-root{opacity:0}' } };
 

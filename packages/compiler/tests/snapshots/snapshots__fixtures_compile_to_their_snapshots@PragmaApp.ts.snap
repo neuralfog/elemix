@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/PragmaApp.ts
 ---
-import { $__template, $__clone, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const css = `
@@ -14,7 +13,7 @@ const css = `
 
 // Registration + styles via a pragma block — no `static styles`, no manual
 // `defineComponent`. The compiler derives the tag (`PragmaApp` → `pragma-app`),
-// hoists `sheet(css)`, wires `__sheets`, and emits the `defineComponent` call.
+// hoists `sheet(css)`, wires `__sheets`, and emits the `$__defineComponent` call.
 const _s0 = $__sheet(css);
 const _t0 = $__template('<span class="label"> </span>');
 
@@ -31,4 +30,4 @@ return _r0;
 }
 }
 PragmaApp.__sheets = [..._s0];
-defineComponent('pragma-app', PragmaApp);
+$__defineComponent('pragma-app', PragmaApp);

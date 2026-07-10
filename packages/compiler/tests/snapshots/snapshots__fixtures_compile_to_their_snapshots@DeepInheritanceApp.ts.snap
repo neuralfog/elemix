@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/DeepInheritanceApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // Deep component inheritance across FOUR levels: `DeepLeaf extends DeepLeg
@@ -61,7 +60,7 @@ return _r0;
 }
 }
 DeepBase.__sheets = [..._s0];
-defineComponent('deep-base', DeepBase);
+$__defineComponent('deep-base', DeepBase);
 
 const _s1 = $__sheet(middleCss);
 export class DeepMiddle extends DeepBase {
@@ -83,7 +82,7 @@ export class DeepMiddle extends DeepBase {
     }
 }
 DeepMiddle.__sheets = [...(Object.getPrototypeOf(DeepMiddle).__sheets ?? []), ..._s1];
-defineComponent('deep-middle', DeepMiddle);
+$__defineComponent('deep-middle', DeepMiddle);
 
 const _s2 = $__sheet(legCss);
 export class DeepLeg extends DeepMiddle {
@@ -105,7 +104,7 @@ export class DeepLeg extends DeepMiddle {
     }
 }
 DeepLeg.__sheets = [...(Object.getPrototypeOf(DeepLeg).__sheets ?? []), ..._s2];
-defineComponent('deep-leg', DeepLeg);
+$__defineComponent('deep-leg', DeepLeg);
 
 const _s3 = $__sheet(leafCss);
 export class DeepLeaf extends DeepLeg {
@@ -127,4 +126,4 @@ export class DeepLeaf extends DeepLeg {
     }
 }
 DeepLeaf.__sheets = [...(Object.getPrototypeOf(DeepLeaf).__sheets ?? []), ..._s3];
-defineComponent('deep-leaf', DeepLeaf);
+$__defineComponent('deep-leaf', DeepLeaf);

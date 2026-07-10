@@ -1,0 +1,6 @@
+/target
+# Prebuilt binaries are dropped into the platform packages by CI at release time.
+npm/*/elemix-template-formatter
+npm/*/elemix-template-formatter.exe
+# The launcher's changelog is copied in from the root CHANGELOG.md at release.
+npm/elemix-template-formatter/CHANGELOG.md

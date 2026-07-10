@@ -83,7 +83,7 @@ fn no_shadow_resolves_to_a_flag() {
 fn no_shadow_injects_the_static_flag() {
     let out = expand("// #component #no-shadow\nclass Foo extends Component {}").unwrap();
     assert!(out.contains("static __noShadow = true;"));
-    assert!(out.contains("defineComponent('foo', Foo);"));
+    assert!(out.contains("$__defineComponent('foo', Foo);"));
 }
 
 #[test]
@@ -289,11 +289,13 @@ fn imports_before_a_pragma_are_fine() {
 fn lowers_a_full_component() {
     let src = "const css = `c`;\n// #component\nclass Foo extends Component {\n    // #styles\n    styles = css;\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("import { defineComponent, $__sheet } from '@neuralfog/elemix/runtime';"));
+    assert!(
+        out.contains("import { $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';")
+    );
     assert!(out.contains("const css = `c`;")); // the referenced const stays in place
     assert!(out.contains("const _s0 = $__sheet(css);")); // field value inlined by name
     assert!(out.contains("Foo.__sheets = [..._s0];"));
-    assert!(out.contains("defineComponent('foo', Foo);"));
+    assert!(out.contains("$__defineComponent('foo', Foo);"));
     assert!(!out.contains("styles = css")); // the styles field is stripped
     assert!(!out.contains("// #styles"));
     assert!(!out.contains("// #component"));
@@ -302,14 +304,14 @@ fn lowers_a_full_component() {
 #[test]
 fn explicit_tag_overrides_derivation() {
     let out = expand("// #component #tag my-thing\nclass Foo extends Component {}").unwrap();
-    assert!(out.contains("defineComponent('my-thing', Foo);"));
+    assert!(out.contains("$__defineComponent('my-thing', Foo);"));
     assert!(!out.contains("'foo'"));
 }
 
 #[test]
 fn derives_tag_from_class_name() {
     let out = expand("// #component\nclass PfBuilderButton extends Component {}").unwrap();
-    assert!(out.contains("defineComponent('pf-builder-button', PfBuilderButton);"));
+    assert!(out.contains("$__defineComponent('pf-builder-button', PfBuilderButton);"));
 }
 
 #[test]
@@ -363,7 +365,7 @@ fn form_injects_form_associated_into_the_class_body() {
     let out =
         expand("// #component #form\nclass Field extends Component {\n    value = '';\n}").unwrap();
     assert!(out.contains("class Field extends Component {\n    static formAssociated = true;"));
-    assert!(out.contains("defineComponent('field', Field);"));
+    assert!(out.contains("$__defineComponent('field', Field);"));
     assert!(out.contains("value = '';"));
 }
 
@@ -407,8 +409,8 @@ fn state_runtime_import_merges_with_define_component() {
     // a registered component with #state pulls both from /runtime, one import.
     let src = "// #component\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("defineComponent"));
-    assert!(out.contains("state"));
+    assert!(out.contains("$__defineComponent"));
+    assert!(out.contains("$__state"));
     assert_eq!(out.matches("from '@neuralfog/elemix/runtime'").count(), 1);
 }
 

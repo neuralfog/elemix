@@ -1,0 +1,29 @@
+{
+  "name": "@neuralfog/elemix-template-formatter",
+  "version": "0.9.0-dev.17",
+  "description": "HTML template formatter for Elemix tpl`` literals (etf)",
+  "license": "MIT",
+  "author": "brownhounds",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neuralfog/elemix.git"
+  },
+  "type": "module",
+  "bin": {
+    "etf": "bin/elemix-template-formatter.mjs",
+    "elemix-template-formatter": "bin/elemix-template-formatter.mjs"
+  },
+  "files": [
+    "bin/elemix-template-formatter.mjs",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "optionalDependencies": {
+    "@neuralfog/elemix-template-formatter-linux-x64": "0.9.0-dev.17",
+    "@neuralfog/elemix-template-formatter-linux-arm64": "0.9.0-dev.17",
+    "@neuralfog/elemix-template-formatter-darwin-x64": "0.9.0-dev.17",
+    "@neuralfog/elemix-template-formatter-darwin-arm64": "0.9.0-dev.17",
+    "@neuralfog/elemix-template-formatter-win32-x64": "0.9.0-dev.17",
+    "@neuralfog/elemix-template-formatter-win32-arm64": "0.9.0-dev.17"
+  }
+}

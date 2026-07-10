@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/ProfileCard.ts
 ---
-import { $__template, $__clone, $__effect, $__setText, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Props = {
@@ -61,4 +60,4 @@ return _r0;
 }
 }
 ProfileCard.__sheets = [..._s0];
-defineComponent('profile-card', ProfileCard);
+$__defineComponent('profile-card', ProfileCard);

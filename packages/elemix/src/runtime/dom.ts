@@ -90,7 +90,7 @@ export const $__sheet = (
         ? input.map(toSheet)
         : [toSheet(input as string | CSSStyleSheet)];
 
-export const defineComponent = (
+export const $__defineComponent = (
     tag: string,
     component: CustomElementConstructor,
 ): void => {

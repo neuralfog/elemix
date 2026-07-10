@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-analyzer",
-  "version": "0.9.0-dev.16",
+  "version": "0.9.0-dev.17",
   "description": "Template prop typechecker for Elemix (ec-analyzer)",
   "license": "MIT",
   "author": "brownhounds",
@@ -19,11 +19,11 @@
     "CHANGELOG.md"
   ],
   "optionalDependencies": {
-    "@neuralfog/elemix-analyzer-linux-x64": "0.9.0-dev.16",
-    "@neuralfog/elemix-analyzer-linux-arm64": "0.9.0-dev.16",
-    "@neuralfog/elemix-analyzer-darwin-x64": "0.9.0-dev.16",
-    "@neuralfog/elemix-analyzer-darwin-arm64": "0.9.0-dev.16",
-    "@neuralfog/elemix-analyzer-win32-x64": "0.9.0-dev.16",
-    "@neuralfog/elemix-analyzer-win32-arm64": "0.9.0-dev.16"
+    "@neuralfog/elemix-analyzer-linux-x64": "0.9.0-dev.17",
+    "@neuralfog/elemix-analyzer-linux-arm64": "0.9.0-dev.17",
+    "@neuralfog/elemix-analyzer-darwin-x64": "0.9.0-dev.17",
+    "@neuralfog/elemix-analyzer-darwin-arm64": "0.9.0-dev.17",
+    "@neuralfog/elemix-analyzer-win32-x64": "0.9.0-dev.17",
+    "@neuralfog/elemix-analyzer-win32-arm64": "0.9.0-dev.17"
   }
 }

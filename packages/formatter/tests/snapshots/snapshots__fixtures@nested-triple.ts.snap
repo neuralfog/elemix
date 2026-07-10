@@ -1,0 +1,40 @@
+---
+source: tests/snapshots.rs
+expression: first.output
+input_file: tests/fixtures/nested-triple.ts
+---
+import { Component, tpl } from '@neuralfog/elemix';
+import { repeat } from '@neuralfog/elemix/directives';
+import type { Template } from '@neuralfog/elemix/types';
+
+type Item = { id: string; label: string };
+type Group = { id: string; title: string; items: Item[] };
+
+// #component #tag nested-tree
+export class NestedTree extends Component {
+    state: { groups: Group[] } = { groups: [] };
+
+    template = (): Template => tpl`
+        <div class="tree">
+            ${repeat(this.state.groups, (group) => tpl`
+                <section class="group">
+                    <header class="group-head">
+                        <h2 class="title">${group.title}</h2>
+                    </header>
+                    <ul class="items">
+                        ${repeat(group.items, (item) => tpl`
+                            <li class="item">
+                                <div class="item-body">
+                                    <span class="label">${item.label}</span>
+                                </div>
+                                <div class="item-meta">
+                                    <code>${item.id}</code>
+                                </div>
+                            </li>
+                        `, (item) => item.id)}
+                    </ul>
+                </section>
+            `, (group) => group.id)}
+        </div>
+    `;
+}

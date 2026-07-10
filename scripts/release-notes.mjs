@@ -9,6 +9,7 @@ const PACKAGES = [
     '@neuralfog/elemix-compiler',
     '@neuralfog/elemix-compiler-wasm',
     '@neuralfog/elemix-analyzer',
+    '@neuralfog/elemix-template-formatter',
     '@neuralfog/elemix-vite',
 ];
 

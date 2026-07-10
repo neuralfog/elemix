@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SecondHelper.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, defineComponent } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // Two components — the SECOND one uses a helper template (`this.heading()`).
@@ -21,7 +20,7 @@ const _r0 = $__clone(_t0);
 return _r0;
 }
 }
-defineComponent('plain-note', PlainNote);
+$__defineComponent('plain-note', PlainNote);
 
 export class TitledNote extends Component {
     
@@ -35,4 +34,4 @@ return _r3;
 return _r1;
 }
 }
-defineComponent('titled-note', TitledNote);
+$__defineComponent('titled-note', TitledNote);

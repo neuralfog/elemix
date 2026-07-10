@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SvgApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setAttr, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setAttr, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -92,4 +91,4 @@ return _r0;
 }
 }
 SvgApp.__sheets = [..._s0];
-defineComponent('svg-app', SvgApp);
+$__defineComponent('svg-app', SvgApp);

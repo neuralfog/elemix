@@ -1,0 +1,18 @@
+import { Component, tpl } from '@neuralfog/elemix';
+// #component #tag multiline-hole
+export class MultilineHole extends Component {
+    template = () => tpl`
+    <div>
+    <input @keydown=${(e: KeyboardEvent) => {
+                if (e.key === 'Enter') this.add();
+            }} />
+      <p>
+      ${
+                    this.state.items.length
+                        ? tpl`${this.state.items.length} items`
+                        : 'nothing here yet'
+                }
+      </p>
+        </div>
+    `;
+}

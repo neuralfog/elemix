@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/PrimitiveStateApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state, $__dep, $__track, $__trigger } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state, $__dep, $__track, $__trigger } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // Proof that a BARE primitive is reactive state — no object wrapper, no
@@ -138,4 +137,4 @@ return _r0;
 }
 }
 PrimitiveStateApp.__sheets = [..._s0];
-defineComponent('primitive-state-app', PrimitiveStateApp);
+$__defineComponent('primitive-state-app', PrimitiveStateApp);

@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/MethodHelperApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { open: boolean; count: number };
@@ -76,4 +75,4 @@ $__event(_n5, 'click', this.inc);
 return _r0;
 }
 }
-defineComponent('method-helper-app', MethodHelperApp);
+$__defineComponent('method-helper-app', MethodHelperApp);

@@ -219,6 +219,83 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # ── the formatter's 6 cross-platform binaries (same matrix).
+  build-formatter:
+    needs: changelog
+    name: build formatter ${{ matrix.pkg }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
+      CARGO_NET_RETRY: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pkg: linux-x64
+            target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          - pkg: linux-arm64
+            target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          - pkg: darwin-x64
+            target: x86_64-apple-darwin
+            os: macos-latest
+          - pkg: darwin-arm64
+            target: aarch64-apple-darwin
+            os: macos-latest
+          - pkg: win32-x64
+            target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - pkg: win32-arm64
+            target: aarch64-pc-windows-msvc
+            os: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/formatter
+          key: formatter-${{ matrix.target }}
+
+      - uses: mlugg/setup-zig@v2
+        if: ${{ matrix.zig }}
+      - name: Install cargo-zigbuild
+        if: ${{ matrix.zig }}
+        run: cargo install --locked cargo-zigbuild
+
+      - name: Build (zig)
+        if: ${{ matrix.zig }}
+        working-directory: packages/formatter
+        run: cargo zigbuild --release --target ${{ matrix.target }}
+
+      - name: Build (native)
+        if: ${{ !matrix.zig }}
+        working-directory: packages/formatter
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Stage binary into platform package
+        working-directory: packages/formatter
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp "target/${{ matrix.target }}/release/elemix-template-formatter.exe" "npm/${{ matrix.pkg }}/elemix-template-formatter.exe"
+          else
+            cp "target/${{ matrix.target }}/release/elemix-template-formatter" "npm/${{ matrix.pkg }}/elemix-template-formatter"
+            chmod +x "npm/${{ matrix.pkg }}/elemix-template-formatter"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: etf-npm-${{ matrix.pkg }}
+          path: packages/formatter/npm/${{ matrix.pkg }}
+          if-no-files-found: error
+          retention-days: 1
+
   # ── publish: nothing here runs unless build-compiler (⇒ changelog ⇒ test) is
   #    fully green. That's the "publish only if everything built" guarantee. ────
 
@@ -329,6 +406,60 @@ jobs:
             npm publish "./$pkg" --access public --provenance --tag "$TAG"
           done
           npm publish ./elemix-analyzer --access public --provenance --tag "$TAG"
+
+  publish-formatter:
+    name: publish formatter to npm
+    needs: [build-formatter, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      # Restore each platform package (now carrying its binary) over the scaffold.
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: etf-npm-*
+          path: artifacts
+
+      - name: Place binaries
+        run: |
+          for dir in artifacts/etf-npm-*; do
+            pkg="${dir#artifacts/etf-npm-}"
+            cp -r "$dir/." "packages/formatter/npm/$pkg/"
+          done
+          # upload-artifact drops the Unix exec bit — restore it so the published
+          # tarball ships an executable binary (npm preserves modes).
+          chmod +x packages/formatter/npm/*/elemix-template-formatter 2>/dev/null || true
+
+      - name: Stamp version
+        run: node packages/formatter/npm/version.mjs "${{ needs.version.outputs.value }}"
+
+      # Ship the changelog inside the launcher (its `files` lists it), from the
+      # single source of truth — the root CHANGELOG.md.
+      - name: Stage changelog into launcher
+        run: cp CHANGELOG.md packages/formatter/npm/elemix-template-formatter/CHANGELOG.md
+
+      # Platform packages first, then the launcher that depends on them.
+      - name: Publish
+        working-directory: packages/formatter/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing formatter $VERSION under dist-tag: $TAG"
+          for pkg in linux-x64 linux-arm64 darwin-x64 darwin-arm64 win32-x64 win32-arm64; do
+            npm publish "./$pkg" --access public --provenance --tag "$TAG"
+          done
+          npm publish ./elemix-template-formatter --access public --provenance --tag "$TAG"
 
   publish-wasm:
     name: publish wasm to npm
@@ -591,6 +722,7 @@ jobs:
       - version
       - publish-compiler
       - publish-analyzer
+      - publish-formatter
       - publish-wasm
       - publish-elemix
       - publish-storybook
@@ -605,7 +737,7 @@ jobs:
           node-version: 24
 
       # Every binary built this run, restored from the build/publish jobs:
-      #   npm-<pkg> → compiler binaries | ea-npm-<pkg> → analyzer binaries | wasm-pkg → wasm.
+      #   npm-<pkg> → compiler | ea-npm-<pkg> → analyzer | etf-npm-<pkg> → formatter | wasm-pkg → wasm.
       - uses: actions/download-artifact@v8
         with:
           pattern: npm-*
@@ -614,6 +746,10 @@ jobs:
         with:
           pattern: ea-npm-*
           path: artifacts-ea
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: etf-npm-*
+          path: artifacts-etf
       - uses: actions/download-artifact@v8
         with:
           name: wasm-pkg
@@ -641,6 +777,7 @@ jobs:
           }
           for dir in artifacts/npm-*; do pack elemix-compiler "$dir" "${dir#artifacts/npm-}"; done
           for dir in artifacts-ea/ea-npm-*; do pack elemix-analyzer "$dir" "${dir#artifacts-ea/ea-npm-}"; done
+          for dir in artifacts-etf/etf-npm-*; do pack elemix-template-formatter "$dir" "${dir#artifacts-etf/etf-npm-}"; done
           tar -czf "dist-assets/elemix-compiler-$VERSION-wasm.tar.gz" -C wasm .
           ( cd dist-assets && sha256sum elemix-* > SHA256SUMS.txt )
           ls -l dist-assets

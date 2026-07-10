@@ -63,7 +63,7 @@ pub struct ClassInfo {
     pub name: String,
     /// Start of the class statement (`export`-inclusive) — hoist consts here.
     pub start: usize,
-    /// End of the class statement — append `defineComponent(...)` after here.
+    /// End of the class statement — append `$__defineComponent(...)` after here.
     pub end: usize,
     /// Offset just inside the class body `{` — inject `#form`'s member here.
     pub body_open: usize,

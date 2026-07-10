@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/InterpApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -105,4 +104,4 @@ return _r0;
 }
 }
 InterpApp.__sheets = [..._s0];
-defineComponent('interp-app', InterpApp);
+$__defineComponent('interp-app', InterpApp);

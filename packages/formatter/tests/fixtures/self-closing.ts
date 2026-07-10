@@ -1,0 +1,5 @@
+import { Component, tpl } from '@neuralfog/elemix';
+// #component #tag self-closing
+export class SelfClosing extends Component {
+    template = () => tpl`<div><todo-app></todo-app><theme-switch/></div>`;
+}

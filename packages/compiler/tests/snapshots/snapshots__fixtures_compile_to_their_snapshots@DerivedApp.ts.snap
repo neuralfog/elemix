@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/DerivedApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { qty: number; price: number };
@@ -89,4 +88,4 @@ return _r0;
 }
 }
 DerivedApp.__sheets = [..._s0];
-defineComponent('derived-app', DerivedApp);
+$__defineComponent('derived-app', DerivedApp);

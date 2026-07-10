@@ -1,0 +1,23 @@
+import { Component, tpl } from '@neuralfog/elemix';
+import { repeat } from '@neuralfog/elemix/directives';
+import type { Template } from '@neuralfog/elemix/types';
+
+type Row = { id: string; label: string; done: boolean };
+
+// A module-level partial template, outside any class.
+const row = (item: Row): Template => tpl`<li class="row ${item.done ? 'is-done' : ''}"><div class="cell"><span class="label">${item.label}</span></div><div class="meta"><code>${item.id}</code></div></li>`;
+
+// #component #tag partials-list
+export class PartialsList extends Component {
+    // A class-member partial.
+    header = (): Template => tpl`<header class="head"><div class="brand"><h1>Items</h1><span class="count">${this.state.rows.length}</span></div></header>`;
+
+    template = (): Template => tpl`
+      <div class="panel">
+    ${this.header()}
+        <ul class="list">
+    ${repeat(this.state.rows, row, (r) => r.id)}
+        </ul>
+      </div>
+    `;
+}

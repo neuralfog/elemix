@@ -1,0 +1,7 @@
+import { Component, tpl } from '@neuralfog/elemix';
+// #component #tag holes-attr
+export class HolesAttr extends Component {
+    template = () => tpl`
+  <a    href="/users/${this.state.id}"   title=${this.state.label}    class="link"  >go</a>
+    `;
+}

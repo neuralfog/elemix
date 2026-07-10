@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/DirectApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setAttr, $__setClass, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setAttr, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Toggle = 'active' | 'rounded' | 'large' | 'disabled';
@@ -133,4 +132,4 @@ return _r0;
 }
 }
 DirectApp.__sheets = [..._s0];
-defineComponent('direct-app', DirectApp);
+$__defineComponent('direct-app', DirectApp);

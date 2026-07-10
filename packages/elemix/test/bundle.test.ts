@@ -60,6 +60,7 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             '$__bind',
             '$__depOf',
             // runtime: DOM-wiring primitives (the codegen contract)
+            '$__defineComponent',
             '$__template',
             '$__clone',
             '$__event',

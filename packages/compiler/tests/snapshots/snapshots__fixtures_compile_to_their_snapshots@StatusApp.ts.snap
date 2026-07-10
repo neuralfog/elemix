@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/StatusApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Status = 'idle' | 'loading' | 'ready' | 'failed';
@@ -158,4 +157,4 @@ return _r0;
 }
 }
 StatusApp.__sheets = [..._s0];
-defineComponent('status-app', StatusApp);
+$__defineComponent('status-app', StatusApp);

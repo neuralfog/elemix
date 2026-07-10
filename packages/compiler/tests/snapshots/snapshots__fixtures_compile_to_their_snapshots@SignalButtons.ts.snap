@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SignalButtons.ts
 ---
-import { $__template, $__clone, $__event, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { counter } from './SignalStore';
@@ -55,4 +54,4 @@ return _r0;
 }
 }
 SignalButtons.__sheets = [..._s0];
-defineComponent('signal-buttons', SignalButtons);
+$__defineComponent('signal-buttons', SignalButtons);

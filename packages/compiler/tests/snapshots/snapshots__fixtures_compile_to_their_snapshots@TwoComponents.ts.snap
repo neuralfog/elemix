@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/TwoComponents.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // Two full components in one file — each gets its own pragma block, its own
@@ -30,7 +29,7 @@ $__setText(_n2, (this.state.n));
 return _r0;
 }
 }
-defineComponent('first-widget', FirstWidget);
+$__defineComponent('first-widget', FirstWidget);
 
 export class SecondWidget extends Component {
     state = $__state<{ label: string }>({ label: 'hi' });
@@ -48,4 +47,4 @@ $__setText(_n5, (this.state.label));
 return _r3;
 }
 }
-defineComponent('second-widget', SecondWidget);
+$__defineComponent('second-widget', SecondWidget);

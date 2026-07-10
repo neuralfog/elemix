@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { Component } from '../src/component/Component';
 import { createApp } from '../src/createApp';
-import { defineComponent } from '../src/runtime/dom';
+import { $__defineComponent as defineComponent } from '../src/runtime/dom';
 
 class RootEl extends Component {}
 defineComponent('root-el', RootEl);

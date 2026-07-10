@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/SignalApp.ts
 ---
-import { $__template, $__clone, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './SignalValue';
@@ -50,4 +49,4 @@ return _r0;
 }
 }
 SignalApp.__sheets = [..._s0];
-defineComponent('signal-app', SignalApp);
+$__defineComponent('signal-app', SignalApp);

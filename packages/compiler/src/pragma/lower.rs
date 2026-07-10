@@ -214,7 +214,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             ));
         }
 
-        // __sheets + defineComponent after the class.
+        // __sheets + $__defineComponent after the class.
         let mut after = String::new();
         if !sheet_vars.is_empty() {
             let spread = sheet_vars
@@ -236,7 +236,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         if meta.register {
             needs_define = true;
             let tag = meta.tag.unwrap_or_else(|| kebab(&class.name));
-            after.push_str(&format!("\ndefineComponent('{tag}', {});", class.name));
+            after.push_str(&format!("\n$__defineComponent('{tag}', {});", class.name));
         }
         if !after.is_empty() {
             edits.push((class.end, class.end, after));
@@ -245,7 +245,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
 
     let mut names = Vec::new();
     if needs_define {
-        names.push("defineComponent");
+        names.push("$__defineComponent");
     }
     if needs_sheet {
         names.push("$__sheet");

@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/UserCard.ts
 ---
-import { $__template, $__clone, $__effect, $__setText, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Props = {
@@ -46,4 +45,4 @@ return _r0;
 }
 }
 UserCard.__sheets = [..._s0];
-defineComponent('user-card', UserCard);
+$__defineComponent('user-card', UserCard);

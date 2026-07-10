@@ -17,7 +17,7 @@ import {
     $__setClass as _setClass,
     $__setText as _setText,
     $__clone as clone,
-    defineComponent,
+    $__defineComponent as defineComponent,
     $__effect as effect,
     $__template as template,
 } from './src/runtime';

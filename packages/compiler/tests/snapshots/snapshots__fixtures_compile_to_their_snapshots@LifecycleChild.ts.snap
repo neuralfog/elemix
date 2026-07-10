@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/LifecycleChild.ts
 ---
-import { $__template, $__clone, $__effect, $__setText, defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { record } from './LifecycleStore';
@@ -94,4 +93,4 @@ return _r0;
 }
 }
 LifecycleChild.__sheets = [..._s0];
-defineComponent('lifecycle-child', LifecycleChild);
+$__defineComponent('lifecycle-child', LifecycleChild);

@@ -52,7 +52,7 @@ fn hyphenless_tag_warns_but_still_compiles() {
     assert!(out.contains("must contain a hyphen"));
     // a warning never blocks: the component is still registered + has a view
     assert!(!out.contains("throw new Error("));
-    assert!(out.contains("defineComponent('widget', Widget)"));
+    assert!(out.contains("$__defineComponent('widget', Widget)"));
     assert!(out.contains("view(): DocumentFragment"));
 
     let (_, diags) = compile_diagnostics(HYPHENLESS);

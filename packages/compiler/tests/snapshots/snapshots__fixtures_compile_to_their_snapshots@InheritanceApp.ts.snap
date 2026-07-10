@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/InheritanceApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // Component inheritance: `InheritDerived extends InheritBase`. State, the
@@ -57,7 +56,7 @@ return _r0;
 }
 }
 InheritBase.__sheets = [..._s0];
-defineComponent('inherit-base', InheritBase);
+$__defineComponent('inherit-base', InheritBase);
 
 const _s1 = $__sheet(derivedCss);
 export class InheritDerived extends InheritBase {
@@ -79,4 +78,4 @@ export class InheritDerived extends InheritBase {
     }
 }
 InheritDerived.__sheets = [...(Object.getPrototypeOf(InheritDerived).__sheets ?? []), ..._s1];
-defineComponent('inherit-derived', InheritDerived);
+$__defineComponent('inherit-derived', InheritDerived);

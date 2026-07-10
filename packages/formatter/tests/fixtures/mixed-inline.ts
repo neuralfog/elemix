@@ -1,0 +1,8 @@
+import { Component, tpl } from '@neuralfog/elemix';
+// #component #tag mixed-inline
+export class MixedInline extends Component {
+    template = () => tpl`
+        <p class="note">A reactive <code>state</code> store    lives in its own
+          module and is imported wherever   it is needed by a component.</p>
+    `;
+}

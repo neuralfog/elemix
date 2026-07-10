@@ -1,0 +1,32 @@
+[package]
+name = "elemix-template-formatter"
+version = "0.9.0-dev.17"
+edition = "2021"
+publish = false
+description = "HTML template formatter for Elemix tpl`` literals (etf)."
+license = "MIT"
+repository = "https://github.com/neuralfog/elemix"
+
+# The formatting engine is a library so the bin AND the tests share one API.
+[lib]
+name = "elemix_template_formatter"
+path = "src/lib.rs"
+
+[[bin]]
+name = "elemix-template-formatter"
+path = "src/main.rs"
+
+# STANDALONE by design: NO `elemix-compiler` / `elemix-analyzer` dependency, in
+# any direction. Formatting is a pure text concern and must run on source that
+# may not even compile yet, so it owns its own scanner/parser/printer. The only
+# thing shared with the rest of the toolchain is the release train and the CLI
+# shell (banner + summary), which are reimplemented here, not imported.
+[dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
+glob = "0.3.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+similar = "2"
+
+[dev-dependencies]
+insta = { version = "1", features = ["glob"] }

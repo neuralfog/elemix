@@ -8,7 +8,7 @@ const css = `
 
 // Registration + styles via a pragma block — no `static styles`, no manual
 // `defineComponent`. The compiler derives the tag (`PragmaApp` → `pragma-app`),
-// hoists `sheet(css)`, wires `__sheets`, and emits the `defineComponent` call.
+// hoists `sheet(css)`, wires `__sheets`, and emits the `$__defineComponent` call.
 // #component
 export class PragmaApp extends Component {
     // #styles

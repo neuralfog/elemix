@@ -28,9 +28,29 @@ GG 👊🥋✊
   - [] Linting extension based on the `analyzer` LSP mode
   - [] Possibly combine into a single one for easier release
   - [] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
-- [] Add currated `clanker` skill, include it in monoropro, add it to `elemix.dev`
+  - [] Add formatting extension based on `formatter`
+- [] Add curated `clanker` skill, include it in monorepo, add it to `elemix.dev`
+- [] Review and test decorator hooks in storybook package - remove if unnecessary
 
 ### Phase 7 - Close the release of v0.9.0 ❎
+
+***The Spice Must Flow 🏜️🌊***
+
+- New package with native template formatter for `tpl` 📦
+  - Native binary == speed ⚡
+  - No third party dependencies 🪶
+  - Full control and ownership of the sources 👑
+  - Handling specific framework formatting needs without needing to make an existing tool work
+    (issue: prettier almost works for what I want 😒)
+- Effort was medium and complexity low - used the `prettier` source as the source of truth for correctness ⚖️🧭
+- Initial `--stdin` mode has been implemented for buffer formatting in preparation for editor tooling ⌨️
+- Initial `--lsp` mode has been implemented for surfacing diagnostics in the editor 🩺
+- For now configuration options are driven by CLI flags `--print-width` and `--tab-width`; this will need extending
+  and possibly be driven by a config file ⚙️
+
+- The emitted registration call is now `$__defineComponent`, completing the `$__` prefixing of runtime imports 🛡️
+
+![formatter](.roadmap/formatter.png)
 
 ***Shields Up 🛡️🖖***
 
@@ -79,8 +99,6 @@ GG 👊🥋✊
 - Fixed multi-root conditional branches now render every root (only the first was kept before) 🪄🐛
 - Fixed custom events (`@my-event`) now fire (`_event` falls back to `addEventListener`) 🪄🐛
 
-- [] There is a tooling gap 😒 String literal formatting for `tpl` - currently I use an augmented prettier setup, not happy with that 🤬🤬
-  Can I ship a native template formatter? Most likely yes 🤔 What kind of effort is this ⁉️⁉️
 - [] Additional polish of playground examples, organize examples better or not 🤔
 - [] Conformance (potential bug fixing)
   - [x] Convert wikipulse app
@@ -880,3 +898,6 @@ What went well:
         trigger(this.#count_dep);
     }
 ```
+
+- [x] There is a tooling gap 😒 String literal formatting for `tpl` - currently I use an augmented prettier setup, not happy with that 🤬🤬
+  Can I ship a native template formatter? Most likely yes 🤔 What kind of effort is this ⁉️⁉️

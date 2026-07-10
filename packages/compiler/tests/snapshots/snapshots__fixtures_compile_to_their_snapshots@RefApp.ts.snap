@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/RefApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__ref, $__child, $__effect, $__setText, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__ref, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 
 type State = {
@@ -107,4 +106,4 @@ return _r0;
 }
 }
 RefApp.__sheets = [..._s0];
-defineComponent('ref-app', RefApp);
+$__defineComponent('ref-app', RefApp);

@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/AttrApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, $__setAttr, defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__setAttr, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -120,4 +119,4 @@ return _r0;
 }
 }
 AttrApp.__sheets = [..._s0];
-defineComponent('attr-app', AttrApp);
+$__defineComponent('attr-app', AttrApp);

@@ -87,7 +87,7 @@ describe('elemix vite plugin', () => {
             '/src/Spacer.ts',
         );
         expect(result).toBeTruthy();
-        expect(result?.code).toContain("defineComponent('spacer', Spacer)");
+        expect(result?.code).toContain("$__defineComponent('spacer', Spacer)");
         expect(result?.code).toContain('Spacer.__sheets');
         expect(result?.code).not.toContain('// #component');
     });
