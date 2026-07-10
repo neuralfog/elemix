@@ -1,6 +1,6 @@
 [package]
 name = "elemix-analyzer"
-version = "0.9.0-dev.17"
+version = "0.9.0-dev.18"
 edition = "2021"
 publish = false
 description = "Template prop typechecker for Elemix (ec-analyzer)."

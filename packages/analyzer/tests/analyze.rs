@@ -19,6 +19,10 @@ fn fixtures_alias() -> String {
     format!("{}/tests/fixtures-alias", env!("CARGO_MANIFEST_DIR"))
 }
 
+fn fixtures_free() -> String {
+    format!("{}/tests/fixtures-free", env!("CARGO_MANIFEST_DIR"))
+}
+
 fn run(args: &[&str]) -> (String, Option<i32>) {
     let out = Command::new(env!("CARGO_BIN_EXE_elemix-analyzer"))
         .args(args)
@@ -300,5 +304,40 @@ fn tsconfig_path_alias_resolves_a_side_effect_import() {
     assert!(
         !stdout.contains("al-widget"),
         "al-widget is imported via the #al/* alias and must NOT warn: {stdout}"
+    );
+}
+
+#[test]
+fn checks_prop_holes_in_a_free_standing_template() {
+    // A free-standing `tpl` (a module-level `render` export, NOT a component's
+    // `template` member) binds props/model/event against MODULE scope. The
+    // analyzer must type-check those holes exactly like a component template:
+    // flag the two bad props and leave the model/event/store reads alone.
+    let fx = fixtures_free();
+    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--lsp"]);
+
+    let value: serde_json::Value = serde_json::from_str(&stdout)
+        .unwrap_or_else(|e| panic!("expected JSON, got {stdout:?}: {e}"));
+    let items = value.as_array().expect("a JSON array");
+
+    assert_eq!(items.len(), 2, "expected exactly 2 findings, got: {stdout}");
+
+    let messages: Vec<&str> = items
+        .iter()
+        .map(|d| d["message"].as_str().unwrap())
+        .collect();
+    // number → string, in module scope (no `this`)
+    assert!(
+        messages
+            .iter()
+            .any(|m| m.contains("prop 'name' of <user-card>") && m.contains("'number'")),
+        "missing the free-template name mismatch: {messages:?}"
+    );
+    // string → number, in module scope
+    assert!(
+        messages
+            .iter()
+            .any(|m| m.contains("prop 'count' of <user-card>") && m.contains("'string'")),
+        "missing the free-template count mismatch: {messages:?}"
     );
 }

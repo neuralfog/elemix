@@ -1,17 +1,10 @@
 import type { Decorator } from '@storybook/html-vite';
-import type { ElemixParams, ElemixTeardown } from '#src/elemixStory';
-
-const setupTeardowns = new Map<string, ElemixTeardown | undefined>();
+import type { ElemixParams } from '#src/elemixStory';
 
 export const elemixDecorator: Decorator = (Story, context) => {
     type CtxArgs = typeof context.args;
 
     const params = (context.parameters?.elemix ?? {}) as ElemixParams<CtxArgs>;
-
-    if (params.setup && !setupTeardowns.has(context.id)) {
-        const teardown = params.setup(context);
-        setupTeardowns.set(context.id, teardown);
-    }
 
     const host = document.createElement('div');
     host.setAttribute('data-elemix-root', '');

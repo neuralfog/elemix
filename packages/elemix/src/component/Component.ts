@@ -148,7 +148,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
             input !== undefined
                 ? $__sheet(input)
                 : (this.constructor as typeof Component).__sheets;
-        if (this.shadowRoot && sheets && sheets.length) {
+        if (this.shadowRoot && sheets?.length) {
             this.shadowRoot.adoptedStyleSheets = sheets;
         }
     }

@@ -1,24 +1,26 @@
 {
     "extends": ["@neuralfog/biome-config/biome"],
     "files": {
-        "ignore": [
-            "node_modules/**/*",
-            "dist/**/*",
-            "bundle/**/*",
-            "coverage/**/*"
+        "includes": [
+            "**",
+            "!**/node_modules/**/*",
+            "!**/dist/**/*",
+            "!**/bundle/**/*",
+            "!**/coverage/**/*"
         ]
     },
     "formatter": {
-        "ignore": [
-            "node_modules/**/*",
-            "dist/**/*",
-            "bundle/**/*",
-            "coverage/**/*"
+        "includes": [
+            "**",
+            "!**/node_modules/**/*",
+            "!**/dist/**/*",
+            "!**/bundle/**/*",
+            "!**/coverage/**/*"
         ]
     },
     "overrides": [
         {
-            "include": ["**/*.test.ts", "**/*.harness.ts"],
+            "includes": ["**/*.test.ts", "**/*.harness.ts"],
             "linter": {
                 "rules": {
                     "style": {

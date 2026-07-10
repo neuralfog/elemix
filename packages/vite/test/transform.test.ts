@@ -92,6 +92,62 @@ describe('elemix vite plugin', () => {
         expect(result?.code).not.toContain('// #component');
     });
 
+    it('compiles a free-standing `tpl` render into an inline builder (no wrapper)', async () => {
+        // A module-level render (e.g. a Storybook story) binding props/events on a
+        // child component with no `#component` wrapper. The plugin must lower the
+        // free `tpl` to an IIFE that clones + wires the bindings, not leave it to
+        // throw as `uncompiled`.
+        const FREE = [
+            "import { tpl } from '@neuralfog/elemix';",
+            "import './ProfileCard';",
+            'export const render = () =>',
+            '    tpl`<profile-card :name=${"Ada"} @pick=${() => {}}></profile-card>`;',
+        ].join('\n');
+        const result = await runTransform(
+            elemix({ bin: BIN }),
+            FREE,
+            '/src/Story.ts',
+        );
+        expect(result).toBeTruthy();
+        expect(result?.code).toContain("from '@neuralfog/elemix/runtime'");
+        // lowered to an inline builder that wires the child's prop + event
+        expect(result?.code).toContain('(() => {');
+        expect(result?.code).toContain('$__setProp');
+        expect(result?.code).toContain('$__event');
+        // the compile-only tag is erased and the side-effect import survives
+        expect(result?.code).not.toContain('tpl`');
+        expect(result?.code).toContain("import './ProfileCard'");
+    });
+
+    it('compiles a bare standalone `tpl` module const into an inline builder', async () => {
+        // The purest free template: a top-level `const` bound directly to `tpl`,
+        // no component, no render function. It must lower to an IIFE assigned to
+        // that same const, hoisting the template + wiring the child prop.
+        const STANDALONE = [
+            "import { tpl } from '@neuralfog/elemix';",
+            "import './ProfileCard';",
+            'export const view = tpl`<profile-card :name=${"Ada"}></profile-card>`;',
+        ].join('\n');
+        const result = await runTransform(
+            elemix({ bin: BIN }),
+            STANDALONE,
+            '/src/view.ts',
+        );
+        expect(result).toBeTruthy();
+        const code = result?.code ?? '';
+        // the runtime import + hoisted template const
+        expect(code).toContain("from '@neuralfog/elemix/runtime'");
+        expect(code).toMatch(/const _ft0 = \$__template\(/);
+        // the const is now an immediately-invoked builder returning the fragment
+        expect(code).toMatch(/export const view = \(\(\) => \{/);
+        expect(code).toContain('$__clone(_ft0)');
+        expect(code).toContain('$__setProp');
+        expect(code).toMatch(/return _r0;\s*\}\)\(\);/);
+        // compile-only tag erased, side-effect import survives
+        expect(code).not.toContain('tpl`');
+        expect(code).toContain("import './ProfileCard'");
+    });
+
     it('compiles a module-level `// #state` store (no component, no tpl`)', async () => {
         // A standalone reactive store: `// #state` on a module const, no class
         // and no template. The gate must match on the `#state` pragma alone, else

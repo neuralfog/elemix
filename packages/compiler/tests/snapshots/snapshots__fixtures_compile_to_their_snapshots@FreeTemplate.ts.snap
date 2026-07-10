@@ -1,0 +1,26 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: tests/fixtures/FreeTemplate.ts
+---
+import { $__template, $__clone, $__model, $__effect, $__setProp, $__state } from '@neuralfog/elemix/runtime';
+const _ft0 = $__template('<label>Name <input type="text"/></label><profile-card></profile-card>');
+import { ref } from '@neuralfog/elemix';
+
+import './ProfileCard';
+
+export const store = $__state({ name: ref('Ada Lovelace'), likes: 0 });
+
+export const render = () => (() => {
+const _r0 = $__clone(_ft0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n2 = _r0.firstChild!.nextSibling!;
+$__model(_n1 as HTMLInputElement, () => (store.name));
+$__effect(() => {
+$__setProp(_n2, 'name', (store.name.value));
+});
+$__effect(() => {
+$__setProp(_n2, 'likes', (store.likes));
+});
+return _r0;
+})();

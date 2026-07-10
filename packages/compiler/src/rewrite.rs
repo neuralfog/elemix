@@ -328,7 +328,7 @@ fn import_names(import: &oxc_ast::ast::ImportDeclaration) -> Vec<String> {
 }
 
 /// Build the runtime import for exactly the primitives the generated code uses.
-fn runtime_import(decls: &str, body: &str) -> String {
+pub(crate) fn runtime_import(decls: &str, body: &str) -> String {
     let used: Vec<&str> = PRIMITIVES
         .iter()
         .copied()

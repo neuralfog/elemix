@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 import { elemixDecorator } from './elemixDecorator';
 
 let idCounter = 0;
@@ -77,14 +77,5 @@ describe('elemixDecorator', () => {
         );
 
         expect(calls).toEqual(['before', 'render', 'after']);
-    });
-
-    test('runs setup only once per story id', () => {
-        const setup = vi.fn(() => () => {});
-
-        run(() => node('<i>a</i>'), { elemix: { setup } }, 'shared-id');
-        run(() => node('<i>b</i>'), { elemix: { setup } }, 'shared-id');
-
-        expect(setup).toHaveBeenCalledTimes(1);
     });
 });

@@ -17,9 +17,8 @@ export const choose = (
     _cases: Array<[condition: unknown, template: () => Template]>,
 ): Template => uncompiled('choose');
 
-type MatchWidened<T> = Record<never, 0> extends Record<T & PropertyKey, 0>
-    ? true
-    : false;
+type MatchWidened<T> =
+    Record<never, 0> extends Record<T & PropertyKey, 0> ? true : false;
 
 type MatchOpenError =
     'elemix match(): value must be a finite literal-union or enum type - use choose() for open conditions';

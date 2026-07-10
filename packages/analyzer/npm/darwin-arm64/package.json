@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-analyzer-darwin-arm64",
-  "version": "0.9.0-dev.17",
+  "version": "0.9.0-dev.18",
   "description": "Prebuilt elemix-analyzer binary for macOS arm64 (Apple Silicon).",
   "license": "MIT",
   "author": "brownhounds",

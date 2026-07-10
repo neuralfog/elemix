@@ -10,10 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 
 ## [0.9.0-dev.18] - 2026-07-10
 
+### Added
+
+- Free-standing templates: a `tpl` outside a component now compiles to an inline builder
+
 ### Changed
 
 - Updated dependencies to their latest versions and TypeScript 7
 - Updated the Rust toolchain and crate dependencies
+
+### Fixed
+
+- Storybook: `ElemixStory` now exposes every property of the underlying story type (`play`, `beforeEach`, `tags`, ...) instead of a hand-picked subset; removed the dead `setup` hook (`beforeRender`/`afterRender` remain)
 
 ## [0.9.0-dev.17] - 2026-07-10
 

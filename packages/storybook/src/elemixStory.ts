@@ -1,9 +1,12 @@
-import type { StoryContext, Parameters, Meta } from '@storybook/html-vite';
-
-export type ElemixTeardown = () => void;
+import type { Template } from '@neuralfog/elemix/types';
+import type {
+    Meta,
+    Parameters,
+    StoryContext,
+    StoryObj,
+} from '@storybook/html-vite';
 
 export type ElemixParams<TArgs = Record<string, never>> = {
-    setup?: (ctx: StoryContext<TArgs>) => ElemixTeardown | undefined;
     beforeRender?: (ctx: StoryContext<TArgs>) => void;
     afterRender?: (ctx: StoryContext<TArgs>) => void;
 };
@@ -16,12 +19,13 @@ export type ElemixStoryParameters<TArgs = Record<string, never>> =
 export type ElemixStoryFn<TArgs = Record<string, never>> = (
     args: TArgs,
     context: StoryContext<TArgs>,
-) => string | Node;
+) => string | Node | Template;
 
-export type ElemixStory<TArgs = Record<string, never>> = {
+export type ElemixStory<TArgs = Record<string, never>> = Omit<
+    StoryObj<TArgs>,
+    'render' | 'parameters'
+> & {
     render: ElemixStoryFn<TArgs>;
-    args?: Partial<TArgs>;
-    argTypes?: Record<string, unknown>;
     parameters?: ElemixStoryParameters<TArgs>;
 };
 
@@ -29,7 +33,5 @@ export type ElemixMeta<TArgs = Record<string, never>> = Omit<
     Meta<TArgs>,
     'parameters'
 > & {
-    parameters?: Parameters & {
-        elemix?: ElemixParams<TArgs>;
-    };
+    parameters?: ElemixStoryParameters<TArgs>;
 };

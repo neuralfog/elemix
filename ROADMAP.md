@@ -34,6 +34,14 @@ GG 👊🥋✊
 
 ### Phase 7 - Close the release of v0.9.0 ❎
 
+***Escape Velocity 🚀🪐***
+
+- This is absolutely humongous!! Free-standing templates outside a component now compile. This is one of the
+  steps towards removing the "special context boundary" - a component and its bindings should work
+  independently of their context (stories no longer need wrapper components just to pass props, for example 🔥🔥🔥)
+- `ElemixStory` now exposes every property of the underlying story type (`play`, `beforeEach`, `tags`, ...)
+  instead of a hand-picked subset; the dead `setup` hook was removed (`beforeRender`/`afterRender` remain) 🐞🔨
+
 ***Chores 🥣🧽***
 
 - Update all JS dependencies and upgrade to TypeScript 7 ❤️ Finally 🔥🔥🔥

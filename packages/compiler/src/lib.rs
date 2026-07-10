@@ -6,6 +6,7 @@
 pub mod codegen;
 pub mod diagnostics;
 pub mod emit;
+pub mod free_template;
 pub mod grammar;
 pub mod imports;
 mod locate;
@@ -51,7 +52,8 @@ pub fn compile_diagnostics(source: &str) -> (String, Vec<Diagnostic>) {
     // Best-effort transform: a pragma error makes `expand` bail, so the
     // pragmas pass through unexpanded — the inlined `throw` is what surfaces it.
     let expanded = pragma::expand(&spliced).unwrap_or(spliced);
-    let compiled = imports::merge_runtime_imports(&rewrite::rewrite(&expanded));
+    let lowered = free_template::lower(&rewrite::rewrite(&expanded));
+    let compiled = imports::merge_runtime_imports(&lowered);
     let out = diagnostics::inline(&compiled, &diags);
     (out, diags)
 }

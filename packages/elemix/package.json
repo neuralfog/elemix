@@ -1,6 +1,6 @@
 {
     "name": "@neuralfog/elemix",
-    "version": "0.9.0-dev.17",
+    "version": "0.9.0-dev.18",
     "license": "MIT",
     "author": "brownhounds",
     "repository": {
@@ -13,7 +13,10 @@
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",
     "types": "./dist/index.d.ts",
-    "files": ["./dist/**/*", "CHANGELOG.md"],
+    "files": [
+        "./dist/**/*",
+        "CHANGELOG.md"
+    ],
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -45,8 +48,8 @@
         "test-nc": "vitest run && npm run render-cost",
         "render-cost": "vitest run --config vitest.harness.config.mjs",
         "test-ui": "npx vitest --api.host 0.0.0.0 --ui",
-        "lint": "tsc --noEmit && biome format && biome lint",
-        "lint:fix": "biome format --write && biome lint --fix",
+        "lint": "tsc --noEmit && biome format && biome lint --error-on-warnings",
+        "lint:fix": "biome format --write && biome lint --fix --error-on-warnings",
         "release": "npm run clean && npm run build && npm publish --access public"
     },
     "devDependencies": {

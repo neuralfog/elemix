@@ -33,11 +33,19 @@ struct Ctx {
     decls: String,
     seen: HashMap<String, String>,
     reactive: Vec<Reactive>,
+    tpl_prefix: &'static str,
 }
 
 impl Ctx {
+    fn new(tpl_prefix: &'static str) -> Self {
+        Ctx {
+            tpl_prefix,
+            ..Default::default()
+        }
+    }
+
     fn tpl(&mut self) -> String {
-        let id = format!("_t{}", self.tpls);
+        let id = format!("_{}{}", self.tpl_prefix, self.tpls);
         self.tpls += 1;
         id
     }
@@ -58,7 +66,7 @@ pub struct Generated {
 
 /// Generate the `decls` + `view()` body for one top-level template.
 pub fn generate(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> Generated {
-    let mut ctx = Ctx::default();
+    let mut ctx = Ctx::new("t");
     let body = gen_template(statics, holes, &mut ctx, emitter, false, false);
     Generated {
         decls: ctx.decls,
@@ -74,7 +82,24 @@ pub fn generate_all(
     templates: &[(Vec<String>, Vec<String>)],
     emitter: &dyn Emitter,
 ) -> (String, Vec<String>) {
-    let mut ctx = Ctx::default();
+    let mut ctx = Ctx::new("t");
+    let bodies = templates
+        .iter()
+        .map(|(statics, holes)| gen_template(statics, holes, &mut ctx, emitter, false, false))
+        .collect();
+    (ctx.decls, bodies)
+}
+
+/// Like [`generate_all`], but for free-standing (non-component) `tpl` templates.
+/// The hoisted `template(...)` consts use a `_ft` prefix so they never collide
+/// with a component's `_t` consts already emitted into the same module. Each body
+/// returns the whole cloned `DocumentFragment`, so the caller can wrap it in an
+/// IIFE and mount the result directly.
+pub fn generate_free(
+    templates: &[(Vec<String>, Vec<String>)],
+    emitter: &dyn Emitter,
+) -> (String, Vec<String>) {
+    let mut ctx = Ctx::new("ft");
     let bodies = templates
         .iter()
         .map(|(statics, holes)| gen_template(statics, holes, &mut ctx, emitter, false, false))
