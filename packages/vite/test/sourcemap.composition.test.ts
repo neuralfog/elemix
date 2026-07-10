@@ -4,15 +4,16 @@ import {
     originalPositionFor,
     TraceMap,
 } from '@jridgewell/trace-mapping';
-import ts from 'typescript';
+import { transformWithEsbuild } from 'vite';
 import { describe, expect, it } from 'vitest';
 import { elemix } from '../src';
 import { BIN, COUNTER_ID, COUNTER_SOURCE, runTransform } from './harness';
 
-// The real chain: elemix lowers `tpl` (pass 1, our map), tsc emits JS (pass 2,
-// its map), and Rollup composes the two with @ampproject/remapping. We reproduce
-// that exactly and assert a generated position resolves to the ORIGINAL tpl
-// source — the thing the in-repo unit tests (map-is-internally-honest) can't see.
+// The real chain: elemix lowers `tpl` (pass 1, our map), esbuild emits JS (pass 2,
+// its map — the transpiler Vite/Rollup actually run on `.ts`), and Rollup composes
+// the two with @ampproject/remapping. We reproduce that exactly and assert a
+// generated position resolves to the ORIGINAL tpl source — the thing the in-repo
+// unit tests (map-is-internally-honest) can't see.
 
 // Shared virtual name for the compiled intermediate so remapping can chain
 // js → compiled.ts → original.ts.
@@ -20,7 +21,7 @@ const COMPILED = 'compiled.ts';
 // A verbatim line present identically in source + output → unambiguous origin.
 const NEEDLE = 'this.state.count++';
 
-// pass 1 (elemix) → pass 2 (tsc) → compose. `chainEc=false` drops our map to
+// pass 1 (elemix) → pass 2 (esbuild) → compose. `chainEc=false` drops our map to
 // prove it's the bridge back to the tpl source.
 async function compose(chainEc: boolean): Promise<{
     js: string;
@@ -33,22 +34,20 @@ async function compose(chainEc: boolean): Promise<{
     );
     if (!ec) throw new Error('plugin returned null');
 
-    const tsc = ts.transpileModule(ec.code, {
-        fileName: COMPILED,
-        compilerOptions: {
-            sourceMap: true,
-            target: ts.ScriptTarget.ES2022,
-            module: ts.ModuleKind.ESNext,
-        },
+    const out = await transformWithEsbuild(ec.code, COMPILED, {
+        loader: 'ts',
+        sourcemap: true,
+        target: 'es2022',
+        format: 'esm',
     });
-    const tscMap = JSON.parse(tsc.sourceMapText as string) as EncodedSourceMap;
+    const outMap = out.map as unknown as EncodedSourceMap;
 
-    const composed = remapping(tscMap, (file) =>
+    const composed = remapping(outMap, (file) =>
         chainEc && file === COMPILED
             ? (ec.map as unknown as EncodedSourceMap)
             : null,
     );
-    return { js: tsc.outputText, map: composed as unknown as EncodedSourceMap };
+    return { js: out.code, map: composed as unknown as EncodedSourceMap };
 }
 
 // Where the needle lands in the generated JS (1-based line, 0-based column).
@@ -58,7 +57,7 @@ function locate(js: string): { line: number; column: number } {
     return { line: line + 1, column: lines[line].indexOf(NEEDLE) };
 }
 
-describe('sourcemap composition (elemix ∘ tsc, the Rollup chain)', () => {
+describe('sourcemap composition (elemix ∘ esbuild, the Rollup chain)', () => {
     it('resolves a generated line back to the original tpl source', async () => {
         const { js, map } = await compose(true);
         const pos = originalPositionFor(new TraceMap(map), locate(js));

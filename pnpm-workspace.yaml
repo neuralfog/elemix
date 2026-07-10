@@ -19,3 +19,9 @@ allowBuilds:
 # cooldown so the vite plugin can depend on our own just-published builds.
 minimumReleaseAgeExclude:
   - '@neuralfog/*'
+  - '@storybook/addon-vitest@10.5.0'
+  - '@storybook/builder-vite@10.5.0'
+  - '@storybook/csf-plugin@10.5.0'
+  - '@storybook/html-vite@10.5.0'
+  - '@storybook/html@10.5.0'
+  - storybook@10.5.0

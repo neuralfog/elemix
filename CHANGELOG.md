@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.18] - 2026-07-10
+
+### Changed
+
+- Updated dependencies to their latest versions and TypeScript 7
+- Updated the Rust toolchain and crate dependencies
+
 ## [0.9.0-dev.17] - 2026-07-10
 
 ### Added

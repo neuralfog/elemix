@@ -34,6 +34,10 @@ GG 👊🥋✊
 
 ### Phase 7 - Close the release of v0.9.0 ❎
 
+***Chores 🥣🧽***
+
+- Update all JS dependencies and upgrade to TypeScript 7 ❤️ Finally 🔥🔥🔥
+
 ***The Spice Must Flow 🏜️🌊***
 
 - New package with native template formatter for `tpl` 📦
