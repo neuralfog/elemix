@@ -8,15 +8,6 @@ Target release of compiled templates `v0.9.0`
 
 ***Hunt never ends... 🌃🦇🌃***
 
-- Row swap gap was driving me insane 😡😡😡 The difference was disproportionate to the amount of work ⌛
-
-![flip table](.roadmap/flip-table.gif)
-
-- Managed to squeeze a bit more out of it 🍋‍🟩🍋‍🟩🤏
-- I think I can let go now... I am broken 🥲🧠🔨🤣
-
-GG 👊🥋✊
-
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
 ### Post v0.9.0 Release
@@ -30,7 +21,6 @@ GG 👊🥋✊
   - [] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
   - [] Add formatting extension based on `formatter`
 - [] Add curated `clanker` skill, include it in monorepo, add it to `elemix.dev`
-- [] Review and test decorator hooks in storybook package - remove if unnecessary
 
 ### Phase 7 - Close the release of v0.9.0 ❎
 
@@ -39,12 +29,42 @@ GG 👊🥋✊
 - This is absolutely humongous!! Free-standing templates outside a component now compile. This is one of the
   steps towards removing the "special context boundary" - a component and its bindings should work
   independently of their context (stories no longer need wrapper components just to pass props, for example 🔥🔥🔥)
+
+```ts
+const todo = (args: Args): Todo => ({
+    id: 'demo',
+    text: args.text,
+    done: args.done,
+});
+
+export const Unchecked: ElemixStory<Args> = {
+    args: { text: 'Learn Elemix', done: false },
+    render: (args) => tpl`<todo-item :todo=${todo(args)} :remove=${() => {}} />`,
+};
+```
+🤌✨🔥
+
+In opposition to the wrapping madness 🤢🤮 - [the wrapper harness deleted from the template](https://github.com/neuralfog/elemix-template/commit/4bf4fb8817d11310914e03a4d513ffcba9418145#diff-7fff3df58dd73d9285a128d8197af636d0b02251bb259633ee906fcd10be8fe8)
+
+Taking this even further!! (Global) reactive state in module scope can also be used ❤️‍🔥❤️‍🔥❤️‍🔥
+Reactivity for the standalone template is preserved!! 😶‍🌫️😶‍🌫️😶‍🌫️💪💪
+
+```ts
+// #state
+export const store: Todo = { id: 'demo', text: 'Learn Elemix', done: false };
+
+export const Unchecked: ElemixStory = {
+    render: () => tpl`<todo-item :todo=${store} :remove=${() => {}} />`,
+};
+```
+
 - `ElemixStory` now exposes every property of the underlying story type (`play`, `beforeEach`, `tags`, ...)
   instead of a hand-picked subset; the dead `setup` hook was removed (`beforeRender`/`afterRender` remain) 🐞🔨
 
 ***Chores 🥣🧽***
 
-- Update all JS dependencies and upgrade to TypeScript 7 ❤️ Finally 🔥🔥🔥
+- Updated all JS dependencies and upgraded to `TypeScript 7` ❤️ Finally 🔥🔥🔥 Native `tsgo` is here 😃😃😁😁
+- Updated the Rust toolchain and all the Rust `packages' dependencies, gotta stay frosty!! ☃️☃️
 
 ***The Spice Must Flow 🏜️🌊***
 
@@ -60,9 +80,9 @@ GG 👊🥋✊
 - For now configuration options are driven by CLI flags `--print-width` and `--tab-width`; this will need extending
   and possibly be driven by a config file ⚙️
 
-- The emitted registration call is now `$__defineComponent`, completing the `$__` prefixing of runtime imports 🛡️
-
 ![formatter](.roadmap/formatter.png)
+
+- The emitted registration call is now `$__defineComponent`, completing the `$__` prefixing of runtime imports 🛡️
 
 ***Shields Up 🛡️🖖***
 
@@ -913,3 +933,14 @@ What went well:
 
 - [x] There is a tooling gap 😒 String literal formatting for `tpl` - currently I use an augmented prettier setup, not happy with that 🤬🤬
   Can I ship a native template formatter? Most likely yes 🤔 What kind of effort is this ⁉️⁉️
+
+- Row swap gap was driving me insane 😡😡😡 The difference was disproportionate to the amount of work ⌛
+
+![flip table](.roadmap/flip-table.gif)
+
+- Managed to squeeze a bit more out of it 🍋‍🟩🍋‍🟩🤏
+- I think I can let go now... I am broken 🥲🧠🔨🤣
+
+GG 👊🥋✊
+
+- [x] Review and test decorator hooks in storybook package - remove if unnecessary
