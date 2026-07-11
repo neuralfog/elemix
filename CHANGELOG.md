@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.20] - 2026-07-11
+
+### Fixed
+
+- Storybook: `elemixDecorator` no longer pre-mounts the story into `#storybook-root`; it renders into a detached host that Storybook mounts itself. Under the Vitest runner the canvas is a per-test element, so the old pre-mount left the component connected to the wrong tree and a subsequent move disconnected it - tearing down its reactive scopes, so interactions stopped updating the DOM
+
 ## [0.9.0-dev.19] - 2026-07-11
 
 ### Added

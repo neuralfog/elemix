@@ -41,7 +41,12 @@ describe('elemixDecorator', () => {
         expect(host.querySelector('p')?.textContent).toBe('hello world');
     });
 
-    test('mounts into #storybook-root and clears prior content', () => {
+    test('returns a detached host for Storybook to mount', () => {
+        const host = run(() => node('<i>x</i>'));
+        expect(host.parentElement).toBeNull();
+    });
+
+    test('does not touch #storybook-root', () => {
         const root = document.createElement('div');
         root.id = 'storybook-root';
         root.innerHTML = '<span>stale</span>';
@@ -49,15 +54,10 @@ describe('elemixDecorator', () => {
 
         run(() => node('<b>fresh</b>'));
 
-        expect(root.querySelector('span')).toBeNull();
-        expect(root.querySelector('[data-elemix-root] b')?.textContent).toBe(
-            'fresh',
-        );
-    });
-
-    test('falls back to document.body when #storybook-root is absent', () => {
-        const host = run(() => node('<i>x</i>'));
-        expect(host.parentElement).toBe(document.body);
+        // the canvas is left untouched - Storybook mounts the returned host
+        // itself, so the decorator must not disturb any existing tree.
+        expect(root.querySelector('span')?.textContent).toBe('stale');
+        expect(root.querySelector('[data-elemix-root]')).toBeNull();
     });
 
     test('runs beforeRender before render and afterRender after', () => {
