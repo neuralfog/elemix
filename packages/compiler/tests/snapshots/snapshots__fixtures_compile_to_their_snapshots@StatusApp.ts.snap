@@ -110,7 +110,7 @@ export class StatusApp extends Component {
         this.state.showLog = !this.state.showLog;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
@@ -156,5 +156,5 @@ $__setText(_x13, (this.state.showLog ? 'Hide' : 'Show'));
 return _r0;
 }
 }
-StatusApp.__sheets = [..._s0];
+StatusApp.$$__sheets = [..._s0];
 $__defineComponent('status-app', StatusApp);

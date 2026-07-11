@@ -14,7 +14,7 @@ import { Component } from '@neuralfog/elemix';
 const _t0 = $__template('<span>hi</span>');
 
 export class WarnApp extends Component {
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 return _r0;
 }

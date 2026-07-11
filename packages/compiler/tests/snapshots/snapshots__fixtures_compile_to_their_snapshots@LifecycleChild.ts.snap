@@ -26,19 +26,19 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="child">Child · tick <!----></div>');
 
 export class LifecycleChild extends Component<ChildProps> {
-    onDispose(): void {
+    $$__onDispose(): void {
         this.cleanupA();
         this.cleanupB();
     }
-    onMount(): void {
+    $$__onMount(): void {
         this.readyA();
         this.readyB();
     }
-    beforeMount(): void {
+    $$__beforeMount(): void {
         this.prepareA();
         this.prepareB();
     }
-    effects(): void {
+    $$__effects(): void {
         $__effect(() => this.trackA());
         $__effect(() => this.trackB());
     }
@@ -81,7 +81,7 @@ export class LifecycleChild extends Component<ChildProps> {
         record('dispose-2');
     }
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.nextSibling!;
 const _x2 = document.createTextNode('');
@@ -92,5 +92,5 @@ $__setText(_x2, (this.props.tick));
 return _r0;
 }
 }
-LifecycleChild.__sheets = [..._s0];
+LifecycleChild.$$__sheets = [..._s0];
 $__defineComponent('lifecycle-child', LifecycleChild);

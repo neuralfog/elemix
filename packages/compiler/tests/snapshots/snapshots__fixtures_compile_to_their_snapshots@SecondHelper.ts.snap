@@ -15,7 +15,7 @@ const _t1 = $__template('<div class="card"><!----><p class="body">body</p></div>
 const _t2 = $__templateEl('<h2 class="heading">Title</h2>');
 
 export class PlainNote extends Component {
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 return _r0;
 }
@@ -24,7 +24,7 @@ $__defineComponent('plain-note', PlainNote);
 
 export class TitledNote extends Component {
     
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r1 = $__clone(_t1);
 const _n2 = _r1.firstChild!.firstChild!;
 $__child(_n2, () => ((() => {

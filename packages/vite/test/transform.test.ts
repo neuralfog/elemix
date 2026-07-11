@@ -45,7 +45,7 @@ describe('elemix vite plugin', () => {
         );
         expect(result).toBeTruthy();
         expect(result?.code).toContain("from '@neuralfog/elemix/runtime'");
-        expect(result?.code).toContain('view()');
+        expect(result?.code).toContain('$$__view()');
         expect(result?.code).not.toContain('tpl`');
         // the source-map chain is intact (not severed with map: null), and
         // points back at the real module id
@@ -88,7 +88,7 @@ describe('elemix vite plugin', () => {
         );
         expect(result).toBeTruthy();
         expect(result?.code).toContain("$__defineComponent('spacer', Spacer)");
-        expect(result?.code).toContain('Spacer.__sheets');
+        expect(result?.code).toContain('Spacer.$$__sheets');
         expect(result?.code).not.toContain('// #component');
     });
 

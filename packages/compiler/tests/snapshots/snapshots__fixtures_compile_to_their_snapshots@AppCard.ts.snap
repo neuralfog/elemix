@@ -38,7 +38,7 @@ const _t2 = $__templateEl('<div class="footer"><slot name="footer"></slot></div>
 
 export class AppCard extends Component {
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
@@ -57,5 +57,5 @@ return _r4;
 return _r0;
 }
 }
-AppCard.__sheets = [..._s0];
+AppCard.$$__sheets = [..._s0];
 $__defineComponent('app-card', AppCard);

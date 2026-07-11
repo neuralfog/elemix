@@ -1,4 +1,6 @@
-import { expect, userEvent } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { click as clickEl } from '@neuralfog/elemix-testing-library/events';
+import { find, query } from '@neuralfog/elemix-testing-library/query';
 import './.emited/ClassStateApp';
 
 export default { title: 'Compiled/ClassStateApp' };
@@ -6,20 +8,16 @@ export default { title: 'Compiled/ClassStateApp' };
 export const Default = {
     render: () => '<class-state-app></class-state-app>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        const app = canvasElement.querySelector('class-state-app');
-        const root = app?.shadowRoot;
-        if (!root) throw new Error('class-state-app did not render');
-
         const read = (sel: string): string =>
-            root.querySelector(sel)?.textContent ?? '';
+            find(sel, canvasElement)?.textContent ?? '';
         const col = (cls: string): string[] =>
-            [...root.querySelectorAll(`ul.items li.item .${cls}`)].map(
+            [...query(`ul.items li.item .${cls}`, canvasElement)].map(
                 (el) => el.textContent ?? '',
             );
         const click = async (sel: string): Promise<void> => {
-            const btn = root.querySelector(sel);
+            const btn = find(sel, canvasElement);
             if (!btn) throw new Error(`missing button ${sel}`);
-            await userEvent.click(btn);
+            clickEl(btn);
         };
 
         // ----- initial: Cart.count / subtotal / total are prototype getters,

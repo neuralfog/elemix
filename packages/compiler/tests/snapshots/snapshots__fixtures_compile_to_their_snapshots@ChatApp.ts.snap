@@ -117,7 +117,7 @@ export class ChatApp extends Component {
         if (log) log.scrollTop = log.scrollHeight;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
@@ -141,5 +141,5 @@ $__event(_n3, 'click', this.send);
 return _r0;
 }
 }
-ChatApp.__sheets = [..._s0];
+ChatApp.$$__sheets = [..._s0];
 $__defineComponent('chat-app', ChatApp);

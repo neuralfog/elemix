@@ -1,6 +1,5 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/ErrorApp.ts
 ---
@@ -16,7 +15,7 @@ import { Component } from '@neuralfog/elemix';
 const _t0 = $__template('<button>boom</button>');
 
 export class ErrorApp extends Component {
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 return _r0;
 }

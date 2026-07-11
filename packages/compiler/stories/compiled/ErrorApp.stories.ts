@@ -1,4 +1,5 @@
-import { expect } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { find } from '@neuralfog/elemix-testing-library/query';
 
 // A compile-time ERROR (unknown pragma) is inlined as a module-scope `throw`.
 // We import the compiled module INSIDE the play function so the throw is
@@ -22,7 +23,7 @@ export const InlinedError = {
             '[elemix] ErrorApp: unknown pragma directive `#frobnicate`',
         );
 
-        const pre = canvasElement.querySelector('[data-testid="msg"]');
+        const pre = find('[data-testid="msg"]', canvasElement);
         if (pre) pre.textContent = caught?.message ?? '';
     },
 };

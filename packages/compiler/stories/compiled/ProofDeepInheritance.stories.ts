@@ -1,4 +1,6 @@
-import { expect, userEvent } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { click } from '@neuralfog/elemix-testing-library/events';
+import { find } from '@neuralfog/elemix-testing-library/query';
 import './.emited/DeepInheritanceApp';
 
 export default { title: 'Compiled/ProofDeepInheritance' };
@@ -6,13 +8,13 @@ export default { title: 'Compiled/ProofDeepInheritance' };
 export const Default = {
     render: () => '<deep-leaf></deep-leaf>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        const app = canvasElement.querySelector('deep-leaf');
+        const app = find('deep-leaf', canvasElement);
         const root = app?.shadowRoot;
         if (!app || !root)
             throw new Error('deep-leaf did not render a shadow root');
 
         // template + state are INHERITED four levels up from DeepBase
-        const button = root.querySelector('.btn');
+        const button = find('.btn', canvasElement);
         if (!button) throw new Error('inherited template did not render');
         expect(button.textContent?.trim()).toBe('count 0');
 
@@ -24,8 +26,8 @@ export const Default = {
         expect(app.getAttribute('data-leaf-fx')).toBe('0');
 
         // inherited reactive state works on the deepest instance
-        await userEvent.click(button);
-        await userEvent.click(button);
+        click(button);
+        click(button);
         expect(button.textContent?.trim()).toBe('count 2');
 
         // all four effects re-ran reactively off the inherited state

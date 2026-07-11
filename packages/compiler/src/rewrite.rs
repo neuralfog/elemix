@@ -82,9 +82,9 @@ pub fn rewrite(source: &str) -> String {
     // Each component's `template` member → its compiled `view()`.
     for (c, body) in plan.comps.iter().zip(&bodies) {
         let view = if c.prelude.is_empty() {
-            format!("view(): DocumentFragment {{\n{body}}}")
+            format!("$$__view(): DocumentFragment {{\n{body}}}")
         } else {
-            format!("view(): DocumentFragment {{\n{}\n{body}}}", c.prelude)
+            format!("$$__view(): DocumentFragment {{\n{}\n{body}}}", c.prelude)
         };
         edits.push((c.member.0, c.member.1, view));
     }

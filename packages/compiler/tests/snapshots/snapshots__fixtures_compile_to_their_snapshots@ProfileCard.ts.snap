@@ -36,7 +36,7 @@ const _t0 = $__template('<div class="card"><div class="avatar"> </div><div class
 
 export class ProfileCard extends Component<Props> {
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.firstChild!;
@@ -59,5 +59,5 @@ $__setText(_x5, (this.props.likes));
 return _r0;
 }
 }
-ProfileCard.__sheets = [..._s0];
+ProfileCard.$$__sheets = [..._s0];
 $__defineComponent('profile-card', ProfileCard);

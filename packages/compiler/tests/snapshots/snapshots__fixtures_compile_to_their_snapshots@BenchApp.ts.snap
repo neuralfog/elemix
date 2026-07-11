@@ -122,7 +122,7 @@ export class BenchApp extends Component {
         if (index !== -1) rows.splice(index, 1);
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
@@ -157,5 +157,5 @@ return _r8;
 return _r0;
 }
 }
-BenchApp.__sheets = [..._s0];
+BenchApp.$$__sheets = [..._s0];
 $__defineComponent('bench-app', BenchApp);

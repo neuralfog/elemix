@@ -59,7 +59,7 @@ export class StoreControls extends Component<Props> {
         this.props.counter.value++;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
@@ -72,5 +72,5 @@ $__setText(_n2, (this.props.counter.value));
 return _r0;
 }
 }
-StoreControls.__sheets = [..._s0];
+StoreControls.$$__sheets = [..._s0];
 $__defineComponent('store-controls', StoreControls);

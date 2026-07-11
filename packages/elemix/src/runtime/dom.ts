@@ -101,7 +101,7 @@ export const $__defineComponent = (
 
 type PropTarget = {
     props?: Record<string, unknown>;
-    __pendingProps?: Record<string, unknown>;
+    $$__pendingProps?: Record<string, unknown>;
 };
 
 type OnModelEl = HTMLInputElement & {
@@ -528,6 +528,6 @@ export const $__setProp = (el: Element, name: string, value: unknown): void => {
         target.props[name] = value;
         return;
     }
-    if (!target.__pendingProps) target.__pendingProps = {};
-    target.__pendingProps[name] = value;
+    if (!target.$$__pendingProps) target.$$__pendingProps = {};
+    target.$$__pendingProps[name] = value;
 };

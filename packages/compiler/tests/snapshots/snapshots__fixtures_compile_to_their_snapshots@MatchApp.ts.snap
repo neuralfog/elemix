@@ -99,7 +99,7 @@ export class MatchApp extends Component {
         this.state.mode = this.state.mode === 'compact' ? 'full' : 'compact';
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
@@ -154,5 +154,5 @@ return _r18;
 return _r0;
 }
 }
-MatchApp.__sheets = [..._s0];
+MatchApp.$$__sheets = [..._s0];
 $__defineComponent('match-app', MatchApp);

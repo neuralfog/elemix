@@ -40,10 +40,10 @@ const _t0 = $__template('<p class="note">Slots project light-DOM children into a
 
 export class SlotApp extends Component {
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 return _r0;
 }
 }
-SlotApp.__sheets = [..._s0];
+SlotApp.$$__sheets = [..._s0];
 $__defineComponent('slot-app', SlotApp);

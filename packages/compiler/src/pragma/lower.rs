@@ -148,7 +148,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             edits.push((
                 class.body_open,
                 class.body_open,
-                "\n    static __noShadow = true;".to_string(),
+                "\n    static $$__noShadow = true;".to_string(),
             ));
         }
 
@@ -157,7 +157,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             edits.push((
                 class.body_open,
                 class.body_open,
-                "\n    static __shadow = true;".to_string(),
+                "\n    static $$__shadow = true;".to_string(),
             ));
         }
 
@@ -166,7 +166,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         if !class.effects.is_empty() {
             needs_effect = true;
             let sup = if inherits {
-                "\n        super.effects?.();"
+                "\n        super.$$__effects?.();"
             } else {
                 ""
             };
@@ -178,7 +178,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             edits.push((
                 class.body_open,
                 class.body_open,
-                format!("\n    effects(): void {{{sup}{calls}\n    }}"),
+                format!("\n    $$__effects(): void {{{sup}{calls}\n    }}"),
             ));
         }
 
@@ -187,9 +187,9 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         // runtime import: the base calls `beforeMount`/`onMount`/`onDispose` by
         // name. Tagging many methods just adds more calls to the one hook.
         for (hook, methods) in [
-            ("beforeMount", &class.before_mounts),
-            ("onMount", &class.mounts),
-            ("onDispose", &class.disposes),
+            ("$$__beforeMount", &class.before_mounts),
+            ("$$__onMount", &class.mounts),
+            ("$$__onDispose", &class.disposes),
         ] {
             if methods.is_empty() {
                 continue;
@@ -202,7 +202,7 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             // (super before own); teardown reverses (own before super).
             let body = if !inherits {
                 calls
-            } else if hook == "onDispose" {
+            } else if hook == "$$__onDispose" {
                 format!("{calls}\n        super.{hook}?.();")
             } else {
                 format!("\n        super.{hook}?.();{calls}")
@@ -227,10 +227,10 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             // runtime) so the derived component adopts both — no cross-file lookup.
             if inherits {
                 after.push_str(&format!(
-                    "\n{name}.__sheets = [...(Object.getPrototypeOf({name}).__sheets ?? []), {spread}];"
+                    "\n{name}.$$__sheets = [...(Object.getPrototypeOf({name}).$$__sheets ?? []), {spread}];"
                 ));
             } else {
-                after.push_str(&format!("\n{name}.__sheets = [{spread}];"));
+                after.push_str(&format!("\n{name}.$$__sheets = [{spread}];"));
             }
         }
         if meta.register {

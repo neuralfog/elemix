@@ -1,4 +1,6 @@
-import { expect, userEvent } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { click } from '@neuralfog/elemix-testing-library/events';
+import { find, query } from '@neuralfog/elemix-testing-library/query';
 import './.emited/RenderApp';
 
 export default { title: 'Compiled/RenderApp' };
@@ -6,12 +8,8 @@ export default { title: 'Compiled/RenderApp' };
 export const Default = {
     render: () => '<render-app></render-app>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        const app = canvasElement.querySelector('render-app');
-        const root = app?.shadowRoot;
-        if (!root) throw new Error('render-app did not render a shadow root');
-
-        const value = root.querySelector('.value');
-        const buttons = root.querySelectorAll('button');
+        const value = find('.value', canvasElement);
+        const buttons = query('button', canvasElement);
         // button order: "Increment (silent)" (.ghost) then "Increment + render()"
         const silent = buttons[0];
         const withRender = buttons[1];
@@ -26,24 +24,24 @@ export const Default = {
         expect(value.textContent).toBe('0');
 
         // silent increments mutate count but do NOT flush to the DOM (still 0)
-        await userEvent.click(silent);
+        click(silent);
         expect(value.textContent).toBe('0');
-        await userEvent.click(silent);
-        await userEvent.click(silent);
+        click(silent);
+        click(silent);
         expect(value.textContent).toBe('0');
 
         // render() escape hatch increments AND flushes all accumulated mutations:
         // 3 silent + 1 here = 4
-        await userEvent.click(withRender);
+        click(withRender);
         expect(value.textContent).toBe('4');
 
         // more silent clicks accumulate behind the scenes without re-rendering
-        await userEvent.click(silent);
-        await userEvent.click(silent);
+        click(silent);
+        click(silent);
         expect(value.textContent).toBe('4');
 
         // render() catches the DOM up again: 4 + 2 silent + 1 = 7
-        await userEvent.click(withRender);
+        click(withRender);
         expect(value.textContent).toBe('7');
     },
 };

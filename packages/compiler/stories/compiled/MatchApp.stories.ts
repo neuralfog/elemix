@@ -1,4 +1,6 @@
-import { expect, userEvent } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { click } from '@neuralfog/elemix-testing-library/events';
+import { find, query } from '@neuralfog/elemix-testing-library/query';
 import './.emited/MatchApp';
 
 export default { title: 'Compiled/MatchApp' };
@@ -6,12 +8,8 @@ export default { title: 'Compiled/MatchApp' };
 export const Default = {
     render: () => '<match-app></match-app>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        const app = canvasElement.querySelector('match-app');
-        const root = app?.shadowRoot;
-        if (!root) throw new Error('match-app did not render a shadow root');
-
         // .bar buttons in order: [Idle, Loading, Ready, Failed]
-        const buttons = root.querySelectorAll('.bar button');
+        const buttons = query('.bar button', canvasElement);
         const idleButton = buttons[0] as HTMLButtonElement;
         const loadingButton = buttons[1] as HTMLButtonElement;
         const readyButton = buttons[2] as HTMLButtonElement;
@@ -19,12 +17,12 @@ export const Default = {
 
         // only ONE match arm renders at a time.
         const onlyCard = (cls: string, text: string): void => {
-            const card = root.querySelector(`.card.${cls}`);
+            const card = find(`.card.${cls}`, canvasElement);
             expect(card).toBeTruthy();
             expect(card?.textContent).toContain(text);
             for (const other of ['idle', 'loading', 'ready', 'failed']) {
                 if (other !== cls) {
-                    expect(root.querySelector(`.card.${other}`)).toBeNull();
+                    expect(find(`.card.${other}`, canvasElement)).toBeNull();
                 }
             }
         };
@@ -33,28 +31,28 @@ export const Default = {
         onlyCard('idle', 'Pick a state above');
 
         // loading arm: the narrowed member exposes `pct`.
-        await userEvent.click(loadingButton);
+        click(loadingButton);
         onlyCard('loading', 'Working 42%');
-        expect(root.querySelector('.card.loading .spinner')).toBeTruthy();
+        expect(find('.card.loading .spinner', canvasElement)).toBeTruthy();
 
         // ready arm: narrowed member exposes `url`.
-        await userEvent.click(readyButton);
+        click(readyButton);
         onlyCard('ready', 'Deployed to /build/app.js');
 
         // failed arm: narrowed member exposes `error`.
-        await userEvent.click(failedButton);
+        click(failedButton);
         onlyCard('failed', 'boom');
 
         // back to idle re-mounts the idle arm.
-        await userEvent.click(idleButton);
+        click(idleButton);
         onlyCard('idle', 'Pick a state above');
 
         // form-1 match on a literal union reacts to its own value.
-        const modeButton = root.querySelector('.link') as HTMLButtonElement;
-        expect(root.querySelector('.mode')?.textContent).toBe('compact');
-        await userEvent.click(modeButton);
-        expect(root.querySelector('.mode')?.textContent).toBe('full view');
-        await userEvent.click(modeButton);
-        expect(root.querySelector('.mode')?.textContent).toBe('compact');
+        const modeButton = find('.link', canvasElement) as HTMLButtonElement;
+        expect(find('.mode', canvasElement)?.textContent).toBe('compact');
+        click(modeButton);
+        expect(find('.mode', canvasElement)?.textContent).toBe('full view');
+        click(modeButton);
+        expect(find('.mode', canvasElement)?.textContent).toBe('compact');
     },
 };

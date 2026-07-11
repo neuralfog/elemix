@@ -1,4 +1,5 @@
-import { expect } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { find } from '@neuralfog/elemix-testing-library/query';
 
 // A module-level primitive `#state` is a compile-time ERROR — inlined as a
 // module-scope `throw`. We import the compiled module INSIDE the play function
@@ -24,7 +25,7 @@ export const InlinedError = {
         // and it points the user at the fix
         expect(caught?.message).toContain('export const store = { count: 0 };');
 
-        const pre = canvasElement.querySelector('[data-testid="msg"]');
+        const pre = find('[data-testid="msg"]', canvasElement);
         if (pre) pre.textContent = caught?.message ?? '';
     },
 };

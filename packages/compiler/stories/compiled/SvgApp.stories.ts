@@ -1,4 +1,6 @@
-import { expect, userEvent } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { click } from '@neuralfog/elemix-testing-library/events';
+import { find, query } from '@neuralfog/elemix-testing-library/query';
 import './.emited/SvgApp';
 
 export default { title: 'Compiled/SvgApp' };
@@ -6,15 +8,11 @@ export default { title: 'Compiled/SvgApp' };
 export const Default = {
     render: () => '<svg-app></svg-app>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        const app = canvasElement.querySelector('svg-app');
-        const root = app?.shadowRoot;
-        if (!root) throw new Error('svg-app did not render a shadow root');
-
-        const circle = root.querySelector('circle');
+        const circle = find('circle', canvasElement);
         if (!circle) throw new Error('svg-app missing circle');
 
         // buttons in DOM order: move, grow, recolor
-        const buttons = root.querySelectorAll('button');
+        const buttons = query('button', canvasElement);
         const moveBtn = buttons[0];
         const growBtn = buttons[1];
         const recolorBtn = buttons[2];
@@ -35,32 +33,32 @@ export const Default = {
         expect(circle.getAttribute('fill')).toBe('#6366f1');
 
         // move toggles cx 100->60 and cy 100->140
-        await userEvent.click(moveBtn);
+        click(moveBtn);
         expect(circle.getAttribute('cx')).toBe('60');
         expect(circle.getAttribute('cy')).toBe('140');
         // move again toggles back to the origin
-        await userEvent.click(moveBtn);
+        click(moveBtn);
         expect(circle.getAttribute('cx')).toBe('100');
         expect(circle.getAttribute('cy')).toBe('100');
 
         // grow steps r by 20: 40 -> 60 -> 80, then wraps to 20
-        await userEvent.click(growBtn);
+        click(growBtn);
         expect(circle.getAttribute('r')).toBe('60');
-        await userEvent.click(growBtn);
+        click(growBtn);
         expect(circle.getAttribute('r')).toBe('80');
-        await userEvent.click(growBtn); // r >= 80 -> wrap to 20
+        click(growBtn); // r >= 80 -> wrap to 20
         expect(circle.getAttribute('r')).toBe('20');
-        await userEvent.click(growBtn);
+        click(growBtn);
         expect(circle.getAttribute('r')).toBe('40');
 
         // recolor cycles through the 4-color palette and wraps back to the first
-        await userEvent.click(recolorBtn);
+        click(recolorBtn);
         expect(circle.getAttribute('fill')).toBe('#ef4444');
-        await userEvent.click(recolorBtn);
+        click(recolorBtn);
         expect(circle.getAttribute('fill')).toBe('#22c55e');
-        await userEvent.click(recolorBtn);
+        click(recolorBtn);
         expect(circle.getAttribute('fill')).toBe('#f59e0b');
-        await userEvent.click(recolorBtn); // wraps back to COLORS[0]
+        click(recolorBtn); // wraps back to COLORS[0]
         expect(circle.getAttribute('fill')).toBe('#6366f1');
     },
 };

@@ -89,7 +89,7 @@ export class AttrApp extends Component {
         this.state.collapsed = !this.state.collapsed;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!;
 const _n2 = _n1.firstChild!.nextSibling!;
@@ -118,5 +118,5 @@ $__setAttr(_n5, 'hidden', (this.state.collapsed));
 return _r0;
 }
 }
-AttrApp.__sheets = [..._s0];
+AttrApp.$$__sheets = [..._s0];
 $__defineComponent('attr-app', AttrApp);

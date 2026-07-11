@@ -95,7 +95,7 @@ export class TodoApp extends Component {
         if (index !== -1) this.state.todos.splice(index, 1);
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
@@ -118,5 +118,5 @@ return _r4;
 return _r0;
 }
 }
-TodoApp.__sheets = [..._s0];
+TodoApp.$$__sheets = [..._s0];
 $__defineComponent('todo-app', TodoApp);

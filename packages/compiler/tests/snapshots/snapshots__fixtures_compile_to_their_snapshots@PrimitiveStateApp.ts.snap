@@ -111,7 +111,7 @@ export class PrimitiveStateApp extends Component {
         this.label = this.label === 'idle' ? 'busy' : 'idle';
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
@@ -136,5 +136,5 @@ $__setText(_n6, (this.label));
 return _r0;
 }
 }
-PrimitiveStateApp.__sheets = [..._s0];
+PrimitiveStateApp.$$__sheets = [..._s0];
 $__defineComponent('primitive-state-app', PrimitiveStateApp);

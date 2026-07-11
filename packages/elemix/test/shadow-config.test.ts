@@ -8,7 +8,7 @@ class LightByDefault extends Component {}
 defineComponent('cfg-light', LightByDefault);
 
 class ForcedShadow extends Component {
-    static __shadow = true;
+    static $$__shadow = true;
 }
 defineComponent('cfg-forced-shadow', ForcedShadow);
 

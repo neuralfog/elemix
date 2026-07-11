@@ -11,16 +11,16 @@ type State = { phase: string; ticks: number };
 const _t0 = $__template('<div class="async"><span class="phase"> </span><span class="ticks"> </span><button class="bump">+1</button></div>');
 
 export class AsyncApp extends Component {
-    onDispose(): void {
+    $$__onDispose(): void {
         this.teardown();
     }
-    onMount(): void {
+    $$__onMount(): void {
         this.load();
     }
-    beforeMount(): void {
+    $$__beforeMount(): void {
         this.prepare();
     }
-    effects(): void {
+    $$__effects(): void {
         $__effect(() => this.mirror());
     }
     state = $__state<State>({ phase: 'init', ticks: 0 });
@@ -52,7 +52,7 @@ export class AsyncApp extends Component {
         this.removeAttribute('data-phase');
     }
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;

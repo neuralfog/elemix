@@ -21,10 +21,10 @@ const _s0 = $__sheet(baseCss);
 const _t0 = $__template('<button class="btn">count <!----></button>');
 
 export class InheritBase extends Component {
-    onMount(): void {
+    $$__onMount(): void {
         this.baseMounted();
     }
-    effects(): void {
+    $$__effects(): void {
         $__effect(() => this.mirrorBase());
     }
 
@@ -42,7 +42,7 @@ export class InheritBase extends Component {
         this.state.count++;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
 const _n2 = _n1.firstChild!.nextSibling!;
@@ -55,17 +55,17 @@ $__setText(_x3, (this.state.count));
 return _r0;
 }
 }
-InheritBase.__sheets = [..._s0];
+InheritBase.$$__sheets = [..._s0];
 $__defineComponent('inherit-base', InheritBase);
 
 const _s1 = $__sheet(derivedCss);
 export class InheritDerived extends InheritBase {
-    onMount(): void {
-        super.onMount?.();
+    $$__onMount(): void {
+        super.$$__onMount?.();
         this.derivedMounted();
     }
-    effects(): void {
-        super.effects?.();
+    $$__effects(): void {
+        super.$$__effects?.();
         $__effect(() => this.mirrorDerived());
     }
 
@@ -77,5 +77,5 @@ export class InheritDerived extends InheritBase {
         this.setAttribute('data-derived-fx', String(this.state.count));
     }
 }
-InheritDerived.__sheets = [...(Object.getPrototypeOf(InheritDerived).__sheets ?? []), ..._s1];
+InheritDerived.$$__sheets = [...(Object.getPrototypeOf(InheritDerived).$$__sheets ?? []), ..._s1];
 $__defineComponent('inherit-derived', InheritDerived);

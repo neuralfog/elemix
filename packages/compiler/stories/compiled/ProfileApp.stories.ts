@@ -1,4 +1,6 @@
-import { expect, userEvent } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { find, query } from '@neuralfog/elemix-testing-library/query';
+import { click, type } from '@neuralfog/elemix-testing-library/events';
 import './.emited/ProfileApp';
 
 export default { title: 'Compiled/ProfileApp' };
@@ -6,25 +8,23 @@ export default { title: 'Compiled/ProfileApp' };
 export const Default = {
     render: () => '<profile-app></profile-app>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        const app = canvasElement.querySelector('profile-app');
-        const root = app?.shadowRoot;
-        if (!root) throw new Error('profile-app did not render a shadow root');
+        const app = find('profile-app', canvasElement);
+        if (!app) throw new Error('profile-app did not render a shadow root');
 
         // inputs order: Name then Role; then the 👍 Like button
-        const nameInput = root.querySelectorAll('input')[0];
-        const roleInput = root.querySelectorAll('input')[1];
-        const likeButton = root.querySelector('button');
-        const card = root.querySelector('profile-card');
-        const cardRoot = card?.shadowRoot;
-        if (!nameInput || !roleInput || !likeButton || !cardRoot) {
+        const nameInput = query<HTMLInputElement>('input', app)[0];
+        const roleInput = query<HTMLInputElement>('input', app)[1];
+        const likeButton = find('button', app);
+        const card = find('profile-card', app);
+        if (!nameInput || !roleInput || !likeButton || !card) {
             throw new Error('profile-app missing name/role input, like button, or child card');
         }
 
         // child card mirrors the parent state via props
-        const avatar = cardRoot.querySelector('.avatar');
-        const cardName = cardRoot.querySelector('.info strong');
-        const cardRole = cardRoot.querySelector('.info span');
-        const likes = cardRoot.querySelector('.likes');
+        const avatar = find('.avatar', card);
+        const cardName = find('.info strong', card);
+        const cardRole = find('.info span', card);
+        const likes = find('.likes', card);
         if (!avatar || !cardName || !cardRole || !likes) {
             throw new Error('profile-card missing avatar, name, role, or likes');
         }
@@ -40,20 +40,20 @@ export const Default = {
 
         // typing the name (~model) flows through the :name prop into the child card.
         // avatar (charAt(0)) is unchanged because we append.
-        await userEvent.type(nameInput, '!');
+        type(nameInput, '!');
         expect(nameInput.value).toBe('Ada Lovelace!');
         expect(cardName.textContent).toBe('Ada Lovelace!');
         expect(avatar.textContent).toBe('A');
 
         // typing the role (~model) flows through the :role prop into the child card
-        await userEvent.type(roleInput, ' Lead');
+        type(roleInput, ' Lead');
         expect(roleInput.value).toBe('Engineer Lead');
         expect(cardRole.textContent).toBe('Engineer Lead');
 
         // liking increments the shared :likes count rendered by the child; do it twice
-        await userEvent.click(likeButton);
+        click(likeButton);
         expect(likes.textContent).toBe('❤️ 1');
-        await userEvent.click(likeButton);
+        click(likeButton);
         expect(likes.textContent).toBe('❤️ 2');
     },
 };

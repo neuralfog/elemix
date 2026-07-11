@@ -113,7 +113,7 @@ fn helper_on_a_non_first_component_is_inlined() {
     assert!(out.contains("<h2>Title</h2>"));
     assert!(out.contains("$__child("));
     // both components still compiled
-    assert_eq!(out.matches("view(): DocumentFragment").count(), 2);
+    assert_eq!(out.matches("$$__view(): DocumentFragment").count(), 2);
 }
 
 // The main template written as a METHOD `template() { return tpl`…`; }` (not the
@@ -136,7 +136,7 @@ fn method_form_template_inlines_its_helpers() {
     assert!(!out.contains("cell ="));
     assert!(!out.contains("this.cell("));
     assert!(!out.contains("tpl`"));
-    assert!(out.contains("view(): DocumentFragment"));
+    assert!(out.contains("$$__view(): DocumentFragment"));
 }
 
 // A helper call buried inside a NESTED template literal (a ternary branch) — the
@@ -157,5 +157,5 @@ fn helper_call_inside_a_nested_template_is_inlined() {
     assert!(!out.contains("chip ="));
     assert!(!out.contains("this.chip("));
     assert!(!out.contains("tpl`"));
-    assert!(out.contains("view(): DocumentFragment"));
+    assert!(out.contains("$$__view(): DocumentFragment"));
 }
