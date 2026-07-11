@@ -115,7 +115,7 @@ export class DeepStateApp extends Component {
         this.state.groups.push({ id: 'g1', tasks: [] });
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
@@ -179,5 +179,5 @@ $__setText(_n7, (this.groupsStr));
 return _r0;
 }
 }
-DeepStateApp.__sheets = [..._s0];
+DeepStateApp.$$__sheets = [..._s0];
 $__defineComponent('deep-state-app', DeepStateApp);

@@ -1,4 +1,6 @@
-import { expect, userEvent } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { click as clickEl } from '@neuralfog/elemix-testing-library/events';
+import { find, query } from '@neuralfog/elemix-testing-library/query';
 import './.emited/CollectionApp';
 
 export default { title: 'Compiled/CollectionApp' };
@@ -6,18 +8,14 @@ export default { title: 'Compiled/CollectionApp' };
 export const Default = {
     render: () => '<collection-app></collection-app>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        const app = canvasElement.querySelector('collection-app');
-        const root = app?.shadowRoot;
-        if (!root) throw new Error('collection-app did not render');
-
         const read = (sel: string): string =>
-            root.querySelector(sel)?.textContent ?? '';
+            find(sel, canvasElement)?.textContent ?? '';
         const list = (sel: string): string[] =>
-            [...root.querySelectorAll(sel)].map((el) => el.textContent ?? '');
+            [...query(sel, canvasElement)].map((el) => el.textContent ?? '');
         const click = async (sel: string): Promise<void> => {
-            const btn = root.querySelector(sel);
+            const btn = find(sel, canvasElement);
             if (!btn) throw new Error(`missing button ${sel}`);
-            await userEvent.click(btn);
+            clickEl(btn);
         };
 
         // ----- initial state: every read method off Set, Map, WeakSet, WeakMap -----

@@ -1,4 +1,5 @@
-import { expect } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { find } from '@neuralfog/elemix-testing-library/query';
 import init, { compile } from '../../pkg/elemix_compiler.js';
 import wasmUrl from '../../pkg/elemix_compiler_bg.wasm?url';
 
@@ -32,7 +33,7 @@ export const CompilesInBrowser = {
         const out = compile(SOURCE);
 
         // Show the compiled output live in the story.
-        const pre = canvasElement.querySelector('[data-testid="wasm-out"]');
+        const pre = find('[data-testid="wasm-out"]', canvasElement);
         if (pre) pre.textContent = out;
 
         // The wasm compiler ran in-browser and lowered the template:

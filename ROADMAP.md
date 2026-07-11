@@ -21,8 +21,25 @@ Target release of compiled templates `v0.9.0`
   - [] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
   - [] Add formatting extension based on `formatter`
 - [] Add curated `clanker` skill, include it in monorepo, add it to `elemix.dev`
+- [] Add MCP server for the docs for agentic coding along the skill
 
 ### Phase 7 - Close the release of v0.9.0 ❎
+
+***The Kobayashi Maru 🖖🧪***
+
+- New `@neuralfog/elemix-testing-library` package - a fully isolated `DECENT` testing library 💪
+  - `elemix` doesn't use any synthetic garbage 🤮 Real DOM and real events, as it should be! 🎯🎯🎯
+  - Query selectors with built-in Shadow DOM piercing
+    - `query` finds multiple
+    - `find` gets a single one
+    - `byTestId` helpers. Accessibility query helpers are not implemented on purpose!! Stupid idea. Yes, `data-testid`
+      pollutes the DOM, but the selectors are stable (no test refactors on source changes 🏋)
+  - Sane event-handling helpers 🌀
+
+- Reactivity compiler tests rewritten to use the new testing package 😍😍
+- Reactivity compiler tests run across Chromium, Firefox, and WebKit 🛡️
+- Isolated `Component` internals behind a `$$__` prefix so user code can no longer shadow them 🛡️
+- Prefix `$__` reserved for the runtime and `$$__` for component internals 🎯
 
 ***Escape Velocity 🚀🪐***
 

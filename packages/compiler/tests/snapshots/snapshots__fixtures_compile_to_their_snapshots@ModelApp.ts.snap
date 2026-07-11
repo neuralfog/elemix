@@ -78,7 +78,7 @@ export class ModelApp extends Component {
         volume: ref('50'),
     });
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
@@ -100,5 +100,5 @@ $__setText(_x6, (this.state.volume.value));
 return _r0;
 }
 }
-ModelApp.__sheets = [..._s0];
+ModelApp.$$__sheets = [..._s0];
 $__defineComponent('model-app', ModelApp);

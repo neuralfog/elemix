@@ -69,7 +69,7 @@ export class RenderApp extends Component {
         this.render();
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
@@ -82,5 +82,5 @@ $__setText(_n1, (this.count));
 return _r0;
 }
 }
-RenderApp.__sheets = [..._s0];
+RenderApp.$$__sheets = [..._s0];
 $__defineComponent('render-app', RenderApp);

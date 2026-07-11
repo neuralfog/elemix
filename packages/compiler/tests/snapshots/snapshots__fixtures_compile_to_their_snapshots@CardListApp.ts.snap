@@ -85,7 +85,7 @@ export class CardListApp extends Component {
         if (i !== -1) this.state.users.splice(i, 1);
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
@@ -108,5 +108,5 @@ return _r3;
 return _r0;
 }
 }
-CardListApp.__sheets = [..._s0];
+CardListApp.$$__sheets = [..._s0];
 $__defineComponent('card-list-app', CardListApp);

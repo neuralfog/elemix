@@ -86,7 +86,7 @@ defineComponent('b-el', B);
 fn multiple_components_per_file_each_compile() {
     let out = compile(TWO_COMPONENTS);
     // both templates lowered, no tpl tag bleeds through
-    assert_eq!(out.matches("view(): DocumentFragment").count(), 2);
+    assert_eq!(out.matches("$$__view(): DocumentFragment").count(), 2);
     assert!(!out.contains("tpl`"));
     // their hoisted template consts are unique (no _t0/_t0 collision)
     assert!(out.contains("const _t0 = $__template("));
@@ -98,10 +98,10 @@ fn block_body_prelude_survives_into_view() {
     // The statements before `return tpl` (here a destructure the holes use) must
     // be carried into view() — otherwise `inc` is undefined in the emitted code.
     let out = compile(BLOCK_BODY);
-    assert!(out.contains("view(): DocumentFragment {"));
+    assert!(out.contains("$$__view(): DocumentFragment {"));
     assert!(out.contains("const { inc } = this;"));
     // and it lands inside view(), before the clone — not left in dead template().
-    let view_at = out.find("view(): DocumentFragment").unwrap();
+    let view_at = out.find("$$__view(): DocumentFragment").unwrap();
     let destruct_at = out.find("const { inc } = this;").unwrap();
     let clone_at = out.find("$__clone(").unwrap();
     assert!(view_at < destruct_at && destruct_at < clone_at);
@@ -151,7 +151,7 @@ fn method_form_template_lowers() {
     // `template() { return tpl`…`; }` must lower like `template = () => tpl`…``:
     // the method signature is replaced by `view()` and the `tpl` tag is erased.
     let out = compile(METHOD_FORM);
-    assert_eq!(out.matches("view(): DocumentFragment").count(), 1);
+    assert_eq!(out.matches("$$__view(): DocumentFragment").count(), 1);
     assert!(!out.contains("template(): Template"));
     assert!(!out.contains("tpl`"));
     // the holes still bound — proof the template was actually compiled
@@ -162,9 +162,9 @@ fn method_form_template_lowers() {
 fn method_form_prelude_survives_into_view() {
     // Same block-body prelude guarantee as the arrow form, but for a method.
     let out = compile(METHOD_PRELUDE);
-    assert!(out.contains("view(): DocumentFragment {"));
+    assert!(out.contains("$$__view(): DocumentFragment {"));
     assert!(out.contains("const { inc } = this;"));
-    let view_at = out.find("view(): DocumentFragment").unwrap();
+    let view_at = out.find("$$__view(): DocumentFragment").unwrap();
     let destruct_at = out.find("const { inc } = this;").unwrap();
     let clone_at = out.find("$__clone(").unwrap();
     assert!(view_at < destruct_at && destruct_at < clone_at);
@@ -176,7 +176,7 @@ fn method_template_lowers_alongside_a_getter() {
     // A `get` accessor must not be mistaken for the template, and is left intact
     // (mirrors real components that pair a getter with a method template).
     let out = compile(METHOD_WITH_GETTER);
-    assert!(out.contains("view(): DocumentFragment {"));
+    assert!(out.contains("$$__view(): DocumentFragment {"));
     assert!(out.contains("get cls(): string"));
     assert!(!out.contains("tpl`"));
 }
@@ -203,7 +203,7 @@ defineComponent('w-el', W);
 "#;
     let view = |src| {
         let out = compile(src);
-        let at = out.find("view(): DocumentFragment").expect("a view");
+        let at = out.find("$$__view(): DocumentFragment").expect("a view");
         out[at..].to_string()
     };
     assert_eq!(view(ARROW), view(METHOD));

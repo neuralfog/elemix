@@ -44,7 +44,7 @@ export class CounterApp extends Component {
         this.state.count++;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
 const _n2 = _n1.firstChild!.nextSibling!;
@@ -57,5 +57,5 @@ $__setText(_x3, (this.state.count));
 return _r0;
 }
 }
-CounterApp.__sheets = [..._s0];
+CounterApp.$$__sheets = [..._s0];
 $__defineComponent('counter-app', CounterApp);

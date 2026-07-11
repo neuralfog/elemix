@@ -59,7 +59,7 @@ const buildRow = (item: Item): HTMLElement => {
 const listTpl = template('<table><tbody><!----></tbody></table>');
 class CostList extends Component {
     state = state<{ data: Item[] }>({ data: [] });
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
         const root = clone(listTpl);
         const tbody = (root.firstChild as HTMLElement)
             .firstChild as HTMLElement;

@@ -1,4 +1,5 @@
-import { expect } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { find } from '@neuralfog/elemix-testing-library/query';
 
 // A compile-time WARNING (a tag with no hyphen) is inlined as `console.warn`.
 // The component still compiles and tries to register — but the invalid tag makes
@@ -37,7 +38,7 @@ export const InlinedWarning = {
         // the warning was right — the runtime registration really does throw
         expect(registrationThrew).toBe(true);
 
-        const pre = canvasElement.querySelector('[data-testid="msg"]');
+        const pre = find('[data-testid="msg"]', canvasElement);
         if (pre) pre.textContent = warnings.find((w) => w.includes('[elemix]')) ?? '';
     },
 };

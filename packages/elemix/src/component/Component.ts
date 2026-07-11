@@ -11,9 +11,9 @@ import { $__sheet } from '../runtime/dom';
 import type { Template } from '../types';
 
 type LifecycleHooks = {
-    beforeMount?(): void;
-    onMount?(): void;
-    onDispose?(): void;
+    $$__beforeMount?(): void;
+    $$__onMount?(): void;
+    $$__onDispose?(): void;
 };
 
 const DEFAULT_CLOAK = '[data-cloak],:not(:defined){visibility:hidden}';
@@ -36,13 +36,13 @@ const cloak = (): CSSStyleSheet => {
 
 export class Component<ComponentProps = unknown> extends HTMLElement {
     public static formAssociated?: boolean;
-    public static __sheets?: CSSStyleSheet[];
-    public static __noShadow?: boolean;
-    public static __shadow?: boolean;
-    public $props?: Record<string, unknown>;
+    public static $$__sheets?: CSSStyleSheet[];
+    public static $$__noShadow?: boolean;
+    public static $$__shadow?: boolean;
+    private $$__props?: Record<string, unknown>;
+    private $$__scopes: Scope | null = null;
+    private $$__effectScopes: Scope | null = null;
     private connected = false;
-    private scopes: Scope | null = null;
-    private effectScopes: Scope | null = null;
     public isMounted = false;
     public internals!: ElementInternals;
 
@@ -51,23 +51,23 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     }
 
     public get props(): ComponentProps {
-        return this.$props as ComponentProps;
+        return this.$$__props as ComponentProps;
     }
 
-    public initProps(): void {
+    public $$__initProps(): void {
         const el = this as unknown as {
-            __pendingProps?: Record<string, unknown>;
+            $$__pendingProps?: Record<string, unknown>;
         };
-        this.$props = $__reactive(el.__pendingProps ?? {});
-        el.__pendingProps = undefined;
+        this.$$__props = $__reactive(el.$$__pendingProps ?? {});
+        el.$$__pendingProps = undefined;
     }
 
     constructor() {
         super();
         const ctor = this.constructor as typeof Component;
-        const useShadow = ctor.__shadow
+        const useShadow = ctor.$$__shadow
             ? true
-            : ctor.__noShadow
+            : ctor.$$__noShadow
               ? false
               : (window.__elemix__?.config?.shadow ?? true);
         if (useShadow) {
@@ -77,40 +77,40 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
     }
 
     public template?(): Template;
-    public view?(): DocumentFragment;
-    public effects?(): void;
+    public $$__view?(): DocumentFragment;
+    public $$__effects?(): void;
 
     connectedCallback(): void {
         if (this.connected) return;
         this.connected = true;
 
         $__untrack(() => {
-            this.adoptStyles();
-            this.attachFormInternals();
-            this.initProps();
-            (this as LifecycleHooks).beforeMount?.();
+            this.$$__adoptStyles();
+            this.$$__attachFormInternals();
+            this.$$__initProps();
+            (this as LifecycleHooks).$$__beforeMount?.();
 
-            if (this.view) {
-                const view = this.view;
+            if (this.$$__view) {
+                const view = this.$$__view;
                 const frag = collect(() => view.call(this));
-                this.scopes = takeScopes();
+                this.$$__scopes = takeScopes();
                 (this.shadowRoot ?? this).appendChild(frag);
             }
 
-            if (this.effects) {
-                const effects = this.effects;
+            if (this.$$__effects) {
+                const effects = this.$$__effects;
                 collect(() => effects.call(this));
-                this.effectScopes = takeScopes();
+                this.$$__effectScopes = takeScopes();
             }
 
             this.removeAttribute('data-cloak');
-            (this as LifecycleHooks).onMount?.();
+            (this as LifecycleHooks).$$__onMount?.();
         });
 
         this.isMounted = true;
     }
 
-    private attachFormInternals(): void {
+    private $$__attachFormInternals(): void {
         if (this.internals) return;
         const ctor = this.constructor as typeof Component;
         if (ctor.formAssociated) {
@@ -122,32 +122,32 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         queueMicrotask(() => {
             if (this.isConnected) return;
             $__untrack(() => {
-                dispose(this.scopes);
-                this.scopes = null;
-                dispose(this.effectScopes);
-                this.effectScopes = null;
-                (this as LifecycleHooks).onDispose?.();
+                dispose(this.$$__scopes);
+                this.$$__scopes = null;
+                dispose(this.$$__effectScopes);
+                this.$$__effectScopes = null;
+                (this as LifecycleHooks).$$__onDispose?.();
             });
             this.isMounted = false;
         });
     }
 
     public render(): void {
-        let scope = this.scopes;
+        let scope = this.$$__scopes;
         while (scope) {
             rerun(scope);
             scope = scope.next;
         }
     }
 
-    public adoptStyles(
+    public $$__adoptStyles(
         input?: string | CSSStyleSheet | ReadonlyArray<string | CSSStyleSheet>,
     ): void {
         cloak();
         const sheets =
             input !== undefined
                 ? $__sheet(input)
-                : (this.constructor as typeof Component).__sheets;
+                : (this.constructor as typeof Component).$$__sheets;
         if (this.shadowRoot && sheets?.length) {
             this.shadowRoot.adoptedStyleSheets = sheets;
         }

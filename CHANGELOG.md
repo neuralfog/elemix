@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.19] - 2026-07-11
+
+### Added
+
+- New `@neuralfog/elemix-testing-library`: shadow-piercing queries (`/query`), real DOM events (`/events`), and `expect`/`waitFor` assertions
+
+### Changed
+
+- Compiler conformance stories now assert with `@neuralfog/elemix-testing-library` instead of `storybook/test`
+- Compiler conformance stories now run headless across Chromium, Firefox, and WebKit (Safari's engine)
+- Isolated `Component` internals behind a `$$__` prefix so user code can no longer shadow them
+
 ## [0.9.0-dev.18] - 2026-07-10
 
 ### Added

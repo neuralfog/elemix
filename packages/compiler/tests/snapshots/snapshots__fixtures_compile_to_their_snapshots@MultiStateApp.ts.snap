@@ -89,7 +89,7 @@ export class MultiStateApp extends Component {
         this.user.name = this.user.name === 'Ada' ? 'Grace' : 'Ada';
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
@@ -114,5 +114,5 @@ $__setText(_n5, (this.user.online ? 'online' : 'offline'));
 return _r0;
 }
 }
-MultiStateApp.__sheets = [..._s0];
+MultiStateApp.$$__sheets = [..._s0];
 $__defineComponent('multi-state-app', MultiStateApp);

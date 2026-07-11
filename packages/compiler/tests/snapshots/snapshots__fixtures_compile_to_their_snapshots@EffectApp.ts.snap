@@ -13,7 +13,7 @@ type State = {
 const _t0 = $__template('<div class="effect"><span class="count"> </span><button class="inc">+1</button></div>');
 
 export class EffectApp extends Component {
-    effects(): void {
+    $$__effects(): void {
         $__effect(() => this.mirror());
         $__effect(() => this.report());
     }
@@ -33,7 +33,7 @@ export class EffectApp extends Component {
         this.setAttribute('data-changed', String(count));
     }
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;

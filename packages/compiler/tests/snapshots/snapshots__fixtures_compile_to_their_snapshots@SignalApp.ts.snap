@@ -43,10 +43,10 @@ const _t0 = $__template('<p class="note">A reactive <code>state</code> store cre
 
 export class SignalApp extends Component {
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 return _r0;
 }
 }
-SignalApp.__sheets = [..._s0];
+SignalApp.$$__sheets = [..._s0];
 $__defineComponent('signal-app', SignalApp);

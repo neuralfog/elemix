@@ -23,7 +23,7 @@ export class CustomEventApp extends Component {
         this.state.caught += (e as CustomEvent<number>).detail;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!;

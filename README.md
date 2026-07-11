@@ -2,7 +2,8 @@
 
 pnpm workspace housing the Elemix framework and its tooling.
 
-Live playground: **[playground.elemix.dev](https://playground.elemix.dev/)**
+- Live playground (pre compilation era): **[playground.elemix.dev](https://playground.elemix.dev/)**
+- Compiler Explorer: **[compiler-explorer.elemix.dev](https://compiler-explorer.elemix.dev/)**
 
 The **[Roadmap](ROADMAP.md)** is the full log of development.
 
@@ -16,15 +17,14 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-template-formatter` | Template Formatter For `tpl`. | [README](packages/formatter/README.md) |
 | `@neuralfog/elemix-vite` | Vite Compiler plugin. | [README](packages/vite/README.md) |
 | `@neuralfog/elemix-storybook` | Storybook Integration For Elemix. | [README](packages/storybook/README.md) |
-
-`@neuralfog/elemix-storybook` depends on `@neuralfog/elemix` via `workspace:*`, so the workspace always builds/tests against the local source.
+| `@neuralfog/elemix-testing-library` | Shadow-piercing queries and real DOM events for testing Elemix components. | [README](packages/testing-library/README.md) |
 
 ## Releasing
 
 One version, one tag. `pnpm bump` locksteps every version across the repo, `pnpm tag`
 pushes a single `v<version>` tag, and CI publishes the whole toolchain — the library,
-its Storybook integration, the compiler binaries, the wasm build, and the Vite plugin
-— to npm.
+its Storybook integration, its testing library, the compiler binaries, the wasm build,
+and the Vite plugin — to npm.
 
 ```bash
 # add a `## [<version>] - <date>` section to the root CHANGELOG.md first

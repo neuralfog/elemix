@@ -82,7 +82,7 @@ fn no_shadow_resolves_to_a_flag() {
 #[test]
 fn no_shadow_injects_the_static_flag() {
     let out = expand("// #component #no-shadow\nclass Foo extends Component {}").unwrap();
-    assert!(out.contains("static __noShadow = true;"));
+    assert!(out.contains("static $$__noShadow = true;"));
     assert!(out.contains("$__defineComponent('foo', Foo);"));
 }
 
@@ -95,7 +95,7 @@ fn shadow_resolves_to_a_flag() {
 #[test]
 fn shadow_injects_the_static_flag() {
     let out = expand("// #component #shadow\nclass Foo extends Component {}").unwrap();
-    assert!(out.contains("static __shadow = true;"));
+    assert!(out.contains("static $$__shadow = true;"));
 }
 
 #[test]
@@ -114,9 +114,9 @@ fn shadow_and_no_shadow_are_mutually_exclusive() {
 fn no_shadow_skips_styles_emission() {
     let src = "const css = `x`;\n// #component #no-shadow\nclass Foo extends Component {\n    // #styles\n    styles = css;\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("static __noShadow = true;"));
+    assert!(out.contains("static $$__noShadow = true;"));
     assert!(!out.contains("$__sheet(")); // no stylesheet emitted
-    assert!(!out.contains("__sheets"));
+    assert!(!out.contains("$$__sheets"));
     assert!(out.contains("styles = css;")); // field kept → `css` stays referenced
     assert!(!out.contains("// #styles")); // marker stripped
 }
@@ -294,7 +294,7 @@ fn lowers_a_full_component() {
     );
     assert!(out.contains("const css = `c`;")); // the referenced const stays in place
     assert!(out.contains("const _s0 = $__sheet(css);")); // field value inlined by name
-    assert!(out.contains("Foo.__sheets = [..._s0];"));
+    assert!(out.contains("Foo.$$__sheets = [..._s0];"));
     assert!(out.contains("$__defineComponent('foo', Foo);"));
     assert!(!out.contains("styles = css")); // the styles field is stripped
     assert!(!out.contains("// #styles"));
@@ -320,7 +320,7 @@ fn styles_only_no_registration() {
         "const css = `x`;\nclass Foo extends Component {\n    // #styles\n    styles = css;\n}",
     )
     .unwrap();
-    assert!(out.contains("Foo.__sheets = [..._s0];"));
+    assert!(out.contains("Foo.$$__sheets = [..._s0];"));
     assert!(!out.contains("defineComponent"));
     assert!(out.contains("import { $__sheet } from '@neuralfog/elemix/runtime';"));
 }
@@ -333,7 +333,7 @@ fn multiple_styles_accumulate_onto_a_class() {
     .unwrap();
     assert!(out.contains("const _s0 = $__sheet(base);"));
     assert!(out.contains("const _s1 = $__sheet(theme);"));
-    assert!(out.contains("Foo.__sheets = [..._s0, ..._s1];"));
+    assert!(out.contains("Foo.$$__sheets = [..._s0, ..._s1];"));
 }
 
 #[test]
@@ -491,7 +491,7 @@ fn effect_on_a_method_generates_an_effects_hook() {
     let src =
         "// #component\nclass Foo extends Component {\n    // #effect\n    sync(): void {}\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("effects(): void {"));
+    assert!(out.contains("$$__effects(): void {"));
     assert!(out.contains("$__effect(() => this.sync());"));
     assert!(out.contains("sync(): void {}")); // the method itself stays
     assert!(!out.contains("// #effect"));
@@ -509,7 +509,7 @@ fn effect_works_on_an_arrow_field() {
 fn multiple_effects_share_one_hook() {
     let src = "// #component\nclass Foo extends Component {\n    // #effect\n    a(): void {}\n    // #effect\n    b(): void {}\n}";
     let out = expand(src).unwrap();
-    assert_eq!(out.matches("effects(): void {").count(), 1);
+    assert_eq!(out.matches("$$__effects(): void {").count(), 1);
     assert!(out.contains("$__effect(() => this.a());"));
     assert!(out.contains("$__effect(() => this.b());"));
 }
@@ -530,11 +530,11 @@ fn effect_on_a_class_is_an_error() {
 fn lifecycle_pragmas_synthesize_the_matching_hooks() {
     let src = "// #component\nclass Foo extends Component {\n    // #before-mount\n    setup(): void {}\n    // #mount\n    ready(): void {}\n    // #dispose\n    teardown(): void {}\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("beforeMount(): void {"));
+    assert!(out.contains("$$__beforeMount(): void {"));
     assert!(out.contains("this.setup();"));
-    assert!(out.contains("onMount(): void {"));
+    assert!(out.contains("$$__onMount(): void {"));
     assert!(out.contains("this.ready();"));
-    assert!(out.contains("onDispose(): void {"));
+    assert!(out.contains("$$__onDispose(): void {"));
     assert!(out.contains("this.teardown();"));
     // the tagged methods stay; the markers are stripped.
     assert!(out.contains("setup(): void {}"));
@@ -549,7 +549,7 @@ fn lifecycle_wiring_pulls_in_no_runtime_import() {
     // #component/#state/#effect) needs no `/runtime` import.
     let src = "class Foo extends Component {\n    // #mount\n    ready(): void {}\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("onMount(): void {"));
+    assert!(out.contains("$$__onMount(): void {"));
     assert!(!out.contains("from '@neuralfog/elemix/runtime'"));
 }
 
@@ -557,8 +557,8 @@ fn lifecycle_wiring_pulls_in_no_runtime_import() {
 fn many_mount_methods_share_one_hook_in_source_order() {
     let src = "// #component\nclass Foo extends Component {\n    // #mount\n    a(): void {}\n    // #mount\n    b(): void {}\n}";
     let out = expand(src).unwrap();
-    assert_eq!(out.matches("onMount(): void {").count(), 1);
-    let hook = &out[out.find("onMount(): void {").unwrap()..];
+    assert_eq!(out.matches("$$__onMount(): void {").count(), 1);
+    let hook = &out[out.find("$$__onMount(): void {").unwrap()..];
     assert!(hook.find("this.a();").unwrap() < hook.find("this.b();").unwrap());
 }
 
@@ -566,7 +566,7 @@ fn many_mount_methods_share_one_hook_in_source_order() {
 fn lifecycle_works_on_arrow_fields() {
     let src = "// #component\nclass Foo extends Component {\n    // #mount\n    ready = (): void => {};\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("onMount(): void {"));
+    assert!(out.contains("$$__onMount(): void {"));
     assert!(out.contains("this.ready();"));
 }
 
@@ -576,9 +576,9 @@ fn lifecycle_works_on_arrow_fields() {
 fn inheriting_component_chains_super_before_own_in_setup_hooks() {
     let src = "// #component\nclass Derived extends Base {\n    // #mount\n    ready(): void {}\n}";
     let out = expand(src).unwrap();
-    let hook = &out[out.find("onMount(): void {").unwrap()..];
+    let hook = &out[out.find("$$__onMount(): void {").unwrap()..];
     // setup runs base-first: super before own
-    assert!(hook.find("super.onMount?.();").unwrap() < hook.find("this.ready();").unwrap());
+    assert!(hook.find("super.$$__onMount?.();").unwrap() < hook.find("this.ready();").unwrap());
 }
 
 #[test]
@@ -586,18 +586,20 @@ fn inheriting_component_disposes_own_before_super() {
     let src =
         "// #component\nclass Derived extends Base {\n    // #dispose\n    teardown(): void {}\n}";
     let out = expand(src).unwrap();
-    let hook = &out[out.find("onDispose(): void {").unwrap()..];
+    let hook = &out[out.find("$$__onDispose(): void {").unwrap()..];
     // teardown reverses: own before super
-    assert!(hook.find("this.teardown();").unwrap() < hook.find("super.onDispose?.();").unwrap());
+    assert!(
+        hook.find("this.teardown();").unwrap() < hook.find("super.$$__onDispose?.();").unwrap()
+    );
 }
 
 #[test]
 fn inheriting_component_chains_super_effects() {
     let src = "// #component\nclass Derived extends Base {\n    // #effect\n    fx(): void {}\n}";
     let out = expand(src).unwrap();
-    let hook = &out[out.find("effects(): void {").unwrap()..];
+    let hook = &out[out.find("$$__effects(): void {").unwrap()..];
     assert!(
-        hook.find("super.effects?.();").unwrap()
+        hook.find("super.$$__effects?.();").unwrap()
             < hook.find("$__effect(() => this.fx());").unwrap()
     );
 }
@@ -606,9 +608,9 @@ fn inheriting_component_chains_super_effects() {
 fn inheriting_component_merges_super_sheets() {
     let src = "// #component\nclass Derived extends Base {\n    // #styles\n    s = `x`;\n}";
     let out = expand(src).unwrap();
-    assert!(
-        out.contains("Derived.__sheets = [...(Object.getPrototypeOf(Derived).__sheets ?? []), ...")
-    );
+    assert!(out.contains(
+        "Derived.$$__sheets = [...(Object.getPrototypeOf(Derived).$$__sheets ?? []), ..."
+    ));
 }
 
 #[test]
@@ -616,9 +618,9 @@ fn base_component_extending_component_does_not_chain_super() {
     // a plain component (extends the base `Component`) must be untouched.
     let src = "// #component\nclass Foo extends Component {\n    // #mount\n    ready(): void {}\n    // #styles\n    s = `x`;\n}";
     let out = expand(src).unwrap();
-    assert!(!out.contains("super.onMount"));
+    assert!(!out.contains("super.$$__onMount"));
     assert!(!out.contains("Object.getPrototypeOf"));
-    assert!(out.contains("Foo.__sheets = [..."));
+    assert!(out.contains("Foo.$$__sheets = [..."));
 }
 
 #[test]

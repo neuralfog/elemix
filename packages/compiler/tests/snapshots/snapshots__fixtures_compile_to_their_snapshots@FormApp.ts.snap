@@ -80,7 +80,7 @@ export class FormApp extends Component {
         this.state.result = JSON.stringify(Object.fromEntries(data), null, 2);
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
@@ -98,5 +98,5 @@ return _r3;
 return _r0;
 }
 }
-FormApp.__sheets = [..._s0];
+FormApp.$$__sheets = [..._s0];
 $__defineComponent('form-app', FormApp);

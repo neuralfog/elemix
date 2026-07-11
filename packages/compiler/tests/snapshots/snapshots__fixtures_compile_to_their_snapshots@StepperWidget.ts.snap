@@ -65,7 +65,7 @@ export class StepperWidget extends Component {
         this.state.count++;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
@@ -78,5 +78,5 @@ $__setText(_n2, (this.state.count));
 return _r0;
 }
 }
-StepperWidget.__sheets = [..._s0];
+StepperWidget.$$__sheets = [..._s0];
 $__defineComponent('ui-stepper', StepperWidget);

@@ -52,7 +52,7 @@ export class ProfileApp extends Component {
         this.state.likes++;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!;
@@ -73,5 +73,5 @@ $__setProp(_n4, 'likes', (this.state.likes));
 return _r0;
 }
 }
-ProfileApp.__sheets = [..._s0];
+ProfileApp.$$__sheets = [..._s0];
 $__defineComponent('profile-app', ProfileApp);

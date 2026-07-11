@@ -53,7 +53,7 @@ fn hyphenless_tag_warns_but_still_compiles() {
     // a warning never blocks: the component is still registered + has a view
     assert!(!out.contains("throw new Error("));
     assert!(out.contains("$__defineComponent('widget', Widget)"));
-    assert!(out.contains("view(): DocumentFragment"));
+    assert!(out.contains("$$__view(): DocumentFragment"));
 
     let (_, diags) = compile_diagnostics(HYPHENLESS);
     assert_eq!(diags.len(), 1);

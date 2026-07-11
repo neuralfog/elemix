@@ -15,7 +15,7 @@ const css = `.light { color: rgb(255, 0, 0); }`;
 const _t0 = $__template('<div class="light"><span class="count"> </span><button class="inc">+1</button></div>');
 
 export class NoShadowApp extends Component {
-    static __noShadow = true;
+    static $$__noShadow = true;
     styles = css;
 
     state = $__state<State>({ count: 0 });
@@ -24,7 +24,7 @@ export class NoShadowApp extends Component {
         this.state.count++;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;

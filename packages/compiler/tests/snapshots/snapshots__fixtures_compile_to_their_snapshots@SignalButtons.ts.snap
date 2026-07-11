@@ -42,7 +42,7 @@ export class SignalButtons extends Component {
         counter.count++;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
@@ -53,5 +53,5 @@ $__event(_n3, 'click', this.inc);
 return _r0;
 }
 }
-SignalButtons.__sheets = [..._s0];
+SignalButtons.$$__sheets = [..._s0];
 $__defineComponent('signal-buttons', SignalButtons);

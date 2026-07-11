@@ -97,7 +97,7 @@ export class ClassStateApp extends Component {
         this.state.cart.clear();
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
@@ -145,5 +145,5 @@ $__setText(_n4, (this.state.cart.total));
 return _r0;
 }
 }
-ClassStateApp.__sheets = [..._s0];
+ClassStateApp.$$__sheets = [..._s0];
 $__defineComponent('class-state-app', ClassStateApp);

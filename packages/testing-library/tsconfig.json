@@ -1,0 +1,15 @@
+{
+    "extends": "@neuralfog/ts-config/index.json",
+    "include": ["index.ts", "query.ts", "events.ts", "src/**/*"],
+    "exclude": [
+        "dist",
+        "node_modules",
+        "**/*.test.*",
+        "**/*.spec.*",
+        "vite.config.*",
+        "vitest.config.*"
+    ],
+    "compilerOptions": {
+        "types": ["node"]
+    }
+}

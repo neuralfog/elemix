@@ -1,4 +1,6 @@
-import { expect, userEvent } from 'storybook/test';
+import { expect } from '@neuralfog/elemix-testing-library';
+import { click } from '@neuralfog/elemix-testing-library/events';
+import { find } from '@neuralfog/elemix-testing-library/query';
 import './.emited/InheritanceApp';
 
 export default { title: 'Compiled/ProofInheritance' };
@@ -6,13 +8,13 @@ export default { title: 'Compiled/ProofInheritance' };
 export const Default = {
     render: () => '<inherit-derived></inherit-derived>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        const app = canvasElement.querySelector('inherit-derived');
+        const app = find('inherit-derived', canvasElement);
         const root = app?.shadowRoot;
         if (!app || !root)
             throw new Error('inherit-derived did not render a shadow root');
 
         // template + state are INHERITED from the base via the prototype
-        const button = root.querySelector('.btn');
+        const button = find('.btn', canvasElement);
         if (!button) throw new Error('inherited template did not render');
         expect(button.textContent?.trim()).toBe('count 0');
 
@@ -22,8 +24,8 @@ export const Default = {
         expect(app.getAttribute('data-derived-fx')).toBe('0');
 
         // inherited reactive state works on the derived instance
-        await userEvent.click(button);
-        await userEvent.click(button);
+        click(button);
+        click(button);
         expect(button.textContent?.trim()).toBe('count 2');
 
         // both effects re-ran reactively off the inherited state

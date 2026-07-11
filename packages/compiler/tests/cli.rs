@@ -43,7 +43,7 @@ fn compiles_a_single_file_to_the_out_dir() {
     assert!(status.success());
 
     let compiled = std::fs::read_to_string(dir.join("CounterApp.ts")).unwrap();
-    assert!(compiled.contains("view(): DocumentFragment"));
+    assert!(compiled.contains("$$__view(): DocumentFragment"));
     assert!(compiled.contains("from '@neuralfog/elemix/runtime'"));
     assert!(compiled.contains("const _t0 = $__template("));
     // the html intrinsic and the directive are fully lowered/erased
@@ -73,7 +73,7 @@ fn stdin_mode_pipes_compiled_source_to_stdout() {
     assert!(out.status.success());
 
     let compiled = String::from_utf8(out.stdout).unwrap();
-    assert!(compiled.contains("view(): DocumentFragment"));
+    assert!(compiled.contains("$$__view(): DocumentFragment"));
     assert!(compiled.contains("from '@neuralfog/elemix/runtime'"));
     assert!(!compiled.contains("tpl`"));
 }
@@ -148,7 +148,7 @@ fn stdin_sourcemap_emits_a_code_map_envelope() {
     let envelope = String::from_utf8(out.stdout).unwrap();
     assert!(envelope.starts_with("{\"code\":"));
     assert!(envelope.contains("\"map\":{\"version\":3"));
-    assert!(envelope.contains("view(): DocumentFragment"));
+    assert!(envelope.contains("$$__view(): DocumentFragment"));
 }
 
 #[test]

@@ -120,7 +120,7 @@ fn generated_lines_map_to_nothing() {
     for (gen, _) in &pairs {
         let line = out_lines[*gen];
         assert!(
-            !line.contains("view(): DocumentFragment") && !line.contains("= $__template("),
+            !line.contains("$$__view(): DocumentFragment") && !line.contains("= $__template("),
             "a generated line ({line}) was mapped to the source"
         );
     }

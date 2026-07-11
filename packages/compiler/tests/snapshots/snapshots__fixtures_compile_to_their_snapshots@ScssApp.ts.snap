@@ -25,7 +25,7 @@ export class ScssApp extends Component {
         this.state.count++;
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
 const _n2 = _n1.firstChild!.nextSibling!;
@@ -38,5 +38,5 @@ $__setText(_x3, (this.state.count));
 return _r0;
 }
 }
-ScssApp.__sheets = [..._s0];
+ScssApp.$$__sheets = [..._s0];
 $__defineComponent('scss-app', ScssApp);

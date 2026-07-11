@@ -105,7 +105,7 @@ export class DirectApp extends Component {
         this.state[key] = !this.state[key];
     };
 
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.nextSibling!;
 const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
@@ -131,5 +131,5 @@ $__setAttr(_n6, 'disabled', (_v7));
 return _r0;
 }
 }
-DirectApp.__sheets = [..._s0];
+DirectApp.$$__sheets = [..._s0];
 $__defineComponent('direct-app', DirectApp);

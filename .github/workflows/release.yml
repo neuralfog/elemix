@@ -644,6 +644,82 @@ jobs:
           echo "publishing @neuralfog/elemix-storybook@$VERSION under dist-tag: $TAG"
           pnpm publish --access public --provenance --no-git-checks --tag "$TAG"
 
+  publish-testing-library:
+    name: publish @neuralfog/elemix-testing-library
+    # After elemix is on npm (peer dependency).
+    needs: [publish-elemix, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      # Stamp BOTH manifests: testing-library's own version, and elemix's — pnpm
+      # rewrites the `workspace:*` peer-dep to whatever elemix's version field
+      # says at publish time, so it must read the released version.
+      - name: Stamp version + elemix peer-dep
+        env:
+          VERSION: ${{ needs.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = process.env.VERSION;
+            for (const f of ["packages/elemix/package.json", "packages/testing-library/package.json"]) {
+              const p = JSON.parse(fs.readFileSync(f, "utf8"));
+              p.version = v;
+              fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            }
+            console.log(`elemix-testing-library@${v} (peer @neuralfog/elemix ${v})`);
+          '
+
+      # testing-library builds against elemix's types — build the library first.
+      - name: Build
+        run: |
+          pnpm --filter @neuralfog/elemix build
+          pnpm --filter @neuralfog/elemix-testing-library build
+
+      # `needs: publish-elemix` already ran the publish — this only rides out
+      # npm's CDN propagation lag so an installer never sees a missing peer.
+      - name: Wait for the elemix peer dependency
+        run: |
+          DEP="${{ needs.version.outputs.value }}"
+          echo "waiting for @neuralfog/elemix@$DEP on npm..."
+          for i in $(seq 1 30); do
+            if npm view "@neuralfog/elemix@$DEP" version >/dev/null 2>&1; then
+              echo "✓ @neuralfog/elemix@$DEP is published"
+              exit 0
+            fi
+            echo "  not yet ($i/30)..."; sleep 5
+          done
+          echo "::error::@neuralfog/elemix@$DEP did not propagate in time"
+          exit 1
+
+      # Ship the changelog (its `files` lists it) — staged from the root source.
+      - name: Stage changelog
+        run: cp CHANGELOG.md packages/testing-library/CHANGELOG.md
+
+      - name: Publish
+        working-directory: packages/testing-library
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/elemix-testing-library@$VERSION under dist-tag: $TAG"
+          pnpm publish --access public --provenance --no-git-checks --tag "$TAG"
+
   publish-vite:
     name: publish @neuralfog/elemix-vite
     # After the compiler is on npm (runtime dependency, pinned to this version).
@@ -726,6 +802,7 @@ jobs:
       - publish-wasm
       - publish-elemix
       - publish-storybook
+      - publish-testing-library
       - publish-vite
     runs-on: ubuntu-latest
     permissions:

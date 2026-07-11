@@ -25,7 +25,7 @@ export class MethodHelperApp extends Component {
     };
 
     
-    view(): DocumentFragment {
+    $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!;

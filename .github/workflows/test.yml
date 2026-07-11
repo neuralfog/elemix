@@ -44,9 +44,10 @@ jobs:
       - name: Lint changelog
         run: node scripts/changelog.mjs lint
 
-      # Browser for the compiler's Storybook conformance plays (headless chromium).
-      - name: Install Playwright chromium
-        run: pnpm --filter @neuralfog/elemix-compiler exec playwright install --with-deps chromium
+      # Browsers for the compiler's Storybook conformance plays — every story runs
+      # headless in Chromium, Firefox, and WebKit (Safari's engine).
+      - name: Install Playwright browsers
+        run: pnpm --filter @neuralfog/elemix-compiler exec playwright install --with-deps chromium firefox webkit
 
       - run: pnpm build
 
