@@ -59,29 +59,53 @@ struct Sidecar {
     content: String,
 }
 
+/// All overlays go under ONE throwaway cache dir (already git-ignored via
+/// `node_modules`), never next to the user's sources. It is created fresh and
+/// removed wholesale each run, so a stray file can never survive.
+const CACHE_REL: &str = "node_modules/.cache/elemix-analyzer";
+
+/// This process's private overlay dir, namespaced by pid so two analyzers on the
+/// same project (an LSP server + a CLI `pn lint`, or parallel test runners) never
+/// clobber each other's cache.
+pub(crate) fn cache_dir(root: &Path) -> PathBuf {
+    root.join(CACHE_REL).join(std::process::id().to_string())
+}
+
 fn run_tsc(root: &str, overlays: &[Overlay]) -> Result<Vec<RawDiagnostic>, String> {
     let root_path = Path::new(root);
-    let pid = std::process::id();
+    let cache = cache_dir(root_path);
+    // Start from a clean slate (a prior crash may have left one behind).
+    let _ = std::fs::remove_dir_all(&cache);
 
-    // 1. Write each overlay to a hidden sidecar NEXT TO its original, so the
-    //    overlay's relative imports and `#alias/*` paths resolve identically.
+    // 1. Write each overlay into the cache, MIRRORING its path relative to the
+    //    project root. Paired with `rootDirs: [root, cache]` below, this makes the
+    //    overlay's relative imports (`./Sibling`) resolve to the real files, and
+    //    `#alias/*` + bare packages resolve through the project's own tsconfig +
+    //    node_modules — all without a single file landing beside the sources.
     let mut sidecars = Vec::new();
     for (i, ov) in overlays.iter().enumerate() {
         let orig = Path::new(&ov.path);
-        let dir = orig.parent().unwrap_or(root_path);
-        let stem = orig.file_stem().and_then(|s| s.to_str()).unwrap_or("file");
-        let path = dir.join(format!(".{stem}.__elemix{pid}_{i}.ts"));
-        std::fs::write(&path, &ov.content)
-            .map_err(|e| format!("writing overlay {}: {e}", path.display()))?;
+        let target = match orig.strip_prefix(root_path) {
+            Ok(rel) => cache.join(rel),
+            // A source outside the project root can't be mirrored; park it flat.
+            Err(_) => cache.join(format!("__external{i}.ts")),
+        };
+        if let Some(parent) = target.parent() {
+            std::fs::create_dir_all(parent)
+                .map_err(|e| format!("creating overlay dir {}: {e}", parent.display()))?;
+        }
+        std::fs::write(&target, &ov.content)
+            .map_err(|e| format!("writing overlay {}: {e}", target.display()))?;
         sidecars.push(Sidecar {
-            path,
+            path: target,
             orig: ov.path.clone(),
             content: ov.content.clone(),
         });
     }
 
-    // 2. A temp tsconfig that inherits the project's options (strict, paths, lib)
-    //    but roots ONLY the sidecars — nothing else is checked.
+    // 2. A temp tsconfig (also inside the cache) that inherits the project's options
+    //    but roots ONLY the overlays, with `rootDirs` merging the cache over the
+    //    real tree.
     let files: Vec<String> = sidecars
         .iter()
         .map(|s| s.path.to_string_lossy().into_owned())
@@ -89,7 +113,10 @@ fn run_tsc(root: &str, overlays: &[Overlay]) -> Result<Vec<RawDiagnostic>, Strin
     let mut cfg = serde_json::json!({
         "files": files,
         "include": [],
-        "compilerOptions": { "noEmit": true },
+        "compilerOptions": {
+            "noEmit": true,
+            "rootDirs": [root_path.to_string_lossy(), cache.to_string_lossy()],
+        },
     });
     if let Some(base) = find_tsconfig(root_path) {
         cfg["extends"] = base.to_string_lossy().into_owned().into();
@@ -97,7 +124,7 @@ fn run_tsc(root: &str, overlays: &[Overlay]) -> Result<Vec<RawDiagnostic>, Strin
         cfg["compilerOptions"]["strict"] = true.into();
         cfg["compilerOptions"]["skipLibCheck"] = true.into();
     }
-    let tsconfig = root_path.join(format!(".tsconfig.__elemix{pid}.json"));
+    let tsconfig = cache.join("tsconfig.json");
     let write_cfg = std::fs::write(&tsconfig, serde_json::to_vec(&cfg).unwrap())
         .map_err(|e| format!("writing tsconfig: {e}"));
 
@@ -118,26 +145,36 @@ fn run_tsc(root: &str, overlays: &[Overlay]) -> Result<Vec<RawDiagnostic>, Strin
             })
     });
 
-    // 4. Clean up temp files unconditionally.
-    for s in &sidecars {
-        let _ = std::fs::remove_file(&s.path);
-    }
-    let _ = std::fs::remove_file(&tsconfig);
+    // 4. Drop the ENTIRE cache dir - one wholesale removal, no per-file bookkeeping,
+    //    no chance of a straggler.
+    let _ = std::fs::remove_dir_all(&cache);
 
     let output = output?;
 
-    // 5. Parse `file(line,col): category TS####: message`, keep only sidecar
-    //    diagnostics, and translate to overlay coords (path + byte offset).
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    Ok(parse_output(&output.stdout, &sidecars, root_path))
+}
+
+/// Parse `file(line,col): category TS####: message` lines, keep only overlay
+/// diagnostics, and translate each to overlay coords (original path + byte offset).
+/// Matches by full path (overlays share their originals' base names now).
+fn parse_output(stdout: &[u8], sidecars: &[Sidecar], root: &Path) -> Vec<RawDiagnostic> {
+    let stdout = String::from_utf8_lossy(stdout);
+    let norm = |p: &str| p.replace('\\', "/");
     let mut diagnostics = Vec::new();
     for line in stdout.lines() {
         let Some(d) = parse_diagnostic(line) else {
             continue;
         };
-        let name = file_name(&d.file);
+        // tsc prints the overlay path relative to cwd (the root) or absolute.
+        let abs = if Path::new(&d.file).is_absolute() {
+            PathBuf::from(&d.file)
+        } else {
+            root.join(&d.file)
+        };
+        let abs = norm(&abs.to_string_lossy());
         let Some(side) = sidecars
             .iter()
-            .find(|s| s.path.file_name().and_then(|n| n.to_str()) == Some(name))
+            .find(|s| norm(&s.path.to_string_lossy()) == abs)
         else {
             continue;
         };
@@ -149,7 +186,7 @@ fn run_tsc(root: &str, overlays: &[Overlay]) -> Result<Vec<RawDiagnostic>, Strin
             message: d.message,
         });
     }
-    Ok(diagnostics)
+    diagnostics
 }
 
 /// The project's tsc launcher (`node_modules/.bin/tsc`), which on TS 7 execs the
@@ -233,9 +270,4 @@ fn line_col_to_byte(content: &str, line: u32, col: u32) -> u32 {
         byte += l.len();
     }
     byte as u32
-}
-
-/// Last path segment, tolerant of either slash flavour tsc might emit.
-fn file_name(path: &str) -> &str {
-    path.rsplit(['/', '\\']).next().unwrap_or(path)
 }

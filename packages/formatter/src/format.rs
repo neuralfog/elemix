@@ -32,14 +32,10 @@ fn format_one(src: &str, tpl: &scan::Tpl, opts: &Options) -> Option<String> {
     // content are honest). Whether the result ends up single- or multi-line is
     // decided afterward by `reindent` - if a single-line body results, it has no
     // break lines, so the indent never mattered.
-    let content_indent = tpl.base_indent + opts.tab_width;
+    let base_cols = opts.base_cols(tpl.base_indent);
+    let content_indent = base_cols + opts.tab_width;
     let body = html::format_template(&tpl.statics, &tpl.holes, opts, content_indent)?;
-    Some(reindent(
-        &body,
-        tpl.base_indent,
-        opts.tab_width,
-        was_multiline,
-    ))
+    Some(reindent(&body, base_cols, opts, was_multiline))
 }
 
 /// Format every ``tpl`` `` template in a source file.
@@ -158,7 +154,7 @@ impl<'a> LineIndex<'a> {
 ///     <div>…</div>
 /// `
 /// ```
-fn reindent(body: &str, base_indent: usize, tab_width: usize, was_multiline: bool) -> String {
+fn reindent(body: &str, base_cols: usize, opts: &Options, was_multiline: bool) -> String {
     // A body that printed to a single line and was authored on one line stays a
     // single-line template (`tpl`<x/>``); don't blow it up into three lines.
     if !body.contains('\n') && !was_multiline {
@@ -168,8 +164,8 @@ fn reindent(body: &str, base_indent: usize, tab_width: usize, was_multiline: boo
     // Prepend the content indent to that first line and wrap with the boundary
     // newlines + the closing backtick's indent. Verbatim (pre) lines, emitted at
     // column 0 by the printer, are left untouched - so re-running is a fixed point.
-    let content_indent = " ".repeat(base_indent + tab_width);
-    format!("\n{content_indent}{body}\n{}", " ".repeat(base_indent))
+    let content_indent = opts.indent(base_cols + opts.tab_width);
+    format!("\n{content_indent}{body}\n{}", opts.indent(base_cols))
 }
 
 #[cfg(test)]
@@ -180,6 +176,7 @@ mod tests {
         Options {
             width: 80,
             tab_width: 4,
+            ..Options::default()
         }
     }
 
@@ -264,6 +261,34 @@ mod tests {
     }
 
     #[test]
+    fn tab_indent_style_emits_tabs() {
+        // A tab-indented source, formatted with indent_style = tab.
+        let src =
+            "class C {\n\ttemplate = () => tpl`\n\t\t<ul><li>one</li><li>two</li></ul>\n\t`;\n}\n";
+        let opts = Options {
+            width: 80,
+            tab_width: 4,
+            indent_style: crate::doc::IndentStyle::Tab,
+        };
+        let out = format_source(src, &opts).output;
+        assert!(
+            out.contains("\n\t\t<ul>"),
+            "ul under the template at 2 tabs: {out:?}"
+        );
+        assert!(
+            out.contains("\n\t\t\t<li>one</li>"),
+            "li at 3 tabs: {out:?}"
+        );
+        assert!(out.contains("\n\t\t</ul>"), "closing ul at 2 tabs: {out:?}");
+        assert!(
+            !out.contains("\n    "),
+            "no space indentation leaks in: {out:?}"
+        );
+        // Idempotent in tab mode too.
+        assert_eq!(format_source(&out, &opts).output, out);
+    }
+
+    #[test]
     fn print_width_is_configurable() {
         let src = "class C {\n    t = tpl`<a href=\"/x\" title=\"hello there\">link</a>`;\n}\n";
         // Wide: stays on one line.
@@ -272,6 +297,7 @@ mod tests {
             &Options {
                 width: 200,
                 tab_width: 4,
+                ..Options::default()
             },
         )
         .output;
@@ -282,6 +308,7 @@ mod tests {
             &Options {
                 width: 20,
                 tab_width: 4,
+                ..Options::default()
             },
         )
         .output;

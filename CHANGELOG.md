@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.21] - 2026-07-14
+
+### Added
+
+- Neovim editor extension
+- Vscode editor extension
+
+### Changed
+
+- Formatter is configured from `elemix.toml` (`[formatter]`) this includes editor extensions
+
+### Fixed
+
+- Vite plugin now compiles a file whose only hint is `// #shadow`
+
 ## [0.9.0-dev.20] - 2026-07-11
 
 ### Fixed

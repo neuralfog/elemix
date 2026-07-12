@@ -4,16 +4,17 @@
 //! the one un-native step — type judgment — to the project's `tsc`. See
 //! ANALYZER.md for the design.
 
+mod analyze;
 mod imports;
+mod lsp;
 mod oracle;
 mod project;
 mod report;
 
 use clap::Parser;
-use elemix_compiler::scan_hints;
-use oracle::{Overlay, TscOracle, TypeOracle};
-use project::{build_overlay, build_registry, FileOverlay, Skipped};
-use report::{Palette, Stats};
+use oracle::TscOracle;
+use project::Skipped;
+use report::Palette;
 use std::collections::HashMap;
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
@@ -26,20 +27,37 @@ use std::process::ExitCode;
 )]
 struct Cli {
     /// Directories or globs to scan for `.ts` sources (recursive for a dir).
-    #[arg(long = "dirs", value_name = "DIR|GLOB", num_args = 1.., required = true)]
+    #[arg(long = "dirs", value_name = "DIR|GLOB", num_args = 1.., required_unless_present = "lsp")]
     dirs: Vec<String>,
 
     /// Project root holding `node_modules` + `tsconfig.json` (where `tsc` resolves).
     #[arg(long, default_value = ".")]
     root: String,
 
-    /// Emit LSP-shaped JSON diagnostics instead of the human caret report.
+    /// Run as a persistent LSP server on stdio (warm state, push diagnostics)
+    /// instead of the one-shot CLI report. Same binary, same checks.
     #[arg(long)]
     lsp: bool,
+
+    /// Accepted for LSP-client compatibility - `vscode-languageclient` appends
+    /// `--stdio` when it launches the server. The server always talks stdio, so
+    /// this is simply tolerated and ignored.
+    #[arg(long, hide = true)]
+    stdio: bool,
+
+    /// Emit findings as a JSON array (one-shot, for CI) instead of the human report.
+    #[arg(long)]
+    json: bool,
 }
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
+
+    // The persistent LSP server owns its own file set (the editor pushes edits),
+    // so it takes over before any --dirs scan.
+    if cli.lsp || cli.stdio {
+        return lsp::serve(&cli.root);
+    }
 
     let root = match std::fs::canonicalize(&cli.root) {
         Ok(p) => p,
@@ -65,63 +83,17 @@ fn main() -> ExitCode {
         return ExitCode::from(2);
     }
 
-    let registry = build_registry(&files);
-
-    // Build the virtual overlays (wrapped prop holes) for every file that has any.
-    let mut overlays: Vec<FileOverlay> = Vec::new();
-    let mut skipped: Vec<Skipped> = Vec::new();
-    for (path, src) in &files {
-        if let Some(ov) = build_overlay(path, src, &registry, &mut skipped) {
-            overlays.push(ov);
+    let analysis = match analyze::analyze(&root, &files, &TscOracle, false) {
+        Ok(a) => a,
+        Err(e) => {
+            eprintln!("elemix-analyzer: {e}");
+            return ExitCode::from(2);
         }
-    }
-
-    let stats = Stats {
-        components: registry.len(),
-        checked: overlays.iter().map(|o| o.holes.len()).sum(),
-        files: files.len(),
     };
 
     // Colour the human report when stdout is a real terminal (and NO_COLOR unset).
     let palette =
         Palette::new(std::io::stdout().is_terminal() && std::env::var_os("NO_COLOR").is_none());
-
-    let mut findings = Vec::new();
-
-    // Compiler-hint checks are pure-Rust (no oracle) — run them on every file.
-    for (path, src) in &files {
-        findings.extend(report::hint_findings(
-            &path.to_string_lossy(),
-            scan_hints(src),
-        ));
-    }
-
-    // Unimported-component warnings — also pure-Rust (an import-graph walk).
-    findings.extend(imports::unimported_warnings(&files, &registry, &root));
-
-    // Prop type-judgment is delegated to the project's tsc via the oracle — only
-    // needed when there are prop holes to check (hint-only projects skip node).
-    if !overlays.is_empty() {
-        let request: Vec<Overlay> = overlays
-            .iter()
-            .map(|o| Overlay {
-                path: o.path.to_string_lossy().into_owned(),
-                content: o.content.clone(),
-            })
-            .collect();
-        let check: Vec<String> = request.iter().map(|o| o.path.clone()).collect();
-
-        match TscOracle.check(&root.to_string_lossy(), &request, &check) {
-            Ok(raw) => findings.extend(report::attribute(&raw, &overlays)),
-            Err(e) => {
-                eprintln!("elemix-analyzer: {e}");
-                return ExitCode::from(2);
-            }
-        }
-    }
-
-    // Stable order: by file, then position in the file.
-    findings.sort_by(|a, b| (a.file.as_str(), a.orig_start).cmp(&(b.file.as_str(), b.orig_start)));
 
     // Source lookup for rendering carets against the ORIGINAL files.
     let sources: HashMap<String, String> = files
@@ -130,18 +102,24 @@ fn main() -> ExitCode {
         .collect();
     let source_of = |f: &str| sources.get(f).cloned();
 
-    if cli.lsp {
-        println!("{}", report::render_lsp(&findings, source_of));
+    if cli.json {
+        println!("{}", report::render_json(&analysis.findings, source_of));
         return ExitCode::SUCCESS;
     }
 
     print!("{}", report::banner(&palette));
-    print!("{}", report::render_pretty(&findings, source_of, &palette));
-    print!("{}", report::summary(&findings, &stats, &palette));
-    report_skipped(&skipped);
+    print!(
+        "{}",
+        report::render_pretty(&analysis.findings, source_of, &palette)
+    );
+    print!(
+        "{}",
+        report::summary(&analysis.findings, &analysis.stats, &palette)
+    );
+    report_skipped(&analysis.skipped);
 
     // Errors fail the build; warnings (e.g. an invalid tag) do not.
-    if findings.iter().any(|f| f.category != "warning") {
+    if analysis.findings.iter().any(|f| f.category != "warning") {
         ExitCode::FAILURE
     } else {
         ExitCode::SUCCESS
@@ -150,7 +128,7 @@ fn main() -> ExitCode {
 
 fn report_skipped(skipped: &[Skipped]) {
     for s in skipped {
-        eprintln!("note: skipped <{}> — {}", s.tag, s.reason);
+        eprintln!("note: skipped <{}> - {}", s.tag, s.reason);
     }
 }
 

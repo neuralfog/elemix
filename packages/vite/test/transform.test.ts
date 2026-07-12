@@ -10,6 +10,7 @@ const ALL_PRAGMAS = [
     'tag',
     'form',
     'no-shadow',
+    'shadow',
     'styles',
     'state',
     'effect',

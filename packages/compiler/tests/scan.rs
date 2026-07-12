@@ -285,6 +285,21 @@ fn derived_invalid_tag_carets_the_class_name() {
 }
 
 #[test]
+fn unknown_directive_on_a_member_carets_the_member_not_the_file_head() {
+    // Regression: an unknown hint on a field/method used to collapse to offset 0
+    // (line 1). It must caret the member the bad hint is attached to.
+    let src = "export class Foo extends Component {\n    // #effectdfsd\n    doThing() {}\n}";
+    let diags = scan_hints(src);
+    assert_eq!(diags.len(), 1);
+    assert_eq!(diags[0].severity, HintSeverity::Error);
+    assert!(diags[0].message.contains("effectdfsd"));
+    assert_eq!(
+        &src[diags[0].start as usize..diags[0].end as usize],
+        "doThing"
+    );
+}
+
+#[test]
 fn tag_arity_error_is_reported() {
     let src = "// #component #tag a b\nexport class Foo extends Component {}";
     let diags = scan_hints(src);

@@ -48,7 +48,7 @@ impl std::fmt::Display for ExpandError {
 
 /// Expand every pragma in `source`. Identity when there are none.
 pub fn expand(source: &str) -> Result<String, ExpandError> {
-    let located = locate(source).map_err(ExpandError::Locate)?;
+    let located = locate(source).map_err(|e| ExpandError::Locate(e.err))?;
     let no_pragmas = located.states.is_empty()
         && located.classes.iter().all(|c| {
             c.directives.is_empty()

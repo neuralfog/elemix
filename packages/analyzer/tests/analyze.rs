@@ -37,7 +37,7 @@ fn run(args: &[&str]) -> (String, Option<i32>) {
 #[test]
 fn flags_exactly_the_bad_prop_holes() {
     let fx = fixtures();
-    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--lsp"]);
+    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--json"]);
 
     let value: serde_json::Value = serde_json::from_str(&stdout)
         .unwrap_or_else(|e| panic!("expected JSON, got {stdout:?}: {e}"));
@@ -220,7 +220,7 @@ fn flags_exactly_the_bad_prop_holes() {
 #[test]
 fn flags_match_directive_problems() {
     let fx = fixtures_match();
-    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--lsp"]);
+    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--json"]);
 
     let value: serde_json::Value = serde_json::from_str(&stdout)
         .unwrap_or_else(|e| panic!("expected JSON, got {stdout:?}: {e}"));
@@ -291,7 +291,7 @@ fn tsconfig_path_alias_resolves_a_side_effect_import() {
     // is not imported at all. The alias must resolve like a relative import, so
     // ONLY `al-orphan` earns the unimported-module warning.
     let fx = fixtures_alias();
-    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--lsp"]);
+    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--json"]);
 
     assert!(
         stdout.contains("is used but its module is not imported"),
@@ -314,7 +314,7 @@ fn checks_prop_holes_in_a_free_standing_template() {
     // analyzer must type-check those holes exactly like a component template:
     // flag the two bad props and leave the model/event/store reads alone.
     let fx = fixtures_free();
-    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--lsp"]);
+    let (stdout, _) = run(&["--dirs", &fx, "--root", &fx, "--json"]);
 
     let value: serde_json::Value = serde_json::from_str(&stdout)
         .unwrap_or_else(|e| panic!("expected JSON, got {stdout:?}: {e}"));

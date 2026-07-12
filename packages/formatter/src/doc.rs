@@ -136,9 +136,20 @@ enum Mode {
     Break,
 }
 
+/// Whether one indent level is rendered as a tab or as spaces.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum IndentStyle {
+    Space,
+    Tab,
+}
+
 pub struct Options {
+    /// Max line width the printer wraps at.
     pub width: usize,
+    /// Columns per indent level (spaces per level, or a tab's display width).
     pub tab_width: usize,
+    /// Render indentation with tabs or spaces.
+    pub indent_style: IndentStyle,
 }
 
 impl Default for Options {
@@ -146,6 +157,27 @@ impl Default for Options {
         Self {
             width: 80,
             tab_width: 4,
+            indent_style: IndentStyle::Space,
+        }
+    }
+}
+
+impl Options {
+    /// Render `cols` columns of indentation in the configured style: that many
+    /// spaces, or `cols / tab_width` tabs.
+    pub fn indent(&self, cols: usize) -> String {
+        match self.indent_style {
+            IndentStyle::Space => " ".repeat(cols),
+            IndentStyle::Tab => "\t".repeat(cols / self.tab_width),
+        }
+    }
+
+    /// Columns for a source line's leading-whitespace CHAR count. In space mode a
+    /// char is one column; in tab mode each char is a tab worth `tab_width`.
+    pub fn base_cols(&self, indent_chars: usize) -> usize {
+        match self.indent_style {
+            IndentStyle::Space => indent_chars,
+            IndentStyle::Tab => indent_chars * self.tab_width,
         }
     }
 }
@@ -262,7 +294,7 @@ pub fn print_at(mut doc: Doc, opts: &Options, initial_indent: usize) -> String {
                 } else {
                     trim_trailing_blanks(&mut out);
                     out.push('\n');
-                    out.push_str(&" ".repeat(ind));
+                    out.push_str(&opts.indent(ind));
                     pos = ind;
                 }
             }
@@ -448,6 +480,7 @@ mod tests {
             &Options {
                 width,
                 tab_width: 2,
+                ..Options::default()
             },
         )
     }

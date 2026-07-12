@@ -12,18 +12,45 @@ Target release of compiled templates `v0.9.0`
 
 ### Post v0.9.0 Release
 
-- [] Focus on proper editor support
-  - [] Full-blown LSP server in `analyzer`
-  - [] Focus on VS Code as the target
-  - [] Extension for template highlighting of `tpl`
-  - [] Linting extension based on the `analyzer` LSP mode
-  - [] Possibly combine into a single one for easier release
-  - [] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
-  - [] Add formatting extension based on `formatter`
-- [] Add curated `clanker` skill, include it in monorepo, add it to `elemix.dev`
-- [] Add MCP server for the docs for agentic coding along the skill
+No shortcuts, `v0.9.0` will ship as a full package. Target `1.0.0` will be reserved mainly for stability
+improvements if any... This is already incredibly stable!!
 
 ### Phase 7 - Close the release of v0.9.0 ❎
+
+- [ ] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
+- [ ] Look into `nvim` plugin versioning if such a thing exists 🤔
+- [ ] Add a curated `clanker` skill, include it in the monorepo, add it to `elemix.dev`
+- [ ] Add an MCP server for the docs for agentic coding alongside the skill
+
+***Editors, assemble! ⌨️🧑‍💻🔥***
+
+- Added editor support for `vscode` and `neovim` ⌨️🧑‍💻
+  - Syntax highlighting for `tpl` templates
+  - Prop typechecking diagnostics: prop type mismatches, missing required props, unknown props, duplicated props
+  - Validation for compiler hints 🎯
+  - Completion: `:props` (component-context aware), `@event`, `~model`/`~onmodel`
+  - Completion: compiler hints `// #...`
+  - Completion: component tags with default props inlined
+  - Hover: compiler hints docs
+  - Hover: component tags listing props
+  - Code actions: auto-import a used-but-unimported component
+  - Code actions: format templates
+  - Both `elemix-analyzer` and `elemix-template-formatter` resolve from the project's `node_modules` 💪
+- Full LSP server built into `elemix-analyzer` 🔥🐦‍🔥
+- Elemix formatter driven via a global `elemix.toml` config file resolved from the project root - this becomes
+  the single place to configure `elemix` 😶‍🌫️😶‍🌫️😶‍🌫️
+- Editor-extension formatting options driven from the config file, so no special per-editor config 🤮
+
+`elemix.toml` - sitting in root of the project 🌳
+
+```toml
+[formatter]
+enabled = true           # false turns the formatter off entirely
+indent_style = "space"   # "space" (default) or "tab"
+indent_width = 4         # columns per indent level
+line_width = 80          # max line width
+format_on_save = false   # format tpl templates on save
+```
 
 ***The Kobayashi Maru 🖖🧪***
 
@@ -81,7 +108,7 @@ export const Unchecked: ElemixStory = {
 ***Chores 🥣🧽***
 
 - Updated all JS dependencies and upgraded to `TypeScript 7` ❤️ Finally 🔥🔥🔥 Native `tsgo` is here 😃😃😁😁
-- Updated the Rust toolchain and all the Rust `packages' dependencies, gotta stay frosty!! ☃️☃️
+- Updated the Rust toolchain and all the Rust `packages` dependencies, gotta stay frosty!! ☃️☃️
 
 ***The Spice Must Flow 🏜️🌊***
 
@@ -961,3 +988,11 @@ What went well:
 GG 👊🥋✊
 
 - [x] Review and test decorator hooks in storybook package - remove if unnecessary
+
+- [x] Focus on proper editor support
+  - [x] Full-blown LSP server in `analyzer`
+  - [x] Focus on VS Code as the target
+  - [x] Extension for template highlighting of `tpl`
+  - [x] Linting extension based on the `analyzer` LSP mode
+  - [x] Possibly combine into a single one for easier release
+  - [x] Add formatting extension based on `formatter`

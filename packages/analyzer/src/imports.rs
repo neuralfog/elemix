@@ -66,7 +66,7 @@ pub fn unimported_warnings(
                 badge: "import".to_string(),
                 category: "warning".to_string(),
                 message: format!(
-                    "`<{}>` is used but its module is not imported here — a custom \
+                    "`<{}>` is used but its module is not imported here - a custom \
                      element only registers when its module loads",
                     usage.tag
                 ),
@@ -75,6 +75,29 @@ pub fn unimported_warnings(
         }
     }
     out
+}
+
+/// The specifier to write to import `component_file` from `current_file`: a
+/// tsconfig `paths` alias (e.g. `#src/components/Card`) when the component lives
+/// under an alias target, else a relative path. Powers the auto-import code action.
+pub(crate) fn import_specifier(component_file: &Path, current_file: &Path, root: &Path) -> String {
+    for rule in read_alias_rules(root) {
+        for dir in &rule.targets {
+            let dir = std::fs::canonicalize(dir).unwrap_or_else(|_| dir.clone());
+            let Ok(rel) = component_file.strip_prefix(&dir) else {
+                continue;
+            };
+            let rel = rel.with_extension("");
+            let rel = rel.to_string_lossy().replace('\\', "/");
+            if rule.has_star {
+                return format!("{}{}", rule.prefix, rel);
+            }
+            if rel.is_empty() {
+                return rule.prefix.clone();
+            }
+        }
+    }
+    crate::project::rel_module(current_file, component_file)
 }
 
 /// Resolve a relative `import`/`export … from` specifier to a project file: try

@@ -467,15 +467,17 @@ pub fn scan_hints(source: &str) -> Vec<HintDiagnostic> {
 
     let located = match locate(source) {
         Ok(l) => l,
-        // Structural failure is file-level — no declaration to blame or point at.
+        // A located failure carets the offending member; a spanless one (an orphan
+        // pragma, a structural parse error) stays file-level.
         Err(e) => {
+            let (start, end) = e.span.map_or((0, 0), |(s, en)| (s as u32, en as u32));
             out.push(HintDiagnostic {
                 severity: HintSeverity::Error,
                 kind: HintKind::Directive,
-                message: ExpandError::Locate(e).to_string(),
+                message: ExpandError::Locate(e.err).to_string(),
                 class: None,
-                start: 0,
-                end: 0,
+                start,
+                end,
             });
             return out;
         }

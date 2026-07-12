@@ -1,0 +1,19 @@
+{
+    "extends": ["@neuralfog/biome-config/biome"],
+    "files": {
+        "includes": [
+            "**",
+            "!**/node_modules/**/*",
+            "!**/dist/**/*",
+            "!**/*.vsix"
+        ]
+    },
+    "formatter": {
+        "includes": [
+            "**",
+            "!**/node_modules/**/*",
+            "!**/dist/**/*",
+            "!**/*.vsix"
+        ]
+    }
+}

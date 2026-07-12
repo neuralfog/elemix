@@ -238,7 +238,7 @@ fn gen_template(
         let g = read.as_str();
         match b.kind {
             BindingKind::Splice => {
-                lines.push(emitter.pending("Splice content binding — symbol resolution pending"))
+                lines.push(emitter.pending("Splice content binding - symbol resolution pending"))
             }
             BindingKind::List => lines.push(lower_list(&b.expr, node, ctx, emitter)),
             BindingKind::Child => lines.extend(lower_child(&b.expr, node, ctx, emitter)),

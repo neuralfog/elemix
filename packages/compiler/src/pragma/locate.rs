@@ -132,6 +132,21 @@ pub enum LocateError {
     OnField(String),
 }
 
+/// A [`LocateError`] paired with the source span to caret it at, where one
+/// exists. `span == None` is file-level (no declaration to point at, e.g. an
+/// orphan pragma); `Some((start, end))` frames the offending member name.
+#[derive(Debug, PartialEq)]
+pub struct LocatedError {
+    pub err: LocateError,
+    pub span: Option<(usize, usize)>,
+}
+
+impl From<LocateError> for LocatedError {
+    fn from(err: LocateError) -> Self {
+        LocatedError { err, span: None }
+    }
+}
+
 /// What a pragma comment binds to.
 enum Kind {
     Class(usize),
@@ -154,6 +169,7 @@ enum Kind {
         name_end: usize,
     },
     Const {
+        name_start: usize,
         name_end: usize,
         type_span: Option<Span>,
         value: Span,
@@ -161,7 +177,7 @@ enum Kind {
 }
 
 /// Find every pragma comment and bind it to the next-line declaration.
-pub fn locate(source: &str) -> Result<Located, LocateError> {
+pub fn locate(source: &str) -> Result<Located, LocatedError> {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
 
@@ -260,10 +276,10 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
             .filter(|(start, _)| *start >= cend)
             .min_by_key(|(start, _)| *start);
         let Some((start, kind)) = target else {
-            return Err(LocateError::Orphan);
+            return Err(LocateError::Orphan.into());
         };
         if !immediately_next_line(source, cend, *start) {
-            return Err(LocateError::Orphan);
+            return Err(LocateError::Orphan.into());
         }
 
         match kind {
@@ -286,7 +302,10 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                 value,
                 prop_end,
                 value_is_fn,
-            } => match directive_name(&directives)? {
+            } => match directive_name(&directives).map_err(|err| LocatedError {
+                err,
+                span: Some((*name_start, *name_end)),
+            })? {
                 "styles" => classes[*class_idx].styles.push(StyleField {
                     value: slice(source, *value),
                     strip: (line, field_block_end(source, *prop_end)),
@@ -341,14 +360,22 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                     }
                     strips.push((line, cend));
                 }
-                other => return Err(LocateError::OnField(other.to_string())),
+                other => {
+                    return Err(LocatedError {
+                        err: LocateError::OnField(other.to_string()),
+                        span: Some((*name_start, *name_end)),
+                    })
+                }
             },
             Kind::Method {
                 class_idx,
                 name,
                 name_start,
                 name_end,
-            } => match directive_name(&directives)? {
+            } => match directive_name(&directives).map_err(|err| LocatedError {
+                err,
+                span: Some((*name_start, *name_end)),
+            })? {
                 "effect" => {
                     classes[*class_idx].effects.push(name.clone());
                     strips.push((line, cend));
@@ -377,18 +404,32 @@ pub fn locate(source: &str) -> Result<Located, LocateError> {
                     });
                     strips.push((line, cend));
                 }
-                other => return Err(LocateError::OnField(other.to_string())),
+                other => {
+                    return Err(LocatedError {
+                        err: LocateError::OnField(other.to_string()),
+                        span: Some((*name_start, *name_end)),
+                    })
+                }
             },
             Kind::Const {
+                name_start,
                 name_end,
                 type_span,
                 value,
-            } => match directive_name(&directives)? {
+            } => match directive_name(&directives).map_err(|err| LocatedError {
+                err,
+                span: Some((*name_start, *name_end)),
+            })? {
                 "state" => {
                     states.push(state_edit(source, *name_end, *type_span, *value));
                     strips.push((line, cend));
                 }
-                other => return Err(LocateError::OnConst(other.to_string())),
+                other => {
+                    return Err(LocatedError {
+                        err: LocateError::OnConst(other.to_string()),
+                        span: Some((*name_start, *name_end)),
+                    })
+                }
             },
         }
     }
@@ -533,6 +574,7 @@ fn as_const(stmt: &Statement) -> Option<(usize, Kind)> {
     Some((
         stmt_start,
         Kind::Const {
+            name_start: id.span.start as usize,
             name_end: id.span.end as usize,
             type_span: first
                 .type_annotation

@@ -209,10 +209,12 @@ fn binds_a_styles_comment_to_a_class_field() {
 
 #[test]
 fn a_non_styles_directive_on_a_field_errors() {
-    assert_eq!(
-        locate("class Foo extends Component {\n    // #tag x\n    y = 1;\n}"),
-        Err(LocateError::OnField("tag".to_string()))
-    );
+    let src = "class Foo extends Component {\n    // #tag x\n    y = 1;\n}";
+    let e = locate(src).unwrap_err();
+    assert_eq!(e.err, LocateError::OnField("tag".to_string()));
+    // The error carets the offending member, not the file head.
+    let (s, en) = e.span.expect("a member span");
+    assert_eq!(&src[s..en], "y");
 }
 
 #[test]
@@ -254,23 +256,26 @@ fn non_pragma_comments_are_ignored() {
 
 #[test]
 fn a_blank_line_breaks_the_binding() {
-    assert_eq!(
-        locate("// #component\n\nclass Foo extends Component {}"),
-        Err(LocateError::Orphan)
-    );
+    let e = locate("// #component\n\nclass Foo extends Component {}").unwrap_err();
+    assert_eq!(e.err, LocateError::Orphan);
+    // An orphan pragma has no declaration to point at - file-level.
+    assert_eq!(e.span, None);
 }
 
 #[test]
 fn pragma_with_nothing_after_is_orphan() {
-    assert_eq!(locate("// #component"), Err(LocateError::Orphan));
+    let e = locate("// #component").unwrap_err();
+    assert_eq!(e.err, LocateError::Orphan);
+    assert_eq!(e.span, None);
 }
 
 #[test]
 fn a_class_directive_on_a_const_errors() {
-    assert_eq!(
-        locate("// #component\nconst x = 1;"),
-        Err(LocateError::OnConst("component".to_string()))
-    );
+    let src = "// #component\nconst x = 1;";
+    let e = locate(src).unwrap_err();
+    assert_eq!(e.err, LocateError::OnConst("component".to_string()));
+    let (s, en) = e.span.expect("a const-name span");
+    assert_eq!(&src[s..en], "x");
 }
 
 #[test]

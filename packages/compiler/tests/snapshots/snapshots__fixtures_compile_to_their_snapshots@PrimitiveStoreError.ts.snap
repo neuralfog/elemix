@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: tests/fixtures/PrimitiveStoreError.ts
 ---
-throw new Error('[elemix] module-level `#state` must be an object — a bare primitive export can\'t be reactive. Wrap it in a store object, e.g. `export const store = { count: 0 };` and read `store.count`. (Bare primitives are reactive only as component class fields.)');
+throw new Error('[elemix] module-level `#state` must be an object - a bare primitive export can\'t be reactive. Wrap it in a store object, e.g. `export const store = { count: 0 };` and read `store.count`. (Bare primitives are reactive only as component class fields.)');
 import { $__state } from '@neuralfog/elemix/runtime';
 // Diagnostic fixture: a MODULE-LEVEL `#state` with a bare primitive initializer.
 // A module export has no `this` to hang an accessor on, so it can't be made
