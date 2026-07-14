@@ -17,9 +17,38 @@ improvements if any... This is already incredibly stable!!
 
 ### Phase 7 - Close the release of v0.9.0 ❎
 
-- [ ] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
-- [ ] Look into `nvim` plugin versioning if such a thing exists 🤔
 - [ ] Add a curated `clanker` skill, include it in the monorepo, add it to `elemix.dev`
+- [ ] Additional polish of playground examples, organize examples better or not 🤔
+  Need compleating before the documentation so I can link real examples...
+- [ ] Conformance (potential bug fixing)
+  - [x] Convert wikipulse app
+  - [ ] Convert stealth app (over 200 components)
+- [ ] Put a website at `elemix.dev`
+  - [x] Landing page
+  - [x] Documentation driven by markdow files
+  - [x] Selectable verion same as Laravel docs
+  - [ ] Write the actual docs 😒
+- [ ] Update all `README` files at the moment are just autocomplete filler from the `minion` 🤖
+- [ ] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
+- [ ] Add elemix to official benchmarks
+- [ ] Once `elemix.dev` is live verify publisher on vscode marketplace with DNS record
+
+***The Extension Awakens ⚡🚀***
+
+- VSCode publish pipeline now works, the initial `0.9.0` pre-release version is live and can be installed in `vscode` 🔥🔥 [vscode marketplace](https://marketplace.visualstudio.com/items?itemName=neuralfog.elemix-vscode)
+
+![vscode](.roadmap/vscode-marketplace.png)
+
+- Neovim mirror repo now syncs correctly during release, versions managed by tags 💪💪
+- 🚨🚨🚨🚨 What the hell was I thinking 😂🤦🧠🧟 Since when should the editor's responsibility for formatting code live
+  in a project setting, well that was dumb, to put it lightly 😬🤣 Auto formatting is now controlled at the editor level:
+    - `vscode` - command palette, a per-project persistent option to enable/disable auto formatting ⚙️
+    - `nvim` - editor command `:...`, a per-project persistent option to enable/disable auto formatting ⚙️
+- Documentation will live here and be synced on deployments of `elemix.dev`; for development, use symlinks 📋
+  - Only `major` and `minor` are relevant here for new features, so `0.9.x` should work just fine ✅
+  - Synced what I have for testing rendering and routing; the only real page that will survive is the `kitchen sink` 👌
+  - The `--1` and so on notation controls the rendering order of the `categories` and `pages` 👮🚨
+- Slowly moving away from minion slop in `README` files 😃
 
 ***Editors, assemble! ⌨️🧑‍💻🔥***
 
@@ -173,19 +202,6 @@ export const Unchecked: ElemixStory = {
   you call them now 🪄🐛
 - Fixed multi-root conditional branches now render every root (only the first was kept before) 🪄🐛
 - Fixed custom events (`@my-event`) now fire (`_event` falls back to `addEventListener`) 🪄🐛
-
-- [] Additional polish of playground examples, organize examples better or not 🤔
-- [] Conformance (potential bug fixing)
-  - [x] Convert wikipulse app
-  - [] Convert stealth app (over 200 components)
-- [] Put a website at `elemix.dev`
-  - [x] Landing page
-  - [x] Documentation driven by markdow files
-  - [x] Selectable verion same as Laravel docs
-  - [] Write the actual docs 😒
-- [] Update all `README` files at the moment are just autocomplete filler from the `minion` 🤖
-- [] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
-- [] Add elemix to official benchmarks
 
 ### Phase 6 - Analyzer 📊
 
@@ -997,3 +1013,6 @@ GG 👊🥋✊
   - [x] Add formatting extension based on `formatter`
 
 - [x] Add an MCP server for the docs for agentic coding alongside the skill - NO, not a good idea 😂😂😂
+
+- [x] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
+- [x] Look into `nvim` plugin versioning if such a thing exists 🤔

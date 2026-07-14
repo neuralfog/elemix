@@ -1,6 +1,6 @@
 {
     "name": "elemix-vscode",
-    "displayName": "elemix",
+    "displayName": "Official elemix extension",
     "description": "elemix language support - syntax highlighting for `tpl` templates and compiler hints.",
     "version": "0.9.0",
     "publisher": "neuralfog",
