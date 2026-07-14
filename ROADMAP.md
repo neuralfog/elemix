@@ -20,7 +20,6 @@ improvements if any... This is already incredibly stable!!
 - [ ] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
 - [ ] Look into `nvim` plugin versioning if such a thing exists 🤔
 - [ ] Add a curated `clanker` skill, include it in the monorepo, add it to `elemix.dev`
-- [ ] Add an MCP server for the docs for agentic coding alongside the skill
 
 ***Editors, assemble! ⌨️🧑‍💻🔥***
 
@@ -996,3 +995,5 @@ GG 👊🥋✊
   - [x] Linting extension based on the `analyzer` LSP mode
   - [x] Possibly combine into a single one for easier release
   - [x] Add formatting extension based on `formatter`
+
+- [x] Add an MCP server for the docs for agentic coding alongside the skill - NO, not a good idea 😂😂😂

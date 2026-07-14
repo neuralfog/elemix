@@ -22,16 +22,10 @@ struct Cli {
     dirs: Vec<String>,
 
     /// Format source read from stdin and write the result to stdout (no banner or
-    /// summary) - for editor format-on-save. Ignores `--dirs`/`--write`.
+    /// summary) - for editor formatting / format-on-save. Ignores `--dirs`/`--write`.
+    /// Formats unless the formatter is disabled in config (then passes through).
     #[arg(long)]
     stdin: bool,
-
-    /// With `--stdin`: this is a save-triggered format, so honour the config's
-    /// `[formatter] format_on_save`. When it's false, the input passes through
-    /// unchanged. Editors send this on save so the on/off lives in `elemix.toml`,
-    /// not the editor. An explicit "format now" omits it and always formats.
-    #[arg(long = "on-save")]
-    on_save: bool,
 
     /// Read source from stdin and emit formatting diagnostics as JSON to stdout
     /// (LSP-shaped ranges + a fix edit per unformatted template) - for editor
@@ -73,10 +67,9 @@ fn main() -> ExitCode {
         let Some(src) = read_stdin() else {
             return ExitCode::from(2);
         };
-        // Format unless the formatter is off, or this is a save and the config
-        // has format_on_save disabled - in either case echo the input unchanged.
-        let format = settings.enabled && (!cli.on_save || settings.format_on_save);
-        let out = if format {
+        // Format unless the formatter is disabled in config - then echo unchanged.
+        // Whether a save triggers this is the editor's call, not ours.
+        let out = if settings.enabled {
             format::format_source(&src, opts).output
         } else {
             src

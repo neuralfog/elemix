@@ -7,21 +7,21 @@
 //! ```toml
 //! [formatter]
 //! enabled = true          # false disables formatting + diagnostics entirely
-//! format_on_save = false  # format tpl templates on save (editors honour this)
 //! indent_style = "space"  # "space" (default) or "tab"
 //! indent_width = 4        # columns per indent level
 //! line_width = 80         # max line width
 //! ```
+//!
+//! Format-on-save is deliberately NOT here - it is an editor concern (a VS Code
+//! setting / command, an nvim option), not project config.
 
 use crate::doc::{IndentStyle, Options};
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 
-/// The resolved formatter settings: whether it runs at all, whether editors
-/// format on save, plus how it prints.
+/// The resolved formatter settings: whether it runs at all, plus how it prints.
 pub struct Settings {
     pub enabled: bool,
-    pub format_on_save: bool,
     pub options: Options,
 }
 
@@ -29,7 +29,6 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             enabled: true,
-            format_on_save: false,
             options: Options::default(),
         }
     }
@@ -43,7 +42,6 @@ struct ElemixConfig {
 #[derive(Deserialize, Default)]
 struct FormatterConfig {
     enabled: Option<bool>,
-    format_on_save: Option<bool>,
     indent_style: Option<String>,
     indent_width: Option<usize>,
     line_width: Option<usize>,
@@ -67,7 +65,6 @@ fn from_toml(text: &str) -> Settings {
     let d = Options::default();
     Settings {
         enabled: f.enabled.unwrap_or(true),
-        format_on_save: f.format_on_save.unwrap_or(false),
         options: Options {
             width: f.line_width.unwrap_or(d.width),
             tab_width: f.indent_width.unwrap_or(d.tab_width),
@@ -120,13 +117,6 @@ mod tests {
         assert!(!from_toml("[formatter]\nenabled = false\n").enabled);
         // Absent key defaults to enabled.
         assert!(from_toml("[formatter]\nindent_width = 2\n").enabled);
-    }
-
-    #[test]
-    fn format_on_save_reads_from_config() {
-        assert!(from_toml("[formatter]\nformat_on_save = true\n").format_on_save);
-        // Default off.
-        assert!(!from_toml("[formatter]\nindent_width = 2\n").format_on_save);
     }
 
     #[test]

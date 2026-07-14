@@ -1,6 +1,6 @@
 [package]
 name = "elemix-template-formatter"
-version = "0.9.0-dev.21"
+version = "0.9.0-dev.22"
 edition = "2021"
 publish = false
 description = "HTML template formatter for Elemix tpl`` literals (etf)."

@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-template-formatter",
-  "version": "0.9.0-dev.21",
+  "version": "0.9.0-dev.22",
   "description": "HTML template formatter for Elemix tpl`` literals (etf)",
   "license": "MIT",
   "author": "brownhounds",
@@ -19,11 +19,11 @@
     "CHANGELOG.md"
   ],
   "optionalDependencies": {
-    "@neuralfog/elemix-template-formatter-linux-x64": "0.9.0-dev.21",
-    "@neuralfog/elemix-template-formatter-linux-arm64": "0.9.0-dev.21",
-    "@neuralfog/elemix-template-formatter-darwin-x64": "0.9.0-dev.21",
-    "@neuralfog/elemix-template-formatter-darwin-arm64": "0.9.0-dev.21",
-    "@neuralfog/elemix-template-formatter-win32-x64": "0.9.0-dev.21",
-    "@neuralfog/elemix-template-formatter-win32-arm64": "0.9.0-dev.21"
+    "@neuralfog/elemix-template-formatter-linux-x64": "0.9.0-dev.22",
+    "@neuralfog/elemix-template-formatter-linux-arm64": "0.9.0-dev.22",
+    "@neuralfog/elemix-template-formatter-darwin-x64": "0.9.0-dev.22",
+    "@neuralfog/elemix-template-formatter-darwin-arm64": "0.9.0-dev.22",
+    "@neuralfog/elemix-template-formatter-win32-x64": "0.9.0-dev.22",
+    "@neuralfog/elemix-template-formatter-win32-arm64": "0.9.0-dev.22"
   }
 }

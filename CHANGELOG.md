@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.22] - 2026-07-14
+
+### Added
+
+- VS Code extension on the Marketplace
+
+### Changed
+
+- Format on save is now an editor toggle, not `elemix.toml`
+
 ## [0.9.0-dev.21] - 2026-07-14
 
 ### Added

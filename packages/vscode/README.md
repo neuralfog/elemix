@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/neuralfog/elemix/main/.readme/elemix-banner.svg" alt="elemix - Reactive Elements" width="100%" />
+<img src="https://raw.githubusercontent.com/neuralfog/elemix/main/.readme/elemix-banner.png" alt="elemix - Reactive Elements" width="100%" />
 
 # Elemix extension for vscode
 
@@ -19,6 +19,7 @@
 
 - `elemix: Restart LSP` - restart lsp server.
 - `elemix: Format templates in file` - format elemix file.
+- `elemix: Format on save` - toggle format-on-save for current project.
 
 ### Formatter config
 
@@ -30,5 +31,4 @@ enabled = true           # false turns the formatter off entirely
 indent_style = "space"   # "space" (default) or "tab"
 indent_width = 4         # columns per indent level
 line_width = 80          # max line width
-format_on_save = false   # format tpl templates on save
 ```

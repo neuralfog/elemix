@@ -146,17 +146,46 @@ const codeActionProvider: vscode.CodeActionProvider = {
     },
 };
 
-// On save, delegate the whole decision to `etf --stdin --on-save`: it formats
-// only when the project's `elemix.toml` has `[formatter] format_on_save = true`
-// (and the formatter enabled), else it echoes the buffer back unchanged. So
-// format-on-save is controlled by elemix.toml, not editor settings.
+// Whether format-on-save is enabled, from the persisted `elemix.formatter.
+// formatOnSave` setting (scoped to the saved document). Toggled from the palette.
+const formatOnSaveEnabled = (uri?: vscode.Uri): boolean =>
+    vscode.workspace
+        .getConfiguration('elemix', uri)
+        .get<boolean>('formatter.formatOnSave', false);
+
+// Persist the format-on-save flag (workspace-scoped when there's a folder, else
+// global) and refresh the `when`-clause context key so the palette entry flips.
+const setFormatOnSave = async (value: boolean): Promise<void> => {
+    const target = vscode.workspace.workspaceFolders?.length
+        ? vscode.ConfigurationTarget.Workspace
+        : vscode.ConfigurationTarget.Global;
+    await vscode.workspace
+        .getConfiguration('elemix')
+        .update('formatter.formatOnSave', value, target);
+    syncFormatOnSaveContext();
+    void vscode.window.showInformationMessage(
+        `elemix: format on save ${value ? 'enabled' : 'disabled'}`,
+    );
+};
+
+// Publish the current format-on-save state as a `when`-clause context key so the
+// palette shows exactly one of the "(on)"/"(off)" entries.
+const syncFormatOnSaveContext = (): void => {
+    void vscode.commands.executeCommand(
+        'setContext',
+        'elemix.formatOnSave',
+        formatOnSaveEnabled(vscode.window.activeTextEditor?.document.uri),
+    );
+};
+
+// On save, run the formatter over the buffer. Gated by `formatOnSaveEnabled`.
 const saveEdits = async (
     document: vscode.TextDocument,
 ): Promise<vscode.TextEdit[]> => {
     const source = document.getText();
     const out = await runEtf(
         resolveBin(document.uri),
-        ['--stdin', '--on-save', ...rootArgs(document)],
+        ['--stdin', ...rootArgs(document)],
         source,
     );
     if (out === null || out === source) return [];
@@ -325,6 +354,7 @@ const debounce = new Map<string, ReturnType<typeof setTimeout>>();
 
 export function activate(context: vscode.ExtensionContext): void {
     void refreshEtfAvailability();
+    syncFormatOnSaveContext();
     startAllAnalyzers();
     context.subscriptions.push(
         diagnostics,
@@ -341,9 +371,18 @@ export function activate(context: vscode.ExtensionContext): void {
             'elemix.formatTemplates',
             formatTemplates,
         ),
+        vscode.commands.registerCommand('elemix.enableFormatOnSave', () =>
+            setFormatOnSave(true),
+        ),
+        vscode.commands.registerCommand('elemix.disableFormatOnSave', () =>
+            setFormatOnSave(false),
+        ),
         vscode.workspace.onDidChangeConfiguration((e) => {
             if (e.affectsConfiguration('elemix.formatter.path')) {
                 void refreshEtfAvailability();
+            }
+            if (e.affectsConfiguration('elemix.formatter.formatOnSave')) {
+                syncFormatOnSaveContext();
             }
             if (e.affectsConfiguration('elemix.analyzer.path')) {
                 void restartAllAnalyzers();
@@ -351,6 +390,7 @@ export function activate(context: vscode.ExtensionContext): void {
         }),
         vscode.window.onDidChangeActiveTextEditor(() => {
             void refreshEtfAvailability();
+            syncFormatOnSaveContext();
         }),
         vscode.workspace.onDidChangeWorkspaceFolders((e) => {
             void refreshEtfAvailability();
@@ -361,7 +401,7 @@ export function activate(context: vscode.ExtensionContext): void {
             const document = event.document;
             if (document.languageId !== 'typescript') return;
             if (!etfAvailable) return;
-            // etf honours elemix.toml's format_on_save; nothing to gate here.
+            if (!formatOnSaveEnabled(document.uri)) return;
             event.waitUntil(saveEdits(document));
         }),
         vscode.workspace.onDidOpenTextDocument(refreshDiagnostics),

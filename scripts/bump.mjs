@@ -28,18 +28,25 @@ const next = (() => {
     process.exit(1);
 })();
 
+// The VS Code extension can't carry a `-dev.N` prerelease suffix: the Marketplace
+// only accepts a clean `major.minor.patch`. So it always gets the base version
+// (0.9.0-dev.22 -> 0.9.0); the release workflow publishes it to the pre-release
+// channel when the root version is a dev build.
+const base = next.split('-')[0];
+
 // Text replace so only the version line changes — no reformatting churn.
 // NB: cross-package pins (e.g. the vite plugin's `@neuralfog/elemix-compiler`
 // dependency) are deliberately NOT bumped here. They must stay at a published,
 // lockfile-resolvable version so `pnpm install` works locally and in CI; the
 // release workflow stamps them to the release version at publish time.
 for (const file of files) {
+    const stamp = file === 'packages/vscode/package.json' ? base : next;
     const text = readFileSync(file, 'utf8').replace(
         /("version":\s*")[^"]+(")/,
-        `$1${next}$2`,
+        `$1${stamp}$2`,
     );
     writeFileSync(file, text);
-    console.log(`${file} -> ${next}`);
+    console.log(`${file} -> ${stamp}`);
 }
 
 // Sync the compiler's published npm packages (launcher + per-platform binaries,

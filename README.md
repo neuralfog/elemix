@@ -2,7 +2,9 @@
 
 # Elemix
 
-pnpm workspace housing the Elemix framework and its tooling.
+A compiled frontend library - no virtual DOM, incredibly fast, with state management that doesn't suck and frictionless ergonomics that stay out of your way - for the love of the web 💙
+
+**[elemix.dev](https://elemix.dev/)**
 
 - Live playground (pre compilation era): **[playground.elemix.dev](https://playground.elemix.dev/)**
 - Compiler Explorer: **[compiler-explorer.elemix.dev](https://compiler-explorer.elemix.dev/)**
@@ -23,48 +25,8 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-vscode` | VS Code Extension For Elemix. | [README](packages/vscode/README.md) |
 | `@neuralfog/elemix-nvim` | Neovim Plugin For Elemix. | [README](packages/nvim/README.md) |
 
-## Releasing
+## Contributing
 
-One version, one tag. `pnpm bump` locksteps every version across the repo, `pnpm tag`
-pushes a single `v<version>` tag, and CI publishes the whole toolchain — the library,
-its Storybook integration, its testing library, the compiler binaries, the wasm build,
-and the Vite plugin — to npm.
-
-```bash
-# add a `## [<version>] - <date>` section to the root CHANGELOG.md first
-pnpm bump <version | major | minor | patch>   # sync the version everywhere
-git commit -am "release: v<version>"
-pnpm tag                                       # push v<version> → CI publishes everything
-```
-
-The whole toolchain shares one version, so it shares one root `CHANGELOG.md` — copied
-into every package at publish time, so each ships it on npm. The same tag builds a
-GitHub Release from that version's section, linking each published package —
-`pnpm changelog:lint` checks the format, and the release gates on the top entry
-matching the version.
-
-### Dev releases
-
-Prereleases publish under the `dev` dist-tag, so they never touch `latest`. The
-trigger is a **hyphen** in the version — every publish step picks the tag with
-`[[ "$VERSION" == *-* ]] && TAG=dev`. Spell it `0.9.0-dev.0`, never `0.9.0dev`
-(no hyphen → it ships to `latest` and clobbers your stable pointer):
-
-```bash
-pnpm bump 0.9.0-dev.0                          # hyphen → stamps every manifest as a prerelease
-git commit -am "release: v0.9.0-dev.0"
-pnpm tag                                        # push v0.9.0-dev.0 → everything ships under @dev
-```
-
-Verify `@dev` moved and `@latest` stayed put:
-
-```bash
-npm view @neuralfog/elemix dist-tags           # latest: <unchanged>, dev: 0.9.0-dev.0
-npm view @neuralfog/elemix-vite dist-tags
-```
-
-Install a dev build with `pnpm add @neuralfog/elemix@dev`. To re-trigger a botched
-run, `pnpm tag-remove` then `pnpm tag` again.
-
-See **[RELEASE-PIPELINE.md](RELEASE-PIPELINE.md)** for the full picture — the bump
-fan-out, the CI workflows, the changelog, ordering, dist-tags, and provenance.
+- **Thanks for your interest!** Third-party contributions are not accepted as external pull requests - only selected contributors can raise one. I'm fully capable of maintaining my own project and code, and I don't need yours.
+- **Bug reports are most welcome**, but they need clear reproduction steps with code examples - anything less will be rejected.
+- **Feature requests** are only considered when they follow the spirit of the library. "I'm too lazy to maintain 5 lines of code myself, so I think it belongs in a library" is not one, and will be rejected.
