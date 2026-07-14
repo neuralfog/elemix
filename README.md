@@ -1,4 +1,6 @@
-# Elemix Monorepo
+<img src=".readme/elemix-banner.svg" alt="elemix - Reactive Elements" width="100%" />
+
+# Elemix
 
 pnpm workspace housing the Elemix framework and its tooling.
 
@@ -18,6 +20,8 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-vite` | Vite Compiler plugin. | [README](packages/vite/README.md) |
 | `@neuralfog/elemix-storybook` | Storybook Integration For Elemix. | [README](packages/storybook/README.md) |
 | `@neuralfog/elemix-testing-library` | Shadow-piercing queries and real DOM events for testing Elemix components. | [README](packages/testing-library/README.md) |
+| `@neuralfog/elemix-vscode` | VS Code Extension For Elemix. | [README](packages/vscode/README.md) |
+| `@neuralfog/elemix-nvim` | Neovim Plugin For Elemix. | [README](packages/nvim/README.md) |
 
 ## Releasing
 

@@ -1,0 +1,66 @@
+<svg width="1280" height="300" viewBox="0 0 1280 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="elemix - Reactive Elements">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a1122"/>
+      <stop offset="1" stop-color="#070b16"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0" r="0.9">
+      <stop offset="0" stop-color="#4ca8ff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#4ca8ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4CA8FF"/>
+      <stop offset="1" stop-color="#1E4FD8"/>
+    </linearGradient>
+
+    <!-- 56px compiler grid + edge-fade mask -->
+    <pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse">
+      <path d="M56 0.5H0M0.5 0V56" fill="none" stroke="#4ca8ff" stroke-width="1" stroke-opacity="0.08"/>
+    </pattern>
+    <radialGradient id="gridFade" gradientUnits="userSpaceOnUse" cx="520" cy="150" r="640" gradientTransform="matrix(1 0 0 0.34 0 99)">
+      <stop offset="0.4" stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="gridMask">
+      <rect width="1280" height="300" fill="url(#gridFade)"/>
+    </mask>
+
+    <!-- static scan lines -->
+    <linearGradient id="scanX" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4ca8ff" stop-opacity="0"/>
+      <stop offset="0.72" stop-color="#4ca8ff" stop-opacity="0.5"/>
+      <stop offset="0.95" stop-color="#4ca8ff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#4ca8ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="scanY" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4ca8ff" stop-opacity="0"/>
+      <stop offset="0.72" stop-color="#4ca8ff" stop-opacity="0.4"/>
+      <stop offset="0.95" stop-color="#4ca8ff" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#4ca8ff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="scanGlow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="300" rx="18" fill="url(#bg)"/>
+  <rect width="1280" height="300" fill="url(#grid)" mask="url(#gridMask)"/>
+  <rect width="1280" height="300" rx="18" fill="url(#glow)"/>
+
+  <!-- static scan lines crossing bottom-right (64px off each edge) -->
+  <rect x="0" y="234.5" width="1280" height="3" fill="url(#scanX)" opacity="0.5" filter="url(#scanGlow)"/>
+  <rect x="0" y="235.25" width="1280" height="1.5" fill="url(#scanX)"/>
+  <rect x="1214.5" y="0" width="3" height="300" fill="url(#scanY)" opacity="0.5" filter="url(#scanGlow)"/>
+  <rect x="1215.25" y="0" width="1.5" height="300" fill="url(#scanY)"/>
+
+  <!-- elemix bolt-and-rings mark -->
+  <g transform="translate(40 39.3) scale(0.1704)">
+    <path fill="url(#ringGrad)" d="M 506.88 254.33 C 527.78 251.22 548.94 252.31 569.98 252.12 C 634.35 252.15 698.71 252.04 763.07 252.20 C 745.50 270.63 728.15 289.26 710.53 307.64 C 652.68 307.71 594.83 307.68 536.98 307.67 C 527.96 308.44 518.84 308.42 509.94 310.29 C 470.42 316.08 433.18 334.16 402.70 359.73 C 357.72 397.50 330.06 454.57 326.91 513.08 C 326.53 521.05 326.58 529.03 326.61 537.01 C 326.59 598.67 326.53 660.33 326.52 721.98 C 326.66 731.99 326.04 742.03 326.99 752.02 C 329.47 792.23 343.29 831.65 366.07 864.85 C 388.62 896.82 418.49 924.02 453.77 941.27 C 456.03 942.06 458.19 944.46 457.11 946.98 C 451.06 962.32 445.06 977.68 438.74 992.90 C 366.28 960.46 308.11 896.59 284.58 820.55 C 275.44 791.99 270.86 761.99 271.44 732.00 C 271.33 669.32 271.42 606.64 271.43 543.95 C 271.14 521.25 271.61 498.38 276.02 476.04 C 284.02 434.26 301.82 394.47 327.30 360.44 C 369.79 302.99 436.07 263.85 506.88 254.33 Z"/>
+    <path fill="url(#ringGrad)" d="M 842.58 326.45 C 848.23 311.57 853.18 296.44 858.93 281.61 C 861.19 281.33 863.60 281.13 865.70 282.26 C 892.75 295.31 917.88 312.57 939.04 333.94 C 979.37 374.92 1006.88 428.77 1014.75 485.85 C 1018.44 512.07 1016.93 538.60 1017.24 564.99 C 1017.20 623.01 1017.28 681.04 1017.17 739.07 C 1017.20 808.28 991.18 877.32 944.79 928.78 C 896.23 983.44 825.32 1018.42 751.96 1020.66 C 730.95 1021.12 709.94 1020.68 688.93 1020.84 C 658.29 1020.82 627.65 1020.87 597.01 1020.78 C 579.20 1020.81 561.39 1021.03 543.58 1020.56 C 554.61 1009.23 565.18 997.45 576.08 985.99 C 582.58 979.10 589.19 972.31 595.53 965.28 C 615.36 964.95 635.16 965.02 654.99 965.21 C 661.34 964.86 667.69 964.96 674.05 965.26 C 704.37 964.71 734.74 966.18 765.02 963.95 C 805.66 959.70 844.67 942.96 876.54 917.51 C 918.36 884.10 947.77 835.65 958.16 783.15 C 962.08 764.70 962.55 745.78 962.45 726.99 C 962.34 670.32 962.50 613.66 962.39 556.99 C 962.28 539.01 963.06 520.97 961.41 503.05 C 956.16 446.13 926.83 391.59 881.36 356.75 C 869.42 347.39 856.21 339.78 842.55 333.24 C 842.04 330.97 841.39 328.61 842.58 326.45 Z"/>
+    <path fill="#ffffff" d="M 866.63 169.62 C 870.97 165.34 874.96 160.69 879.64 156.76 C 866.95 197.40 854.59 238.17 840.22 278.26 C 826.36 316.21 812.15 354.03 798.44 392.04 C 784.39 430.25 770.79 468.62 756.90 506.89 C 751.51 521.69 746.18 536.51 741.02 551.39 C 785.69 551.52 830.36 551.42 875.04 551.44 C 896.95 551.58 918.86 551.17 940.77 551.66 C 933.31 559.30 926.60 567.62 919.42 575.50 C 887.55 611.27 856.09 647.39 824.03 682.98 C 765.70 748.91 706.84 814.37 648.12 879.96 C 617.54 914.05 586.78 947.98 555.44 981.40 C 505.44 1035.57 455.74 1090.05 404.33 1142.89 C 425.95 1079.30 448.65 1016.06 473.94 953.83 C 484.27 928.01 494.24 902.04 504.38 876.15 C 515.12 848.89 526.09 821.72 536.70 794.41 C 545.88 770.77 555.35 747.23 564.04 723.40 C 492.35 723.21 420.66 723.51 348.98 723.21 C 400.61 667.08 452.79 611.45 504.59 555.48 C 560.58 495.19 616.75 435.07 672.91 374.94 C 736.92 305.97 801.32 237.36 866.63 169.62 M 682.50 479.46 C 630.88 536.28 579.10 592.96 527.37 649.68 C 550.91 649.86 574.45 649.96 597.99 650.12 C 619.29 650.92 639.23 666.40 645.18 686.90 C 648.69 698.69 648.29 711.72 643.47 723.10 C 632.04 752.48 620.31 781.75 608.87 811.13 C 623.66 795.14 638.05 778.79 652.49 762.49 C 692.40 717.07 732.89 672.16 773.28 627.17 C 751.17 626.98 729.07 627.22 706.96 627.05 C 690.99 626.87 675.52 618.55 666.04 605.78 C 658.60 595.90 655.33 583.20 656.20 570.93 C 656.82 560.67 661.56 551.37 664.86 541.81 C 672.70 521.25 680.44 500.65 688.38 480.13 C 689.61 476.56 691.38 473.11 691.63 469.29 C 688.89 472.94 685.49 476.02 682.50 479.46 Z"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="254" y="164" textLength="430" lengthAdjust="spacing" font-family="'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="104" font-weight="700" letter-spacing="8" fill="#f4f7ff">elemix</text>
+  <text x="254" y="208" textLength="430" lengthAdjust="spacing" font-family="'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="30" font-weight="500" letter-spacing="7" fill="#4ca8ff">REACTIVE ELEMENTS</text>
+</svg>

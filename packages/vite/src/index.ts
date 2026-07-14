@@ -13,6 +13,7 @@ export const PRAGMAS = [
     'tag',
     'form',
     'no-shadow',
+    'shadow',
     'styles',
     'state',
     'effect',

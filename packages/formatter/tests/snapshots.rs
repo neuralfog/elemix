@@ -12,6 +12,7 @@ fn opts() -> Options {
     Options {
         width: 80,
         tab_width: 4,
+        ..Options::default()
     }
 }
 

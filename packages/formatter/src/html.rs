@@ -818,6 +818,7 @@ mod tests {
             &Options {
                 width: 80,
                 tab_width: 4,
+                ..Options::default()
             },
             0,
         )

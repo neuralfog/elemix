@@ -6,7 +6,7 @@
 
 use clap::Parser;
 use elemix_template_formatter::report::{Palette, Stats};
-use elemix_template_formatter::{doc, format, report};
+use elemix_template_formatter::{format, report};
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -25,6 +25,13 @@ struct Cli {
     /// summary) - for editor format-on-save. Ignores `--dirs`/`--write`.
     #[arg(long)]
     stdin: bool,
+
+    /// With `--stdin`: this is a save-triggered format, so honour the config's
+    /// `[formatter] format_on_save`. When it's false, the input passes through
+    /// unchanged. Editors send this on save so the on/off lives in `elemix.toml`,
+    /// not the editor. An explicit "format now" omits it and always formats.
+    #[arg(long = "on-save")]
+    on_save: bool,
 
     /// Read source from stdin and emit formatting diagnostics as JSON to stdout
     /// (LSP-shaped ranges + a fix edit per unformatted template) - for editor
@@ -49,24 +56,16 @@ struct Cli {
     /// screenshots. Reports success (exit 0), writes nothing. Not for end users.
     #[arg(long, hide = true)]
     demo: bool,
-
-    /// Line width the formatter wraps at.
-    #[arg(long = "print-width", default_value_t = 80)]
-    print_width: usize,
-
-    /// Spaces per indent level.
-    #[arg(long = "tab-width", default_value_t = 4)]
-    tab_width: usize,
 }
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
-    let _ = &cli.root; // reserved for config-file discovery (see spec.md)
     let write = cli.write && !cli.check;
-    let opts = doc::Options {
-        width: cli.print_width,
-        tab_width: cli.tab_width,
-    };
+    // Everything comes solely from `elemix.toml` at (or above) --root - width,
+    // indent, and whether the formatter runs at all. A missing/malformed file uses
+    // the defaults (enabled, 80/4/space).
+    let settings = elemix_template_formatter::config::load(&cli.root);
+    let opts = &settings.options;
 
     // Silent stdin -> stdout, for editors. No banner, no summary; format whatever
     // comes in and hand it straight back (unparseable templates pass through).
@@ -74,7 +73,15 @@ fn main() -> ExitCode {
         let Some(src) = read_stdin() else {
             return ExitCode::from(2);
         };
-        print!("{}", format::format_source(&src, &opts).output);
+        // Format unless the formatter is off, or this is a save and the config
+        // has format_on_save disabled - in either case echo the input unchanged.
+        let format = settings.enabled && (!cli.on_save || settings.format_on_save);
+        let out = if format {
+            format::format_source(&src, opts).output
+        } else {
+            src
+        };
+        print!("{out}");
         return ExitCode::SUCCESS;
     }
 
@@ -85,8 +92,19 @@ fn main() -> ExitCode {
         let Some(src) = read_stdin() else {
             return ExitCode::from(2);
         };
-        let diags = format::diagnose(&src, &opts);
+        // Disabled: report no diagnostics (which also means no "Format template"
+        // code action, since editors derive it from these).
+        let diags = if settings.enabled {
+            format::diagnose(&src, opts)
+        } else {
+            Vec::new()
+        };
         println!("{}", serde_json::to_string(&diags).unwrap());
+        return ExitCode::SUCCESS;
+    }
+
+    // CLI (--dirs): disabled means format nothing at all.
+    if !settings.enabled {
         return ExitCode::SUCCESS;
     }
 
@@ -111,7 +129,7 @@ fn main() -> ExitCode {
         let Ok(src) = std::fs::read_to_string(path) else {
             continue;
         };
-        let result = format::format_source(&src, &opts);
+        let result = format::format_source(&src, opts);
         templates += result.templates;
         if !result.changed {
             continue;

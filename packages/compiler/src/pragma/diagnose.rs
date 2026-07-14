@@ -12,7 +12,7 @@ use crate::pragma::{kebab, resolve, tag_problem};
 /// The module-level `#state` primitive error — shared so the analyzer's spanned
 /// scan reports the identical text (see `scan::scan_hints`).
 pub const MODULE_STATE_PRIMITIVE_MSG: &str =
-    "module-level `#state` must be an object — a bare primitive export can't be \
+    "module-level `#state` must be an object - a bare primitive export can't be \
      reactive. Wrap it in a store object, e.g. `export const store = { count: 0 };` \
      and read `store.count`. (Bare primitives are reactive only as component class fields.)";
 
@@ -21,15 +21,15 @@ pub const MODULE_STATE_PRIMITIVE_MSG: &str =
 pub fn binding_issue_message(directive: &str, member: &str, problem: BindingProblem) -> String {
     match problem {
         BindingProblem::HookOnNonFunction => format!(
-            "`#{directive}` must tag a method or an arrow function — `{member}` is \
+            "`#{directive}` must tag a method or an arrow function - `{member}` is \
              neither, so there is nothing to call"
         ),
         BindingProblem::StateOnFunction => format!(
-            "`#{directive}` must tag a data field, not a function — `{member}` is a \
+            "`#{directive}` must tag a data field, not a function - `{member}` is a \
              function (state is reactive data, not behaviour)"
         ),
         BindingProblem::StateOnMethod => format!(
-            "`#{directive}` must tag a data field, not a method — `{member}` (state \
+            "`#{directive}` must tag a data field, not a method - `{member}` (state \
              is reactive data, not behaviour)"
         ),
     }
@@ -46,11 +46,11 @@ pub fn binding_issue_message(directive: &str, member: &str, problem: BindingProb
 pub fn invalid_tag_message(tag: &str, reason: &str, derived: bool) -> String {
     if derived {
         format!(
-            "the class name derives the tag `{tag}`, which {reason} — give the \
+            "the class name derives the tag `{tag}`, which {reason} - give the \
              component an explicit `#tag`, or rename the class"
         )
     } else {
-        format!("tag `{tag}` is not a valid custom element name — it {reason}")
+        format!("tag `{tag}` is not a valid custom element name - it {reason}")
     }
 }
 
@@ -63,7 +63,10 @@ pub fn collect(source: &str) -> Vec<Diagnostic> {
         Ok(l) => l,
         // A structural locate failure is file-level — no class to blame.
         Err(e) => {
-            out.push(Diagnostic::error(None, ExpandError::Locate(e).to_string()));
+            out.push(Diagnostic::error(
+                None,
+                ExpandError::Locate(e.err).to_string(),
+            ));
             return out;
         }
     };

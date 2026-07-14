@@ -35,6 +35,85 @@ pub fn build_registry(files: &[(PathBuf, String)]) -> Registry {
     reg
 }
 
+/// One component prop for autocomplete: its name and whether it's optional.
+#[derive(Clone, Debug, PartialEq)]
+pub struct PropInfo {
+    pub name: String,
+    pub optional: bool,
+}
+
+/// A per-component enumeration probe in the metadata overlay: the overlay byte
+/// ranges whose tsc "missing properties" errors spell out the prop set — the ALL
+/// range (an empty object vs `Required<props>`, so optional props count as
+/// missing too) and the REQUIRED range (empty object vs `props`).
+pub struct MetaProbe {
+    pub tag: String,
+    pub all_start: usize,
+    pub all_end: usize,
+    pub req_start: usize,
+    pub req_end: usize,
+}
+
+/// A synthetic file that imports every exported component and, per component,
+/// assigns `{}` to its (Required) prop type — forcing tsc to enumerate the props
+/// in a "missing the following properties" error, the SAME diagnostic the
+/// required-prop check already parses. This is how tag → props is surfaced.
+pub struct MetaOverlay {
+    pub path: PathBuf,
+    pub content: String,
+    pub probes: Vec<MetaProbe>,
+}
+
+/// Build the metadata overlay for prop enumeration. `None` when the project has
+/// no exported components to probe.
+pub fn build_metadata_overlay(reg: &Registry, root: &Path) -> Option<MetaOverlay> {
+    let mut comps: Vec<(&String, &Component)> = reg.iter().filter(|(_, c)| c.exported).collect();
+    if comps.is_empty() {
+        return None;
+    }
+    // Deterministic order (map iteration is not) so overlays are stable.
+    comps.sort_by(|a, b| a.0.cmp(b.0));
+
+    let path = root.join("__elemix_props__.ts");
+    let mut content = String::from(
+        "declare function __all<C extends { props: Record<string, unknown> }>(p: Required<C['props']>): void;\n\
+         declare function __req<C extends { props: Record<string, unknown> }>(p: C['props']): void;\n",
+    );
+    for (i, (_, c)) in comps.iter().enumerate() {
+        let module = rel_module(&path, &c.file);
+        content.push_str(&format!(
+            "import {{ {} as __ec{i} }} from '{module}';\n",
+            c.class
+        ));
+    }
+
+    let mut probes = Vec::new();
+    for (i, (tag, _)) in comps.iter().enumerate() {
+        content.push_str(&format!("function __enum{i}() {{ "));
+        let all_start = content.len();
+        content.push_str(&format!("__all<__ec{i}>({{}});"));
+        let all_end = content.len();
+        content.push(' ');
+        let req_start = content.len();
+        content.push_str(&format!("__req<__ec{i}>({{}});"));
+        let req_end = content.len();
+        content.push_str(" }\n");
+        probes.push(MetaProbe {
+            tag: (*tag).clone(),
+            all_start,
+            all_end,
+            req_start,
+            req_end,
+        });
+    }
+
+    Some(MetaOverlay {
+        path,
+        content,
+        probes,
+    })
+}
+
 /// What a wrapped hole binds — drives the diagnostic's subject + message reframe.
 #[derive(Clone)]
 pub enum BindKind {
@@ -376,7 +455,7 @@ pub fn build_overlay(
 
 /// A `./`-prefixed, extension-less module specifier from `from_file`'s directory
 /// to `to_file` (forward slashes), for the injected type-only import.
-fn rel_module(from_file: &Path, to_file: &Path) -> String {
+pub(crate) fn rel_module(from_file: &Path, to_file: &Path) -> String {
     let from_dir = from_file.parent().unwrap_or_else(|| Path::new(""));
     let to_no_ext = to_file.with_extension("");
     let rel = diff_paths(from_dir, &to_no_ext);

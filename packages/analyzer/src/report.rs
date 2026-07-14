@@ -3,8 +3,9 @@
 //! fall out of the same structured finding; pretty is rendered FROM it.
 
 use crate::oracle::RawDiagnostic;
-use crate::project::{BindKind, FileOverlay};
-use elemix_compiler::{HintDiagnostic, HintKind, HintSeverity};
+use crate::project::{BindKind, FileOverlay, MetaOverlay, PropInfo, Registry};
+use elemix_compiler::{scan_element_uses, HintDiagnostic, HintKind, HintSeverity};
+use std::collections::{HashMap, HashSet};
 
 /// An RGB brand colour with a 16-colour ANSI fallback code, so the report looks
 /// the part on truecolor terminals and still degrades cleanly on basic ones.
@@ -337,6 +338,76 @@ pub fn attribute(raw: &[RawDiagnostic], overlays: &[FileOverlay]) -> Vec<Finding
 /// the single form ("Property 'role' is missing in type …") and the multiple
 /// form ("… is missing the following properties from type 'Props': role, age").
 /// `None` when the message isn't a missing-property error.
+/// Flag a component `<tag>` usage that binds the same `:prop` more than once - a
+/// pure-Rust check (each duplicate type-checks fine on its own, so the tsc oracle
+/// never sees it). Carets the tag; one finding per duplicated prop.
+pub fn duplicate_prop_findings(file: &str, source: &str, reg: &Registry) -> Vec<Finding> {
+    let mut out = Vec::new();
+    for u in scan_element_uses(source) {
+        if !reg.contains_key(&u.tag) {
+            continue;
+        }
+        let mut seen: HashSet<&String> = HashSet::new();
+        let mut dupes: Vec<String> = Vec::new();
+        for name in &u.provided {
+            if !seen.insert(name) && !dupes.contains(name) {
+                dupes.push(name.clone());
+            }
+        }
+        for name in dupes {
+            out.push(Finding {
+                file: file.to_string(),
+                orig_start: u.tag_start as usize,
+                orig_end: u.tag_end as usize,
+                badge: "props".to_string(),
+                category: "error".to_string(),
+                message: format!("duplicated prop '{name}' - bound more than once"),
+                subject: Subject::Component { tag: u.tag.clone() },
+            });
+        }
+    }
+    out
+}
+
+/// Read the metadata overlay's tsc diagnostics into `tag → props`. Within each
+/// probe, the ALL range's "missing properties" error lists every prop; the
+/// REQUIRED range's lists only the required ones, so the rest are optional.
+pub fn attribute_metadata(
+    raw: &[RawDiagnostic],
+    meta: &MetaOverlay,
+) -> HashMap<String, Vec<PropInfo>> {
+    let meta_path = meta.path.to_string_lossy();
+    let mut out = HashMap::new();
+    for probe in &meta.probes {
+        let mut all: Vec<String> = Vec::new();
+        let mut required: Vec<String> = Vec::new();
+        for d in raw {
+            if d.file != meta_path {
+                continue;
+            }
+            let at = d.start as usize;
+            if at >= probe.all_start && at < probe.all_end {
+                if let Some(names) = parse_missing(&d.message) {
+                    all = names;
+                }
+            } else if at >= probe.req_start && at < probe.req_end {
+                if let Some(names) = parse_missing(&d.message) {
+                    required = names;
+                }
+            }
+        }
+        let props = all
+            .into_iter()
+            .map(|name| {
+                let optional = !required.contains(&name);
+                PropInfo { name, optional }
+            })
+            .collect();
+        out.insert(probe.tag.clone(), props);
+    }
+    out
+}
+
 fn parse_missing(msg: &str) -> Option<Vec<String>> {
     if let Some(i) = msg.find("is missing the following properties from type") {
         if let Some(c) = msg[i..].find(": ") {
@@ -626,8 +697,48 @@ fn first_line(message: &str) -> &str {
 
 /// LSP-shaped JSON: one object per finding with a 0-based range, severity, code,
 /// message. A thin editor transport can sit on top later — not a new project.
-pub fn render_lsp(findings: &[Finding], source_of: impl Fn(&str) -> Option<String>) -> String {
-    let items: Vec<serde_json::Value> = findings
+/// A finding mapped to LSP coordinates - 0-based line/character ranges, ready for
+/// the server to turn into `lsp_types::Diagnostic`s.
+pub struct LspFinding {
+    pub file: String,
+    pub start_line: u32,
+    pub start_char: u32,
+    pub end_line: u32,
+    pub end_char: u32,
+    pub severity: u8,
+    pub code: String,
+    pub message: String,
+}
+
+/// Render findings as a machine-readable JSON array (one object per finding).
+/// This is the `--json` one-shot output for CI; the `--lsp` server reuses the
+/// same [`lsp_findings`] mapping to push diagnostics live.
+pub fn render_json(findings: &[Finding], source_of: impl Fn(&str) -> Option<String>) -> String {
+    let items: Vec<serde_json::Value> = lsp_findings(findings, source_of)
+        .into_iter()
+        .map(|f| {
+            serde_json::json!({
+                "file": f.file,
+                "range": {
+                    "start": { "line": f.start_line, "character": f.start_char },
+                    "end":   { "line": f.end_line,   "character": f.end_char },
+                },
+                "severity": f.severity,
+                "code": f.code,
+                "source": "elemix-analyzer",
+                "message": f.message,
+            })
+        })
+        .collect();
+    serde_json::to_string_pretty(&serde_json::json!(items)).unwrap_or_else(|_| "[]".into())
+}
+
+/// Map findings to LSP coordinates, resolving each byte span against its source.
+pub fn lsp_findings(
+    findings: &[Finding],
+    source_of: impl Fn(&str) -> Option<String>,
+) -> Vec<LspFinding> {
+    findings
         .iter()
         .filter_map(|f| {
             let src = source_of(&f.file)?;
@@ -635,22 +746,20 @@ pub fn render_lsp(findings: &[Finding], source_of: impl Fn(&str) -> Option<Strin
             let (el, eline, ebyte) = locate(&src, f.orig_end);
             // LSP characters are 0-based code units within the line; approximate
             // with char counts of the line prefix (exact for the common ASCII case).
-            let sc = sline[..sbyte.min(sline.len())].chars().count();
-            let ec = eline[..ebyte.min(eline.len())].chars().count();
-            Some(serde_json::json!({
-                "file": f.file,
-                "range": {
-                    "start": { "line": sl - 1, "character": sc },
-                    "end":   { "line": el - 1, "character": ec },
-                },
-                "severity": severity(&f.category),
-                "code": f.badge,
-                "source": "elemix-analyzer",
-                "message": format!("{}{}", f.message, lsp_suffix(&f.subject)),
-            }))
+            let sc = sline[..sbyte.min(sline.len())].chars().count() as u32;
+            let ec = eline[..ebyte.min(eline.len())].chars().count() as u32;
+            Some(LspFinding {
+                file: f.file.clone(),
+                start_line: sl as u32 - 1,
+                start_char: sc,
+                end_line: el as u32 - 1,
+                end_char: ec,
+                severity: severity(&f.category),
+                code: f.badge.clone(),
+                message: format!("{}{}", f.message, lsp_suffix(&f.subject)),
+            })
         })
-        .collect();
-    serde_json::to_string_pretty(&serde_json::json!(items)).unwrap_or_else(|_| "[]".into())
+        .collect()
 }
 
 /// The ` (prop 'x' of <tag>)` / ` (<class>)` suffix appended to an LSP message.

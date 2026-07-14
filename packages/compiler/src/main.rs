@@ -165,7 +165,7 @@ fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool, strict: bool) -> 
     report(Some(src), &diags);
     if strict && diagnostics::has_errors(&diags) {
         eprintln!(
-            "  \x1b[31mcompile failed (strict)\x1b[0m — {} not written",
+            "  \x1b[31mcompile failed (strict)\x1b[0m - {} not written",
             dest.display()
         );
         return false;
@@ -187,7 +187,7 @@ fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool, strict: bool) -> 
 }
 
 fn print_detail(path: &Path, templates: &[FoundTemplate]) {
-    println!("{} — {} template(s)", path.display(), templates.len());
+    println!("{} - {} template(s)", path.display(), templates.len());
     let emitter = TsEmitter::new();
     for (i, t) in templates.iter().enumerate() {
         let generated = codegen(&t.statics, &t.holes, &emitter);

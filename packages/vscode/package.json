@@ -1,0 +1,110 @@
+{
+    "name": "elemix-vscode",
+    "displayName": "elemix",
+    "description": "elemix language support - syntax highlighting for `tpl` templates and compiler hints.",
+    "version": "0.9.0-dev.21",
+    "publisher": "neuralfog",
+    "license": "MIT",
+    "author": "brownhounds",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/neuralfog/elemix.git",
+        "directory": "packages/vscode"
+    },
+    "engines": {
+        "vscode": "^1.125.0"
+    },
+    "main": "./dist/extension.js",
+    "activationEvents": [
+        "onLanguage:typescript",
+        "onStartupFinished"
+    ],
+    "categories": [
+        "Programming Languages"
+    ],
+    "keywords": [
+        "elemix",
+        "tpl",
+        "web components",
+        "template literal",
+        "html"
+    ],
+    "contributes": {
+        "configurationDefaults": {
+            "[typescript]": {
+                "editor.quickSuggestions": {
+                    "comments": true
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "elemix.restartAnalyzer",
+                "title": "elemix: Restart LSP"
+            },
+            {
+                "command": "elemix.formatTemplates",
+                "title": "elemix: Format Templates in File"
+            }
+        ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "elemix.formatTemplates",
+                    "when": "elemix.formatterAvailable"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "elemix",
+            "properties": {
+                "elemix.analyzer.path": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Path to the `ea` analyzer binary for the LSP server. Empty resolves the project's `node_modules/.bin/ea`; if that is absent the analyzer stays off."
+                },
+                "elemix.formatter.path": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Path to the `etf` template formatter binary. Empty resolves the project's `node_modules/.bin/etf`, then `etf` on PATH."
+                }
+            }
+        },
+        "grammars": [
+            {
+                "scopeName": "inline.elemix.tpl",
+                "path": "./syntaxes/elemix-tpl.tmLanguage.json",
+                "injectTo": [
+                    "source.ts"
+                ],
+                "embeddedLanguages": {
+                    "meta.embedded.block.html.elemix": "html",
+                    "meta.template.expression.ts": "typescript"
+                }
+            }
+        ]
+    },
+    "scripts": {
+        "build": "esbuild src/extension.ts --bundle --external:vscode --format=cjs --platform=node --outfile=dist/extension.js",
+        "watch": "npm run build -- --sourcemap --watch",
+        "typecheck": "tsc --noEmit",
+        "lint": "tsc --noEmit && biome format && biome lint --error-on-warnings",
+        "lint:fix": "biome format --write && biome lint --fix --error-on-warnings",
+        "vscode:prepublish": "npm run build",
+        "package": "vsce package --no-dependencies -o elemix-vscode.vsix",
+        "publish": "vsce publish --no-dependencies"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^10.1.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.5.3",
+        "@neuralfog/biome-config": "0.1.2",
+        "@types/node": "26.1.1",
+        "@types/vscode": "1.125.0",
+        "@vscode/vsce": "3.9.2",
+        "esbuild": "0.28.1",
+        "typescript": "7.0.2"
+    }
+}

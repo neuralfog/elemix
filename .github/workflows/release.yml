@@ -56,6 +56,26 @@ jobs:
       - name: Check changelog
         run: node scripts/changelog.mjs check "${{ needs.version.outputs.value }}"
 
+  # ── mirror the Neovim plugin to its own repo ────────────────────────────────
+  #    Plugin managers install a whole repo, not a monorepo subdir, so
+  #    `git subtree split` mirrors packages/nvim to neuralfog/elemix.nvim (default
+  #    branch + a v<version> tag). Needs an NVIM_MIRROR_TOKEN secret with push
+  #    access to the mirror repo. No binary build, so it only rides the test gate.
+  publish-nvim:
+    needs: [changelog, version]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # subtree split needs the full history
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Mirror packages/nvim to neuralfog/elemix.nvim
+        env:
+          NVIM_MIRROR_TOKEN: ${{ secrets.NVIM_MIRROR_TOKEN }}
+        run: node scripts/publish-nvim.mjs "${{ needs.version.outputs.value }}"
+
   # ── the one build the test gate can't cover: the 6 cross-platform binaries.
   #    A failure on ANY target blocks every publish below. ──────────────────────
   build-compiler:

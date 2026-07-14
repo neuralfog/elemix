@@ -13,7 +13,11 @@ allowBuilds:
   # storybook's HMR file-watcher; ships prebuilt binaries, so its node-gyp
   # build script never needs to run — skip it.
   '@parcel/watcher': false
+  # @vscode/vsce's native auth deps - only needed for `vsce publish` login, not
+  # for building/packaging the extension, so skip their node-gyp builds.
+  '@vscode/vsce-sign': false
   esbuild: true
+  keytar: false
   wasm-pack: true
 # We publish the @neuralfog scope ourselves — exempt it from the release-age
 # cooldown so the vite plugin can depend on our own just-published builds.
