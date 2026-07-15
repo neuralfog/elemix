@@ -12,6 +12,7 @@ const PACKAGES = [
     '@neuralfog/elemix-analyzer',
     '@neuralfog/elemix-template-formatter',
     '@neuralfog/elemix-vite',
+    'create-elemix-app',
 ];
 
 const version = process.argv[2];
@@ -37,17 +38,29 @@ if (!existsSync(CHANGELOG)) {
     process.exit(1);
 }
 
-const body = section(readFileSync(CHANGELOG, 'utf8'), version);
+// A changelog entry is required for stable releases but optional for
+// prereleases (x.y.z-dev.N etc.) — those fall back to a generic body.
+const isPrerelease = version.includes('-');
+let body = section(readFileSync(CHANGELOG, 'utf8'), version);
 if (!body) {
-    console.error(`no changelog entry found for ${version}`);
-    process.exit(1);
+    if (!isPrerelease) {
+        console.error(`no changelog entry found for ${version}`);
+        process.exit(1);
+    }
+    body = `Pre-release build \`${version}\`.`;
 }
 
 const links = PACKAGES.map((npm) => `- [\`${npm}\`](${npmLink(npm)})`).join('\n');
+
+// The VS Code extension ships to the Marketplace, not npm; the .vsix is also
+// attached as a release asset below.
+const MARKETPLACE =
+    'https://marketplace.visualstudio.com/items?itemName=neuralfog.elemix-vscode';
+const editors = `- [elemix for VS Code](${MARKETPLACE}) (\`.vsix\` attached below)`;
 
 // Everything's on npm; the release-notes job also attaches all binaries below.
 const downloads = 'All binaries are attached as assets below.';
 
 process.stdout.write(
-    `${body}\n\n### Packages\n\n${links}\n\n### Downloads\n\n${downloads}\n`,
+    `${body}\n\n### Packages\n\n${links}\n\n### Editors\n\n${editors}\n\n### Downloads\n\n${downloads}\n`,
 );

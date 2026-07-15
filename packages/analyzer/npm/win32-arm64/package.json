@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-analyzer-win32-arm64",
-  "version": "0.9.0-dev.22",
+  "version": "0.9.0-dev.24",
   "description": "Prebuilt elemix-analyzer binary for Windows arm64.",
   "license": "MIT",
   "author": "brownhounds",

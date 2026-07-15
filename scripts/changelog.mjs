@@ -86,8 +86,11 @@ if (cmd === 'lint') {
     const expected = arg ?? JSON.parse(readFileSync('package.json', 'utf8')).version;
     const text = read();
     const errors = lintFormat(CHANGELOG, text);
+    // A changelog entry is only required for stable releases. Prereleases
+    // (x.y.z-dev.N etc.) may ship without one, so skip the top-match check.
+    const isPrerelease = expected.includes('-');
     const top = topVersion(text);
-    if (top !== expected)
+    if (!isPrerelease && top !== expected)
         errors.push(
             `${CHANGELOG} top entry is [${top ?? 'none'}], expected [${expected}]`,
         );
@@ -96,7 +99,11 @@ if (cmd === 'lint') {
         for (const e of errors) console.error(`  ${e}`);
         process.exit(1);
     }
-    console.log(`changelog top entry matches ${expected}`);
+    console.log(
+        isPrerelease && top !== expected
+            ? `changelog entry optional for prerelease ${expected} (top is [${top ?? 'none'}])`
+            : `changelog top entry matches ${expected}`,
+    );
 } else {
     console.error('usage: node scripts/changelog.mjs <lint | check [version]>');
     process.exit(1);

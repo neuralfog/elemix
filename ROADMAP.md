@@ -18,8 +18,6 @@ improvements if any... This is already incredibly stable!!
 ### Phase 7 - Close the release of v0.9.0 ❎
 
 - [ ] Add a curated `clanker` skill, include it in the monorepo, add it to `elemix.dev`
-- [ ] Additional polish of playground examples, organize examples better or not 🤔
-  Need compleating before the documentation so I can link real examples...
 - [ ] Conformance (potential bug fixing)
   - [x] Convert wikipulse app
   - [ ] Convert stealth app (over 200 components)
@@ -32,6 +30,13 @@ improvements if any... This is already incredibly stable!!
 - [ ] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
 - [ ] Add elemix to official benchmarks
 - [ ] Once `elemix.dev` is live verify publisher on vscode marketplace with DNS record
+
+***Chores 🥣🧽***
+
+- Finish polishing the playground 🛝
+- `create-elemix-app` - scaffold a new app from the official template (`npx create-elemix-app`) 🏗️
+- Artifacts for the VS Code extension now ship with every release 📦
+- Changelog no longer nedded for dev version release 🚫
 
 ***The Extension Awakens ⚡🚀***
 
@@ -77,7 +82,6 @@ enabled = true           # false turns the formatter off entirely
 indent_style = "space"   # "space" (default) or "tab"
 indent_width = 4         # columns per indent level
 line_width = 80          # max line width
-format_on_save = false   # format tpl templates on save
 ```
 
 ***The Kobayashi Maru 🖖🧪***
@@ -1003,7 +1007,6 @@ What went well:
 GG 👊🥋✊
 
 - [x] Review and test decorator hooks in storybook package - remove if unnecessary
-
 - [x] Focus on proper editor support
   - [x] Full-blown LSP server in `analyzer`
   - [x] Focus on VS Code as the target
@@ -1011,8 +1014,8 @@ GG 👊🥋✊
   - [x] Linting extension based on the `analyzer` LSP mode
   - [x] Possibly combine into a single one for easier release
   - [x] Add formatting extension based on `formatter`
-
 - [x] Add an MCP server for the docs for agentic coding alongside the skill - NO, not a good idea 😂😂😂
-
 - [x] Look into automatic publishing to the `vscode` marketplace, and make it part of the release pipeline
 - [x] Look into `nvim` plugin versioning if such a thing exists 🤔
+- [x] Additional polish of playground examples, organize examples better or not 🤔
+  Need compleating before the documentation so I can link real examples...

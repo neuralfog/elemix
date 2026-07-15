@@ -139,11 +139,35 @@ jobs:
       - name: Build
         run: pnpm --filter elemix-vscode build
 
+      # The Marketplace rejects re-publishing a version that already exists, and
+      # every 0.9.0-dev.N maps to the same base 0.9.0 — so a re-publish of the
+      # same base is expected and must NOT fail the release. Treat "already
+      # exists" as success; any other error still fails.
       - name: Publish
         working-directory: packages/vscode
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: pnpm exec vsce publish --no-dependencies ${{ steps.mkt.outputs.channel }} -p "$VSCE_PAT"
+        run: |
+          set +e
+          out="$(pnpm exec vsce publish --no-dependencies ${{ steps.mkt.outputs.channel }} -p "$VSCE_PAT" 2>&1)"
+          code=$?
+          echo "$out"
+          [ "$code" -eq 0 ] && exit 0
+          if echo "$out" | grep -qi "already exists"; then
+            echo "elemix-vscode ${{ steps.mkt.outputs.version }} already on the Marketplace — skipping"
+            exit 0
+          fi
+          exit "$code"
+
+      # Also produce the .vsix so the GitHub Release ships an installable artifact.
+      - name: Package VSIX
+        working-directory: packages/vscode
+        run: pnpm exec vsce package --no-dependencies ${{ steps.mkt.outputs.channel }} -o "elemix-vscode-${{ steps.mkt.outputs.version }}.vsix"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: vsix
+          path: packages/vscode/elemix-vscode-*.vsix
 
   # ── the one build the test gate can't cover: the 6 cross-platform binaries.
   #    A failure on ANY target blocks every publish below. ──────────────────────
@@ -880,6 +904,60 @@ jobs:
           echo "publishing @neuralfog/elemix-vite@$VERSION under dist-tag: $TAG"
           npm publish --access public --provenance --tag "$TAG"
 
+  # ── publish create-elemix-app to npm ────────────────────────────────────────
+  #    Standalone scaffolding CLI (unscoped). It only clones the template repo,
+  #    so it has no cross-package deps and just rides the test + changelog gate.
+  publish-create-app:
+    name: publish create-elemix-app
+    needs: [changelog, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Stamp version
+        env:
+          VERSION: ${{ needs.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const f = "packages/create-app/package.json";
+            const p = JSON.parse(fs.readFileSync(f, "utf8"));
+            p.version = process.env.VERSION;
+            fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            console.log(`create-elemix-app@${process.env.VERSION}`);
+          '
+
+      - name: Build
+        run: pnpm --filter create-elemix-app build
+
+      # Ship the changelog (its `files` lists it) — staged from the root source.
+      - name: Stage changelog
+        run: cp CHANGELOG.md packages/create-app/CHANGELOG.md
+
+      - name: Publish
+        working-directory: packages/create-app
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.CREATE_APP_NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing create-elemix-app@$VERSION under dist-tag: $TAG"
+          npm publish --access public --provenance --tag "$TAG"
+
   # ── after everything is on npm: one GitHub Release from the changelog ───────
   release-notes:
     name: GitHub Release
@@ -893,6 +971,8 @@ jobs:
       - publish-storybook
       - publish-testing-library
       - publish-vite
+      - publish-create-app
+      - publish-vscode
     runs-on: ubuntu-latest
     permissions:
       contents: write # create the GitHub Release
@@ -920,6 +1000,10 @@ jobs:
         with:
           name: wasm-pkg
           path: wasm
+      - uses: actions/download-artifact@v8
+        with:
+          name: vsix
+          path: vsix
 
       # Pack each platform into a downloadable archive so the GitHub Release ships
       # the prebuilt binaries, not just npm links. tar for unix (preserves the
@@ -966,5 +1050,6 @@ jobs:
           else
             gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md "${PRERELEASE[@]}"
           fi
-          # Attach (or replace) the prebuilt binaries on the release.
+          # Attach (or replace) the prebuilt binaries and the VS Code extension.
           gh release upload "$TAG" dist-assets/* --clobber
+          gh release upload "$TAG" vsix/*.vsix --clobber

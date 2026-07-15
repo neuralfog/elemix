@@ -1,0 +1,40 @@
+{
+    "name": "create-elemix-app",
+    "version": "0.9.0-dev.24",
+    "description": "Scaffold a new elemix app from the official template.",
+    "license": "MIT",
+    "author": "brownhounds",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/neuralfog/elemix.git",
+        "directory": "packages/create-app"
+    },
+    "type": "module",
+    "bin": {
+        "create-elemix-app": "dist/index.js"
+    },
+    "files": [
+        "./dist/**/*",
+        "CHANGELOG.md"
+    ],
+    "keywords": [
+        "elemix",
+        "create",
+        "scaffold",
+        "template",
+        "starter"
+    ],
+    "scripts": {
+        "clean": "rm -rf ./dist",
+        "build": "npm run clean && esbuild src/index.ts --bundle --platform=node --format=esm --target=node18 --outfile=dist/index.js --banner:js='#!/usr/bin/env node' && chmod +x dist/index.js",
+        "lint": "tsc --noEmit && biome format && biome lint --error-on-warnings",
+        "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings && tsc --noEmit"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.5.3",
+        "@neuralfog/biome-config": "0.1.2",
+        "@types/node": "26.1.1",
+        "esbuild": "0.28.1",
+        "typescript": "7.0.2"
+    }
+}
