@@ -6,7 +6,7 @@ A compiled frontend library - no virtual DOM, incredibly fast, with state manage
 
 **[elemix.dev](https://elemix.dev/)**
 
-- Live playground (pre compilation era): **[playground.elemix.dev](https://playground.elemix.dev/)**
+- Live playground: **[playground.elemix.dev](https://playground.elemix.dev/)**
 - Compiler Explorer: **[compiler-explorer.elemix.dev](https://compiler-explorer.elemix.dev/)**
 
 The **[Roadmap](ROADMAP.md)** is the full log of development.
@@ -24,6 +24,7 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-testing-library` | Shadow-piercing queries and real DOM events for testing Elemix components. | [README](packages/testing-library/README.md) |
 | `@neuralfog/elemix-vscode` | VS Code Extension For Elemix. | [README](packages/vscode/README.md) |
 | `@neuralfog/elemix-nvim` | Neovim Plugin For Elemix. | [README](packages/nvim/README.md) |
+| `create-elemix-app` | Scaffold A New Elemix App. | [README](packages/create-app/README.md) |
 
 ## Contributing
 

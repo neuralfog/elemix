@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0-dev.23] - 2026-07-15
+
+### Added
+
+- `create-elemix-app` - scaffold a new app from the official template (`npm create elemix-app`)
+- VS Code `.vsix` attached to GitHub Releases, plus a Marketplace link in the release notes
+
+### Changed
+
+- Marketplace publish is skipped when the version is already published
+
 ## [0.9.0-dev.22] - 2026-07-14
 
 ### Added

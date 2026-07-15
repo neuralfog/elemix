@@ -1,6 +1,6 @@
 {
   "name": "@neuralfog/elemix-template-formatter-linux-arm64",
-  "version": "0.9.0-dev.22",
+  "version": "0.9.0-dev.23",
   "description": "Prebuilt elemix-template-formatter binary for linux arm64 (static musl).",
   "license": "MIT",
   "author": "brownhounds",
