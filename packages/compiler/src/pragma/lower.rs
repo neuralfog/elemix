@@ -19,7 +19,7 @@ impl std::fmt::Display for ExpandError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ExpandError::Locate(LocateError::Orphan) => {
-                write!(f, "pragma comment has no declaration on the next line")
+                write!(f, "compiler hint has no declaration on the next line")
             }
             ExpandError::Locate(LocateError::OnConst(n)) => {
                 write!(f, "`#{n}` can't tag a const; only #state may")
@@ -27,8 +27,11 @@ impl std::fmt::Display for ExpandError {
             ExpandError::Locate(LocateError::OnField(n)) => {
                 write!(f, "`#{n}` can't tag a field; only #styles/#state may")
             }
+            ExpandError::Locate(LocateError::Unknown(n)) => {
+                write!(f, "unknown compiler hint `#{n}`")
+            }
             ExpandError::Resolve(PragmaError::Unknown(n)) => {
-                write!(f, "unknown pragma directive `#{n}`")
+                write!(f, "unknown compiler hint `#{n}`")
             }
             ExpandError::Resolve(PragmaError::DuplicateTag(a, b)) => {
                 write!(f, "conflicting #tag values `{a}` and `{b}`")

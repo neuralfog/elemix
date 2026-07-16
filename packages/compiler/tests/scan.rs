@@ -210,7 +210,7 @@ fn unknown_directive_is_an_error_at_the_class_name() {
     assert_eq!(diags[0].severity, HintSeverity::Error);
     assert!(diags[0]
         .message
-        .contains("unknown pragma directive `#componnt`"));
+        .contains("unknown compiler hint `#componnt`"));
     assert_eq!(diags[0].class.as_deref(), Some("Foo"));
     // The span must point at the offending HINT token in the comment, not the class.
     assert_eq!(

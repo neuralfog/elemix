@@ -2,7 +2,7 @@
 
 use clap::Parser;
 use elemix_compiler::codegen::codegen;
-use elemix_compiler::diagnostics::{self, Diagnostic, Severity};
+use elemix_compiler::diagnostics::{Diagnostic, Severity};
 use elemix_compiler::emit::TsEmitter;
 use elemix_compiler::sourcemap::{json_string, line_map};
 use elemix_compiler::{collect_ts_files, compile_diagnostics, find_html_templates, FoundTemplate};
@@ -34,12 +34,6 @@ struct Cli {
     /// `<file>.map` is written and the compiled file gets a `sourceMappingURL`.
     #[arg(long)]
     sourcemap: bool,
-
-    /// Fail (non-zero exit, no file written) on an error-level diagnostic.
-    /// Off by default: the compiler writes best-effort output with errors
-    /// inlined as a runtime `throw` and reports them on stderr.
-    #[arg(long)]
-    strict: bool,
 }
 
 fn main() {
@@ -77,17 +71,16 @@ fn main() {
         std::process::exit(2);
     }
 
-    // Build path: a diagnostic error fails the run (non-zero exit, broken file
-    // not written) so CI never ships code that throws at runtime.
-    let mut ok = true;
+    // Build path: the compiler is a transform, not a gate. Every file compiles
+    // and is written best-effort, with any errors inlined as a runtime `throw`
+    // (and reported on stderr). Failing a build on an elemix error is the
+    // analyzer's / tsc's job, not this pass — so a bad component still emits and
+    // surfaces loudly at runtime instead of blocking the transform.
     for path in collect_ts_files(&cli.dirs) {
-        ok &= process(&path, cli.out.as_deref(), cli.sourcemap, cli.strict, false);
+        process(&path, cli.out.as_deref(), cli.sourcemap, false);
     }
     if let Some(path) = cli.file.clone() {
-        ok &= process(&path, cli.out.as_deref(), cli.sourcemap, cli.strict, true);
-    }
-    if !ok {
-        std::process::exit(1);
+        process(&path, cli.out.as_deref(), cli.sourcemap, true);
     }
 }
 
@@ -131,7 +124,7 @@ fn banner() {
     eprintln!();
 }
 
-fn process(path: &Path, out: Option<&Path>, sourcemap: bool, strict: bool, verbose: bool) -> bool {
+fn process(path: &Path, out: Option<&Path>, sourcemap: bool, verbose: bool) {
     let source = match fs::read_to_string(path) {
         Ok(s) => s,
         Err(e) => {
@@ -140,36 +133,25 @@ fn process(path: &Path, out: Option<&Path>, sourcemap: bool, strict: bool, verbo
         }
     };
     match out {
-        Some(dir) => emit(dir, path, &source, sourcemap, strict),
-        None if verbose => {
-            print_detail(path, &find_html_templates(&source));
-            true
-        }
+        Some(dir) => emit(dir, path, &source, sourcemap),
+        None if verbose => print_detail(path, &find_html_templates(&source)),
         None => {
             let n = find_html_templates(&source).len();
             println!("{}: {n} template(s)", path.display());
-            true
         }
     }
 }
 
 /// Write the compiled source to `<dir>/<filename>`, plus a sidecar `.map` and a
-/// `sourceMappingURL` footer when `sourcemap` is set. With `strict`, an error
-/// diagnostic writes nothing and returns `false`; otherwise the best-effort
-/// output (error inlined as a `throw`) is written and `true` returned.
-fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool, strict: bool) -> bool {
+/// `sourceMappingURL` footer when `sourcemap` is set. Best-effort: the file is
+/// always written, with any error diagnostic inlined as a runtime `throw` (and
+/// reported on stderr) — the compiler is a transform, never a build gate.
+fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool) {
     let name = src.file_name().expect("source has a file name");
     let dest = dir.join(name);
 
     let (code, diags) = compile_diagnostics(source);
     report(Some(src), &diags);
-    if strict && diagnostics::has_errors(&diags) {
-        eprintln!(
-            "  \x1b[31mcompile failed (strict)\x1b[0m - {} not written",
-            dest.display()
-        );
-        return false;
-    }
 
     fs::create_dir_all(dir).expect("create out dir");
     if sourcemap {
@@ -183,7 +165,6 @@ fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool, strict: bool) -> 
         fs::write(&dest, code).expect("write emitted file");
     }
     println!("emitted {}", dest.display());
-    true
 }
 
 fn print_detail(path: &Path, templates: &[FoundTemplate]) {

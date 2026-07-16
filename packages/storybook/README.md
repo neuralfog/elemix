@@ -46,3 +46,5 @@ const preview: Preview = {
 
 export default preview;
 ```
+
+The full setup is shown in the [elemix template](https://github.com/neuralfog/elemix-template).

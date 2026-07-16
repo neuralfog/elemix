@@ -215,6 +215,29 @@ fn a_non_styles_directive_on_a_field_errors() {
     // The error carets the offending member, not the file head.
     let (s, en) = e.span.expect("a member span");
     assert_eq!(&src[s..en], "y");
+    // A KNOWN hint in the wrong place still names the component.
+    assert_eq!(e.component.as_deref(), Some("Foo"));
+}
+
+#[test]
+fn an_unknown_hint_on_a_field_is_unknown_not_wrong_placement() {
+    // `#statesdf` is a typo, not a misplaced known hint - it must report
+    // "unknown", never "can't tag a field" (which implies it'd be valid elsewhere).
+    let src = "class Foo extends Component {\n    // #statesdf\n    y = 1;\n}";
+    let e = locate(src).unwrap_err();
+    assert_eq!(e.err, LocateError::Unknown("statesdf".to_string()));
+    assert_eq!(e.component.as_deref(), Some("Foo"));
+    let (s, en) = e.span.expect("a member span");
+    assert_eq!(&src[s..en], "y");
+}
+
+#[test]
+fn an_unknown_hint_on_a_const_is_unknown_not_wrong_placement() {
+    let src = "// #statesdf\nconst x = 1;";
+    let e = locate(src).unwrap_err();
+    assert_eq!(e.err, LocateError::Unknown("statesdf".to_string()));
+    // A const has no owning class to name.
+    assert_eq!(e.component, None);
 }
 
 #[test]

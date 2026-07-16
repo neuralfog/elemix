@@ -20,7 +20,7 @@ export const InlinedError = {
 
         expect(caught).not.toBeNull();
         expect(caught?.message).toContain(
-            '[elemix] ErrorApp: unknown pragma directive `#frobnicate`',
+            '[elemix] ErrorApp: unknown compiler hint `#frobnicate`',
         );
 
         const pre = find('[data-testid="msg"]', canvasElement);

@@ -21,8 +21,9 @@ pub const MODULE_STATE_PRIMITIVE_MSG: &str =
 pub fn binding_issue_message(directive: &str, member: &str, problem: BindingProblem) -> String {
     match problem {
         BindingProblem::HookOnNonFunction => format!(
-            "`#{directive}` must tag a method or an arrow function - `{member}` is \
-             neither, so there is nothing to call"
+            "`#{directive}` must tag a method or an arrow function - `{member}` is a \
+             data field, not a function. Move the logic into a method (or \
+             `{member} = () => {{ ... }}`) and tag that"
         ),
         BindingProblem::StateOnFunction => format!(
             "`#{directive}` must tag a data field, not a function - `{member}` is a \
@@ -61,10 +62,12 @@ pub fn collect(source: &str) -> Vec<Diagnostic> {
 
     let located = match locate(source) {
         Ok(l) => l,
-        // A structural locate failure is file-level — no class to blame.
+        // A locate failure blames its component when the hint sits on a class
+        // member (an unknown hint / wrong-target field); an orphan or bad const
+        // has no class to name.
         Err(e) => {
             out.push(Diagnostic::error(
-                None,
+                e.component.clone(),
                 ExpandError::Locate(e.err).to_string(),
             ));
             return out;

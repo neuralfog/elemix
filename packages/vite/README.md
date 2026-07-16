@@ -1,23 +1,26 @@
-# ⚡ @neuralfog/elemix-vite ⚠️ **Experimental**
+<img src="https://raw.githubusercontent.com/neuralfog/elemix/main/.readme/elemix-banner.svg" alt="elemix - Reactive Elements" width="100%" />
 
-Vite plugin that compiles [elemix](https://www.npmjs.com/package/@neuralfog/elemix)
-`tpl` templates to `view()` on the fly — authoring stays `tpl`...``, the compile
-step is invisible.
+# Elemix compiler plugin for vite
 
-It runs `pre` (before Vite transpiles TS to JS) and drives the native
-`elemix-compiler` binary in `--stdin` mode, one compile per module.
+## Installation
 
-## Usage
+Needs Vite 5+.
 
-```ts
-// vite.config.ts
-import { defineConfig } from 'vite';
-import { elemix } from '@neuralfog/elemix-vite';
+1. Install the plugin (the compiler ships as its dependency):
 
-export default defineConfig({
-    plugins: [elemix()],
-});
-```
+   ```sh
+   pnpm add -D @neuralfog/elemix-vite
+   ```
 
-That's it — write components with `tpl` and Vite compiles them as it loads each
-`.ts` module.
+2. Add it to your Vite config:
+
+   ```ts
+   import { defineConfig } from 'vite';
+   import { elemix } from '@neuralfog/elemix-vite';
+
+   export default defineConfig({
+     plugins: [elemix()],
+   });
+   ```
+
+The full setup is shown in the [elemix template](https://github.com/neuralfog/elemix-template).

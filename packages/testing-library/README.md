@@ -1,7 +1,14 @@
-# @neuralfog/elemix-testing-library
+<img src="https://raw.githubusercontent.com/neuralfog/elemix/main/.readme/elemix-banner.svg" alt="elemix - Reactive Elements" width="100%" />
 
-Testing utilities for Elemix components: shadow-piercing queries, real DOM
-events, and assertions — a self-contained kit, no test framework required.
+# Elemix testing library
+
+Testing utilities for Elemix components: shadow-piercing queries and events, and assertions - a self-contained kit, no test framework required.
+
+## Installation
+
+```sh
+pnpm add -D @neuralfog/elemix-testing-library
+```
 
 The API is split across three entry points:
 
@@ -13,9 +20,7 @@ The API is split across three entry points:
 
 ## Queries
 
-Elemix renders into shadow roots, so a plain `querySelector` stops at the first
-boundary. These helpers walk the whole composed tree — through every open shadow
-root — and take native CSS selectors. Every one is generic over the element type.
+Elemix renders into shadow roots, so a plain `querySelector` stops at the first boundary. These helpers walk the whole composed tree — through every open shadow root — and take native CSS selectors. Every one is generic over the element type.
 
 | Function | Returns |
 | --- | --- |
@@ -35,9 +40,7 @@ const submit = findByTestId('submit', host);
 
 ## Events
 
-Real DOM events, dispatched on the real element with `bubbles` and `composed`
-set the way a browser sets them — so they cross shadow boundaries and drive
-Elemix reactivity, `~model`, and `@event` handlers exactly as a user would.
+Real DOM events, dispatched on the real element with `bubbles` and `composed` set the way a browser sets them — so they cross shadow boundaries and drive Elemix reactivity, `~model`, and `@event` handlers exactly as a user would.
 
 | Function | Fires |
 | --- | --- |
@@ -50,8 +53,7 @@ Elemix reactivity, `~model`, and `@event` handlers exactly as a user would.
 
 ## Assertions
 
-`expect` is a small, dependency-free matcher set; `waitFor` retries a callback
-until it stops throwing (or times out).
+`expect` is a small, dependency-free matcher set; `waitFor` retries a callback until it stops throwing (or times out).
 
 | Matcher | Passes when |
 | --- | --- |
@@ -74,3 +76,5 @@ click(find('.save', host));
 
 await waitFor(() => expect(find('.status', host)?.textContent).toBe('saved'));
 ```
+
+The full setup is shown in the [elemix template](https://github.com/neuralfog/elemix-template).

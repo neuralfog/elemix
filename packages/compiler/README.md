@@ -1,22 +1,9 @@
-# ⚙️ Elemix Compiler ⚠️ **Experimental**
+<img src="https://raw.githubusercontent.com/neuralfog/elemix/main/.readme/elemix-banner.svg" alt="elemix - Reactive Elements" width="100%" />
 
-The compiler that makes Elemix compile-only.
+# Elemix compiler
 
-This is a personal project built for my own use. It is not open source and comes with no guarantees, warranties, or support.
+Driven by the [Vite plugin](https://www.npmjs.com/package/@neuralfog/elemix-vite)
 
-## Why?
+[Compiler Explorer](https://compiler-explorer.elemix.dev/)
 
-Because the runtime should do as little as possible. Elemix components are authored with `tpl` tagged-template views — this compiler lowers them ahead of time so nothing parses, walks, or diffs a template in the browser.
-
-## What it does
-
-Written in Rust on the [oxc](https://oxc.rs) parser. It rewrites each component's `tpl` template into a `view()` that builds the DOM directly and wires it to the runtime primitives — no template interpreter ships. Directives (`repeat`, `when`, `choose`) are erased at compile time, and the output imports only the primitives it uses.
-
-## Usage
-
-Installed via npm, the compiler exposes two equivalent commands — `ec` (short) and `elemix-compiler`:
-
-```sh
-ec --dirs <dir|glob>... --out <dir>
-ec --file <path>
-```
+The full setup is shown in the [elemix template](https://github.com/neuralfog/elemix-template).

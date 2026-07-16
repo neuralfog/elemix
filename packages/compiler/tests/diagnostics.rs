@@ -35,12 +35,31 @@ fn clean_source_is_untouched() {
 fn unknown_pragma_inlines_a_throw_naming_the_component() {
     let out = compile(UNKNOWN_PRAGMA);
     assert!(out.starts_with("throw new Error('[elemix] WidgetApp:"));
-    assert!(out.contains("unknown pragma directive `#frobnicate`"));
+    assert!(out.contains("unknown compiler hint `#frobnicate`"));
     // the throw aborts at module scope before the (un-upgradable) component
     let (_, diags) = compile_diagnostics(UNKNOWN_PRAGMA);
     assert_eq!(diags.len(), 1);
     assert_eq!(diags[0].severity, Severity::Error);
     assert_eq!(diags[0].component.as_deref(), Some("WidgetApp"));
+}
+
+#[test]
+fn unknown_hint_on_a_field_reads_as_unknown_and_names_the_component() {
+    // A typo'd hint on a class field must say "unknown compiler hint", NOT
+    // "can't tag a field" - and name the component like the class-level case.
+    let src = "import { Component } from '@neuralfog/elemix';
+export class MatchApp extends Component {
+    // #statesdf
+    state = { tab: 1 };
+}";
+    let out = compile(src);
+    assert!(
+        out.starts_with("throw new Error('[elemix] MatchApp: unknown compiler hint `#statesdf`');")
+    );
+    assert!(!out.contains("can't tag a field"));
+    let (_, diags) = compile_diagnostics(src);
+    assert_eq!(diags.len(), 1);
+    assert_eq!(diags[0].component.as_deref(), Some("MatchApp"));
 }
 
 #[test]

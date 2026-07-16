@@ -6,7 +6,8 @@
 
 - Syntax highlighting for `tpl` templates.
 - Prop typechecking diagnostics: prop type mismatches, missing required props, unknown props, duplicated props.
-- Completion: `:prop`, `@event`, `~model`/`~onmodel`.
+- Compiler hint validation.
+- Completion: `:prop` component context aware, `@event`, `~model`/`~onmodel`.
 - Completion: compiler hints `// #...`.
 - Completion: components tags with default props inlined.
 - Hover: compiler hints docs.

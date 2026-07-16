@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: tests/fixtures/ErrorApp.ts
 ---
-throw new Error('[elemix] ErrorApp: unknown pragma directive `#frobnicate`');
+throw new Error('[elemix] ErrorApp: unknown compiler hint `#frobnicate`');
 import { $__template, $__clone } from '@neuralfog/elemix/runtime';
 // Diagnostic fixture: an UNKNOWN pragma directive. The compiler can't lower it,
 // so it inlines a module-scope `throw new Error('[elemix] …')` — the component

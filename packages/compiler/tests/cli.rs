@@ -210,32 +210,14 @@ fn tolerant_by_default_emits_an_errored_component_with_an_inlined_throw() {
     let compiled = std::fs::read_to_string(dir.join("ErrorApp.ts")).unwrap();
     assert!(compiled.starts_with("throw new Error('[elemix] ErrorApp:"));
     // the diagnostic is still reported on stderr
-    assert!(String::from_utf8_lossy(&out.stderr).contains("unknown pragma directive"));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("unknown compiler hint"));
 }
 
 #[test]
-fn strict_fails_and_writes_nothing_on_an_error() {
-    let dir = out_dir("strict-err");
-    let out = Command::new(bin())
-        .args(["--file", "tests/fixtures/ErrorApp.ts", "--strict", "--out"])
-        .arg(&dir)
-        .output()
-        .unwrap();
-    assert_eq!(out.status.code(), Some(1));
-    assert!(!dir.join("ErrorApp.ts").exists());
-    assert!(String::from_utf8_lossy(&out.stderr).contains("compile failed (strict)"));
-}
-
-#[test]
-fn strict_passes_a_clean_component() {
-    let dir = out_dir("strict-clean");
+fn emits_a_clean_component() {
+    let dir = out_dir("emit-clean");
     let status = Command::new(bin())
-        .args([
-            "--file",
-            "tests/fixtures/CounterApp.ts",
-            "--strict",
-            "--out",
-        ])
+        .args(["--file", "tests/fixtures/CounterApp.ts", "--out"])
         .arg(&dir)
         .status()
         .unwrap();
@@ -244,15 +226,15 @@ fn strict_passes_a_clean_component() {
 }
 
 #[test]
-fn strict_does_not_fail_on_a_warning() {
-    let dir = out_dir("strict-warn");
-    let status = Command::new(bin())
-        .args(["--file", "tests/fixtures/WarnApp.ts", "--strict", "--out"])
+fn a_warning_is_inlined_and_still_emitted() {
+    let dir = out_dir("emit-warn");
+    let out = Command::new(bin())
+        .args(["--file", "tests/fixtures/WarnApp.ts", "--out"])
         .arg(&dir)
-        .status()
+        .output()
         .unwrap();
-    // a warning is not an error — strict still writes it and exits clean
-    assert!(status.success());
+    // a warning never blocks emit: the file is written and the run exits clean
+    assert!(out.status.success());
     let compiled = std::fs::read_to_string(dir.join("WarnApp.ts")).unwrap();
     assert!(compiled.contains("console.warn('[elemix] WarnApp:"));
 }

@@ -77,6 +77,27 @@ pub enum PragmaError {
     ShadowConflict,
 }
 
+/// Every compiler-hint name the transform understands (class-level and member-
+/// level combined). The gate that separates a KNOWN hint used in the wrong place
+/// (`#component` on a field) from a typo/unknown one (`#statesdf`) — the two want
+/// different diagnostics.
+pub fn is_known_directive(name: &str) -> bool {
+    matches!(
+        name,
+        "component"
+            | "tag"
+            | "form"
+            | "no-shadow"
+            | "shadow"
+            | "styles"
+            | "state"
+            | "effect"
+            | "before-mount"
+            | "mount"
+            | "dispose"
+    )
+}
+
 /// Fold a class pragma's directives into typed meaning. **The extension point**
 /// for component-level directives. `#styles` is rejected here — it belongs above
 /// the `const` it tags, not on the class.

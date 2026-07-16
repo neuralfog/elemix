@@ -26,17 +26,19 @@ improvements if any... This is already incredibly stable!!
   - [x] Documentation driven by markdow files
   - [x] Selectable verion same as Laravel docs
   - [ ] Write the actual docs 😒
-- [ ] Update all `README` files at the moment are just autocomplete filler from the `minion` 🤖
 - [ ] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
 - [ ] Add elemix to official benchmarks
 - [ ] Once `elemix.dev` is live verify publisher on vscode marketplace with DNS record
 
 ***Chores 🥣🧽***
 
+- Drop `strict` from the compiler - it does nothing; the compiler has to be best-effort 🤷
+- Cleanup and tightening of compiler-hint validation and error messages 🧹
+- Update all `README` files 🧹
 - Finish polishing the playground 🛝
 - `create-elemix-app` - scaffold a new app from the official template (`npx create-elemix-app`) 🏗️
 - Artifacts for the VS Code extension now ship with every release 📦
-- Changelog no longer nedded for dev version release 🚫
+- Changelog no longer needed for dev-version releases 🚫
 
 ***The Extension Awakens ⚡🚀***
 
@@ -1019,3 +1021,4 @@ GG 👊🥋✊
 - [x] Look into `nvim` plugin versioning if such a thing exists 🤔
 - [x] Additional polish of playground examples, organize examples better or not 🤔
   Need compleating before the documentation so I can link real examples...
+- [x] Update all `README` files at the moment are just autocomplete filler from the `minion` 🤖

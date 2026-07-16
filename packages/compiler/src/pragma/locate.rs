@@ -17,6 +17,7 @@
 //! The values stay real, type-checked expressions on the declaration — never
 //! text in the comment.
 
+use crate::pragma::is_known_directive;
 use crate::pragma::parse::{is_pragma, split_directives, split_directives_spanned};
 use crate::pragma::Directive;
 use crate::pragma::SpannedDirective;
@@ -126,24 +127,37 @@ pub struct Located {
 pub enum LocateError {
     /// A pragma comment with no declaration on the immediately-following line.
     Orphan,
-    /// A non-`#state` directive tagging a top-level `const`.
+    /// A KNOWN member/class hint tagging a top-level `const` where only `#state`
+    /// is allowed.
     OnConst(String),
-    /// A non-`#styles`/`#state` directive tagging a class field.
+    /// A KNOWN class/method hint tagging a class field where only
+    /// `#styles`/`#state` is allowed.
     OnField(String),
+    /// A hint name no handler claims — almost always a typo (`#statesdf`). Kept
+    /// distinct from [`OnConst`]/[`OnField`] so the message says "unknown" rather
+    /// than misleadingly implying the hint would be valid elsewhere.
+    Unknown(String),
 }
 
-/// A [`LocateError`] paired with the source span to caret it at, where one
-/// exists. `span == None` is file-level (no declaration to point at, e.g. an
-/// orphan pragma); `Some((start, end))` frames the offending member name.
+/// A [`LocateError`] paired with the source span to caret it at (where one
+/// exists) and the component it happened in (where known). `span == None` is
+/// file-level (no declaration to point at, e.g. an orphan pragma); `Some((start,
+/// end))` frames the offending member name. `component` names the class so the
+/// runtime message reads `<Class>: …`, matching the class-level hint errors.
 #[derive(Debug, PartialEq)]
 pub struct LocatedError {
     pub err: LocateError,
     pub span: Option<(usize, usize)>,
+    pub component: Option<String>,
 }
 
 impl From<LocateError> for LocatedError {
     fn from(err: LocateError) -> Self {
-        LocatedError { err, span: None }
+        LocatedError {
+            err,
+            span: None,
+            component: None,
+        }
     }
 }
 
@@ -305,6 +319,7 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
             } => match directive_name(&directives).map_err(|err| LocatedError {
                 err,
                 span: Some((*name_start, *name_end)),
+                component: Some(classes[*class_idx].name.clone()),
             })? {
                 "styles" => classes[*class_idx].styles.push(StyleField {
                     value: slice(source, *value),
@@ -362,8 +377,9 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                 }
                 other => {
                     return Err(LocatedError {
-                        err: LocateError::OnField(other.to_string()),
+                        err: field_error(other),
                         span: Some((*name_start, *name_end)),
+                        component: Some(classes[*class_idx].name.clone()),
                     })
                 }
             },
@@ -375,6 +391,7 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
             } => match directive_name(&directives).map_err(|err| LocatedError {
                 err,
                 span: Some((*name_start, *name_end)),
+                component: Some(classes[*class_idx].name.clone()),
             })? {
                 "effect" => {
                     classes[*class_idx].effects.push(name.clone());
@@ -406,8 +423,9 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                 }
                 other => {
                     return Err(LocatedError {
-                        err: LocateError::OnField(other.to_string()),
+                        err: field_error(other),
                         span: Some((*name_start, *name_end)),
+                        component: Some(classes[*class_idx].name.clone()),
                     })
                 }
             },
@@ -419,6 +437,7 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
             } => match directive_name(&directives).map_err(|err| LocatedError {
                 err,
                 span: Some((*name_start, *name_end)),
+                component: None,
             })? {
                 "state" => {
                     states.push(state_edit(source, *name_end, *type_span, *value));
@@ -426,8 +445,9 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                 }
                 other => {
                     return Err(LocatedError {
-                        err: LocateError::OnConst(other.to_string()),
+                        err: const_error(other),
                         span: Some((*name_start, *name_end)),
+                        component: None,
                     })
                 }
             },
@@ -455,6 +475,25 @@ fn directive_name(directives: &[Directive]) -> Result<&str, LocateError> {
     match directives {
         [d] => Ok(d.name.as_str()),
         _ => Err(LocateError::OnField("(expected one directive)".to_string())),
+    }
+}
+
+/// Classify a hint that a class field can't carry: an UNKNOWN name is a typo
+/// (`#statesdf`), a KNOWN one is just in the wrong place (`#component` on a field).
+fn field_error(name: &str) -> LocateError {
+    if is_known_directive(name) {
+        LocateError::OnField(name.to_string())
+    } else {
+        LocateError::Unknown(name.to_string())
+    }
+}
+
+/// As [`field_error`], for a top-level `const` (only `#state` is allowed there).
+fn const_error(name: &str) -> LocateError {
+    if is_known_directive(name) {
+        LocateError::OnConst(name.to_string())
+    } else {
+        LocateError::Unknown(name.to_string())
     }
 }
 

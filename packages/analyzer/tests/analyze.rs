@@ -123,7 +123,7 @@ fn flags_exactly_the_bad_prop_holes() {
     assert!(
         messages
             .iter()
-            .any(|m| m.contains("unknown pragma directive `#componnt`")),
+            .any(|m| m.contains("unknown compiler hint `#componnt`")),
         "missing the compiler-hint diagnostic: {messages:?}"
     );
     // MODULE-level `#state` store must be an object, not a bare primitive

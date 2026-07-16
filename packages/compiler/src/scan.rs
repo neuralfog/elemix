@@ -475,7 +475,7 @@ pub fn scan_hints(source: &str) -> Vec<HintDiagnostic> {
                 severity: HintSeverity::Error,
                 kind: HintKind::Directive,
                 message: ExpandError::Locate(e.err).to_string(),
-                class: None,
+                class: e.component.clone(),
                 start,
                 end,
             });
