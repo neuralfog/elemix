@@ -430,18 +430,41 @@ export const $__list = <T>(
     });
 };
 
-type Cache = { __t?: string; __c?: string; __s?: string };
+type Cache = {
+    __t?: string;
+    __c?: string;
+    __s?: string;
+    __r?: Node[] | null;
+};
 
 const attrKeys = new Map<string, string>();
 
+const clearMounted = (n: Text & Cache): void => {
+    if (!n.__r) return;
+    for (const c of n.__r) c.parentNode?.removeChild(c);
+    n.__r = null;
+};
+
 export const $__setText = (node: Text, value: unknown): void => {
-    const next =
-        typeof value === 'string'
-            ? value
-            : value === null || value === undefined
-              ? ''
-              : String(value);
     const n = node as Text & Cache;
+    if (typeof value === 'string') {
+        if (n.__r) clearMounted(n);
+        if (n.__t === value) return;
+        n.__t = value;
+        node.data = value;
+        return;
+    }
+    if (value instanceof Node) {
+        clearMounted(n);
+        n.__r =
+            value instanceof DocumentFragment ? [...value.childNodes] : [value];
+        node.parentNode?.insertBefore(value, node);
+        n.__t = undefined;
+        if (node.data !== '') node.data = '';
+        return;
+    }
+    if (n.__r) clearMounted(n);
+    const next = value === null || value === undefined ? '' : String(value);
     if (n.__t === next) return;
     n.__t = next;
     node.data = next;

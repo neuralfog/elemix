@@ -18,9 +18,6 @@ improvements if any... This is already incredibly stable!!
 ### Phase 7 - Close the release of v0.9.0 ❎
 
 - [ ] Add a curated `clanker` skill, include it in the monorepo, add it to `elemix.dev`
-- [ ] Conformance (potential bug fixing)
-  - [x] Convert wikipulse app
-  - [ ] Convert stealth app (over 200 components)
 - [ ] Put a website at `elemix.dev`
   - [x] Landing page
   - [x] Documentation driven by markdow files
@@ -32,10 +29,14 @@ improvements if any... This is already incredibly stable!!
 
 ***Chores 🥣🧽***
 
-- Drop `strict` from the compiler - it does nothing; the compiler has to be best-effort 🤷
+- The fun is over, now the boring stuff 😒🤣
+- One-shotted the conversion of `150` components; only one bug surfaced 🔥🏋😁:
+  - A content hole holding a `Template` returned through a variable or method (e.g. a data-driven `${it.icon()}`) was
+  stringified to `[object DocumentFragment]` instead of being mounted. Now fixed 🛡️🛡️
+- Droped `strict` from the compiler - it does nothing; the compiler has to be best-effort 🤷
 - Cleanup and tightening of compiler-hint validation and error messages 🧹
-- Update all `README` files 🧹
-- Finish polishing the playground 🛝
+- Updated all `README` files 🧹
+- Finished polishing the playground 🛝
 - `create-elemix-app` - scaffold a new app from the official template (`npx create-elemix-app`) 🏗️
 - Artifacts for the VS Code extension now ship with every release 📦
 - Changelog no longer needed for dev-version releases 🚫
@@ -1022,3 +1023,6 @@ GG 👊🥋✊
 - [x] Additional polish of playground examples, organize examples better or not 🤔
   Need compleating before the documentation so I can link real examples...
 - [x] Update all `README` files at the moment are just autocomplete filler from the `minion` 🤖
+- [x] Conformance (potential bug fixing)
+  - [x] Convert wikipulse app
+  - [x] Convert stealth app
