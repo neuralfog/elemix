@@ -12,3 +12,4 @@ target
 packages/*/CHANGELOG.md
 packages/compiler/npm/elemix-compiler/CHANGELOG.md
 packages/analyzer/npm/elemix-analyzer/CHANGELOG.md
+ssr

@@ -29,6 +29,8 @@ improvements if any... This is already incredibly stable!!
 
 ***Chores 🥣🧽***
 
+- Fixed a compiler bug, found while going through the playground 😒: the `when` directive never rendered its `otherwise`
+  branch; now fixed 💪💪🪄🐛
 - The fun is over, now the boring stuff 😒🤣
 - One-shotted the conversion of `150` components; only one bug surfaced 🔥🏋😁:
   - A content hole holding a `Template` returned through a variable or method (e.g. a data-driven `${it.icon()}`) was

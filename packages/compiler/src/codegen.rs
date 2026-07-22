@@ -393,7 +393,8 @@ fn lower_child(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -
         let args = split_call_args(expr);
         let cond = args.first().cloned().unwrap_or_default();
         let body = substitute_html(&arrow_body(args.get(1)), ctx, emitter, true);
-        format!("{cond} ? {body} : ''")
+        let els = substitute_html(&arrow_body(args.get(2)), ctx, emitter, true);
+        format!("{cond} ? {body} : {els}")
     } else if trimmed.starts_with("choose(") {
         lower_choose(expr, ctx, emitter)
     } else if trimmed.starts_with("match(") {
