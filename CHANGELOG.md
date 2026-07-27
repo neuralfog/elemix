@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.1] - 2026-07-28
+
+### Fixed
+
+- VS Code extension is back on the Marketplace under `0.9.1`. The `0.9.0` listing was
+  pulled, and the Marketplace permanently retires a removed extension's ID and burns every
+  version number it ever published (the pre-release `0.9.0` builds included), so `0.9.0`
+  can never be republished. `0.9.1` is the first clean version it will accept.
+
+### Changed
+
+- Whole toolchain bumped to `0.9.1` in lockstep, so the editor extensions never drift from
+  the runtime version even when only the VS Code extension needed the re-release.
+
 ## [0.9.0] - 2026-07-27
 
 ### Changed

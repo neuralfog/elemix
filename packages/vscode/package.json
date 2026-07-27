@@ -2,7 +2,7 @@
     "name": "elemix-vscode",
     "displayName": "Official elemix extension",
     "description": "elemix language support - syntax highlighting for `tpl` templates and compiler hints.",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "publisher": "neuralfog",
     "license": "MIT",
     "author": "brownhounds",
