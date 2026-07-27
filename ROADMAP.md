@@ -10,22 +10,30 @@ Target release of compiled templates `v0.9.0`
 
 ![batman vs mutant](.roadmap/batman-batman-vs-mutant.gif)
 
+### Target v1.1.0
+
+- [] UI Library
+
+### Target v1.0.0
+
+- [] SSR
+- [] Maybe SPA router
+  - [] How many routers I can write 😒🤣
+
 ### Post v0.9.0 Release
 
-No shortcuts, `v0.9.0` will ship as a full package. Target `1.0.0` will be reserved mainly for stability
-improvements if any... This is already incredibly stable!!
+- [x] Released!! 🚀🚀
 
 ### Phase 7 - Close the release of v0.9.0 ❎
 
-- [ ] Add a curated `clanker` skill, include it in the monorepo, add it to `elemix.dev`
 - [ ] Put a website at `elemix.dev`
   - [x] Landing page
   - [x] Documentation driven by markdow files
   - [x] Selectable verion same as Laravel docs
   - [ ] Write the actual docs 😒
-- [ ] Full release of `v0.9.0` and let's make it official 🎉🎉🎉
 - [ ] Add elemix to official benchmarks
 - [ ] Once `elemix.dev` is live verify publisher on vscode marketplace with DNS record
+- [ ] Add a curated `clanker` skill, include it in the monorepo, add it to `elemix.dev`
 
 ***Chores 🥣🧽***
 
@@ -1028,3 +1036,5 @@ GG 👊🥋✊
 - [x] Conformance (potential bug fixing)
   - [x] Convert wikipulse app
   - [x] Convert stealth app
+
+- [x] Full release of `v0.9.0` and let's make it official 🎉🎉🎉

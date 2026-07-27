@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.0] - 2026-07-27
+
+### Changed
+
+- Official release of v0.9.0
+
 ## [0.9.0-dev.23] - 2026-07-15
 
 ### Added
