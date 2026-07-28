@@ -12,13 +12,18 @@ Target release of compiled templates `v0.9.0`
 
 ### Target v1.1.0
 
-- [] UI Library
+- [ ] UI Library
 
 ### Target v1.0.0
 
-- [] SSR
-- [] Maybe SPA router
-  - [] How many routers I can write 😒🤣
+- [ ] SSR
+- [ ] Maybe SPA router
+  - [ ] How many routers I can write 😒🤣
+
+- SSR will just work, verified no issue even Shadow DOM survives SSR via DSD - Declarative Shadow DOM 💪💪
+  - DSD is supported in all browsers now 🌐
+- Minimal evaluation at runtime thanks to compiler, SSR templates AOT 🔥🔥⚙️⚙️
+- Simple server framework on Bun runtime only - tuff 🤷 Why ?? Many reasons 😏
 
 ### Post v0.9.0 Release
 

@@ -139,6 +139,54 @@ pub fn rewrite(source: &str) -> String {
     out
 }
 
+/// A component's SSR inputs — the class name, its template block-body prelude,
+/// the template's statics + holes, and the byte offset just inside the class body
+/// `{` where the `$$__ssr` method is injected. Same extraction [`component`] does
+/// for the CSR `view()`, plus the name + insert point the SSR path needs.
+pub struct SsrComp {
+    pub class_name: String,
+    pub prelude: String,
+    pub statics: Vec<String>,
+    pub holes: Vec<String>,
+    pub body_open: usize,
+}
+
+/// Collect the SSR inputs for every component class in `source` (a class with a
+/// `template` member returning a `` tpl`…` ``). Reuses [`component`] for the
+/// statics/holes/prelude so the SSR emit tracks the CSR extraction exactly.
+pub fn plan_components(source: &str) -> Vec<SsrComp> {
+    let allocator = Allocator::default();
+    let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
+
+    let mut out = Vec::new();
+    for stmt in &ret.program.body {
+        let (class, class_start) = match stmt {
+            Statement::ExportNamedDeclaration(export) => match &export.declaration {
+                Some(Declaration::ClassDeclaration(class)) => {
+                    (class.as_ref(), export.span.start as usize)
+                }
+                _ => continue,
+            },
+            Statement::ClassDeclaration(class) => (class.as_ref(), class.span.start as usize),
+            _ => continue,
+        };
+        let Some(id) = class.id.as_ref() else {
+            continue;
+        };
+        let Some(c) = component(source, class_start, class) else {
+            continue;
+        };
+        out.push(SsrComp {
+            class_name: id.name.to_string(),
+            prelude: c.prelude,
+            statics: c.statics,
+            holes: c.holes,
+            body_open: class.body.span.start as usize + 1,
+        });
+    }
+    out
+}
+
 /// Collect every component + the erasable imports.
 fn plan(source: &str) -> Plan {
     let allocator = Allocator::default();

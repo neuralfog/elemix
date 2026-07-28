@@ -10,6 +10,25 @@ use oxc_parser::Parser;
 use oxc_span::SourceType;
 
 const RUNTIME: &str = "@neuralfog/elemix/runtime";
+const SSR_RUNTIME: &str = "@neuralfog/elemix/ssr-runtime";
+
+/// Prepend the `@neuralfog/elemix/ssr-runtime` import for the SSR string helpers
+/// (`$__ssrText` / `$__ssrAttr` / `$__ssrSlot`) that a `$$__ssr()` method
+/// references — only the ones actually present, in a stable order. Identity when
+/// none are used (i.e. not an `--ssr` compile, or a component with no such holes).
+pub fn add_ssr_runtime_import(code: &str) -> String {
+    let used: Vec<&str> = ["$__ssrText", "$__ssrAttr", "$__ssrSlot"]
+        .into_iter()
+        .filter(|id| code.contains(id))
+        .collect();
+    if used.is_empty() {
+        return code.to_string();
+    }
+    format!(
+        "import {{ {} }} from '{SSR_RUNTIME}';\n{code}",
+        used.join(", ")
+    )
+}
 
 /// Merge multiple `import { … } from '@neuralfog/elemix/runtime'` statements
 /// into the first, preserving first-seen specifier order. Identity for zero or

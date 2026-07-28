@@ -17,6 +17,7 @@ pub mod scan;
 #[cfg(feature = "cli")]
 pub mod sourcemap;
 pub mod splice;
+pub mod ssr;
 pub mod template;
 #[cfg(feature = "wasm")]
 pub mod wasm;
@@ -56,6 +57,64 @@ pub fn compile_diagnostics(source: &str) -> (String, Vec<Diagnostic>) {
     let compiled = imports::merge_runtime_imports(&lowered);
     let out = diagnostics::inline(&compiled, &diags);
     (out, diags)
+}
+
+/// Like [`compile_diagnostics`], but also emits a `$$__ssr(): string` server-
+/// render method into every registered component's class body (slice 1, behind
+/// the CLI `--ssr` flag). The method returns the component's HTML string: a
+/// Declarative Shadow DOM wrapper with an inline `<style data-ssr>` for shadow
+/// components, or bare host markup for `#no-shadow` ones.
+///
+/// Slice 1 packaging (intentional, revisited in a later slice): rather than
+/// splitting a `.server.ts` file, the SSR methods are injected into the ORIGINAL
+/// source at each class body's open brace, then the normal CSR pipeline runs over
+/// the injected source — so pragma/rewrite passes carry the method through and the
+/// CSR output is a strict superset of the no-`--ssr` build. The emitted method
+/// references the SSR-runtime stubs `$__ssrText`/`$__ssrAttr`/`$__ssrSlot` as free
+/// identifiers; they are deliberately NOT added to the CSR runtime import.
+pub fn compile_ssr(source: &str) -> (String, Vec<Diagnostic>) {
+    let comps = rewrite::plan_components(source);
+    let registered = scan_components(source);
+    let located = pragma::locate::locate(source).ok();
+
+    // (body_open, method text) for every registered component. Built against the
+    // ORIGINAL offsets; applied back-to-front so earlier offsets stay valid.
+    let mut inserts: Vec<(usize, String)> = Vec::new();
+    for comp in &comps {
+        let Some(decl) = registered.iter().find(|d| d.class == comp.class_name) else {
+            continue;
+        };
+        let (no_shadow, css_value) = located
+            .as_ref()
+            .and_then(|l| l.classes.iter().find(|c| c.name == comp.class_name))
+            .map(|c| {
+                let no_shadow = pragma::resolve(&c.directives)
+                    .map(|m| m.no_shadow)
+                    .unwrap_or(false);
+                let css = c.styles.first().map(|s| s.value.clone());
+                (no_shadow, css)
+            })
+            .unwrap_or((false, None));
+
+        let inner = template::parse::ssr_inner(&comp.statics, &comp.holes);
+        let method = ssr::ssr_method(
+            &decl.tag,
+            css_value.as_deref(),
+            no_shadow,
+            &comp.prelude,
+            &inner,
+        );
+        inserts.push((comp.body_open, format!("\n{method}\n")));
+    }
+
+    inserts.sort_by_key(|(at, _)| std::cmp::Reverse(*at));
+    let mut injected = source.to_string();
+    for (at, text) in inserts {
+        injected.insert_str(at, &text);
+    }
+
+    let (out, diags) = compile_diagnostics(&injected);
+    (imports::add_ssr_runtime_import(&out), diags)
 }
 
 /// Compile + a line-level source map back to the original (`cli` feature).

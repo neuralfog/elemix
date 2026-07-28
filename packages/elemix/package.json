@@ -28,6 +28,11 @@
             "import": "./dist/runtime.mjs",
             "require": "./dist/runtime.cjs"
         },
+        "./ssr-runtime": {
+            "types": "./dist/ssr-runtime.d.ts",
+            "import": "./dist/ssr-runtime.mjs",
+            "require": "./dist/ssr-runtime.cjs"
+        },
         "./directives": {
             "types": "./dist/directives.d.ts",
             "import": "./dist/directives.mjs",

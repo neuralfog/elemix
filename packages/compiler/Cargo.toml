@@ -17,6 +17,13 @@ name = "elemix-compiler"
 path = "src/main.rs"
 required-features = ["cli"]
 
+# SSR tests live in their own directory (a different harness from the CSR
+# `tests/`), so the target is declared explicitly — Cargo only auto-discovers
+# integration tests under `tests/`.
+[[test]]
+name = "ssr"
+path = "ssr-tests/ssr.rs"
+
 [features]
 default = ["cli"]
 cli = ["dep:clap", "dep:glob"]
