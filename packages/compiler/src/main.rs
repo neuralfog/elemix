@@ -5,7 +5,9 @@ use elemix_compiler::codegen::codegen;
 use elemix_compiler::diagnostics::{Diagnostic, Severity};
 use elemix_compiler::emit::TsEmitter;
 use elemix_compiler::sourcemap::{json_string, line_map};
-use elemix_compiler::{collect_ts_files, compile_diagnostics, find_html_templates, FoundTemplate};
+use elemix_compiler::{
+    collect_ts_files, compile_diagnostics, compile_ssr, find_html_templates, FoundTemplate,
+};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -29,6 +31,11 @@ struct Cli {
     #[arg(long)]
     stdin: bool,
 
+    /// Also emit a `$$__ssr(): string` server-render method into every registered
+    /// component (slice 1). Off by default — the CSR output is byte-identical.
+    #[arg(long)]
+    ssr: bool,
+
     /// Also produce a line-level source map back to the original. With `--stdin`
     /// stdout becomes a `{"code","map"}` JSON envelope; with `--out` a sidecar
     /// `<file>.map` is written and the compiled file gets a `sourceMappingURL`.
@@ -48,7 +55,11 @@ fn main() {
         // Dev path: never fail. Diagnostics are inlined into `code` (so they
         // surface in the browser) and echoed to stderr (so they show in the
         // Vite terminal); the compile always succeeds and HMR stays alive.
-        let (code, diags) = compile_diagnostics(&source);
+        let (code, diags) = if cli.ssr {
+            compile_ssr(&source)
+        } else {
+            compile_diagnostics(&source)
+        };
         report(None, &diags);
         let payload = if cli.sourcemap {
             // Machine envelope: the Vite plugin parses this and returns
@@ -77,10 +88,10 @@ fn main() {
     // analyzer's / tsc's job, not this pass — so a bad component still emits and
     // surfaces loudly at runtime instead of blocking the transform.
     for path in collect_ts_files(&cli.dirs) {
-        process(&path, cli.out.as_deref(), cli.sourcemap, false);
+        process(&path, cli.out.as_deref(), cli.sourcemap, cli.ssr, false);
     }
     if let Some(path) = cli.file.clone() {
-        process(&path, cli.out.as_deref(), cli.sourcemap, true);
+        process(&path, cli.out.as_deref(), cli.sourcemap, cli.ssr, true);
     }
 }
 
@@ -124,7 +135,7 @@ fn banner() {
     eprintln!();
 }
 
-fn process(path: &Path, out: Option<&Path>, sourcemap: bool, verbose: bool) {
+fn process(path: &Path, out: Option<&Path>, sourcemap: bool, ssr: bool, verbose: bool) {
     let source = match fs::read_to_string(path) {
         Ok(s) => s,
         Err(e) => {
@@ -133,7 +144,7 @@ fn process(path: &Path, out: Option<&Path>, sourcemap: bool, verbose: bool) {
         }
     };
     match out {
-        Some(dir) => emit(dir, path, &source, sourcemap),
+        Some(dir) => emit(dir, path, &source, sourcemap, ssr),
         None if verbose => print_detail(path, &find_html_templates(&source)),
         None => {
             let n = find_html_templates(&source).len();
@@ -146,11 +157,15 @@ fn process(path: &Path, out: Option<&Path>, sourcemap: bool, verbose: bool) {
 /// `sourceMappingURL` footer when `sourcemap` is set. Best-effort: the file is
 /// always written, with any error diagnostic inlined as a runtime `throw` (and
 /// reported on stderr) — the compiler is a transform, never a build gate.
-fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool) {
+fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool, ssr: bool) {
     let name = src.file_name().expect("source has a file name");
     let dest = dir.join(name);
 
-    let (code, diags) = compile_diagnostics(source);
+    let (code, diags) = if ssr {
+        compile_ssr(source)
+    } else {
+        compile_diagnostics(source)
+    };
     report(Some(src), &diags);
 
     fs::create_dir_all(dir).expect("create out dir");

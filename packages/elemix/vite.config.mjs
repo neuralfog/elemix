@@ -7,6 +7,7 @@ export default defineConfig({
             entry: {
                 index: resolve('index.ts'),
                 runtime: resolve('runtime.ts'),
+                'ssr-runtime': resolve('ssr-runtime.ts'),
                 directives: resolve('directives.ts'),
             },
             name: 'elemix',

@@ -12,13 +12,24 @@ Target release of compiled templates `v0.9.0`
 
 ### Target v1.1.0
 
-- [] UI Library
+- [ ] UI Library
 
 ### Target v1.0.0
 
-- [] SSR
-- [] Maybe SPA router
-  - [] How many routers I can write 😒🤣
+- [ ] SSR
+- [ ] Maybe SPA router
+  - [ ] How many routers I can write 😒🤣
+
+- SSR will just work, verified no issue even Shadow DOM survives SSR via DSD - Declarative Shadow DOM 💪💪
+  - DSD is supported in all browsers now 🌐
+- Minimal evaluation at runtime thanks to compiler, SSR templates AOT 🔥🔥⚙️⚙️
+- There is one small gotcha: DSD is not the best for SEO optimised sites, modern crawlers will index content
+  in DSD, but that begs the question - scoped styles 😒 Most likely will ship scoped styles and make it
+  default 🛡️🛡️
+  - Compiler generates a UUID of some sort per component and augments styles, similar to what Vue does in scoped
+    mode 🪄
+  - This will remove the issue with crawlers and DSD 🏋
+- Simple server framework on Bun runtime only - tuff 🤷 Why ?? Many reasons 😏
 
 ### Post v0.9.0 Release
 

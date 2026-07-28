@@ -544,6 +544,107 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
     }
 }
 
+/// Walk the tree producing an SSR template-literal body: static HTML plus
+/// `${...}` interpolations that call the SSR runtime stubs. Mirrors [`serialize`]
+/// but emits string content destined for a JS template literal (backticks are
+/// added by the caller) rather than DOM-clone markup + positioned holes.
+///
+/// Slice-1 hole handling:
+///   * Text content → `${$__ssrText(expr)}`.
+///   * List/Child content → `${$__ssrSlot(expr)}` (a stub; slice 2 renders it).
+///   * Attr/Class/Style attribute holes → `name="${$__ssrAttr(expr)}"`.
+///   * Event/Model/OnModel/Prop/Ref attribute holes → dropped (client wiring).
+///
+/// The dropped set is matched by the same sigils [`crate::grammar`] classifies
+/// on (`@` → event, `~` → model/onmodel, `:` → prop and `:ref` → ref); every one
+/// of those is client-only and has no server-rendered form.
+fn serialize_ssr(children: &[Child], out: &mut String) {
+    for child in children {
+        match child {
+            Child::Text(t) => out.push_str(&esc_tpl(t)),
+            Child::Anchor(expr, _) => {
+                if crate::grammar::is_text_content(expr) {
+                    out.push_str(&format!("${{$__ssrText({expr})}}"));
+                } else {
+                    // TODO(ssr slice 2): render list (`repeat`) and child
+                    // (`when`/`choose`/`match`/nested `tpl`) holes. Routed to the
+                    // `$__ssrSlot` stub for now so the emit stays total and valid.
+                    out.push_str(&format!("${{$__ssrSlot({expr})}}"));
+                }
+            }
+            Child::Elem(el) => {
+                out.push('<');
+                out.push_str(&el.tag);
+                out.push_str(&esc_tpl(&el.static_attrs));
+                for (name, expr, _) in &el.attr_holes {
+                    // Sigil-carrying holes are client wiring — drop them. The
+                    // sigils mirror `grammar::classify_attr`: `@` event, `~`
+                    // model/onmodel, `:` prop (and `:ref` ref).
+                    if name.starts_with('@') || name.starts_with('~') || name.starts_with(':') {
+                        continue;
+                    }
+                    match name.as_str() {
+                        "class" => out.push_str(&format!(" class=\"${{$__ssrAttr({expr})}}\"")),
+                        "style" => out.push_str(&format!(" style=\"${{$__ssrAttr({expr})}}\"")),
+                        _ => out.push_str(&format!(" {name}=\"${{$__ssrAttr({expr})}}\"")),
+                    }
+                }
+                if el.self_closing && VOID.contains(&el.tag.as_str()) {
+                    out.push_str("/>");
+                } else if el.self_closing {
+                    out.push_str("></");
+                    out.push_str(&el.tag);
+                    out.push('>');
+                } else {
+                    out.push('>');
+                    serialize_ssr(&el.children, out);
+                    out.push_str("</");
+                    out.push_str(&el.tag);
+                    out.push('>');
+                }
+            }
+        }
+    }
+}
+
+/// Escape the three JS template-literal metacharacters so a static HTML run sits
+/// verbatim inside the SSR `` `...` `` string: `\` → `\\`, `` ` `` → `` \` ``, and
+/// only the `$` that opens an interpolation (`${`) → `\${`.
+fn esc_tpl(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '\\' => out.push_str("\\\\"),
+            '`' => out.push_str("\\`"),
+            '$' if chars.peek() == Some(&'{') => out.push_str("\\$"),
+            _ => out.push(c),
+        }
+    }
+    out
+}
+
+/// Build the SSR template-literal body for one component template: the static
+/// HTML with `${...}` interpolations that call the SSR runtime stubs. Backticks
+/// are added by the caller ([`crate::ssr::ssr_method`]). Constructs the node tree
+/// exactly like [`parse_spanned`], then serializes via [`serialize_ssr`].
+pub fn ssr_inner(statics: &[String], holes: &[String]) -> String {
+    let mut p = Parser::new();
+    for (i, s) in statics.iter().enumerate() {
+        p.feed_static(s);
+        if let Some(expr) = holes.get(i) {
+            p.feed_hole(expr, Span::default());
+        }
+    }
+    p.flush_text();
+    let mut root = p.stack.swap_remove(0);
+    normalize(&mut root.children);
+
+    let mut out = String::new();
+    serialize_ssr(&root.children, &mut out);
+    out
+}
+
 /// Parse a located template into static markup plus positioned holes. Hole spans
 /// default to empty — the compile path works on expr strings and never reads
 /// them. The analyzer wants real spans, so it calls [`parse_spanned`].
