@@ -22,6 +22,11 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      # Bun runs the `bun test` suites for the ssr-plugin and servmix packages.
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       # Rust toolchain — the compiler builds with cargo and `pnpm test` runs
       # `cargo test`; the wasm32 target + wasm-pack drive the wasm conformance gate;
       # clippy + rustfmt back `pnpm lint`.
