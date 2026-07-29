@@ -451,6 +451,9 @@ jobs:
       - name: Stage changelog into launcher
         run: cp CHANGELOG.md packages/compiler/npm/elemix-compiler/CHANGELOG.md
 
+      - name: Stage README into launcher
+        run: cp packages/compiler/README.md packages/compiler/npm/elemix-compiler/README.md
+
       # Platform packages first, then the launcher that depends on them.
       - name: Publish
         working-directory: packages/compiler/npm
@@ -504,6 +507,9 @@ jobs:
       # single source of truth — the root CHANGELOG.md.
       - name: Stage changelog into launcher
         run: cp CHANGELOG.md packages/analyzer/npm/elemix-analyzer/CHANGELOG.md
+
+      - name: Stage README into launcher
+        run: cp packages/analyzer/README.md packages/analyzer/npm/elemix-analyzer/README.md
 
       # Platform packages first, then the launcher that depends on them.
       - name: Publish
@@ -559,6 +565,9 @@ jobs:
       - name: Stage changelog into launcher
         run: cp CHANGELOG.md packages/formatter/npm/elemix-template-formatter/CHANGELOG.md
 
+      - name: Stage README into launcher
+        run: cp packages/formatter/README.md packages/formatter/npm/elemix-template-formatter/README.md
+
       # Platform packages first, then the launcher that depends on them.
       - name: Publish
         working-directory: packages/formatter/npm
@@ -609,6 +618,9 @@ jobs:
       - name: Finalize package
         working-directory: packages/compiler
         run: node scripts/wasm-pkg.mjs "${{ needs.version.outputs.value }}"
+
+      - name: Stage README into wasm package
+        run: cp packages/compiler/README.md packages/compiler/pkg/README.md
 
       # Hand the built wasm package to release-notes so it can be attached to the
       # GitHub Release alongside the native binaries (same as the npm-* artifacts).

@@ -1,3 +1,5 @@
-# ⚙️ Elemix Compiler — WASM ⚠️ **Experimental**
+<img src="https://raw.githubusercontent.com/neuralfog/elemix/main/.readme/elemix-banner.svg" alt="elemix - Reactive Elements" width="100%" />
 
-The WebAssembly build of the [Elemix](https://www.npmjs.com/package/@neuralfog/elemix) compiler — a separate package from the native `@neuralfog/elemix-compiler` binary.
+# Elemix compiler - WASM
+
+[Compiler Explorer](https://compiler-explorer.elemix.dev/)
