@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/CustomEventApp.ts
+input_file: fixtures/CustomEventApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -36,3 +36,4 @@ return _r0;
 }
 }
 $__defineComponent('custom-event-app', CustomEventApp);
+CustomEventApp.prototype.$$__tag = 'custom-event-app';

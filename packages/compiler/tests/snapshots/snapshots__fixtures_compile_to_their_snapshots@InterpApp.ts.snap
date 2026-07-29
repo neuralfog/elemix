@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/InterpApp.ts
+input_file: fixtures/InterpApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -39,7 +39,7 @@ const css = `
 `;
 
 const _s0 = $__sheet(css);
-const _t0 = $__template('<p class="note">Interpolation edge cases: adjacent holes with no static text between, holes separated by static text, a <code>null</code> value (renders empty), and a numeric hole.</p><p class="full"><span class="k">full:</span> <!----><!----></p><p class="dash"><span class="k">dash:</span> <!---->-<!----></p><p class="middle"><span class="k">middle:</span> [<!---->]</p><p class="num"><span class="k">num:</span> <!----></p><button>swap</button><button>set middle</button><button>inc</button>');
+const _t0 = $__template('<p class="full"><span class="k">full:</span> <!----><!----></p><p class="dash"><span class="k">dash:</span> <!---->-<!----></p><p class="middle"><span class="k">middle:</span> [<!---->]</p><p class="num"><span class="k">num:</span> <!----></p><button>swap</button><button>set middle</button><button>inc</button>');
 
 export class InterpApp extends Component {
 
@@ -66,15 +66,15 @@ export class InterpApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n9 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n9 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _x12 = document.createTextNode('');
 _n1.replaceWith(_x12);
 const _x13 = document.createTextNode('');
@@ -105,3 +105,4 @@ return _r0;
 }
 InterpApp.$$__sheets = [..._s0];
 $__defineComponent('interp-app', InterpApp);
+InterpApp.prototype.$$__tag = 'interp-app';

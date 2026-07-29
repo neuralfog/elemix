@@ -1,0 +1,40 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 15
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SsrMixedClient.ts
+---
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './SsrMixedLeaf';
+
+type State = { n: number };
+
+const _t0 = $__template('<div class="mid">mid <span class="mn"> </span><button class="mb">mid+</button><ssr-mixed-leaf></ssr-mixed-leaf></div>');
+
+export class SsrMixedClient extends Component {
+    static $$__client = true;
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'ssr-mixed-client'}></${this.$$__tag ?? 'ssr-mixed-client'}>`;
+}
+
+    state = $__state<State>({ n: 0 });
+
+    bump = (): void => {
+        this.state.n++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n2, 'click', this.bump);
+$__effect(() => {
+$__setText(_n1, (this.state.n));
+});
+return _r0;
+}
+}
+$__defineComponent('ssr-mixed-client', SsrMixedClient);
+SsrMixedClient.prototype.$$__tag = 'ssr-mixed-client';

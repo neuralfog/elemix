@@ -1,0 +1,139 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 23
+expression: compile_hydrate(&source).0
+input_file: fixtures/RawApp.ts
+---
+import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+const _h0 = $__templateEl('<li class="row"><span class="rid"> </span><span class="rlabel"> </span></li>');
+
+import { Component, raw } from '@neuralfog/elemix';
+
+class Stopwatch {
+    #ticks = 0;
+
+    tick(): void {
+        this.#ticks++;
+    }
+
+    get ticks(): number {
+        return this.#ticks;
+    }
+}
+
+type Row = { id: string; label: string };
+
+type State = {
+    sw: Stopwatch;
+    count: number;
+    rows: Row[];
+};
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    button { font: inherit; cursor: pointer; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<span class="ticks"> </span><span class="count"> </span><div class="controls"><button class="tick">tick</button><button class="refresh">refresh</button><button class="inc">inc</button><button class="add-row">row</button></div><ul class="rows"><!----></ul>');
+const _t1 = $__templateEl('<li class="row"><span class="rid"> </span><span class="rlabel"> </span></li>');
+
+export class RawApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _n1 = $__text(_n0);
+const _n2 = root.firstChild!.nextSibling!;
+const _n3 = $__text(_n2);
+const _n4 = root.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n5 = root.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n6 = root.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n7 = root.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n4, 'click', this.tickRaw);
+$__event(_n5, 'click', this.refresh);
+$__event(_n6, 'click', this.inc);
+$__event(_n7, 'click', this.addRow);
+$__effect(() => {
+$__setText(_n1, (this.state.sw.ticks));
+});
+$__effect(() => {
+$__setText(_n3, (this.state.count));
+});
+const _n8 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _b9 = $__bounds(_n8, 0, 0);
+$__fresh(() => {
+const _a10 = $__reanchor(_n8, _b9[0], _b9[1]);
+$__list(_a10, () => (this.state.rows), (row) => row.id, (row) =>
+                    (() => {
+const _r11 = $__cloneEl(_h0);
+const _n12 = _r11.firstChild!.firstChild!;
+const _n13 = _r11.firstChild!.nextSibling!.firstChild!;
+_n12.data = ($__toRaw(row).id);
+$__effect(() => {
+$__setText(_n13, (row.label));
+});
+return _r11;
+})());
+});
+}
+
+
+    state = $__state<State>({
+        sw: raw(new Stopwatch()),
+        count: 0,
+        rows: [{ id: 'a', label: 'A' }],
+    });
+
+    tickRaw = (): void => {
+        this.state.sw.tick();
+    };
+
+    refresh = (): void => {
+        this.render();
+    };
+
+    inc = (): void => {
+        this.state.count++;
+    };
+
+    addRow = (): void => {
+        this.state.rows.push({ id: 'b', label: 'B' });
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+$__event(_n3, 'click', this.tickRaw);
+$__event(_n4, 'click', this.refresh);
+$__event(_n5, 'click', this.inc);
+$__event(_n6, 'click', this.addRow);
+$__list(_n7, () => (this.state.rows), (row) => row.id, (row) =>
+                    (() => {
+const _r8 = $__cloneEl(_t1);
+const _n9 = _r8.firstChild!.firstChild!;
+const _n10 = _r8.firstChild!.nextSibling!.firstChild!;
+_n9.data = ($__toRaw(row).id);
+$__effect(() => {
+$__setText(_n10, (row.label));
+});
+return _r8;
+})());
+$__effect(() => {
+$__setText(_n1, (this.state.sw.ticks));
+});
+$__effect(() => {
+$__setText(_n2, (this.state.count));
+});
+return _r0;
+}
+}
+RawApp.$$__sheets = [..._s0];
+$__defineComponent('raw-app', RawApp);
+RawApp.prototype.$$__tag = 'raw-app';

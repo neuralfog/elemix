@@ -1,0 +1,102 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/LifecycleChild.ts
+---
+import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { record } from './LifecycleStore';
+
+type ChildProps = { tick: number };
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .child {
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 10px;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="child">Child · tick <!----></div>');
+
+export class LifecycleChild extends Component<ChildProps> {
+    $$__onDispose(): void {
+        this.cleanupA();
+        this.cleanupB();
+    }
+    $$__onMount(): void {
+        this.readyA();
+        this.readyB();
+    }
+    $$__beforeMount(): void {
+        this.prepareA();
+        this.prepareB();
+    }
+    $$__effects(): void {
+        $__effect(() => this.trackA());
+        $__effect(() => this.trackB());
+    }
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'lifecycle-child'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.props.tick);return `<div class="child" data-t="${$__ssrLen(_t0)}">Child · tick ${$__ssrText(_t0)}</div>`;})()}</template></${this.$$__tag ?? 'lifecycle-child'}>`;
+}
+
+
+    prepareA(): void {
+        record('before-1');
+    }
+
+    prepareB(): void {
+        record('before-2');
+    }
+
+    trackA(): void {
+        this.setAttribute(
+            'data-fx',
+            (this.getAttribute('data-fx') ?? '') + `A${this.props.tick}`,
+        );
+    }
+
+    trackB(): void {
+        this.setAttribute(
+            'data-fx',
+            (this.getAttribute('data-fx') ?? '') + `B${this.props.tick}`,
+        );
+    }
+
+    readyA(): void {
+        record('mount-1');
+    }
+
+    readyB(): void {
+        record('mount-2');
+    }
+
+    cleanupA(): void {
+        record('dispose-1');
+    }
+
+    cleanupB(): void {
+        record('dispose-2');
+    }
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!;
+const _x2 = document.createTextNode('');
+_n1.replaceWith(_x2);
+$__effect(() => {
+$__setText(_x2, (this.props.tick));
+});
+return _r0;
+}
+}
+LifecycleChild.$$__sheets = [..._s0];
+$__defineComponent('lifecycle-child', LifecycleChild);
+LifecycleChild.prototype.$$__tag = 'lifecycle-child';

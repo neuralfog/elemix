@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/FreeTemplate.ts
+input_file: fixtures/FreeTemplate.ts
 ---
 import { $__template, $__clone, $__model, $__effect, $__setProp, $__state } from '@neuralfog/elemix/runtime';
 const _ft0 = $__template('<label>Name <input type="text"/></label><profile-card></profile-card>');

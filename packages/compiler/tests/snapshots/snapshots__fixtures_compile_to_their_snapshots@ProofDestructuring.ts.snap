@@ -1,7 +1,8 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
-input_file: tests/fixtures/ProofDestructuring.ts
+input_file: fixtures/ProofDestructuring.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -33,11 +34,6 @@ const css = `
     .count { font-weight: 700; min-width: 2ch; text-align: center; color: #1e293b; }
 `;
 
-// Proof: a block-bodied template that destructures before its return. The
-// compiler must keep the statements that come before the return (here the
-// `const { inc, dec } = this`) when it lowers the body into view() — otherwise
-// inc/dec would be undefined. Reactivity is unaffected: count is still read as
-// this.state.count inside the effect.
 const _s0 = $__sheet(css);
 const _t0 = $__template('<div><button class="dec">−</button><span class="count"> </span><button class="inc">+</button></div>');
 
@@ -68,3 +64,4 @@ return _r0;
 }
 ProofDestructuring.$$__sheets = [..._s0];
 $__defineComponent('proof-destructuring', ProofDestructuring);
+ProofDestructuring.prototype.$$__tag = 'proof-destructuring';

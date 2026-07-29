@@ -12,6 +12,8 @@ fn attr(name: &str, expr: &str) -> Hole {
         expr: expr.into(),
         span: Span::default(),
         tag: None,
+        prefix: 0,
+        run_index: 0,
     }
 }
 
@@ -22,6 +24,8 @@ fn content(expr: &str) -> Hole {
         expr: expr.into(),
         span: Span::default(),
         tag: None,
+        prefix: 0,
+        run_index: 0,
     }
 }
 

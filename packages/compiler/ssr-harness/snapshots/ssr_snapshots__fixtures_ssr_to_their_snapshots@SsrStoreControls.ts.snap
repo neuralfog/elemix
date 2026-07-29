@@ -1,0 +1,44 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 15
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SsrStoreControls.ts
+---
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    counter: { value: number };
+};
+
+const _t0 = $__template('<div class="panel"><span class="label">Child controls</span><div class="buttons"><button class="dec">−</button><span class="value"> </span><button class="inc">+</button></div></div>');
+
+export class SsrStoreControls extends Component<Props> {
+    static $$__client = true;
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'ssr-store-controls'}></${this.$$__tag ?? 'ssr-store-controls'}>`;
+}
+
+    dec = (): void => {
+        this.props.counter.value--;
+    };
+
+    inc = (): void => {
+        this.props.counter.value++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n1, 'click', this.dec);
+$__event(_n3, 'click', this.inc);
+$__effect(() => {
+$__setText(_n2, (this.props.counter.value));
+});
+return _r0;
+}
+}
+$__defineComponent('ssr-store-controls', SsrStoreControls);
+SsrStoreControls.prototype.$$__tag = 'ssr-store-controls';

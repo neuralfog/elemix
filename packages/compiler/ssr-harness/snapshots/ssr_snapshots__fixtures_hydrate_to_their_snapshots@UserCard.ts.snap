@@ -1,0 +1,64 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 23
+expression: compile_hydrate(&source).0
+input_file: fixtures/UserCard.ts
+---
+import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    name: string;
+    role: string;
+};
+
+const css = `
+    :host { display: block; }
+    .card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+    .name { font-weight: 700; }
+    .role { font-size: 12px; color: #64748b; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="card"><span class="name"> </span><span class="role"> </span></div>');
+
+export class UserCard extends Component<Props> {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _n1 = $__text(_n0);
+const _n2 = root.firstChild!.firstChild!.nextSibling!;
+const _n3 = $__text(_n2);
+$__effect(() => {
+$__setText(_n1, (this.props.name));
+});
+$__effect(() => {
+$__setText(_n3, (this.props.role));
+});
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+$__effect(() => {
+$__setText(_n1, (this.props.name));
+});
+$__effect(() => {
+$__setText(_n2, (this.props.role));
+});
+return _r0;
+}
+}
+UserCard.$$__sheets = [..._s0];
+$__defineComponent('user-card', UserCard);
+UserCard.prototype.$$__tag = 'user-card';

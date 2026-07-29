@@ -1,8 +1,7 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
-input_file: tests/fixtures/DynamicChildApp.ts
+input_file: fixtures/DynamicChildApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _ft0 = $__template('<i class="icon icon-a"></i>');
@@ -67,3 +66,4 @@ return _r0;
 }
 }
 $__defineComponent('dynamic-child-app', DynamicChildApp);
+DynamicChildApp.prototype.$$__tag = 'dynamic-child-app';

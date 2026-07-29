@@ -25,6 +25,19 @@ pub trait Emitter {
     fn grab(&self, var: &str, parent: &str, path: &NodePath) -> String;
     /// Replace a content anchor with a fresh text node for `_text`; binds `var`.
     fn text_anchor(&self, var: &str, anchor: &str) -> String;
+    /// `const <var> = $__dynLens(<el>)` — read and strip the element's `data-t`
+    /// attribute (the rendered lengths of its dynamic text values), for hydration.
+    fn dyn_lens(&self, var: &str, el: &str) -> String;
+    /// `const <var> = $__splitRun(<el>.firstChild(.nextSibling×run), [<statics>], <lens>)`
+    /// — split the element's markerless merged text run into its dynamic value nodes,
+    /// using the compiled static prefixes and the runtime dynamic lengths. `run` is the
+    /// run's server-DOM child index (nonzero when static element siblings precede it).
+    fn split_run(&self, var: &str, el: &str, run: usize, statics: &[usize], lens: &str) -> String;
+    /// `const <var> = $__text(<el>)` — the element's existing text-node child, or
+    /// a freshly created empty one. A sole (baked) text hole that rendered EMPTY
+    /// server-side leaves no text node; this gives hydration a node to bind onto
+    /// so the first reactive write has somewhere to land.
+    fn text(&self, var: &str, el: &str) -> String;
     /// Insert a fresh comment anchor before `sibling`; binds `var` (used to give
     /// a `repeat`-in-ternary its own `_list` anchor next to the `_child` one).
     fn comment_anchor(&self, var: &str, sibling: &str) -> String;
@@ -41,6 +54,38 @@ pub trait Emitter {
     fn reference(&self, node: &str, target: &str) -> String;
     fn child(&self, anchor: &str, getter: &str) -> String;
     fn list(&self, anchor: &str, items: &str, key: &str, render: &str) -> String;
+
+    /// Capture a structural hole's server content region on the PRISTINE DOM
+    /// (before any takeover mutates sibling counts): binds `var` to
+    /// `[firstNode, count]` - the first content node and how many nodes the region
+    /// spans. A node ref + count survive an earlier adjacent sibling's `reanchor`
+    /// (which may insert/remove nodes to the LEFT), where live indices or a
+    /// neighbouring-hole boundary ref would not. All `bounds` for a parent are
+    /// emitted up front, before any `reanchor`.
+    fn bounds(&self, var: &str, parent: &str, before: usize, after: usize) -> String;
+
+    /// Hydration takeover: insert a fresh comment anchor before the region's first
+    /// node (captured in `bounds`), remove that region's `count` server nodes, and
+    /// bind the anchor to `var` - so the normal `child`/`list` builder can drive the
+    /// region reactively, exactly as client-only would.
+    fn reanchor(&self, var: &str, parent: &str, bounds: &str) -> String;
+
+    /// Resume seat: keep the server region (captured in `bounds`) and drop a comment
+    /// anchor AFTER it, binding `var` to `[anchor, serverRoot]` - the server root is
+    /// adopted on the first run, the anchor drives fresh content on later changes.
+    fn seat(&self, var: &str, parent: &str, bounds: &str) -> String;
+
+    /// `$__child(anchor, $__resume(server, (root) => (hydrate), () => (fresh)))` -
+    /// adopt + hydrate the server subtree at `root` on the first run (component
+    /// self-hydrates, single mount), clone `fresh` on later reactive changes.
+    fn child_resume(
+        &self,
+        anchor: &str,
+        server: &str,
+        root: &str,
+        hydrate: &str,
+        fresh: &str,
+    ) -> String;
 
     // Grouped value writes: the per-binding write with no effect of its own. The
     // codegen collects these and wraps them in one `effect` per template instance

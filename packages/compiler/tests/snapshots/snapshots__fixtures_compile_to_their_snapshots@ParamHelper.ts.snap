@@ -1,7 +1,8 @@
 ---
 source: tests/snapshots.rs
+assertion_line: 14
 expression: compile(&source)
-input_file: tests/fixtures/ParamHelper.ts
+input_file: fixtures/ParamHelper.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -24,9 +25,6 @@ const css = `
     .row { padding: 4px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
 `;
 
-// A parameterized helper template — `row` takes an item and returns a template,
-// called as `this.row(r)` inside a repeat. Splice must inline it, substituting
-// the helper param `item` for the call's arg `r`, so the holes become r.id / r.name.
 const _s0 = $__sheet(css);
 const _t0 = $__template('<div><button class="add">add row</button><ul class="list"><!----></ul></div>');
 const _t1 = $__templateEl('<li class="row"> </li>');
@@ -63,3 +61,4 @@ return _r0;
 }
 RowList.$$__sheets = [..._s0];
 $__defineComponent('row-list', RowList);
+RowList.prototype.$$__tag = 'row-list';

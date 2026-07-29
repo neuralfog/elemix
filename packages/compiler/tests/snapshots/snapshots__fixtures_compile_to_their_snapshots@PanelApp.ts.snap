@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/PanelApp.ts
+input_file: fixtures/PanelApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -58,7 +58,7 @@ const css = `
 `;
 
 const _s0 = $__sheet(css);
-const _t0 = $__template('<p class="note">Sub-templates pulled out as <code>class members</code> — the natural way to organize a component. The main template composes them with member calls; each stays independently reactive.</p><div class="panel"><!----> <!----> <button>add</button><button>rename</button></div>');
+const _t0 = $__template('<div class="panel"><!----> <!----> <button>add</button><button>rename</button></div>');
 const _t1 = $__templateEl('<h2> </h2>');
 const _t2 = $__templateEl('<p class="stat"><!----> open</p>');
 
@@ -81,10 +81,10 @@ export class PanelApp extends Component {
     
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 $__child(_n1, () => ((() => {
 const _r5 = $__cloneEl(_t1);
 const _n6 = _r5.firstChild!;
@@ -110,3 +110,4 @@ return _r0;
 }
 PanelApp.$$__sheets = [..._s0];
 $__defineComponent('panel-app', PanelApp);
+PanelApp.prototype.$$__tag = 'panel-app';

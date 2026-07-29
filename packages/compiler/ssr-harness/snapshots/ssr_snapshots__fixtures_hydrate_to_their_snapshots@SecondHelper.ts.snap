@@ -1,0 +1,59 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 23
+expression: compile_hydrate(&source).0
+input_file: fixtures/SecondHelper.ts
+---
+import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent } from '@neuralfog/elemix/runtime';
+const _h0 = $__templateEl('<h2 class="heading">Title</h2>');
+
+import { Component } from '@neuralfog/elemix';
+
+// Two components — the SECOND one uses a helper template (`this.heading()`).
+// Splice must inline helpers for every class, not just the first, or the
+// non-first component's `${this.heading()}` never gets inlined.
+
+const _t0 = $__template('<span class="plain">plain</span>');
+const _t1 = $__template('<div class="card"><!----><p class="body">body</p></div>');
+const _t2 = $__templateEl('<h2 class="heading">Title</h2>');
+
+export class PlainNote extends Component {
+$$__hydrate(root: Node): void {
+
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('plain-note', PlainNote);
+PlainNote.prototype.$$__tag = 'plain-note';
+
+export class TitledNote extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _b1 = $__bounds(_n0, 0, 1);
+$__fresh(() => {
+const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
+$__child(_a2, () => ((() => {
+const _r3 = $__cloneEl(_h0);
+return _r3;
+})()));
+});
+}
+
+    
+    $$__view(): DocumentFragment {
+const _r1 = $__clone(_t1);
+const _n2 = _r1.firstChild!.firstChild!;
+$__child(_n2, () => ((() => {
+const _r3 = $__cloneEl(_t2);
+return _r3;
+})()));
+return _r1;
+}
+}
+$__defineComponent('titled-note', TitledNote);
+TitledNote.prototype.$$__tag = 'titled-note';

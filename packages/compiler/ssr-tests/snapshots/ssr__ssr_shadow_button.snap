@@ -1,7 +1,0 @@
----
-source: tests/ssr.rs
-expression: ssr_method_text(&compiled)
----
-$$__ssr(): string {
-return `<ssr-button><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><button class="${$__ssrAttr(this.state.tone)}">${$__ssrText(this.state.label)}</button></template></ssr-button>`;
-}

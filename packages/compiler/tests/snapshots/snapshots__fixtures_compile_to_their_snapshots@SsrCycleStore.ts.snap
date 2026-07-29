@@ -1,0 +1,17 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: fixtures/SsrCycleStore.ts
+---
+import { $__state } from '@neuralfog/elemix/runtime';
+export type CycleEntry = { id: number; event: string };
+
+export const cycle = $__state<{ entries: CycleEntry[] }>({ entries: [] });
+
+let seq = 0;
+
+export const record = (event: string): void => {
+    seq++;
+    cycle.entries.push({ id: seq, event });
+};

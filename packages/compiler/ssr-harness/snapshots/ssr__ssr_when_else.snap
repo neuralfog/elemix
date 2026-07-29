@@ -1,0 +1,11 @@
+---
+source: ssr-harness/ssr.rs
+expression: method
+---
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'when-else-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="stage">${($__ssrWhen(
+                    this.state.loggedIn,
+                    () => `<div class="card ready">✓ Welcome back</div>`,
+                    () => `<div class="card idle">Please log in</div>`,
+                ))}</div><button class="toggle">toggle</button></template></${this.$$__tag ?? 'when-else-app'}>`;
+}

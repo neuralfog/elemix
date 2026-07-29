@@ -1,0 +1,11 @@
+---
+source: ssr-harness/ssr.rs
+expression: method
+---
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'card-list-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Add user</button></div><div class="list">${($__ssrRepeat(
+                this.state.users,
+                (user) => `<div class="row">${$__ssrChild('user-card', {name: (user.name), role: (user.role)})}<button class="promote">promote</button><button class="drop">×</button></div>`,
+                (user) => user.id,
+            ))}</div></template></${this.$$__tag ?? 'card-list-app'}>`;
+}

@@ -12,9 +12,6 @@ export const Default = {
             throw new Error('slot-app did not render two app-card elements');
         }
 
-        // the explanatory note is statically rendered with its inline <code>
-        expect(find('.note', canvasElement)?.textContent).toContain("hasSlot('footer')");
-
         // --- first card: header + default + footer slotted content provided ---
         const first = cards[0];
         const firstHeader = find('.header', first);

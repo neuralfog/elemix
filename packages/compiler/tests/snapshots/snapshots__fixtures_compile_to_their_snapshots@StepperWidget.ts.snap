@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/StepperWidget.ts
+input_file: fixtures/StepperWidget.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -80,3 +80,4 @@ return _r0;
 }
 StepperWidget.$$__sheets = [..._s0];
 $__defineComponent('ui-stepper', StepperWidget);
+StepperWidget.prototype.$$__tag = 'ui-stepper';

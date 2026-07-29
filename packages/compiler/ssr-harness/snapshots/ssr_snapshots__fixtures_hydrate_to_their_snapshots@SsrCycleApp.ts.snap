@@ -1,0 +1,97 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 23
+expression: compile_hydrate(&source).0
+input_file: fixtures/SsrCycleApp.ts
+---
+import { $__bounds, $__reanchor, $__seat, $__resume, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+const _h0 = $__templateEl('<ssr-cycle-probe></ssr-cycle-probe>');
+const _h1 = $__templateEl('<span class="empty">unmounted</span>');
+const _h2 = $__templateEl('<li> </li>');
+
+import { Component } from '@neuralfog/elemix';
+
+import './SsrCycleProbe';
+import { cycle } from './SsrCycleStore';
+
+type State = { mounted: boolean };
+
+const _t0 = $__template('<div class="stage"><!----></div><button class="toggle">toggle</button><ul class="log"><!----></ul>');
+const _t1 = $__templateEl('<ssr-cycle-probe></ssr-cycle-probe>');
+const _t2 = $__templateEl('<span class="empty">unmounted</span>');
+const _t3 = $__templateEl('<li> </li>');
+
+export class SsrCycleApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.nextSibling!;
+$__event(_n0, 'click', this.toggle);
+const _n1 = root.firstChild!;
+const _b2 = $__bounds(_n1, 0, 0);
+const _n3 = root.firstChild!.nextSibling!.nextSibling!;
+const _b4 = $__bounds(_n3, 0, 0);
+const _s5 = $__seat(_n1, _b2[0], _b2[1]);
+$__child(_s5[0], $__resume(_s5[1], (_r6) => (this.state.mounted
+                    ? (() => {
+
+return _r6;
+})()
+                    : (() => {
+
+return _r6;
+})()), () => (this.state.mounted
+                    ? (() => {
+const _r7 = $__cloneEl(_h0);
+return _r7;
+})()
+                    : (() => {
+const _r8 = $__cloneEl(_h1);
+return _r8;
+})())));
+$__fresh(() => {
+const _a9 = $__reanchor(_n3, _b4[0], _b4[1]);
+$__list(_a9, () => (cycle.entries), (entry) => String(entry.id), (entry) => (() => {
+const _r10 = $__cloneEl(_h2);
+const _n11 = _r10.firstChild!;
+$__effect(() => {
+$__setText(_n11, (entry.event));
+});
+return _r10;
+})());
+});
+}
+
+    state = $__state<State>({ mounted: true });
+
+    toggle = (): void => {
+        this.state.mounted = !this.state.mounted;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
+$__child(_n1, () => (this.state.mounted
+                    ? (() => {
+const _r4 = $__cloneEl(_t1);
+return _r4;
+})()
+                    : (() => {
+const _r5 = $__cloneEl(_t2);
+return _r5;
+})()));
+$__event(_n2, 'click', this.toggle);
+$__list(_n3, () => (cycle.entries), (entry) => String(entry.id), (entry) => (() => {
+const _r6 = $__cloneEl(_t3);
+const _n7 = _r6.firstChild!;
+$__effect(() => {
+$__setText(_n7, (entry.event));
+});
+return _r6;
+})());
+return _r0;
+}
+}
+$__defineComponent('ssr-cycle-app', SsrCycleApp);
+SsrCycleApp.prototype.$$__tag = 'ssr-cycle-app';

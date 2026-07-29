@@ -1,0 +1,14 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 15
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/FreeTemplate.ts
+---
+import { $__ssrAttr, $__ssrChild, $__ssrTpl, $__scopedStore } from '@neuralfog/elemix/ssr-runtime';
+import { ref } from '@neuralfog/elemix';
+
+import './ProfileCard';
+
+export const store = $__scopedStore(() => ({ name: ref('Ada Lovelace'), likes: 0 }));
+
+export const render = () => $__ssrTpl(`<label>Name <input type="text"${$__ssrAttr('value', (store.name).value)}/></label>${$__ssrChild('profile-card', {name: (store.name.value), likes: (store.likes)})}`);

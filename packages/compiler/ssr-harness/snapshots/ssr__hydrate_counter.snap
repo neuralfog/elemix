@@ -1,0 +1,13 @@
+---
+source: ssr-tests/ssr.rs
+expression: hydrate_method_text(&compiled)
+---
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _d1 = $__dynLens(_n0);
+const _v2 = $__splitRun(_n0.firstChild as Text, [9], _d1);
+$__event(_n0, 'click', this.increment);
+$__effect(() => {
+$__setText(_v2[0], (this.state.count));
+});
+}

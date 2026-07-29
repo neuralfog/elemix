@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/EffectApp.ts
+input_file: fixtures/EffectApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -45,3 +45,4 @@ return _r0;
 }
 }
 $__defineComponent('effect-app', EffectApp);
+EffectApp.prototype.$$__tag = 'effect-app';

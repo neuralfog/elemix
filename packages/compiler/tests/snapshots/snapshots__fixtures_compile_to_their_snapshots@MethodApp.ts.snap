@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/MethodApp.ts
+input_file: fixtures/MethodApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -34,3 +34,4 @@ return _r0;
 }
 }
 $__defineComponent('method-app', MethodApp);
+MethodApp.prototype.$$__tag = 'method-app';

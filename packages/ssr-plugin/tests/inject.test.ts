@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { injectMetadata } from '../src/inject';
 
-const run = (code: string): string =>
-    injectMetadata(code, 'test.ts')?.code ?? code;
+const run = (code: string): string => injectMetadata(code)?.code ?? code;
 
 describe('injectMetadata', () => {
     it('emits inject metadata from a constructor property param', () => {
@@ -108,6 +107,6 @@ describe('injectMetadata', () => {
     });
 
     it('returns null when nothing changed', () => {
-        expect(injectMetadata('const x = 1;', 'test.ts')).toBeNull();
+        expect(injectMetadata('const x = 1;')).toBeNull();
     });
 });

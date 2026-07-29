@@ -1,0 +1,55 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SlotApp.ts
+---
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './AppCard';
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 20px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<app-card><span slot="header">⭐ Featured</span><p>Default-slot content lives in the card body.</p><span slot="footer">Updated just now</span></app-card><app-card><p>This card has only body content — no header or footer slot.</p></app-card>');
+
+export class SlotApp extends Component {
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'slot-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${$__ssrChild('app-card', {}, `<span slot="header">⭐ Featured</span><p>Default-slot content lives in the card body.</p><span slot="footer">Updated just now</span>`)}${$__ssrChild('app-card', {}, `<p>This card has only body content — no header or footer slot.</p>`)}</template></${this.$$__tag ?? 'slot-app'}>`;
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+SlotApp.$$__sheets = [..._s0];
+$__defineComponent('slot-app', SlotApp);
+SlotApp.prototype.$$__tag = 'slot-app';

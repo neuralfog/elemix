@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/WhenElseApp.ts
+input_file: fixtures/WhenElseApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -35,3 +35,4 @@ return _r0;
 }
 }
 $__defineComponent('when-else-app', WhenElseApp);
+WhenElseApp.prototype.$$__tag = 'when-else-app';

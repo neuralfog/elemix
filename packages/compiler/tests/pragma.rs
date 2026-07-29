@@ -63,6 +63,7 @@ fn resolves_component_and_tag() {
             form: false,
             no_shadow: false,
             shadow: false,
+            client: false,
         })
     );
 }

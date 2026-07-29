@@ -65,7 +65,13 @@ impl<'a> Visit<'a> for Finder<'_> {
 /// Replace every free `tpl`…`` with an inline IIFE, hoist the shared consts +
 /// runtime import to the top, and drop the now-unused `tpl` from the main import.
 /// A module with no free template passes through unchanged.
-pub fn lower(source: &str) -> String {
+///
+/// `ssr = true` (the `--ssr` build): a free template lowers to `$__ssrTpl(`…`)` -
+/// a STRING descriptor - instead of a DOM-cloning IIFE, so a free template used as
+/// data (`{ icon: () => tpl`…` }`) and reached through a content hole renders
+/// server-side. `$__ssrText` unwraps the descriptor to raw HTML. The client build
+/// (`--hydrate`, `ssr = false`) keeps the DOM IIFE so the same free template mounts.
+pub fn lower(source: &str, ssr: bool) -> String {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
 
@@ -97,6 +103,49 @@ pub fn lower(source: &str) -> String {
         }
     }
 
+    // Drop `tpl` from the main import once every use is lowered (shared by both
+    // modes).
+    let drop_tpl = |edits: &mut Vec<(usize, usize, String)>| {
+        if let Some((s, e, remaining)) = &main_import {
+            if remaining.is_empty() {
+                let e = e + trailing_newline(source, *e);
+                edits.push((*s, e, String::new()));
+            } else {
+                edits.push((
+                    *s,
+                    *e,
+                    format!(
+                        "import {{ {} }} from '@neuralfog/elemix';",
+                        remaining.join(", ")
+                    ),
+                ));
+            }
+        }
+    };
+
+    let apply = |edits: Vec<(usize, usize, String)>| {
+        let mut edits = edits;
+        edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
+        let mut out = source.to_string();
+        for (start, end, repl) in edits {
+            out.replace_range(start..end, &repl);
+        }
+        out
+    };
+
+    // SSR: each free template becomes a `$__ssrTpl(`…`)` string descriptor. No
+    // DOM consts to hoist; the `$__ssrTpl` import is added by the SSR-runtime
+    // import pass. `view()` in the same (server) bundle is dead code.
+    if ssr {
+        let mut edits: Vec<(usize, usize, String)> = Vec::new();
+        for f in &finder.out {
+            let body = crate::template::parse::ssr_nested_tpl(&f.statics, &f.holes);
+            edits.push((f.span.0, f.span.1, format!("$__ssrTpl({body})")));
+        }
+        drop_tpl(&mut edits);
+        return apply(edits);
+    }
+
     let emitter = TsEmitter::new();
     let templates: Vec<(Vec<String>, Vec<String>)> = finder
         .out
@@ -113,29 +162,8 @@ pub fn lower(source: &str) -> String {
     // ESM hoists imports, so the runtime import + hoisted consts sit safely at the
     // top ahead of the user's own imports.
     edits.push((0, 0, format!("{import_line}\n{decls}")));
-
-    if let Some((s, e, remaining)) = main_import {
-        if remaining.is_empty() {
-            let e = e + trailing_newline(source, e);
-            edits.push((s, e, String::new()));
-        } else {
-            edits.push((
-                s,
-                e,
-                format!(
-                    "import {{ {} }} from '@neuralfog/elemix';",
-                    remaining.join(", ")
-                ),
-            ));
-        }
-    }
-
-    edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
-    let mut out = source.to_string();
-    for (start, end, repl) in edits {
-        out.replace_range(start..end, &repl);
-    }
-    out
+    drop_tpl(&mut edits);
+    apply(edits)
 }
 
 fn import_names(import: &ImportDeclaration) -> Vec<String> {

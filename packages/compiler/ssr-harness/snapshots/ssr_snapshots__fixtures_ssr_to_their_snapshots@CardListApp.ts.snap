@@ -1,0 +1,122 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/CardListApp.ts
+---
+import { $__ssrChild, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './UserCard';
+
+type User = { id: number; name: string; role: string };
+
+type State = {
+    users: User[];
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 16px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code { font-family: ui-monospace, monospace; font-size: 12px; background: #e2e8f0; padding: 1px 5px; border-radius: 4px; }
+    .bar { display: flex; gap: 8px; margin-bottom: 14px; }
+    .bar button { font: inherit; font-size: 13px; padding: 6px 12px; border: none; border-radius: 8px; background: var(--accent); color: white; cursor: pointer; }
+    .list { display: flex; flex-direction: column; gap: 8px; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .row user-card { flex: 1; }
+    .row .promote, .row .drop {
+        font: inherit;
+        font-size: 12px;
+        padding: 6px 8px;
+        border: none;
+        border-radius: 8px;
+        background: #e2e8f0;
+        cursor: pointer;
+    }
+`;
+
+const NAMES = ['Ada', 'Grace', 'Linus', 'Margaret', 'Dennis', 'Barbara'];
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="bar"><button>Add user</button></div><div class="list"><!----></div>');
+const _t1 = $__templateEl('<div class="row"><user-card></user-card><button class="promote">promote</button><button class="drop">×</button></div>');
+
+export class CardListApp extends Component {
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'card-list-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Add user</button></div><div class="list">${($__ssrRepeat(
+                this.state.users,
+                (user) => `<div class="row">${$__ssrChild('user-card', {name: (user.name), role: (user.role)})}<button class="promote">promote</button><button class="drop">×</button></div>`,
+                (user) => user.id,
+            ))}</div></template></${this.$$__tag ?? 'card-list-app'}>`;
+}
+
+
+    state = $__state<State>({
+        users: [
+            { id: 1, name: 'Ada', role: 'Engineer' },
+            { id: 2, name: 'Grace', role: 'Engineer' },
+        ],
+    });
+
+    private seq = 2;
+
+    add = (): void => {
+        const id = ++this.seq;
+        this.state.users.push({
+            id,
+            name: NAMES[id % NAMES.length],
+            role: 'Engineer',
+        });
+    };
+
+    promote = (id: number): void => {
+        const user = this.state.users.find((u) => u.id === id);
+        if (user) user.role = 'Lead';
+    };
+
+    removeUser = (id: number): void => {
+        const i = this.state.users.findIndex((u) => u.id === id);
+        if (i !== -1) this.state.users.splice(i, 1);
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
+$__event(_n1, 'click', this.add);
+$__list(_n2, () => (this.state.users), (user) => user.id, (user) => (() => {
+const _r3 = $__cloneEl(_t1);
+const _n4 = _r3.firstChild!;
+const _n5 = _r3.firstChild!.nextSibling!;
+const _n6 = _r3.firstChild!.nextSibling!.nextSibling!;
+$__event(_n5, 'click', () => this.promote(user.id));
+$__event(_n6, 'click', () => this.removeUser(user.id));
+$__effect(() => {
+$__setProp(_n4, 'name', (user.name));
+});
+$__effect(() => {
+$__setProp(_n4, 'role', (user.role));
+});
+return _r3;
+})());
+return _r0;
+}
+}
+CardListApp.$$__sheets = [..._s0];
+$__defineComponent('card-list-app', CardListApp);
+CardListApp.prototype.$$__tag = 'card-list-app';

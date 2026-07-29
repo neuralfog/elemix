@@ -1,0 +1,90 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 23
+expression: compile_hydrate(&source).0
+input_file: fixtures/ProfileCard.ts
+---
+import { $__dynLens, $__splitRun, $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    name: string;
+    role: string;
+    likes: number;
+};
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .card {
+        display: flex; align-items: center; gap: 14px; max-width: 360px;
+        padding: 16px; border-radius: 14px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    }
+    .avatar {
+        flex: 0 0 48px; height: 48px; display: grid; place-items: center;
+        border-radius: 50%; background: rgba(255, 255, 255, 0.2);
+        font-size: 20px; font-weight: 700;
+    }
+    .info { display: flex; flex-direction: column; }
+    .info strong { font-size: 16px; }
+    .info span { font-size: 13px; opacity: 0.85; }
+    .likes { margin-left: auto; font-size: 15px; font-weight: 600; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="card"><div class="avatar"> </div><div class="info"><strong> </strong><span> </span></div><div class="likes">❤️ <!----></div></div>');
+
+export class ProfileCard extends Component<Props> {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _n1 = $__text(_n0);
+const _n2 = root.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n3 = $__text(_n2);
+const _n4 = root.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n5 = $__text(_n4);
+const _n6 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _d7 = $__dynLens(_n6);
+const _v8 = $__splitRun(_n6.firstChild as Text, [3], _d7);
+$__effect(() => {
+$__setText(_n1, (this.props.name.charAt(0)));
+});
+$__effect(() => {
+$__setText(_n3, (this.props.name));
+});
+$__effect(() => {
+$__setText(_n5, (this.props.role));
+});
+$__effect(() => {
+$__setText(_v8[0], (this.props.likes));
+});
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _x5 = document.createTextNode('');
+_n4.replaceWith(_x5);
+$__effect(() => {
+$__setText(_n1, (this.props.name.charAt(0)));
+});
+$__effect(() => {
+$__setText(_n2, (this.props.name));
+});
+$__effect(() => {
+$__setText(_n3, (this.props.role));
+});
+$__effect(() => {
+$__setText(_x5, (this.props.likes));
+});
+return _r0;
+}
+}
+ProfileCard.$$__sheets = [..._s0];
+$__defineComponent('profile-card', ProfileCard);
+ProfileCard.prototype.$$__tag = 'profile-card';

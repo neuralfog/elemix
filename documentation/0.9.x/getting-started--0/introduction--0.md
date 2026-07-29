@@ -28,11 +28,15 @@ want to sit at the top of the benchmarks 😂
 If I got your attention and you are thinking of using it, I am flattered. If not,
 I could not care less 🤷
 
+> [!WARNING] Hard truth
+>
+> Frameworks and libraries often benefit their authors more than their consumers.
+
 ## Key points
 
 ### State management
 
-I want state management that does not suck and is easy to use. Reactivity and
+State management that does not suck and is easy to use. Reactivity and
 state should not be a chore. A brainless decision, not a week of architecting
 before you write a single line.
 
@@ -45,7 +49,7 @@ pogo stick. Here is my state - I set the value on a field and it works. No `setT
 Reactivity you never wire up. Read state in a template or an effect, ***elemix***
 tracks it. Change it, the right thing re-runs. No dependency arrays. No subscribe
 and unsubscribe. No signal getters and setters to remember - you read values and
-write values, the framework keeps up.
+write values.
 
 You can invoke a render yourself. `this.render()` re-renders the component, no
 reactive state required, you decide when. Full control.

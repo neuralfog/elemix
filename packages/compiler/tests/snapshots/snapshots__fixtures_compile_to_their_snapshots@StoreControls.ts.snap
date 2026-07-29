@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/StoreControls.ts
+input_file: fixtures/StoreControls.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -74,3 +74,4 @@ return _r0;
 }
 StoreControls.$$__sheets = [..._s0];
 $__defineComponent('store-controls', StoreControls);
+StoreControls.prototype.$$__tag = 'store-controls';

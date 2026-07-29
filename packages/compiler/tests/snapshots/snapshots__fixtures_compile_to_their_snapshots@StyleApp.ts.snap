@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/StyleApp.ts
+input_file: fixtures/StyleApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setStyle, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -44,7 +44,7 @@ const css = `
 `;
 
 const _s0 = $__sheet(css);
-const _t0 = $__template('<p class="note"><code>style</code> binds an object of CSS properties (or a string). Each change re-applies only the style declaration.</p><div class="box">Styled box</div><button>color</button><button>size</button><button>background</button>');
+const _t0 = $__template('<div class="box">Styled box</div><button>color</button><button>size</button><button>background</button>');
 
 export class StyleApp extends Component {
 
@@ -68,10 +68,10 @@ export class StyleApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.nextSibling!;
-const _n2 = _r0.firstChild!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n1 = _r0.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 $__event(_n2, 'click', this.recolor);
 $__event(_n3, 'click', this.resize);
 $__event(_n4, 'click', this.shade);
@@ -87,3 +87,4 @@ return _r0;
 }
 StyleApp.$$__sheets = [..._s0];
 $__defineComponent('style-app', StyleApp);
+StyleApp.prototype.$$__tag = 'style-app';

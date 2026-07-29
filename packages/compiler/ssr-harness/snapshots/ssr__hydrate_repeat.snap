@@ -1,0 +1,29 @@
+---
+source: ssr-harness/ssr.rs
+assertion_line: 239
+expression: method
+---
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+$__event(_n0, 'click', this.add);
+const _n1 = root.firstChild!.nextSibling!;
+const _b2 = $__bounds(_n1, 0, 0);
+$__fresh(() => {
+const _a3 = $__reanchor(_n1, _b2[0], _b2[1]);
+$__list(_a3, () => (this.state.users), (user) => user.id, (user) => (() => {
+const _r4 = $__cloneEl(_h0);
+const _n5 = _r4.firstChild!;
+const _n6 = _r4.firstChild!.nextSibling!;
+const _n7 = _r4.firstChild!.nextSibling!.nextSibling!;
+$__event(_n6, 'click', () => this.promote(user.id));
+$__event(_n7, 'click', () => this.removeUser(user.id));
+$__effect(() => {
+$__setProp(_n5, 'name', (user.name));
+});
+$__effect(() => {
+$__setProp(_n5, 'role', (user.role));
+});
+return _r4;
+})());
+});
+}

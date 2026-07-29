@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/CounterApp.ts
+input_file: fixtures/CounterApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -59,3 +59,4 @@ return _r0;
 }
 CounterApp.$$__sheets = [..._s0];
 $__defineComponent('counter-app', CounterApp);
+CounterApp.prototype.$$__tag = 'counter-app';

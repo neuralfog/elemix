@@ -1,0 +1,100 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SvgApp.ts
+---
+import { $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__event, $__effect, $__setAttr, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = {
+    cx: number;
+    cy: number;
+    r: number;
+    color: string;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 18px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    svg { display: block; background: #f8fafc; border-radius: 12px; margin-bottom: 14px; }
+    button { font: inherit; font-size: 13px; padding: 6px 12px; margin-right: 8px; border: none; border-radius: 8px; background: #e2e8f0; cursor: pointer; }
+    button:hover { background: #cbd5e1; }
+`;
+
+const COLORS = ['#6366f1', '#ef4444', '#22c55e', '#f59e0b'];
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<svg viewBox="0 0 200 200" width="200" height="200"><circle></circle></svg><button>move</button><button>grow</button><button>recolor</button>');
+
+export class SvgApp extends Component {
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'svg-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><svg viewBox="0 0 200 200" width="200" height="200"><circle${$__ssrAttr('cx', this.state.cx)}${$__ssrAttr('cy', this.state.cy)}${$__ssrAttr('r', this.state.r)}${$__ssrAttr('fill', this.state.color)}></circle></svg><button>move</button><button>grow</button><button>recolor</button></template></${this.$$__tag ?? 'svg-app'}>`;
+}
+
+
+    state = $__state<State>({
+        cx: 100,
+        cy: 100,
+        r: 40,
+        color: COLORS[0],
+    });
+
+    private colorIndex = 0;
+
+    move = (): void => {
+        this.state.cx = this.state.cx === 100 ? 60 : 100;
+        this.state.cy = this.state.cy === 100 ? 140 : 100;
+    };
+
+    grow = (): void => {
+        this.state.r = this.state.r >= 80 ? 20 : this.state.r + 20;
+    };
+
+    recolor = (): void => {
+        this.colorIndex = (this.colorIndex + 1) % COLORS.length;
+        this.state.color = COLORS[this.colorIndex];
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n2, 'click', this.move);
+$__event(_n3, 'click', this.grow);
+$__event(_n4, 'click', this.recolor);
+$__effect(() => {
+$__setAttr(_n1, 'cx', (this.state.cx));
+});
+$__effect(() => {
+$__setAttr(_n1, 'cy', (this.state.cy));
+});
+$__effect(() => {
+$__setAttr(_n1, 'r', (this.state.r));
+});
+$__effect(() => {
+$__setAttr(_n1, 'fill', (this.state.color));
+});
+return _r0;
+}
+}
+SvgApp.$$__sheets = [..._s0];
+$__defineComponent('svg-app', SvgApp);
+SvgApp.prototype.$$__tag = 'svg-app';

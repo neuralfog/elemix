@@ -11,21 +11,66 @@ use oxc_span::SourceType;
 
 const RUNTIME: &str = "@neuralfog/elemix/runtime";
 const SSR_RUNTIME: &str = "@neuralfog/elemix/ssr-runtime";
+const SSR_RUNTIME_CLIENT: &str = "@neuralfog/elemix/ssr-runtime/client";
 
 /// Prepend the `@neuralfog/elemix/ssr-runtime` import for the SSR string helpers
-/// (`$__ssrText` / `$__ssrAttr` / `$__ssrSlot`) that a `$$__ssr()` method
-/// references — only the ones actually present, in a stable order. Identity when
-/// none are used (i.e. not an `--ssr` compile, or a component with no such holes).
+/// (`$__ssrText` / `$__ssrAttr` / `$__ssrChild` / `$__ssrLen` and the directive
+/// builders `$__ssrRepeat` / `$__ssrWhen` / `$__ssrChoose` / `$__ssrMatch`) that a
+/// `$$__ssr()` method references — only the ones actually present, in a stable
+/// order. Identity when none are used (not an `--ssr` compile, or no such holes).
 pub fn add_ssr_runtime_import(code: &str) -> String {
-    let used: Vec<&str> = ["$__ssrText", "$__ssrAttr", "$__ssrSlot"]
-        .into_iter()
-        .filter(|id| code.contains(id))
-        .collect();
+    let used: Vec<&str> = [
+        "$__ssrText",
+        "$__ssrAttr",
+        "$__ssrClass",
+        "$__ssrStyle",
+        "$__ssrChild",
+        "$__ssrLen",
+        "$__ssrTpl",
+        "$__ssrRepeat",
+        "$__ssrWhen",
+        "$__ssrChoose",
+        "$__ssrMatch",
+        "$__scopedStore",
+    ]
+    .into_iter()
+    .filter(|id| code.contains(id))
+    .collect();
     if used.is_empty() {
         return code.to_string();
     }
     format!(
         "import {{ {} }} from '{SSR_RUNTIME}';\n{code}",
+        used.join(", ")
+    )
+}
+
+/// Prepend the `@neuralfog/elemix/ssr-runtime/client` import for the hydrate-only
+/// helpers (`$__dynLens` / `$__splitRun`) a `$$__hydrate()` method uses. They are
+/// client DOM helpers (so not the DOM-free server `ssr-runtime`) but
+/// hydrate-exclusive, so they live OUTSIDE the CSR `runtime` a client-only build
+/// ships - keeping that bundle free of hydration code. Every other runtime
+/// function the hydrate path emits (`$__event`, `$__setText`, …) is already pulled
+/// from `runtime` by the CSR `view()`.
+pub fn add_hydrate_runtime_import(code: &str) -> String {
+    let used: Vec<&str> = [
+        "$__dynLens",
+        "$__splitRun",
+        "$__bounds",
+        "$__reanchor",
+        "$__seat",
+        "$__resume",
+        "$__fresh",
+        "$__text",
+    ]
+    .into_iter()
+    .filter(|id| code.contains(id))
+    .collect();
+    if used.is_empty() {
+        return code.to_string();
+    }
+    format!(
+        "import {{ {} }} from '{SSR_RUNTIME_CLIENT}';\n{code}",
         used.join(", ")
     )
 }

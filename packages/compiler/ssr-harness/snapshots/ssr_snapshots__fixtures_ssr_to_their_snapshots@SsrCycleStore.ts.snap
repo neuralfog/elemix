@@ -1,0 +1,17 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 15
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SsrCycleStore.ts
+---
+import { $__scopedStore } from '@neuralfog/elemix/ssr-runtime';
+export type CycleEntry = { id: number; event: string };
+
+export const cycle = $__scopedStore<{ entries: CycleEntry[] }>(() => ({ entries: [] }));
+
+let seq = 0;
+
+export const record = (event: string): void => {
+    seq++;
+    cycle.entries.push({ id: seq, event });
+};

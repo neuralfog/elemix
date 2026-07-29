@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/AttrApp.ts
+input_file: fixtures/AttrApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__setAttr, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -67,7 +67,7 @@ const css = `
 `;
 
 const _s0 = $__sheet(css);
-const _t0 = $__template('<p class="note">Everything in a template is an attribute. <code>_attr</code> handles interpolated values (<code>href</code>), <code>data-*</code>/<code>aria-*</code>, and boolean attributes that toggle their presence (<code>hidden</code>).</p><a class="link">Open profile #<!----></a><span class="badge"> </span><div class="secret">Secret content</div><button>next user</button><button>rename</button><button>toggle secret</button>');
+const _t0 = $__template('<a class="link">Open profile #<!----></a><span class="badge"> </span><div class="secret">Secret content</div><button>next user</button><button>rename</button><button>toggle secret</button>');
 
 export class AttrApp extends Component {
 
@@ -91,14 +91,14 @@ export class AttrApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.nextSibling!;
+const _n1 = _r0.firstChild!;
 const _n2 = _n1.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!;
 const _n4 = _n3.firstChild!;
-const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _x11 = document.createTextNode('');
 _n2.replaceWith(_x11);
 $__event(_n6, 'click', this.next);
@@ -120,3 +120,4 @@ return _r0;
 }
 AttrApp.$$__sheets = [..._s0];
 $__defineComponent('attr-app', AttrApp);
+AttrApp.prototype.$$__tag = 'attr-app';

@@ -43,6 +43,27 @@ impl Emitter for TsEmitter {
         format!("const {var} = document.createTextNode('');\n{anchor}.replaceWith({var});")
     }
 
+    fn dyn_lens(&self, var: &str, el: &str) -> String {
+        format!("const {var} = $__dynLens({el});")
+    }
+
+    fn split_run(&self, var: &str, el: &str, run: usize, statics: &[usize], lens: &str) -> String {
+        let arr = statics
+            .iter()
+            .map(|n| n.to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        let mut node = format!("{el}.firstChild");
+        for _ in 0..run {
+            node.push_str("!.nextSibling");
+        }
+        format!("const {var} = $__splitRun({node} as Text, [{arr}], {lens});")
+    }
+
+    fn text(&self, var: &str, el: &str) -> String {
+        format!("const {var} = $__text({el});")
+    }
+
     fn comment_anchor(&self, var: &str, sibling: &str) -> String {
         format!("const {var} = document.createComment('');\n{sibling}.before({var});")
     }
@@ -81,6 +102,31 @@ impl Emitter for TsEmitter {
 
     fn list(&self, anchor: &str, items: &str, key: &str, render: &str) -> String {
         format!("$__list({anchor}, () => ({items}), {key}, {render});")
+    }
+
+    fn bounds(&self, var: &str, parent: &str, before: usize, after: usize) -> String {
+        format!("const {var} = $__bounds({parent}, {before}, {after});")
+    }
+
+    fn reanchor(&self, var: &str, parent: &str, bounds: &str) -> String {
+        format!("const {var} = $__reanchor({parent}, {bounds}[0], {bounds}[1]);")
+    }
+
+    fn seat(&self, var: &str, parent: &str, bounds: &str) -> String {
+        format!("const {var} = $__seat({parent}, {bounds}[0], {bounds}[1]);")
+    }
+
+    fn child_resume(
+        &self,
+        anchor: &str,
+        server: &str,
+        root: &str,
+        hydrate: &str,
+        fresh: &str,
+    ) -> String {
+        format!(
+            "$__child({anchor}, $__resume({server}, ({root}) => ({hydrate}), () => ({fresh})));"
+        )
     }
 
     fn set_text(&self, node: &str, expr: &str) -> String {

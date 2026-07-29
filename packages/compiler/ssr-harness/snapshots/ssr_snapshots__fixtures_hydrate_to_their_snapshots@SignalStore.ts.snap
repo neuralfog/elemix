@@ -1,0 +1,8 @@
+---
+source: ssr-tests/ssr_snapshots.rs
+expression: compile_hydrate(&source).0
+input_file: fixtures/SignalStore.ts
+---
+import { $__state } from '@neuralfog/elemix/runtime';
+
+export const counter = $__state({ count: 0 });

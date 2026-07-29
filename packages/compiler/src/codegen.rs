@@ -10,7 +10,7 @@ use crate::lower::{
     split_template_literal, split_ternary,
 };
 use crate::template::node::NodePath;
-use crate::template::parse::parse;
+use crate::template::parse::{parse, structural_holes, StructHole};
 use std::collections::HashMap;
 
 /// Per-run state: globally-unique counters, the accumulated module-scope
@@ -105,6 +105,264 @@ pub fn generate_free(
         .map(|(statics, holes)| gen_template(statics, holes, &mut ctx, emitter, false, false))
         .collect();
     (ctx.decls, bodies)
+}
+
+/// Generate the `$$__hydrate(root)` body for one component template: bind events
+/// and reactive value writes onto the EXISTING server-rendered nodes reached from
+/// `root`, creating no DOM. Non-baked text holes are recovered from the markerless
+/// SSR run: the parent element's `data-t` attribute holds each dynamic value's
+/// rendered length, and `$__splitRun` slices the merged text node (using the
+/// compiled static prefixes) to isolate the bound nodes.
+///
+/// Structural holes (`repeat`/`when`/`choose`/`match`) are hydrated by [`hydrate_bind`]:
+/// a component-bearing conditional RESUMES (adopt the server subtree on the first
+/// run so a self-hydrating child mounts once, clone fresh after), everything else
+/// TAKES OVER (`$__reanchor` + the CSR builder, rebuilt fresh under `$__fresh`).
+/// Returns hoistable template `decls` (the builders' `$__template` consts) alongside
+/// the method body.
+pub fn generate_hydrate(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> Generated {
+    let mut ctx = Ctx::new("h");
+    let lines = hydrate_bind(statics, holes, "root", false, &mut ctx, emitter);
+    let mut body = lines.join("\n");
+    body.push('\n');
+    Generated {
+        decls: ctx.decls,
+        body,
+    }
+}
+
+/// Bind one template's holes onto EXISTING server DOM reached from `root`, with no
+/// DOM creation. Reused for the top-level `$$__hydrate` method (`root` = the shadow
+/// root) AND for a structural hole's per-branch/row hydrate builder (`root` = the
+/// branch's server root element, `el` = true so paths drop their leading step).
+///
+/// Structural holes split two ways. A conditional that renders a COMPONENT (a
+/// custom element, which self-hydrates from its own DSD) is RESUMED: `$__seat`
+/// keeps the server nodes and drops an anchor after them, and `$__resume` adopts
+/// that server root on the first run (single mount) then clones fresh on later
+/// reactive changes. Everything else keeps the fresh-rebuild takeover (`$__reanchor`
+/// plus the CSR builder), correct for plain content and wrapped in `$__fresh` so
+/// its writes land.
+fn hydrate_bind(
+    statics: &[String],
+    holes: &[String],
+    root: &str,
+    el: bool,
+    ctx: &mut Ctx,
+    emitter: &dyn Emitter,
+) -> Vec<String> {
+    let parsed = parse(statics, holes);
+    let bindings: Vec<_> = parsed.holes.iter().map(classify).collect();
+    let mut lines: Vec<String> = Vec::new();
+    let mut grabbed: Vec<(NodePath, String)> = Vec::new();
+
+    // A single-root branch's clone IS its root element, so every hole path drops
+    // its leading step (the element itself) to navigate from `root`.
+    let adj = |p: &NodePath| -> NodePath {
+        if el && !p.is_empty() {
+            p[1..].to_vec()
+        } else {
+            p.clone()
+        }
+    };
+
+    let is_split_text =
+        |b: &crate::grammar::Binding| matches!(b.kind, BindingKind::Text) && !b.baked;
+    let mut text_groups: Vec<(NodePath, Vec<usize>)> = Vec::new();
+    for (i, (b, hole)) in bindings.iter().zip(&parsed.holes).enumerate() {
+        if !is_split_text(b) {
+            continue;
+        }
+        let parent = adj(&hole.path[..hole.path.len().saturating_sub(1)].to_vec());
+        match text_groups.iter_mut().find(|(p, _)| *p == parent) {
+            Some(g) => g.1.push(i),
+            None => text_groups.push((parent, vec![i])),
+        }
+    }
+
+    let is_structural = |b: &crate::grammar::Binding| {
+        matches!(
+            b.kind,
+            BindingKind::List | BindingKind::Child | BindingKind::Splice
+        )
+    };
+
+    let is_baked_text =
+        |b: &crate::grammar::Binding| matches!(b.kind, BindingKind::Text) && b.baked;
+
+    let mut node_for: Vec<String> = vec![String::new(); bindings.len()];
+    for (i, b) in bindings.iter().enumerate() {
+        if is_split_text(b) || is_structural(b) {
+            continue;
+        }
+        if is_baked_text(b) {
+            let parent = adj(&b.path[..b.path.len().saturating_sub(1)].to_vec());
+            let el_var = grab(ctx, emitter, root, &parent, &mut grabbed, &mut lines);
+            let node = ctx.var("n");
+            lines.push(emitter.text(&node, &el_var));
+            node_for[i] = node;
+            continue;
+        }
+        node_for[i] = grab(ctx, emitter, root, &adj(&b.path), &mut grabbed, &mut lines);
+    }
+
+    for (parent, idxs) in &text_groups {
+        let el_var = grab(ctx, emitter, root, parent, &mut grabbed, &mut lines);
+        let lens = ctx.var("d");
+        lines.push(emitter.dyn_lens(&lens, &el_var));
+        let prefixes: Vec<usize> = idxs.iter().map(|&i| parsed.holes[i].prefix).collect();
+        let run_index = idxs.first().map_or(0, |&i| parsed.holes[i].run_index);
+        let vals = ctx.var("v");
+        lines.push(emitter.split_run(&vals, &el_var, run_index, &prefixes, &lens));
+        for (k, &i) in idxs.iter().enumerate() {
+            node_for[i] = format!("{vals}[{k}]");
+        }
+    }
+
+    let mut group: Vec<String> = Vec::new();
+    for (b, node) in bindings.iter().zip(&node_for) {
+        let name = b.name.as_deref().unwrap_or("");
+        let g = b.expr.trim();
+        match b.kind {
+            BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
+            BindingKind::Model => lines.push(emitter.model(node, &b.expr)),
+            BindingKind::OnModel => lines.push(emitter.onmodel(node, &b.expr)),
+            BindingKind::Ref => lines.push(emitter.reference(node, &b.expr)),
+            BindingKind::Text => group.push(emitter.set_text(node, g)),
+            BindingKind::Attr => group.push(emitter.set_attr(node, name, g)),
+            BindingKind::Class => group.push(emitter.set_class(node, "''", g)),
+            BindingKind::Style => group.push(emitter.set_style(node, g)),
+            BindingKind::Prop => group.push(emitter.set_prop(node, name, g)),
+            BindingKind::List | BindingKind::Child | BindingKind::Splice => {}
+        }
+    }
+
+    let mut counts: std::collections::HashMap<&str, usize> = std::collections::HashMap::new();
+    for b in &bindings {
+        if is_grouped(&b.kind) && is_simple_read(b.expr.trim()) {
+            *counts.entry(b.expr.trim()).or_insert(0) += 1;
+        }
+    }
+    let split = !counts.values().any(|&c| c >= 2);
+    if split && group.len() > 1 {
+        for w in &group {
+            lines.push(emitter.bind_group(std::slice::from_ref(w)));
+        }
+    } else if !group.is_empty() {
+        lines.push(emitter.bind_group(&group));
+    }
+
+    // Phase 1 (pristine reads): grab every structural parent and capture its region
+    // as node-ref bounds, before any seat/reanchor mutates sibling positions.
+    let mut prepared: Vec<(String, String, StructHole, bool)> = Vec::new();
+    for sh in structural_holes(statics, holes) {
+        let parent = grab(
+            ctx,
+            emitter,
+            root,
+            &adj(&sh.parent),
+            &mut grabbed,
+            &mut lines,
+        );
+        let bounds = ctx.var("b");
+        lines.push(emitter.bounds(&bounds, &parent, sh.before, sh.after));
+        let resumable = !sh.list
+            && !sh.expr.contains("repeat(")
+            && branch_has_component(&sh.expr)
+            && branches_single_root(&sh.expr);
+        prepared.push((parent, bounds, sh, resumable));
+    }
+
+    // Phase 2: resume component conditionals in place (outside `$__fresh`, so the
+    // first-run adopt binds under hydrating=true and skips writing correct server
+    // DOM); rebuild everything else fresh inside `$__fresh`.
+    let mut resume: Vec<String> = Vec::new();
+    let mut fresh: Vec<String> = Vec::new();
+    for (parent, bounds, sh, resumable) in prepared {
+        if resumable {
+            let seat = ctx.var("s");
+            resume.push(emitter.seat(&seat, &parent, &bounds));
+            let root_var = ctx.var("r");
+            let hydrate_getter = child_getter(&sh.expr, ctx, emitter, Some(&root_var));
+            let fresh_getter = child_getter(&sh.expr, ctx, emitter, None);
+            resume.push(emitter.child_resume(
+                &format!("{seat}[0]"),
+                &format!("{seat}[1]"),
+                &root_var,
+                &hydrate_getter,
+                &fresh_getter,
+            ));
+        } else {
+            let anchor = ctx.var("a");
+            fresh.push(emitter.reanchor(&anchor, &parent, &bounds));
+            if sh.list {
+                fresh.push(lower_list(&sh.expr, &anchor, ctx, emitter));
+            } else {
+                fresh.extend(lower_child(&sh.expr, &anchor, ctx, emitter));
+            }
+        }
+    }
+    lines.append(&mut resume);
+    if !fresh.is_empty() {
+        lines.push("$__fresh(() => {".to_string());
+        lines.append(&mut fresh);
+        lines.push("});".to_string());
+    }
+
+    lines
+}
+
+/// A structural branch renders a component if any of its `tpl` spans contains a
+/// custom-element open tag (a lowercase name with a hyphen). Only such branches
+/// need the resume path - a self-hydrating server component must not be discarded
+/// and rebuilt (double mount).
+fn branch_has_component(expr: &str) -> bool {
+    for (start, end) in find_html_spans(expr) {
+        let (statics, _) = split_template_literal(&slice(expr, start, end));
+        for st in &statics {
+            if has_custom_tag(st) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn has_custom_tag(markup: &str) -> bool {
+    let bytes = markup.as_bytes();
+    let mut i = 0;
+    while i + 1 < bytes.len() {
+        if bytes[i] == b'<' && bytes[i + 1].is_ascii_lowercase() {
+            let mut j = i + 1;
+            let mut hyphen = false;
+            while j < bytes.len() && (bytes[j].is_ascii_alphanumeric() || bytes[j] == b'-') {
+                if bytes[j] == b'-' {
+                    hyphen = true;
+                }
+                j += 1;
+            }
+            if hyphen {
+                return true;
+            }
+            i = j;
+        } else {
+            i += 1;
+        }
+    }
+    false
+}
+
+/// Every `tpl` span in a structural branch is a single-root element (so the resume
+/// path can adopt one server node per branch). Non-single-root branches keep the
+/// fresh-rebuild takeover.
+fn branches_single_root(expr: &str) -> bool {
+    for (start, end) in find_html_spans(expr) {
+        let (statics, holes) = split_template_literal(&slice(expr, start, end));
+        if !parse(&statics, &holes).single_root {
+            return false;
+        }
+    }
+    true
 }
 
 /// Generate the source for one top-level template: the module-scope
@@ -388,22 +646,72 @@ fn lower_child(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -
         }
     }
 
+    let getter = child_getter(expr, ctx, emitter, None);
+    vec![emitter.child(anchor, &getter)]
+}
+
+/// The `_child` getter for a `when`/`choose`/`match`/ternary hole. `hy` selects
+/// the builder each nested `tpl` lowers to: `None` clones fresh (CSR / later
+/// reactive updates), `Some(root)` binds onto an existing server subtree rooted at
+/// `root` (the resume path's first-run hydrate). The `cond`/dispatch structure is
+/// identical either way.
+fn child_getter(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&str>) -> String {
     let trimmed = expr.trim_start();
-    let getter = if trimmed.starts_with("when(") {
+    if trimmed.starts_with("when(") {
         let args = split_call_args(expr);
         let cond = args.first().cloned().unwrap_or_default();
-        let body = substitute_html(&arrow_body(args.get(1)), ctx, emitter, true);
-        let els = substitute_html(&arrow_body(args.get(2)), ctx, emitter, true);
+        let body = sub(&arrow_body(args.get(1)), ctx, emitter, true, hy);
+        let els = sub(&arrow_body(args.get(2)), ctx, emitter, true, hy);
         format!("{cond} ? {body} : {els}")
     } else if trimmed.starts_with("choose(") {
-        lower_choose(expr, ctx, emitter)
+        lower_choose(expr, ctx, emitter, hy)
     } else if trimmed.starts_with("match(") {
-        lower_match(expr, ctx, emitter)
+        lower_match(expr, ctx, emitter, hy)
     } else {
         // a ternary or direct template
-        substitute_html(expr, ctx, emitter, true)
-    };
-    vec![emitter.child(anchor, &getter)]
+        sub(expr, ctx, emitter, true, hy)
+    }
+}
+
+/// Lower nested `tpl` in `expr` to fresh CSR builders (`hy = None`) or hydrate
+/// binders rooted at `hy` (`Some(root)`).
+fn sub(
+    expr: &str,
+    ctx: &mut Ctx,
+    emitter: &dyn Emitter,
+    multi_root: bool,
+    hy: Option<&str>,
+) -> String {
+    match hy {
+        Some(root) => substitute_html_hydrate(expr, root, ctx, emitter),
+        None => substitute_html(expr, ctx, emitter, multi_root),
+    }
+}
+
+/// Mirror of [`substitute_html`] for the resume path: each nested `tpl` becomes an
+/// IIFE that binds its holes onto the passed server `root` (via [`hydrate_bind`])
+/// and returns `root` - no clone, no DOM creation.
+fn substitute_html_hydrate(expr: &str, root: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
+    let spans = find_html_spans(expr);
+    if spans.is_empty() {
+        return expr.to_string();
+    }
+    let total = expr.chars().count();
+    let mut out = String::new();
+    let mut last = 0;
+    for (start, end) in spans {
+        out.push_str(&slice(expr, last, start));
+        let (statics, holes) = split_template_literal(&slice(expr, start, end));
+        let single = parse(&statics, &holes).single_root;
+        let inner = hydrate_bind(&statics, &holes, root, single, ctx, emitter);
+        out.push_str(&format!(
+            "(() => {{\n{}\nreturn {root};\n}})()",
+            inner.join("\n")
+        ));
+        last = end;
+    }
+    out.push_str(&slice(expr, last, total));
+    out
 }
 
 fn is_repeat(branch: &str) -> bool {
@@ -471,7 +779,7 @@ fn lower_repeat_ternary(
 
 /// `choose([[c1, f1], ..., [true, fd]])` → a right-folded ternary chain
 /// `c1 ? (f1)() : ... : (fd)()`.
-fn lower_choose(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
+fn lower_choose(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&str>) -> String {
     let args = split_call_args(expr);
     let Some(arr) = args.first() else {
         return "''".into();
@@ -481,7 +789,7 @@ fn lower_choose(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
     for pair in split_commas(&inner).into_iter().rev() {
         let parts = split_commas(&strip_brackets(&pair));
         let cond = parts.first().cloned().unwrap_or_default();
-        let body = substitute_html(&arrow_body(parts.get(1)), ctx, emitter, true);
+        let body = sub(&arrow_body(parts.get(1)), ctx, emitter, true, hy);
         chain = format!("{cond} ? {body} : {chain}");
     }
     chain
@@ -493,7 +801,7 @@ fn lower_choose(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
 /// form 2 compares `value[key] === caseKey` and passes the (narrowed) value into
 /// each arm so member reads stay bound. Exhaustiveness is a type-level guarantee
 /// (see the `match` overloads), so the fallthrough seed is `''`.
-fn lower_match(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
+fn lower_match(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&str>) -> String {
     let args = split_call_args(expr);
     let Some(value) = args.first().cloned() else {
         return "''".into();
@@ -512,10 +820,10 @@ fn lower_match(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
     for (key, val) in split_object_entries(cases).into_iter().rev() {
         let rhs = key_compare_rhs(&key);
         let body = if keyed {
-            let sub = substitute_html(&val, ctx, emitter, true);
-            format!("({sub})({value})")
+            let arm = sub(&val, ctx, emitter, true, hy);
+            format!("({arm})({value})")
         } else {
-            substitute_html(&arrow_body(Some(&val)), ctx, emitter, true)
+            sub(&arrow_body(Some(&val)), ctx, emitter, true, hy)
         };
         chain = format!("{dispatch} === {rhs} ? {body} : {chain}");
     }

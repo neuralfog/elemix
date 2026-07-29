@@ -51,6 +51,10 @@ impl std::fmt::Display for ExpandError {
 
 /// Expand every pragma in `source`. Identity when there are none.
 pub fn expand(source: &str) -> Result<String, ExpandError> {
+    expand_mode(source, false)
+}
+
+pub fn expand_mode(source: &str, ssr: bool) -> Result<String, ExpandError> {
     let located = locate(source).map_err(|e| ExpandError::Locate(e.err))?;
     let no_pragmas = located.states.is_empty()
         && located.classes.iter().all(|c| {
@@ -78,12 +82,22 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
         edits.push((*s, end, String::new()));
     }
 
-    // #state → wrap each initializer in `state<T>(…)`. `state` is a compile
-    // target, imported from /runtime below (merged with the rest).
+    // #state → wrap each initializer in `state<T>(…)`. In the SSR build a
+    // MODULE-level `#state` (a shared store) instead lowers to `$__scopedStore(() =>
+    // (…))`: a proxy that resolves to a FRESH per-request instance from the current
+    // render scope (`$__runStores`), so one request's writes never bleed into the
+    // next through the server-process module singleton. `$__scopedStore` comes from
+    // the SSR runtime (added by `add_ssr_runtime_import`), so it is never imported
+    // here; component `#state` stays `$__state` from /runtime.
     for st in &located.states {
-        edits.push((st.start, st.end, st.repl.clone()));
+        let repl = if ssr && st.module {
+            scoped_store(&st.repl)
+        } else {
+            st.repl.clone()
+        };
+        edits.push((st.start, st.end, repl));
     }
-    let needs_state = !located.states.is_empty();
+    let needs_state = located.states.iter().any(|st| !(ssr && st.module));
     // Accessor-form #state (bare primitives) also needs the reactive primitives
     // `dep`/`track`/`trigger` to back the generated get/set pair.
     let needs_reactive = located.states.iter().any(|st| st.accessor);
@@ -164,6 +178,17 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             ));
         }
 
+        // #client → client-only: the server renders a bare host tag and skips this
+        // component's lifecycle; the flag lets the render path (`renderView` /
+        // `$__ssrChild`) short-circuit it server-side.
+        if meta.client {
+            edits.push((
+                class.body_open,
+                class.body_open,
+                "\n    static $$__client = true;".to_string(),
+            ));
+        }
+
         // #effect → a generated `effects()` hook the base runs (owned, disposed
         // separately from the view) registering one effect per tagged method.
         if !class.effects.is_empty() {
@@ -240,6 +265,10 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
             needs_define = true;
             let tag = meta.tag.unwrap_or_else(|| kebab(&class.name));
             after.push_str(&format!("\n$__defineComponent('{tag}', {});", class.name));
+            // Stamp the registered tag on the prototype so a subclass that inherits
+            // its ancestor's `$$__ssr()` (no own template) still server-renders with
+            // its OWN tag, read at runtime as `this.$$__tag`.
+            after.push_str(&format!("\n{}.prototype.$$__tag = '{tag}';", class.name));
         }
         if !after.is_empty() {
             edits.push((class.end, class.end, after));
@@ -287,4 +316,17 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
 
 fn trailing_newline(source: &str, at: usize) -> usize {
     usize::from(source[at..].starts_with('\n'))
+}
+
+/// Rewrite a module `#state` repl for the SSR build:
+/// ` = $__state<T>(INIT)` -> ` = $__scopedStore<T>(() => (INIT))`. The arrow keeps
+/// the initializer lazy so each request's render scope builds its own instance.
+fn scoped_store(repl: &str) -> String {
+    let s = repl.replacen("$__state", "$__scopedStore", 1);
+    match (s.find('('), s.rfind(')')) {
+        (Some(open), Some(close)) if open < close => {
+            format!("{}(() => ({}))", &s[..open], &s[open + 1..close])
+        }
+        _ => s,
+    }
 }

@@ -1,5 +1,4 @@
 import {
-    $__reactive,
     collect,
     takeScopes,
     rerun,
@@ -7,7 +6,9 @@ import {
     $__untrack,
     type Scope,
 } from '../runtime/reactive';
-import { $__sheet } from '../runtime/dom';
+import { $__reactive } from '../runtime/state';
+import { $__viewData } from '../runtime/viewdata';
+import { $__hydrating, $__sheet } from '../runtime/dom';
 import type { Template } from '../types';
 
 type LifecycleHooks = {
@@ -34,8 +35,12 @@ const cloak = (): CSSStyleSheet => {
     return cloakSheet;
 };
 
-export class Component<ComponentProps = unknown> extends HTMLElement {
+export class Component<
+    ComponentProps = unknown,
+    ViewData = unknown,
+> extends HTMLElement {
     public static formAssociated?: boolean;
+    public static $$__module?: string;
     public static $$__sheets?: CSSStyleSheet[];
     public static $$__noShadow?: boolean;
     public static $$__shadow?: boolean;
@@ -54,11 +59,21 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
         return this.$$__props as ComponentProps;
     }
 
+    public get viewData(): ViewData {
+        return $__viewData<ViewData>();
+    }
+
     public $$__initProps(): void {
         const el = this as unknown as {
             $$__pendingProps?: Record<string, unknown>;
         };
-        this.$$__props = $__reactive(el.$$__pendingProps ?? {});
+        let props = el.$$__pendingProps ?? {};
+        const data = this.getAttribute('data-h');
+        if (data !== null) {
+            props = { ...JSON.parse(data), ...props };
+            this.removeAttribute('data-h');
+        }
+        this.$$__props = $__reactive(props) as Record<string, unknown>;
         el.$$__pendingProps = undefined;
     }
 
@@ -70,7 +85,7 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
             : ctor.$$__noShadow
               ? false
               : (window.__elemix__?.config?.shadow ?? true);
-        if (useShadow) {
+        if (useShadow && !this.shadowRoot) {
             this.attachShadow({ mode: 'open' });
         }
         this.setAttribute('data-cloak', '');
@@ -78,11 +93,15 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
 
     public template?(): Template;
     public $$__view?(): DocumentFragment;
+    public $$__hydrate?(root: Node): void;
     public $$__effects?(): void;
 
     connectedCallback(): void {
         if (this.connected) return;
         this.connected = true;
+
+        const root = this.shadowRoot ?? this;
+        const hydrating = Boolean(this.$$__hydrate && root.firstChild);
 
         $__untrack(() => {
             this.$$__adoptStyles();
@@ -90,11 +109,18 @@ export class Component<ComponentProps = unknown> extends HTMLElement {
             this.$$__initProps();
             (this as LifecycleHooks).$$__beforeMount?.();
 
-            if (this.$$__view) {
+            if (hydrating && this.$$__hydrate) {
+                const hydrate = this.$$__hydrate;
+                root.querySelector('style[data-ssr]')?.remove();
+                $__hydrating(true);
+                collect(() => hydrate.call(this, root));
+                this.$$__scopes = takeScopes();
+                $__hydrating(false);
+            } else if (this.$$__view) {
                 const view = this.$$__view;
                 const frag = collect(() => view.call(this));
                 this.$$__scopes = takeScopes();
-                (this.shadowRoot ?? this).appendChild(frag);
+                root.appendChild(frag);
             }
 
             if (this.$$__effects) {

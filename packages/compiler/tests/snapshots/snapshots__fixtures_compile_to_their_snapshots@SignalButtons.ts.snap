@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/SignalButtons.ts
+input_file: fixtures/SignalButtons.ts
 ---
 import { $__template, $__clone, $__event, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -55,3 +55,4 @@ return _r0;
 }
 SignalButtons.$$__sheets = [..._s0];
 $__defineComponent('signal-buttons', SignalButtons);
+SignalButtons.prototype.$$__tag = 'signal-buttons';

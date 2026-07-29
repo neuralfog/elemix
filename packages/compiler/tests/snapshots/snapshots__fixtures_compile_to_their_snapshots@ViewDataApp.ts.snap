@@ -1,0 +1,31 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: fixtures/ViewDataApp.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './ViewDataMid';
+
+export type VData = {
+    title: string;
+    user: { name: string };
+    count: number;
+};
+
+const _t0 = $__template('<div class="app"><h1 class="title"> </h1><view-data-mid></view-data-mid></div>');
+
+export class ViewDataApp extends Component<unknown, VData> {
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+$__effect(() => {
+$__setText(_n1, (this.viewData.title));
+});
+return _r0;
+}
+}
+$__defineComponent('view-data-app', ViewDataApp);
+ViewDataApp.prototype.$$__tag = 'view-data-app';

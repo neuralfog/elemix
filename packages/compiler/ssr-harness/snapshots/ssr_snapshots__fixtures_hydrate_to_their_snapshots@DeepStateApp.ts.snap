@@ -1,0 +1,261 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 23
+expression: compile_hydrate(&source).0
+input_file: fixtures/DeepStateApp.ts
+---
+import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+const _h0 = $__templateEl('<li class="group"><span class="gid"> </span><span class="tcount"> </span></li>');
+
+import { Component } from '@neuralfog/elemix';
+
+type Geo = { lat: number; lng: number };
+type Task = { id: string; label: string; done: boolean };
+type Group = { id: string; tasks: Task[] };
+
+type State = {
+    profile: {
+        name: string;
+        address: { city: string; geo: Geo };
+        tags: string[];
+    };
+    grid: number[][];
+    groups: Group[];
+};
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    button { font: inherit; cursor: pointer; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<section class="readouts"><span class="city"> </span><span class="lat"> </span><span class="lng"> </span><span class="tags"> </span><span class="grid"> </span><span class="cell"> </span><span class="groups-str"> </span></section><div class="controls"><button class="rename-city">city</button><button class="move-lat">lat</button><button class="replace-geo">geo</button><button class="add-tag">tag</button><button class="set-cell">cell</button><button class="push-col">col</button><button class="add-row">row</button><button class="toggle-task">task</button><button class="add-task">+task</button><button class="add-group">+group</button></div><ul class="group-list"><!----></ul>');
+const _t1 = $__templateEl('<li class="group"><span class="gid"> </span><span class="tcount"> </span></li>');
+
+export class DeepStateApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _n1 = $__text(_n0);
+const _n2 = root.firstChild!.firstChild!.nextSibling!;
+const _n3 = $__text(_n2);
+const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n5 = $__text(_n4);
+const _n6 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = $__text(_n6);
+const _n8 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n9 = $__text(_n8);
+const _n10 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n11 = $__text(_n10);
+const _n12 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n13 = $__text(_n12);
+const _n14 = root.firstChild!.nextSibling!.firstChild!;
+const _n15 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n16 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n17 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n18 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n19 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n20 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n21 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n22 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n23 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n14, 'click', this.renameCity);
+$__event(_n15, 'click', this.moveLat);
+$__event(_n16, 'click', this.replaceGeo);
+$__event(_n17, 'click', this.addTag);
+$__event(_n18, 'click', this.setCell);
+$__event(_n19, 'click', this.pushCol);
+$__event(_n20, 'click', this.addRowGrid);
+$__event(_n21, 'click', this.toggleTask);
+$__event(_n22, 'click', this.addTask);
+$__event(_n23, 'click', this.addGroup);
+$__effect(() => {
+$__setText(_n1, (this.state.profile.address.city));
+});
+$__effect(() => {
+$__setText(_n3, (this.state.profile.address.geo.lat));
+});
+$__effect(() => {
+$__setText(_n5, (this.state.profile.address.geo.lng));
+});
+$__effect(() => {
+$__setText(_n7, (this.tagsStr));
+});
+$__effect(() => {
+$__setText(_n9, (this.gridStr));
+});
+$__effect(() => {
+$__setText(_n11, (this.cell));
+});
+$__effect(() => {
+$__setText(_n13, (this.groupsStr));
+});
+const _n24 = root.firstChild!.nextSibling!.nextSibling!;
+const _b25 = $__bounds(_n24, 0, 0);
+$__fresh(() => {
+const _a26 = $__reanchor(_n24, _b25[0], _b25[1]);
+$__list(_a26, () => (this.state.groups), (group) => group.id, (group) => (() => {
+const _r27 = $__cloneEl(_h0);
+const _n28 = _r27.firstChild!.firstChild!;
+const _n29 = _r27.firstChild!.nextSibling!.firstChild!;
+_n28.data = ($__toRaw(group).id);
+$__effect(() => {
+$__setText(_n29, (group.tasks.length));
+});
+return _r27;
+})());
+});
+}
+
+
+    state = $__state<State>({
+        profile: {
+            name: 'Ada',
+            address: { city: 'London', geo: { lat: 51, lng: 0 } },
+            tags: ['a', 'b'],
+        },
+        grid: [
+            [1, 2],
+            [3, 4],
+        ],
+        groups: [
+            { id: 'g0', tasks: [{ id: 't0', label: 'write', done: false }] },
+        ],
+    });
+
+    get tagsStr(): string {
+        return this.state.profile.tags.join(',');
+    }
+
+    get gridStr(): string {
+        return this.state.grid.map((row) => row.join('|')).join(' ');
+    }
+
+    get cell(): number {
+        return this.state.grid[0][1];
+    }
+
+    get groupsStr(): string {
+        return this.state.groups
+            .map(
+                (g) =>
+                    `${g.id}(${g.tasks
+                        .map((t) => t.label + (t.done ? '!' : ''))
+                        .join(',')})`,
+            )
+            .join(' ');
+    }
+
+    renameCity = (): void => {
+        this.state.profile.address.city = 'Paris';
+    };
+
+    moveLat = (): void => {
+        this.state.profile.address.geo.lat++;
+    };
+
+    replaceGeo = (): void => {
+        this.state.profile.address.geo = { lat: 99, lng: 99 };
+    };
+
+    addTag = (): void => {
+        this.state.profile.tags.push('c');
+    };
+
+    setCell = (): void => {
+        this.state.grid[0][1] = 9;
+    };
+
+    pushCol = (): void => {
+        this.state.grid[0].push(5);
+    };
+
+    addRowGrid = (): void => {
+        this.state.grid.push([7, 8]);
+    };
+
+    toggleTask = (): void => {
+        const task = this.state.groups[0].tasks[0];
+        task.done = !task.done;
+    };
+
+    addTask = (): void => {
+        this.state.groups[0].tasks.push({
+            id: 't1',
+            label: 'review',
+            done: false,
+        });
+    };
+
+    addGroup = (): void => {
+        this.state.groups.push({ id: 'g1', tasks: [] });
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n8 = _r0.firstChild!.nextSibling!.firstChild!;
+const _n9 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n10 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n11 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n12 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n13 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n14 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n15 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n16 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n17 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n18 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
+$__event(_n8, 'click', this.renameCity);
+$__event(_n9, 'click', this.moveLat);
+$__event(_n10, 'click', this.replaceGeo);
+$__event(_n11, 'click', this.addTag);
+$__event(_n12, 'click', this.setCell);
+$__event(_n13, 'click', this.pushCol);
+$__event(_n14, 'click', this.addRowGrid);
+$__event(_n15, 'click', this.toggleTask);
+$__event(_n16, 'click', this.addTask);
+$__event(_n17, 'click', this.addGroup);
+$__list(_n18, () => (this.state.groups), (group) => group.id, (group) => (() => {
+const _r19 = $__cloneEl(_t1);
+const _n20 = _r19.firstChild!.firstChild!;
+const _n21 = _r19.firstChild!.nextSibling!.firstChild!;
+_n20.data = ($__toRaw(group).id);
+$__effect(() => {
+$__setText(_n21, (group.tasks.length));
+});
+return _r19;
+})());
+$__effect(() => {
+$__setText(_n1, (this.state.profile.address.city));
+});
+$__effect(() => {
+$__setText(_n2, (this.state.profile.address.geo.lat));
+});
+$__effect(() => {
+$__setText(_n3, (this.state.profile.address.geo.lng));
+});
+$__effect(() => {
+$__setText(_n4, (this.tagsStr));
+});
+$__effect(() => {
+$__setText(_n5, (this.gridStr));
+});
+$__effect(() => {
+$__setText(_n6, (this.cell));
+});
+$__effect(() => {
+$__setText(_n7, (this.groupsStr));
+});
+return _r0;
+}
+}
+DeepStateApp.$$__sheets = [..._s0];
+$__defineComponent('deep-state-app', DeepStateApp);
+DeepStateApp.prototype.$$__tag = 'deep-state-app';

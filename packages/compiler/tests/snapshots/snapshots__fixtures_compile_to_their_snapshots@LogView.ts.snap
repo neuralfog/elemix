@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/LogView.ts
+input_file: fixtures/LogView.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__list, $__effect, $__setText, $__setClass, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -72,3 +72,4 @@ return _r0;
 }
 LogView.$$__sheets = [..._s0];
 $__defineComponent('log-view', LogView);
+LogView.prototype.$$__tag = 'log-view';

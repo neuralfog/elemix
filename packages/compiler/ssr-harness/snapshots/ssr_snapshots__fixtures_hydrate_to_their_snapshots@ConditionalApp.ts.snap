@@ -1,0 +1,177 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 23
+expression: compile_hydrate(&source).0
+input_file: fixtures/ConditionalApp.ts
+---
+import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+const _h0 = $__templateEl('<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>');
+const _h1 = $__templateEl('<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>');
+const _h2 = $__templateEl('<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>');
+
+import { Component } from '@neuralfog/elemix';
+
+type State = {
+    loggedIn: boolean;
+    showTip: boolean;
+};
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 20px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+    .panel { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+    .card {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px;
+        border-radius: 12px;
+    }
+    .card strong { font-size: 16px; }
+    .card span { font-size: 13px; opacity: 0.9; }
+    .card.welcome {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+    }
+    .card.guest { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .tip {
+        padding: 10px 12px;
+        font-size: 13px;
+        color: #92400e;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+    }
+    .buttons { display: flex; gap: 10px; }
+    button {
+        font: inherit;
+        padding: 9px 16px;
+        border: none;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+    }
+    button:hover { background: #4f46e5; }
+    button.ghost { background: #e2e8f0; color: #475569; }
+    button.ghost:hover { background: #cbd5e1; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="panel"><!----> <!----></div><div class="buttons"><button> </button><button class="ghost"> </button></div>');
+const _t1 = $__templateEl('<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>');
+const _t2 = $__templateEl('<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>');
+const _t3 = $__templateEl('<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>');
+
+export class ConditionalApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.nextSibling!.firstChild!;
+const _n1 = $__text(_n0);
+const _n2 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n3 = $__text(_n2);
+$__event(_n0, 'click', this.toggleLogin);
+$__event(_n2, 'click', this.toggleTip);
+$__effect(() => {
+$__setText(_n1, (this.state.loggedIn ? 'Sign out' : 'Sign in'));
+});
+$__effect(() => {
+$__setText(_n3, (this.state.showTip ? 'Hide tip' : 'Show tip'));
+});
+const _n4 = root.firstChild!;
+const _b5 = $__bounds(_n4, 0, 2);
+const _b6 = $__bounds(_n4, 2, 0);
+$__fresh(() => {
+const _a7 = $__reanchor(_n4, _b5[0], _b5[1]);
+$__child(_a7, () => (this.state.loggedIn
+                    ? (() => {
+const _r8 = $__cloneEl(_h0);
+return _r8;
+})()
+                    : (() => {
+const _r9 = $__cloneEl(_h1);
+return _r9;
+})()));
+const _a10 = $__reanchor(_n4, _b6[0], _b6[1]);
+$__child(_a10, () => (this.state.showTip
+                    ? (() => {
+const _r11 = $__cloneEl(_h2);
+return _r11;
+})()
+                    : ''));
+});
+}
+
+
+    state = $__state<State>({
+        loggedIn: false,
+        showTip: true,
+    });
+
+    toggleLogin = (): void => {
+        this.state.loggedIn = !this.state.loggedIn;
+    };
+
+    toggleTip = (): void => {
+        this.state.showTip = !this.state.showTip;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.firstChild!;
+const _n4 = _n3.firstChild!;
+const _n5 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n6 = _n5.firstChild!;
+$__child(_n1, () => (this.state.loggedIn
+                    ? (() => {
+const _r7 = $__cloneEl(_t1);
+return _r7;
+})()
+                    : (() => {
+const _r8 = $__cloneEl(_t2);
+return _r8;
+})()));
+$__child(_n2, () => (this.state.showTip
+                    ? (() => {
+const _r9 = $__cloneEl(_t3);
+return _r9;
+})()
+                    : ''));
+$__event(_n3, 'click', this.toggleLogin);
+$__event(_n5, 'click', this.toggleTip);
+$__effect(() => {
+$__setText(_n4, (this.state.loggedIn ? 'Sign out' : 'Sign in'));
+});
+$__effect(() => {
+$__setText(_n6, (this.state.showTip ? 'Hide tip' : 'Show tip'));
+});
+return _r0;
+}
+}
+ConditionalApp.$$__sheets = [..._s0];
+$__defineComponent('conditional-app', ConditionalApp);
+ConditionalApp.prototype.$$__tag = 'conditional-app';

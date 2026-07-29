@@ -31,9 +31,6 @@ export const Default = {
         expect(reset.textContent?.trim()).toBe('Reset');
         expect(inc.textContent?.trim()).toBe('+');
 
-        // the static note + code block also render in the parent shadow root
-        expect(find('.note code', app)?.textContent).toBe('state');
-
         // the shared module store starts at 0 (reset first in case a prior story bumped it)
         click(reset);
         expect(value.textContent).toBe('0');

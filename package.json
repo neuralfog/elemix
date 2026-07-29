@@ -12,6 +12,8 @@
         "lint": "pnpm -r lint",
         "lint:fix": "pnpm -r run lint:fix",
         "storybook": "pnpm --filter @neuralfog/elemix-compiler storybook",
+        "ssr": "pnpm --filter @neuralfog/elemix-ssr-harness build && pnpm --filter @neuralfog/elemix-ssr-harness preview",
+        "ssr:test": "pnpm --filter @neuralfog/elemix-ssr-harness test",
         "changelog:lint": "node scripts/changelog.mjs lint",
         "changelog:check": "node scripts/changelog.mjs check",
         "bump": "node scripts/bump.mjs",

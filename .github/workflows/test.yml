@@ -22,7 +22,7 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      # Bun runs the `bun test` suites for the ssr-plugin and servmix packages.
+      # Bun runs the `bun test` suites for the ssr-plugin and hydris packages.
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest

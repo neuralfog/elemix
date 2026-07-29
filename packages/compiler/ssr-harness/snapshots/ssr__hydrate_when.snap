@@ -1,0 +1,21 @@
+---
+source: ssr-harness/ssr.rs
+assertion_line: 224
+expression: method
+---
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.nextSibling!;
+$__event(_n0, 'click', this.toggle);
+const _n1 = root.firstChild!;
+const _b2 = $__bounds(_n1, 0, 0);
+$__fresh(() => {
+const _a3 = $__reanchor(_n1, _b2[0], _b2[1]);
+$__child(_a3, () => (this.state.loggedIn ? (() => {
+const _r4 = $__cloneEl(_h0);
+return _r4;
+})() : (() => {
+const _r5 = $__cloneEl(_h1);
+return _r5;
+})()));
+});
+}

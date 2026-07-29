@@ -1,0 +1,38 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 15
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SsrMixedLeaf.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { n: number };
+
+const _t0 = $__template('<div class="leaf">leaf <span class="ln"> </span><button class="lb">leaf+</button></div>');
+
+export class SsrMixedLeaf extends Component {
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'ssr-mixed-leaf'}><template shadowrootmode="open" shadowrootserializable=""><div class="leaf">leaf <span class="ln">${$__ssrText(this.state.n)}</span><button class="lb">leaf+</button></div></template></${this.$$__tag ?? 'ssr-mixed-leaf'}>`;
+}
+
+    state = $__state<State>({ n: 0 });
+
+    bump = (): void => {
+        this.state.n++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n2, 'click', this.bump);
+$__effect(() => {
+$__setText(_n1, (this.state.n));
+});
+return _r0;
+}
+}
+$__defineComponent('ssr-mixed-leaf', SsrMixedLeaf);
+SsrMixedLeaf.prototype.$$__tag = 'ssr-mixed-leaf';

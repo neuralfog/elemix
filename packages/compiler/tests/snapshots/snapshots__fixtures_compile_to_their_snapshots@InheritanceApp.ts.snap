@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/InheritanceApp.ts
+input_file: fixtures/InheritanceApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -57,6 +57,7 @@ return _r0;
 }
 InheritBase.$$__sheets = [..._s0];
 $__defineComponent('inherit-base', InheritBase);
+InheritBase.prototype.$$__tag = 'inherit-base';
 
 const _s1 = $__sheet(derivedCss);
 export class InheritDerived extends InheritBase {
@@ -79,3 +80,4 @@ export class InheritDerived extends InheritBase {
 }
 InheritDerived.$$__sheets = [...(Object.getPrototypeOf(InheritDerived).$$__sheets ?? []), ..._s1];
 $__defineComponent('inherit-derived', InheritDerived);
+InheritDerived.prototype.$$__tag = 'inherit-derived';

@@ -1,0 +1,90 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: compile_hydrate(&source).0
+input_file: fixtures/StoreControls.ts
+---
+import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    counter: { value: number };
+};
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 16px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+    }
+    .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+    }
+    .buttons { display: flex; align-items: center; gap: 14px; }
+    button {
+        width: 38px;
+        height: 38px;
+        font-size: 20px;
+        border: none;
+        border-radius: 10px;
+        background: var(--accent, #6366f1);
+        color: white;
+        cursor: pointer;
+    }
+    button:hover { background: #4f46e5; }
+    .value {
+        min-width: 32px;
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="panel"><span class="label">Child controls</span><div class="buttons"><button>−</button><span class="value"> </span><button>+</button></div></div>');
+
+export class StoreControls extends Component<Props> {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n1 = root.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n2 = $__text(_n1);
+const _n3 = root.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n0, 'click', this.dec);
+$__event(_n3, 'click', this.inc);
+$__effect(() => {
+$__setText(_n2, (this.props.counter.value));
+});
+}
+
+
+    dec = (): void => {
+        this.props.counter.value--;
+    };
+
+    inc = (): void => {
+        this.props.counter.value++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n1, 'click', this.dec);
+$__event(_n3, 'click', this.inc);
+$__effect(() => {
+$__setText(_n2, (this.props.counter.value));
+});
+return _r0;
+}
+}
+StoreControls.$$__sheets = [..._s0];
+$__defineComponent('store-controls', StoreControls);
+StoreControls.prototype.$$__tag = 'store-controls';

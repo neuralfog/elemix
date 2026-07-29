@@ -1,0 +1,37 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: fixtures/SsrStoreApp.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './SsrStoreControls';
+
+type State = {
+    counter: { value: number };
+};
+
+const _t0 = $__template('<div class="readout">Parent reads: <strong> </strong></div><ssr-store-controls></ssr-store-controls>');
+
+export class SsrStoreApp extends Component {
+    state = $__state<State>({
+        counter: { value: 0 },
+    });
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!;
+$__effect(() => {
+$__setText(_n1, (this.state.counter.value));
+});
+$__effect(() => {
+$__setProp(_n2, 'counter', (this.state.counter));
+});
+return _r0;
+}
+}
+$__defineComponent('ssr-store-app', SsrStoreApp);
+SsrStoreApp.prototype.$$__tag = 'ssr-store-app';

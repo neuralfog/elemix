@@ -1,0 +1,128 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/LifecycleApp.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__setAttr, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './LifecycleChild';
+import './LogView';
+import { clearLog } from './LifecycleStore';
+
+type State = { mounted: boolean; tick: number };
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 460px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+    }
+    .note {
+        margin: 0 0 20px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+    .stage {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 56px;
+        margin-bottom: 14px;
+        padding: 12px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+    }
+    .stage .empty { font-size: 13px; color: #94a3b8; }
+    .buttons { display: flex; gap: 10px; margin-bottom: 16px; }
+    button {
+        font: inherit;
+        padding: 9px 14px;
+        border: none;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: #4f46e5; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.ghost { background: #e2e8f0; color: #475569; }
+    button.ghost:hover { background: #cbd5e1; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="stage"><!----></div><div class="buttons"><button> </button><button>Update child</button><button class="ghost">Clear log</button></div><log-view></log-view>');
+const _t1 = $__templateEl('<lifecycle-child></lifecycle-child>');
+const _t2 = $__templateEl('<div class="empty">child unmounted</div>');
+
+export class LifecycleApp extends Component {
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'lifecycle-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stage">${(this.state.mounted
+                    ? `${$__ssrChild('lifecycle-child', {tick: (this.state.tick)})}`
+                    : `<div class="empty">child unmounted</div>`)}</div><div class="buttons"><button>${$__ssrText(this.state.mounted ? 'Unmount' : 'Mount')}</button><button${$__ssrAttr('disabled', !this.state.mounted)}>Update child</button><button class="ghost">Clear log</button></div>${$__ssrChild('log-view', {})}</template></${this.$$__tag ?? 'lifecycle-app'}>`;
+}
+
+
+    state = $__state<State>({ mounted: false, tick: 0 });
+
+    toggleMount = (): void => {
+        this.state.mounted = !this.state.mounted;
+    };
+
+    update = (): void => {
+        this.state.tick++;
+    };
+
+    clear = (): void => {
+        clearLog();
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
+const _n3 = _n2.firstChild!;
+const _n4 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n5 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+$__child(_n1, () => (this.state.mounted
+                    ? (() => {
+const _r6 = $__cloneEl(_t1);
+$__effect(() => {
+$__setProp(_r6, 'tick', (this.state.tick));
+});
+return _r6;
+})()
+                    : (() => {
+const _r7 = $__cloneEl(_t2);
+return _r7;
+})()));
+$__event(_n2, 'click', this.toggleMount);
+$__event(_n4, 'click', this.update);
+$__event(_n5, 'click', this.clear);
+$__effect(() => {
+$__setText(_n3, (this.state.mounted ? 'Unmount' : 'Mount'));
+});
+$__effect(() => {
+$__setAttr(_n4, 'disabled', (!this.state.mounted));
+});
+return _r0;
+}
+}
+LifecycleApp.$$__sheets = [..._s0];
+$__defineComponent('lifecycle-app', LifecycleApp);
+LifecycleApp.prototype.$$__tag = 'lifecycle-app';

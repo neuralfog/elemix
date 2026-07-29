@@ -1,0 +1,41 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: fixtures/SsrClientParentChild.ts
+---
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    value: number;
+};
+
+const _t0 = $__template('<div class="child"><span class="from-parent"> </span><span class="local"> </span><button class="tick">tick</button></div>');
+
+export class SsrClientParentChild extends Component<Props> {
+    state = $__state({
+        local: 0,
+    });
+
+    tick = (): void => {
+        this.state.local++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n3, 'click', this.tick);
+$__effect(() => {
+$__setText(_n1, (this.props.value));
+});
+$__effect(() => {
+$__setText(_n2, (this.state.local));
+});
+return _r0;
+}
+}
+$__defineComponent('ssr-client-parent-child', SsrClientParentChild);
+SsrClientParentChild.prototype.$$__tag = 'ssr-client-parent-child';

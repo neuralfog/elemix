@@ -1,0 +1,76 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/RatingInput.ts
+---
+import { $__ssrClass, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = {
+    value: number;
+};
+
+const css = `
+    :host { display: inline-block; }
+    .stars { display: flex; gap: 2px; }
+    button.star {
+        padding: 0;
+        font-size: 24px;
+        line-height: 1;
+        color: #cbd5e1;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.1s ease;
+    }
+    button.star.on { color: #f59e0b; }
+    button.star:hover { color: #fbbf24; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="stars"><!----></div>');
+const _t1 = $__templateEl('<button type="button">★</button>');
+
+export class RatingInput extends Component {
+    $$__beforeMount(): void {
+        this.initFormValue();
+    }
+    static formAssociated = true;
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'rating-input'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stars">${($__ssrRepeat(
+            [1, 2, 3, 4, 5],
+            (n) => `<button type="button"${$__ssrClass({ star: true, on: n <= this.state.value })}>★</button>`,
+            (n) => String(n),
+        ))}</div></template></${this.$$__tag ?? 'rating-input'}>`;
+}
+
+
+    state = $__state<State>({ value: 0 });
+
+    initFormValue(): void {
+        this.internals.setFormValue(String(this.state.value));
+    }
+
+    set = (n: number): void => {
+        this.state.value = n;
+        this.internals.setFormValue(String(n));
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+$__list(_n1, () => ([1, 2, 3, 4, 5]), (n) => String(n), (n) => (() => {
+const _r2 = $__cloneEl(_t1);
+$__event(_r2, 'click', () => this.set(n));
+$__effect(() => {
+$__setClass(_r2, '', ({ star: true, on: n <= this.state.value }));
+});
+return _r2;
+})());
+return _r0;
+}
+}
+RatingInput.$$__sheets = [..._s0];
+$__defineComponent('rating-input', RatingInput);
+RatingInput.prototype.$$__tag = 'rating-input';

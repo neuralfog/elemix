@@ -1,0 +1,27 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: compile_hydrate(&source).0
+input_file: fixtures/WarnApp.ts
+---
+console.warn('[elemix] WarnApp: tag `warnapp` is not a valid custom element name - it must contain a hyphen');
+import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
+// Diagnostic fixture: an explicit `#tag` with no hyphen. It compiles and
+// registers, but `warnapp` is not a valid custom-element name, so the compiler
+// inlines a `console.warn('[elemix] …')` predicting the registration failure.
+
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<span>hi</span>');
+
+export class WarnApp extends Component {
+$$__hydrate(root: Node): void {
+
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('warnapp', WarnApp);
+WarnApp.prototype.$$__tag = 'warnapp';

@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/ClassStateApp.ts
+input_file: fixtures/ClassStateApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -77,7 +77,7 @@ export class ClassStateApp extends Component {
     state = $__state<{ cart: Cart }>({ cart: new Cart() });
 
     addCherry = (): void => {
-        this.state.cart.add(new Item('p3', 'cherry', 5, 1));
+        this.state.cart.add(new Item(crypto.randomUUID(), 'cherry', 5, 1));
     };
 
     bumpApple = (): void => {
@@ -147,3 +147,4 @@ return _r0;
 }
 ClassStateApp.$$__sheets = [..._s0];
 $__defineComponent('class-state-app', ClassStateApp);
+ClassStateApp.prototype.$$__tag = 'class-state-app';

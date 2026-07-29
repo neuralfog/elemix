@@ -1,0 +1,102 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 15
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ViewDataRichApp.ts
+---
+import { $__ssrText, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__list, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export type RichData = {
+    str: string;
+    num: number;
+    bool: boolean;
+    nil: null;
+    tags: string[];
+    scores: number[];
+    obj: { a: string; b: number };
+    nested: { deep: { value: string } };
+    rows: Array<{ id: number; label: string }>;
+};
+
+const _t0 = $__template('<div class="rich"><span class="str"> </span><span class="num"> </span><span class="bool"> </span><span class="nil"> </span><span class="tags"> </span><span class="scores-len"> </span><span class="scores-sum"> </span><span class="obj-a"> </span><span class="obj-b"> </span><span class="deep"> </span><ul class="rows"><!----></ul></div>');
+const _t1 = $__templateEl('<li class="row"><!---->:<!----></li>');
+
+export class ViewDataRichApp extends Component<unknown, RichData> {
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'view-data-rich-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="rich"><span class="str">${$__ssrText(this.viewData.str)}</span><span class="num">${$__ssrText(this.viewData.num)}</span><span class="bool">${$__ssrText(this.viewData.bool ? 'yes' : 'no')}</span><span class="nil">${$__ssrText(this.viewData.nil ?? 'none')}</span><span class="tags">${$__ssrText(this.viewData.tags.join(','))}</span><span class="scores-len">${$__ssrText(this.viewData.scores.length)}</span><span class="scores-sum">${$__ssrText(this.viewData.scores.reduce(
+                (a, b) => a + b,
+                0,
+            ))}</span><span class="obj-a">${$__ssrText(this.viewData.obj.a)}</span><span class="obj-b">${$__ssrText(this.viewData.obj.b)}</span><span class="deep">${$__ssrText(this.viewData.nested.deep.value)}</span><ul class="rows">${($__ssrRepeat(
+                    this.viewData.rows,
+                    (row) => `<li class="row">${$__ssrText(row.id)}:${$__ssrText(row.label)}</li>`,
+                    (row) => row.id,
+                ))}</ul></div></template></${this.$$__tag ?? 'view-data-rich-app'}>`;
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n8 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n9 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n10 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n11 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+$__list(_n11, () => (this.viewData.rows), (row) => row.id, (row) => (() => {
+const _r12 = $__cloneEl(_t1);
+const _n13 = _r12.firstChild!;
+const _n14 = _r12.firstChild!.nextSibling!.nextSibling!;
+const _x15 = document.createTextNode('');
+_n13.replaceWith(_x15);
+const _x16 = document.createTextNode('');
+_n14.replaceWith(_x16);
+_x15.data = ($__toRaw(row).id);
+$__effect(() => {
+$__setText(_x16, (row.label));
+});
+return _r12;
+})());
+$__effect(() => {
+$__setText(_n1, (this.viewData.str));
+});
+$__effect(() => {
+$__setText(_n2, (this.viewData.num));
+});
+$__effect(() => {
+$__setText(_n3, (this.viewData.bool ? 'yes' : 'no'));
+});
+$__effect(() => {
+$__setText(_n4, (this.viewData.nil ?? 'none'));
+});
+$__effect(() => {
+$__setText(_n5, (this.viewData.tags.join(',')));
+});
+$__effect(() => {
+$__setText(_n6, (this.viewData.scores.length));
+});
+$__effect(() => {
+$__setText(_n7, (this.viewData.scores.reduce(
+                (a, b) => a + b,
+                0,
+            )));
+});
+$__effect(() => {
+$__setText(_n8, (this.viewData.obj.a));
+});
+$__effect(() => {
+$__setText(_n9, (this.viewData.obj.b));
+});
+$__effect(() => {
+$__setText(_n10, (this.viewData.nested.deep.value));
+});
+return _r0;
+}
+}
+$__defineComponent('view-data-rich-app', ViewDataRichApp);
+ViewDataRichApp.prototype.$$__tag = 'view-data-rich-app';

@@ -181,25 +181,3 @@ export const $__bind = (fn: () => void, sources: Dep[]): void => {
         fn();
     });
 };
-
-export const $__reactive = <T extends object>(source: T): T => {
-    const store = source as Record<string, unknown>;
-    for (const key of Object.keys(store)) {
-        let value = store[key];
-        const d = $__dep();
-        Object.defineProperty(store, key, {
-            enumerable: true,
-            configurable: true,
-            get(): unknown {
-                $__track(d);
-                return value;
-            },
-            set(next: unknown): void {
-                if (value === next) return;
-                value = next;
-                $__trigger(d);
-            },
-        });
-    }
-    return source;
-};

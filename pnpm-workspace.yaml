@@ -1,5 +1,6 @@
 packages:
   - 'packages/*'
+  - 'packages/compiler/ssr-harness'
 # Storybook's bundled CLI resolves its framework preset via ESM from its own
 # location; pnpm's strict layout hides it. Hoist the storybook packages to the
 # root so `@storybook/web-components-vite/preset` resolves.

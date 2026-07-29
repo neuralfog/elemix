@@ -445,7 +445,14 @@ const clearMounted = (n: Text & Cache): void => {
     n.__r = null;
 };
 
+let hydrating = false;
+
+export const $__hydrating = (on: boolean): void => {
+    hydrating = on;
+};
+
 export const $__setText = (node: Text, value: unknown): void => {
+    if (hydrating) return;
     const n = node as Text & Cache;
     if (typeof value === 'string') {
         if (n.__r) clearMounted(n);
@@ -471,6 +478,7 @@ export const $__setText = (node: Text, value: unknown): void => {
 };
 
 export const $__setAttr = (el: Element, name: string, value: unknown): void => {
+    if (hydrating) return;
     let key = attrKeys.get(name);
     if (key === undefined) {
         key = `__a_${name}`;
@@ -506,6 +514,7 @@ export const $__setClass = (
     _initial: string,
     value: unknown,
 ): void => {
+    if (hydrating) return;
     let next: string;
     if (typeof value === 'string') {
         next = value.indexOf(' ') === -1 ? value : dedupeClasses(value);
@@ -527,6 +536,7 @@ export const $__setClass = (
 };
 
 export const $__setStyle = (el: HTMLElement, value: unknown): void => {
+    if (hydrating) return;
     let css = '';
     if (typeof value === 'string') {
         css = value;

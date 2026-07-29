@@ -10,7 +10,7 @@ import init, { compile } from '../pkg/elemix_compiler.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 await init({ module_or_path: readFileSync(join(root, 'pkg/elemix_compiler_bg.wasm')) });
 
-const fixturesDir = join(root, 'tests/fixtures');
+const fixturesDir = join(root, 'fixtures');
 const snapsDir = join(root, 'tests/snapshots');
 
 // Strip the insta YAML header (everything up to and including the closing `---`).

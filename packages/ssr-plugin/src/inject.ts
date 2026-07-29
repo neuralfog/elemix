@@ -6,7 +6,6 @@ import type {
     Identifier,
     Node,
 } from '@babel/types';
-import MagicString from 'magic-string';
 
 const INJECT_KEY = 'Symbol.for("ssr.inject")';
 const INJECT_METHODS_KEY = 'Symbol.for("ssr.inject.methods")';
@@ -15,8 +14,21 @@ type ClassNode = ClassDeclaration | ClassExpression;
 
 export interface InjectResult {
     code: string;
-    map: ReturnType<MagicString['generateMap']>;
 }
+
+type Insert = { pos: number; text: string };
+
+const applyInserts = (code: string, inserts: Insert[]): string => {
+    if (inserts.length === 0) return code;
+    const ordered = [...inserts].sort((a, b) => a.pos - b.pos);
+    let out = '';
+    let cursor = 0;
+    for (const { pos, text } of ordered) {
+        out += code.slice(cursor, pos) + text;
+        cursor = pos;
+    }
+    return out + code.slice(cursor);
+};
 
 const isClass = (node: Node): node is ClassNode =>
     node.type === 'ClassDeclaration' || node.type === 'ClassExpression';
@@ -111,15 +123,11 @@ const methodTokens = (
     return Object.keys(methods).length > 0 ? methods : null;
 };
 
-export const injectMetadata = (
-    code: string,
-    id: string,
-): InjectResult | null => {
+export const injectMetadata = (code: string): InjectResult | null => {
     const ast = parse(code, { sourceType: 'module', plugins: ['typescript'] });
 
     const typeOnly = collectTypeOnly(ast.program);
-    const s = new MagicString(code);
-    let changed = false;
+    const inserts: Insert[] = [];
     for (const node of walk(ast.program)) {
         if (!isClass(node)) continue;
         const ctorTokens = constructorTokens(node, typeOnly);
@@ -136,15 +144,30 @@ export const injectMetadata = (
                 .join(', ');
             statics += `\n    static [${INJECT_METHODS_KEY}] = { ${entries} };`;
         }
-        s.appendLeft((node.body.start ?? 0) + 1, statics);
-        changed = true;
+        inserts.push({ pos: (node.body.start ?? 0) + 1, text: statics });
     }
 
-    if (!changed) return null;
-    return {
-        code: s.toString(),
-        map: s.generateMap({ hires: true, source: id }),
-    };
+    if (inserts.length === 0) return null;
+    return { code: applyInserts(code, inserts) };
+};
+
+const COMPONENT_CLASS = /\bclass\s+([A-Za-z_$][\w$]*)\s+extends\s+Component\b/g;
+// A free-standing `tpl` view lowers (behind `--ssr`) to
+// `export const <name> = () => $__ssrTpl(...)`; stamp it like a component so
+// `Reply.view(render)` can find its client bundle.
+const FREE_VIEW =
+    /\bexport\s+const\s+([A-Za-z_$][\w$]*)\s*=\s*\(\)\s*=>\s*\$__ssrTpl\b/g;
+
+export const stampModule = (code: string, name: string): string => {
+    const targets = [
+        ...[...code.matchAll(COMPONENT_CLASS)].map((m) => m[1]),
+        ...[...code.matchAll(FREE_VIEW)].map((m) => m[1]),
+    ];
+    if (targets.length === 0) return code;
+    const stamps = targets
+        .map((c) => `${c}.$$__module = ${JSON.stringify(name)};`)
+        .join('\n');
+    return `${code}\n${stamps}\n`;
 };
 
 const ROUTE_CALL =
@@ -164,7 +187,6 @@ export const stampRouteFile = (code: string, name: string): string => {
             pos = node.end;
         }
     }
-    const s = new MagicString(code);
-    s.appendRight(pos, `\nRoute.__file(${JSON.stringify(name)});`);
-    return s.toString();
+    const insert = `\nRoute.__file(${JSON.stringify(name)});`;
+    return code.slice(0, pos) + insert + code.slice(pos);
 };

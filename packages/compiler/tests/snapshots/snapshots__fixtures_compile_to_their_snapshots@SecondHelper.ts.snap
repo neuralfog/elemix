@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/SecondHelper.ts
+input_file: fixtures/SecondHelper.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -21,6 +21,7 @@ return _r0;
 }
 }
 $__defineComponent('plain-note', PlainNote);
+PlainNote.prototype.$$__tag = 'plain-note';
 
 export class TitledNote extends Component {
     
@@ -35,3 +36,4 @@ return _r1;
 }
 }
 $__defineComponent('titled-note', TitledNote);
+TitledNote.prototype.$$__tag = 'titled-note';

@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/DirectApp.ts
+input_file: fixtures/DirectApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setAttr, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -90,7 +90,7 @@ const css = `
 `;
 
 const _s0 = $__sheet(css);
-const _t0 = $__template('<p class="note">Everything in a template is an attribute. A bare attribute binding sets an attribute (booleans toggle their presence); a class binding toggles classes from an object. Live DOM properties are set imperatively via a ref, never from the template.</p><div>class</div><div class="toggles"><button>active</button><button>rounded</button><button>large</button></div><label class="prop-demo"><input type="checkbox"/> Disable the button (<code>disabled</code>)</label><button class="action">Action</button>');
+const _t0 = $__template('<div>class</div><div class="toggles"><button>active</button><button>rounded</button><button>large</button></div><label class="prop-demo"><input type="checkbox"/> Disable the button (<code>disabled</code>)</label><button class="action">Action</button>');
 
 export class DirectApp extends Component {
 
@@ -107,12 +107,12 @@ export class DirectApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.nextSibling!;
-const _n2 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n1 = _r0.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n4 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 $__event(_n2, 'click', () => this.toggle('active'));
 $__event(_n3, 'click', () => this.toggle('rounded'));
 $__event(_n4, 'click', () => this.toggle('large'));
@@ -133,3 +133,4 @@ return _r0;
 }
 DirectApp.$$__sheets = [..._s0];
 $__defineComponent('direct-app', DirectApp);
+DirectApp.prototype.$$__tag = 'direct-app';

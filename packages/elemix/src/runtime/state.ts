@@ -57,7 +57,7 @@ const objectHandler: ProxyHandler<Target> = {
         }
         if (typeof key !== 'symbol') {
             $__track(depFor(target, key));
-            if (Array.isArray(value)) $__track(depFor(value, ARRAY));
+            if (Array.isArray(value)) $__track(depFor($__toRaw(value), ARRAY));
         }
         return $__reactive(value);
     },
@@ -82,7 +82,7 @@ const classHandler: ProxyHandler<Target> = {
         }
         if (typeof key !== 'symbol') {
             $__track(depFor(target, key));
-            if (Array.isArray(value)) $__track(depFor(value, ARRAY));
+            if (Array.isArray(value)) $__track(depFor($__toRaw(value), ARRAY));
         }
         return $__reactive(value);
     },
@@ -107,7 +107,7 @@ const arrayHandler: ProxyHandler<Target> = {
             };
         }
         const value = target[key];
-        if (Array.isArray(value)) $__track(depFor(value, ARRAY));
+        if (Array.isArray(value)) $__track(depFor($__toRaw(value), ARRAY));
         return $__reactive(value);
     },
     set(target, key, value) {
@@ -241,7 +241,7 @@ const isPlain = (obj: object): boolean => {
     return proto === Object.prototype || proto === null;
 };
 
-const $__reactive = (value: unknown): unknown => {
+export const $__reactive = (value: unknown): unknown => {
     if (value === null || typeof value !== 'object') return value;
     const obj = value as Target;
     if (obj[RAW] !== undefined) return obj;

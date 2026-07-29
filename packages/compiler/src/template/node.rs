@@ -48,4 +48,16 @@ pub struct Hole {
     /// `user-card`) — the analyzer needs it to resolve `<tag>` back to its class.
     /// `None` for content/text holes.
     pub tag: Option<String>,
+    /// Character count of the static text immediately BEFORE a content hole in
+    /// the same merged run (`Hello!! ${name}` -> prefix 8). The markerless
+    /// hydrate split skips this many chars to reach the dynamic value. `0` when a
+    /// hole starts a run or directly follows another hole.
+    pub prefix: usize,
+    /// Server-DOM child index (within the hole's parent element) of the merged
+    /// text run this hole lives in. Text/holes collapse into a single server text
+    /// node, so a run preceded by static ELEMENT siblings (`<span>k:</span> ${v}`)
+    /// starts at index 1, not `firstChild`. The markerless hydrate split walks
+    /// `parent.firstChild` + this many `nextSibling` steps to reach the run node.
+    /// `0` for a run that is the parent's first child.
+    pub run_index: usize,
 }

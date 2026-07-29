@@ -1,0 +1,58 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SignalApp.ts
+---
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './SignalValue';
+import './SignalButtons';
+
+const css = `
+    :host {
+        --accent: #6366f1;
+        display: block;
+        max-width: 440px;
+        font-family: system-ui, sans-serif;
+        color: #1e293b;
+        text-align: center;
+    }
+    .note {
+        margin: 0 0 20px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        text-align: left;
+        color: #475569;
+        background: #f1f5f9;
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+    }
+    code {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<signal-value></signal-value><signal-buttons></signal-buttons>');
+
+export class SignalApp extends Component {
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'signal-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${$__ssrChild('signal-value', {})}${$__ssrChild('signal-buttons', {})}</template></${this.$$__tag ?? 'signal-app'}>`;
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+SignalApp.$$__sheets = [..._s0];
+$__defineComponent('signal-app', SignalApp);
+SignalApp.prototype.$$__tag = 'signal-app';

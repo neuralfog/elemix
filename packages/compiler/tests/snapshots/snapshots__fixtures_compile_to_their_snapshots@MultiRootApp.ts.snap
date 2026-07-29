@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/MultiRootApp.ts
+input_file: fixtures/MultiRootApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -43,3 +43,4 @@ return _r0;
 }
 }
 $__defineComponent('multi-root-app', MultiRootApp);
+MultiRootApp.prototype.$$__tag = 'multi-root-app';

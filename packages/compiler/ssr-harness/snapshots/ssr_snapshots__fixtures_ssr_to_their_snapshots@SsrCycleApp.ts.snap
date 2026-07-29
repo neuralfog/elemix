@@ -1,0 +1,65 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 15
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SsrCycleApp.ts
+---
+import { $__ssrText, $__ssrChild, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './SsrCycleProbe';
+import { cycle } from './SsrCycleStore';
+
+type State = { mounted: boolean };
+
+const _t0 = $__template('<div class="stage"><!----></div><button class="toggle">toggle</button><ul class="log"><!----></ul>');
+const _t1 = $__templateEl('<ssr-cycle-probe></ssr-cycle-probe>');
+const _t2 = $__templateEl('<span class="empty">unmounted</span>');
+const _t3 = $__templateEl('<li> </li>');
+
+export class SsrCycleApp extends Component {
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'ssr-cycle-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="stage">${(this.state.mounted
+                    ? `${$__ssrChild('ssr-cycle-probe', {})}`
+                    : `<span class="empty">unmounted</span>`)}</div><button class="toggle">toggle</button><ul class="log">${($__ssrRepeat(
+                cycle.entries,
+                (entry) => `<li>${$__ssrText(entry.event)}</li>`,
+                (entry) => String(entry.id),
+            ))}</ul></template></${this.$$__tag ?? 'ssr-cycle-app'}>`;
+}
+
+    state = $__state<State>({ mounted: true });
+
+    toggle = (): void => {
+        this.state.mounted = !this.state.mounted;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
+$__child(_n1, () => (this.state.mounted
+                    ? (() => {
+const _r4 = $__cloneEl(_t1);
+return _r4;
+})()
+                    : (() => {
+const _r5 = $__cloneEl(_t2);
+return _r5;
+})()));
+$__event(_n2, 'click', this.toggle);
+$__list(_n3, () => (cycle.entries), (entry) => String(entry.id), (entry) => (() => {
+const _r6 = $__cloneEl(_t3);
+const _n7 = _r6.firstChild!;
+$__effect(() => {
+$__setText(_n7, (entry.event));
+});
+return _r6;
+})());
+return _r0;
+}
+}
+$__defineComponent('ssr-cycle-app', SsrCycleApp);
+SsrCycleApp.prototype.$$__tag = 'ssr-cycle-app';

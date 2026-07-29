@@ -1,0 +1,46 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 23
+expression: compile_hydrate(&source).0
+input_file: fixtures/SsrMixedApp.ts
+---
+import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './SsrMixedClient';
+
+type State = { n: number };
+
+const _t0 = $__template('<div class="outer">outer <span class="on"> </span><button class="ob">outer+</button><ssr-mixed-client></ssr-mixed-client></div>');
+
+export class SsrMixedApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!.nextSibling!;
+const _n1 = $__text(_n0);
+const _n2 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n2, 'click', this.bump);
+$__effect(() => {
+$__setText(_n1, (this.state.n));
+});
+}
+
+    state = $__state<State>({ n: 0 });
+
+    bump = (): void => {
+        this.state.n++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n2, 'click', this.bump);
+$__effect(() => {
+$__setText(_n1, (this.state.n));
+});
+return _r0;
+}
+}
+$__defineComponent('ssr-mixed-app', SsrMixedApp);
+SsrMixedApp.prototype.$$__tag = 'ssr-mixed-app';

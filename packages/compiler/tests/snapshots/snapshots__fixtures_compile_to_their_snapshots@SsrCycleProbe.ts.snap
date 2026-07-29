@@ -1,0 +1,51 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: fixtures/SsrCycleProbe.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { record } from './SsrCycleStore';
+
+type State = { ready: boolean };
+
+const _t0 = $__template('<span class="status"> </span>');
+
+export class SsrCycleProbe extends Component {
+    $$__onDispose(): void {
+        this.cleanup();
+    }
+    $$__onMount(): void {
+        this.mounted();
+    }
+    $$__beforeMount(): void {
+        this.prepare();
+    }
+    state = $__state<State>({ ready: false });
+
+    prepare(): void {
+        this.state.ready = true;
+        record('before-mount');
+    }
+
+    mounted(): void {
+        record('mount');
+    }
+
+    cleanup(): void {
+        record('dispose');
+    }
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+$__effect(() => {
+$__setText(_n1, (this.state.ready ? 'ready' : 'pending'));
+});
+return _r0;
+}
+}
+$__defineComponent('ssr-cycle-probe', SsrCycleProbe);
+SsrCycleProbe.prototype.$$__tag = 'ssr-cycle-probe';

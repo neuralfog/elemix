@@ -22,7 +22,7 @@ pub mod locate;
 pub mod lower;
 pub mod parse;
 
-pub use lower::expand;
+pub use lower::{expand, expand_mode};
 
 /// A parsed directive — its `name` (without the leading `#`) and ordered word
 /// args. Purely structural; the parser never knows what a directive means.
@@ -61,6 +61,10 @@ pub struct ComponentMeta {
     /// `#shadow` — force a shadow root even when the app default is light DOM
     /// (`config({ shadow: false })`). Mutually exclusive with `#no-shadow`.
     pub shadow: bool,
+    /// `#client` — client-only component: it renders NO content server-side (just
+    /// a bare host tag, no DSD, no server lifecycle), so the client ships its CSR
+    /// module and mounts it fresh on upgrade - no hydration.
+    pub client: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -89,6 +93,7 @@ pub fn is_known_directive(name: &str) -> bool {
             | "form"
             | "no-shadow"
             | "shadow"
+            | "client"
             | "styles"
             | "state"
             | "effect"
@@ -118,6 +123,7 @@ pub fn resolve(directives: &[Directive]) -> Result<ComponentMeta, PragmaError> {
             "form" => meta.form = true,
             "no-shadow" => meta.no_shadow = true,
             "shadow" => meta.shadow = true,
+            "client" => meta.client = true,
             "styles" | "state" | "effect" | "before-mount" | "mount" | "dispose" => {
                 return Err(PragmaError::OnClass(d.name.clone()))
             }

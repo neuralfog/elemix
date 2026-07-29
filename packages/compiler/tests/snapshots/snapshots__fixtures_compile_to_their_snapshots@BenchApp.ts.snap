@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/BenchApp.ts
+input_file: fixtures/BenchApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -159,3 +159,4 @@ return _r0;
 }
 BenchApp.$$__sheets = [..._s0];
 $__defineComponent('bench-app', BenchApp);
+BenchApp.prototype.$$__tag = 'bench-app';

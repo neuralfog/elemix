@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/MethodHelperApp.ts
+input_file: fixtures/MethodHelperApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -76,3 +76,4 @@ return _r0;
 }
 }
 $__defineComponent('method-helper-app', MethodHelperApp);
+MethodHelperApp.prototype.$$__tag = 'method-helper-app';

@@ -1,0 +1,15 @@
+---
+source: ssr-harness/ssr.rs
+expression: method
+---
+$$__ssr(): string {
+return `<${this.$$__tag ?? 'match-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage">${($__ssrMatch(this.state.load, 'kind', {
+                idle: () => `<div class="card idle">Pick a state above</div>`,
+                loading: (m) => `<div class="card loading"><span class="spinner"></span>Working ${$__ssrText(m.pct)}%</div>`,
+                ready: (m) => `<div class="card ready">✓ Deployed to ${$__ssrText(m.url)}</div>`,
+                failed: (m) => `<div class="card failed">✕ ${$__ssrText(m.error)}</div>`,
+            }))}</div><button class="link">toggle mode</button> ${($__ssrMatch(this.state.mode, {
+            compact: () => `<span class="mode">compact</span>`,
+            full: () => `<span class="mode">full view</span>`,
+        }))}</template></${this.$$__tag ?? 'match-app'}>`;
+}

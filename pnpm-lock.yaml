@@ -59,6 +59,37 @@ importers:
         specifier: 0.15.0
         version: 0.15.0
 
+  packages/compiler/ssr-harness:
+    dependencies:
+      '@neuralfog/elemix':
+        specifier: workspace:*
+        version: link:../../elemix
+      '@neuralfog/elemix-ssr-plugin':
+        specifier: workspace:*
+        version: link:../../ssr-plugin
+      '@neuralfog/hydris':
+        specifier: workspace:*
+        version: link:../../hydris
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 2.5.5
+        version: 2.5.5
+      '@neuralfog/elemix-compiler':
+        specifier: workspace:*
+        version: link:..
+      '@neuralfog/ts-config':
+        specifier: 0.1.2
+        version: 0.1.2
+      '@playwright/test':
+        specifier: 1.61.1
+        version: 1.61.1
+      '@types/bun':
+        specifier: 1.2.19
+        version: 1.2.19(@types/react@19.2.17)
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+
   packages/create-app:
     devDependencies:
       '@biomejs/biome':
@@ -115,7 +146,7 @@ importers:
 
   packages/formatter: {}
 
-  packages/servmix:
+  packages/hydris:
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.5
@@ -141,9 +172,9 @@ importers:
       '@babel/parser':
         specifier: 7.28.4
         version: 7.28.4
-      magic-string:
-        specifier: 0.30.19
-        version: 0.30.19
+      sass:
+        specifier: 1.101.0
+        version: 1.101.0
     devDependencies:
       '@babel/types':
         specifier: 7.28.4
@@ -1147,6 +1178,11 @@ packages:
   '@parcel/watcher@2.5.6':
     resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
+
+  '@playwright/test@1.61.1':
+    resolution: {integrity: sha512-8nKv6+0RJSL9FE4jYOEGXnPeM/Hg12qZpmqzZjRh3qM0Y7c3z1mrOTfFLids72RDQYVh9WpLEfR5WdpNX4fkig==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
@@ -2394,9 +2430,6 @@ packages:
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
-
-  magic-string@0.30.19:
-    resolution: {integrity: sha512-2N21sPY9Ws53PZvsEpVtNuSW+ScYbQdp4b9qUaL+9QkHUrGFKo56Lg9Emg5s9V/qrtNBmiR01sYhUOwu3H+VOw==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -3813,6 +3846,10 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.5.6
     optional: true
 
+  '@playwright/test@1.61.1':
+    dependencies:
+      playwright: 1.61.1
+
   '@polka/url@1.0.0-next.29': {}
 
   '@rolldown/binding-android-arm64@1.1.5':
@@ -5075,10 +5112,6 @@ snapshots:
       yallist: 4.0.0
 
   lz-string@1.5.0: {}
-
-  magic-string@0.30.19:
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.5
 
   magic-string@0.30.21:
     dependencies:

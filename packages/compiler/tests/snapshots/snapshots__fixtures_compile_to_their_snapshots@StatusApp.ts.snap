@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/StatusApp.ts
+input_file: fixtures/StatusApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -88,7 +88,7 @@ const css = `
 `;
 
 const _s0 = $__sheet(css);
-const _t0 = $__template('<p class="note"><code>choose</code> renders the first branch whose condition is truthy — use <code>[true, ...]</code> as the fallback. <code>when</code> renders one branch or nothing. Both take lazy factory functions, so only the chosen branch is ever built.</p><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage"><!----></div><button class="link"><!----> log</button> <!---->');
+const _t0 = $__template('<div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage"><!----></div><button class="link"><!----> log</button> <!---->');
 const _t1 = $__templateEl('<div class="card idle">Pick a status above</div>');
 const _t2 = $__templateEl('<div class="card failed">✕ Build failed</div>');
 const _t3 = $__templateEl('<div class="card ready">✓ Deployed</div>');
@@ -112,14 +112,14 @@ export class StatusApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
-const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.nextSibling!.firstChild!;
+const _n6 = _r0.firstChild!.nextSibling!.nextSibling!;
 const _n7 = _n6.firstChild!;
-const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 $__event(_n1, 'click', () => this.set('idle'));
 $__event(_n2, 'click', () => this.set('loading'));
 $__event(_n3, 'click', () => this.set('ready'));
@@ -158,3 +158,4 @@ return _r0;
 }
 StatusApp.$$__sheets = [..._s0];
 $__defineComponent('status-app', StatusApp);
+StatusApp.prototype.$$__tag = 'status-app';

@@ -1,7 +1,0 @@
----
-source: tests/ssr.rs
-expression: method
----
-$$__ssr(): string {
-return `<no-shadow-app><div class="light"><span class="count">${$__ssrText(this.state.count)}</span><button class="inc">+1</button></div></no-shadow-app>`;
-}

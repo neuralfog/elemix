@@ -6,7 +6,8 @@ use elemix_compiler::diagnostics::{Diagnostic, Severity};
 use elemix_compiler::emit::TsEmitter;
 use elemix_compiler::sourcemap::{json_string, line_map};
 use elemix_compiler::{
-    collect_ts_files, compile_diagnostics, compile_ssr, find_html_templates, FoundTemplate,
+    collect_ts_files, compile_diagnostics, compile_hydrate, compile_ssr, find_html_templates,
+    FoundTemplate,
 };
 use std::fs;
 use std::io::{self, Read, Write};
@@ -36,6 +37,17 @@ struct Cli {
     #[arg(long)]
     ssr: bool,
 
+    /// Also emit a `$$__hydrate(root)` client-hydration method into every
+    /// registered component (the client build for an SSR app). Off by default.
+    #[arg(long)]
+    hydrate: bool,
+
+    /// Precompile-minify each `#styles` sheet baked into an SSR `<style data-ssr>`
+    /// block (resolvable static literals only). Only affects `--ssr`. Off by
+    /// default so the dev SSR output stays readable.
+    #[arg(long)]
+    minify: bool,
+
     /// Also produce a line-level source map back to the original. With `--stdin`
     /// stdout becomes a `{"code","map"}` JSON envelope; with `--out` a sidecar
     /// `<file>.map` is written and the compiled file gets a `sourceMappingURL`.
@@ -55,8 +67,10 @@ fn main() {
         // Dev path: never fail. Diagnostics are inlined into `code` (so they
         // surface in the browser) and echoed to stderr (so they show in the
         // Vite terminal); the compile always succeeds and HMR stays alive.
-        let (code, diags) = if cli.ssr {
-            compile_ssr(&source)
+        let (code, diags) = if cli.hydrate {
+            compile_hydrate(&source)
+        } else if cli.ssr {
+            compile_ssr(&source, cli.minify)
         } else {
             compile_diagnostics(&source)
         };
@@ -88,10 +102,26 @@ fn main() {
     // analyzer's / tsc's job, not this pass — so a bad component still emits and
     // surfaces loudly at runtime instead of blocking the transform.
     for path in collect_ts_files(&cli.dirs) {
-        process(&path, cli.out.as_deref(), cli.sourcemap, cli.ssr, false);
+        process(
+            &path,
+            cli.out.as_deref(),
+            cli.sourcemap,
+            cli.ssr,
+            cli.hydrate,
+            cli.minify,
+            false,
+        );
     }
     if let Some(path) = cli.file.clone() {
-        process(&path, cli.out.as_deref(), cli.sourcemap, cli.ssr, true);
+        process(
+            &path,
+            cli.out.as_deref(),
+            cli.sourcemap,
+            cli.ssr,
+            cli.hydrate,
+            cli.minify,
+            true,
+        );
     }
 }
 
@@ -135,7 +165,15 @@ fn banner() {
     eprintln!();
 }
 
-fn process(path: &Path, out: Option<&Path>, sourcemap: bool, ssr: bool, verbose: bool) {
+fn process(
+    path: &Path,
+    out: Option<&Path>,
+    sourcemap: bool,
+    ssr: bool,
+    hydrate: bool,
+    minify: bool,
+    verbose: bool,
+) {
     let source = match fs::read_to_string(path) {
         Ok(s) => s,
         Err(e) => {
@@ -144,7 +182,7 @@ fn process(path: &Path, out: Option<&Path>, sourcemap: bool, ssr: bool, verbose:
         }
     };
     match out {
-        Some(dir) => emit(dir, path, &source, sourcemap, ssr),
+        Some(dir) => emit(dir, path, &source, sourcemap, ssr, hydrate, minify),
         None if verbose => print_detail(path, &find_html_templates(&source)),
         None => {
             let n = find_html_templates(&source).len();
@@ -157,12 +195,22 @@ fn process(path: &Path, out: Option<&Path>, sourcemap: bool, ssr: bool, verbose:
 /// `sourceMappingURL` footer when `sourcemap` is set. Best-effort: the file is
 /// always written, with any error diagnostic inlined as a runtime `throw` (and
 /// reported on stderr) — the compiler is a transform, never a build gate.
-fn emit(dir: &Path, src: &Path, source: &str, sourcemap: bool, ssr: bool) {
+fn emit(
+    dir: &Path,
+    src: &Path,
+    source: &str,
+    sourcemap: bool,
+    ssr: bool,
+    hydrate: bool,
+    minify: bool,
+) {
     let name = src.file_name().expect("source has a file name");
     let dest = dir.join(name);
 
-    let (code, diags) = if ssr {
-        compile_ssr(source)
+    let (code, diags) = if hydrate {
+        compile_hydrate(source)
+    } else if ssr {
+        compile_ssr(source, minify)
     } else {
         compile_diagnostics(source)
     };

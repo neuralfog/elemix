@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/WarnApp.ts
+input_file: fixtures/WarnApp.ts
 ---
 console.warn('[elemix] WarnApp: tag `warnapp` is not a valid custom element name - it must contain a hyphen');
 import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
@@ -20,3 +20,4 @@ return _r0;
 }
 }
 $__defineComponent('warnapp', WarnApp);
+WarnApp.prototype.$$__tag = 'warnapp';

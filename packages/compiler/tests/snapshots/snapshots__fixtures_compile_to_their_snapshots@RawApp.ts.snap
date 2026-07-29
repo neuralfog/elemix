@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/RawApp.ts
+input_file: fixtures/RawApp.ts
 ---
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, raw } from '@neuralfog/elemix';
@@ -95,3 +95,4 @@ return _r0;
 }
 RawApp.$$__sheets = [..._s0];
 $__defineComponent('raw-app', RawApp);
+RawApp.prototype.$$__tag = 'raw-app';

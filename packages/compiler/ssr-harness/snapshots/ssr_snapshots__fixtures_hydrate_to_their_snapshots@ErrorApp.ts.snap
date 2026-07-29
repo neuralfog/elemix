@@ -1,0 +1,26 @@
+---
+source: ssr-tests/ssr_snapshots.rs
+expression: compile_hydrate(&source).0
+input_file: fixtures/ErrorApp.ts
+---
+throw new Error('[elemix] ErrorApp: unknown compiler hint `#frobnicate`');
+import { $__template, $__clone } from '@neuralfog/elemix/runtime';
+// Diagnostic fixture: an UNKNOWN pragma directive. The compiler can't lower it,
+// so it inlines a module-scope `throw new Error('[elemix] …')` — the component
+// is left un-registerable, and importing the module throws loudly at load.
+
+import { Component } from '@neuralfog/elemix';
+
+// #component #frobnicate
+const _t0 = $__template('<button>boom</button>');
+
+export class ErrorApp extends Component {
+$$__hydrate(root: Node): void {
+
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}

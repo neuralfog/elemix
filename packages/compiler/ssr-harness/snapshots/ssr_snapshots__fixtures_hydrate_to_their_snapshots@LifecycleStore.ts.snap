@@ -1,0 +1,22 @@
+---
+source: ssr-tests/ssr_snapshots.rs
+expression: compile_hydrate(&source).0
+input_file: fixtures/LifecycleStore.ts
+---
+import { $__state } from '@neuralfog/elemix/runtime';
+
+export type LogEntry = { id: number; event: string };
+
+export const log = $__state<{ entries: LogEntry[] }>({ entries: [] });
+
+let seq = 0;
+
+export const record = (event: string): void => {
+    seq++;
+    log.entries.push({ id: seq, event });
+};
+
+export const clearLog = (): void => {
+    seq = 0;
+    log.entries.splice(0);
+};

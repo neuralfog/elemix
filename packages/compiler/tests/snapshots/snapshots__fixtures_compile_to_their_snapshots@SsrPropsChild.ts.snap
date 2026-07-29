@@ -1,0 +1,51 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: fixtures/SsrPropsChild.ts
+---
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    label: string;
+    count: number;
+    flag: boolean;
+    tags: string[];
+    onBump: () => void;
+    onAdd: (item: string) => void;
+};
+
+const _t0 = $__template('<div class="child"><span class="label"> </span><span class="count"> </span><span class="flag"> </span><span class="tags"> </span><button class="bump">bump</button><button class="add">add</button><button class="push">push</button></div>');
+
+export class SsrPropsChild extends Component<Props> {
+    static $$__client = true;
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n5, 'click', () => this.props.onBump());
+$__event(_n6, 'click', () => this.props.onAdd('x'));
+$__event(_n7, 'click', () => this.props.tags.push('y'));
+$__effect(() => {
+$__setText(_n1, (this.props.label));
+});
+$__effect(() => {
+$__setText(_n2, (this.props.count));
+});
+$__effect(() => {
+$__setText(_n3, (this.props.flag ? 'yes' : 'no'));
+});
+$__effect(() => {
+$__setText(_n4, (this.props.tags.join(',')));
+});
+return _r0;
+}
+}
+$__defineComponent('ssr-props-child', SsrPropsChild);
+SsrPropsChild.prototype.$$__tag = 'ssr-props-child';

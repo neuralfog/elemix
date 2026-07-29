@@ -1,7 +1,7 @@
 ---
 source: tests/snapshots.rs
 expression: compile(&source)
-input_file: tests/fixtures/AsyncApp.ts
+input_file: fixtures/AsyncApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
@@ -68,3 +68,4 @@ return _r0;
 }
 }
 $__defineComponent('async-app', AsyncApp);
+AsyncApp.prototype.$$__tag = 'async-app';

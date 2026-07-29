@@ -1,0 +1,8 @@
+node_modules
+dist
+public
+test-results
+playwright-report
+blob-report
+.last-run.json
+tests/.server.pid

@@ -56,6 +56,11 @@ pub struct StateEdit {
     pub repl: String,
     pub accessor: bool,
     pub module_primitive: bool,
+    /// A module-level `#state` const (a shared store), not a per-instance class
+    /// field. The SSR build lowers these to `$__store` (registered for per-request
+    /// reset) instead of `$__state`, so one request's writes don't bleed into the
+    /// next through the server-process singleton.
+    pub module: bool,
 }
 
 /// A top-level class with whatever pragma directives + styles fields tag it.
@@ -511,6 +516,7 @@ fn state_edit(source: &str, name_end: usize, type_span: Option<Span>, value: Spa
         repl: format!(" = $__state{generic}({init})"),
         accessor: false,
         module_primitive,
+        module: true,
     }
 }
 
@@ -537,6 +543,7 @@ fn field_state_edit(
             repl: format!(" = $__state{generic}({init})"),
             accessor: false,
             module_primitive: false,
+            module: false,
         };
     }
 
@@ -571,6 +578,7 @@ fn field_state_edit(
         repl,
         accessor: true,
         module_primitive: false,
+        module: false,
     }
 }
 
