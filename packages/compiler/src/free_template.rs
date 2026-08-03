@@ -133,14 +133,15 @@ pub fn lower(source: &str, ssr: bool) -> String {
         out
     };
 
-    // SSR: each free template becomes a `$__ssrTpl(`…`)` string descriptor. No
-    // DOM consts to hoist; the `$__ssrTpl` import is added by the SSR-runtime
-    // import pass. `view()` in the same (server) bundle is dead code.
+    // SSR: each free template becomes a `$__ssrTpl(...)` rope descriptor (which
+    // `ssr_nested_tpl` already emits). No DOM consts to hoist; the `$__ssrTpl`
+    // import is added by the SSR-runtime import pass. `view()` in the same
+    // (server) bundle is dead code.
     if ssr {
         let mut edits: Vec<(usize, usize, String)> = Vec::new();
         for f in &finder.out {
             let body = crate::template::parse::ssr_nested_tpl(&f.statics, &f.holes);
-            edits.push((f.span.0, f.span.1, format!("$__ssrTpl({body})")));
+            edits.push((f.span.0, f.span.1, body));
         }
         drop_tpl(&mut edits);
         return apply(edits);

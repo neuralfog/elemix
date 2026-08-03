@@ -22,6 +22,12 @@ import { render as freeTemplateView } from '../../../../fixtures/FreeTemplate';
 import { InheritDerived } from '../../../../fixtures/InheritanceApp';
 import { InterpApp } from '../../../../fixtures/InterpApp';
 import { LifecycleApp } from '../../../../fixtures/LifecycleApp';
+import { LoremApp1k } from '../../../../fixtures/LoremApp1k';
+import { LoremApp10k } from '../../../../fixtures/LoremApp10k';
+import { LoremStyled1k } from '../../../../fixtures/LoremStyled1k';
+import { LoremStyled10k } from '../../../../fixtures/LoremStyled10k';
+import { LoremNested1k } from '../../../../fixtures/LoremNested1k';
+import { LoremNested10k } from '../../../../fixtures/LoremNested10k';
 import { MethodApp } from '../../../../fixtures/MethodApp';
 import { MethodHelperApp } from '../../../../fixtures/MethodHelperApp';
 import { MultiRootApp } from '../../../../fixtures/MultiRootApp';
@@ -186,6 +192,30 @@ export class TestController {
 
     lifecycleApp(): Reply {
         return Reply.view(LifecycleApp);
+    }
+
+    loremApp1k(): Reply {
+        return Reply.view(LoremApp1k);
+    }
+
+    loremApp10k(): Reply {
+        return Reply.view(LoremApp10k);
+    }
+
+    loremStyled1k(): Reply {
+        return Reply.view(LoremStyled1k);
+    }
+
+    loremStyled10k(): Reply {
+        return Reply.view(LoremStyled10k);
+    }
+
+    loremNested1k(): Reply {
+        return Reply.view(LoremNested1k);
+    }
+
+    loremNested10k(): Reply {
+        return Reply.view(LoremNested10k);
     }
 
     multiStateApp(): Reply {

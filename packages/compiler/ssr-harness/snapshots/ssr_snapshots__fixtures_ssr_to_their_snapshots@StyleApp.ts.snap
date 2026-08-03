@@ -48,12 +48,12 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="box">Styled box</div><button>color</button><button>size</button><button>background</button>');
 
 export class StyleApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'style-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="box"${$__ssrStyle({
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'style-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="box"${$__ssrStyle({
                 color: this.state.color,
                 'font-size': `${this.state.size}px`,
                 background: this.state.bg,
-            })}>Styled box</div><button>color</button><button>size</button><button>background</button></template></${this.$$__tag ?? 'style-app'}>`;
+            })}>Styled box</div><button>color</button><button>size</button><button>background</button></template></${this.$$__tag ?? 'style-app'}>`];
 }
 
 
@@ -97,3 +97,4 @@ return _r0;
 StyleApp.$$__sheets = [..._s0];
 $__defineComponent('style-app', StyleApp);
 StyleApp.prototype.$$__tag = 'style-app';
+StyleApp.$$__propSafe = true;

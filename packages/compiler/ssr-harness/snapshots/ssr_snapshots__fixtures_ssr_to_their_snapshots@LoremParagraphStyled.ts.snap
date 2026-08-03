@@ -1,0 +1,57 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/LoremParagraphStyled.ts
+---
+import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    index: number;
+    text: string;
+};
+
+const css = `
+    :host { display: block; }
+    .para {
+        margin: 0;
+        padding: 12px 16px;
+        border-left: 3px solid #6366f1;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #1e293b;
+        font: 14px/1.6 system-ui, sans-serif;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<p class="para"><!---->: <!----></p>');
+
+export class LoremParagraphStyled extends Component<Props> {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'lorem-paragraph-styled'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.props.index);const _t1 = (this.props.text);return `<p class="para" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}">${$__ssrText(_t0)}: ${$__ssrText(_t1)}</p>`;})()}</template></${this.$$__tag ?? 'lorem-paragraph-styled'}>`];
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _x3 = document.createTextNode('');
+_n1.replaceWith(_x3);
+const _x4 = document.createTextNode('');
+_n2.replaceWith(_x4);
+$__effect(() => {
+$__setText(_x3, (this.props.index));
+});
+$__effect(() => {
+$__setText(_x4, (this.props.text));
+});
+return _r0;
+}
+}
+LoremParagraphStyled.$$__sheets = [..._s0];
+$__defineComponent('lorem-paragraph-styled', LoremParagraphStyled);
+LoremParagraphStyled.prototype.$$__tag = 'lorem-paragraph-styled';
+LoremParagraphStyled.$$__propSafe = true;

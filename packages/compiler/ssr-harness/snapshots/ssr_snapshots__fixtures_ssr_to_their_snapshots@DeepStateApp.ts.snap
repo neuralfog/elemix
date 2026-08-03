@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/DeepStateApp.ts
 ---
-import { $__ssrText, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -32,12 +32,12 @@ const _t0 = $__template('<section class="readouts"><span class="city"> </span><s
 const _t1 = $__templateEl('<li class="group"><span class="gid"> </span><span class="tcount"> </span></li>');
 
 export class DeepStateApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'deep-state-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section class="readouts"><span class="city">${$__ssrText(this.state.profile.address.city)}</span><span class="lat">${$__ssrText(this.state.profile.address.geo.lat)}</span><span class="lng">${$__ssrText(this.state.profile.address.geo.lng)}</span><span class="tags">${$__ssrText(this.tagsStr)}</span><span class="grid">${$__ssrText(this.gridStr)}</span><span class="cell">${$__ssrText(this.cell)}</span><span class="groups-str">${$__ssrText(this.groupsStr)}</span></section><div class="controls"><button class="rename-city">city</button><button class="move-lat">lat</button><button class="replace-geo">geo</button><button class="add-tag">tag</button><button class="set-cell">cell</button><button class="push-col">col</button><button class="add-row">row</button><button class="toggle-task">task</button><button class="add-task">+task</button><button class="add-group">+group</button></div><ul class="group-list">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'deep-state-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section class="readouts"><span class="city">`, $__ssrText(this.state.profile.address.city), `</span><span class="lat">`, $__ssrText(this.state.profile.address.geo.lat), `</span><span class="lng">`, $__ssrText(this.state.profile.address.geo.lng), `</span><span class="tags">`, $__ssrText(this.tagsStr), `</span><span class="grid">`, $__ssrText(this.gridStr), `</span><span class="cell">`, $__ssrText(this.cell), `</span><span class="groups-str">`, $__ssrText(this.groupsStr), `</span></section><div class="controls"><button class="rename-city">city</button><button class="move-lat">lat</button><button class="replace-geo">geo</button><button class="add-tag">tag</button><button class="set-cell">cell</button><button class="push-col">col</button><button class="add-row">row</button><button class="toggle-task">task</button><button class="add-task">+task</button><button class="add-group">+group</button></div><ul class="group-list">`, ($__ssrRepeat(
                 this.state.groups,
-                (group) => `<li class="group"><span class="gid">${$__ssrText(group.id)}</span><span class="tcount">${$__ssrText(group.tasks.length)}</span></li>`,
+                (group) => $__ssrTpl(`<li class="group"><span class="gid">`, $__ssrText(group.id), `</span><span class="tcount">`, $__ssrText(group.tasks.length), `</span></li>`),
                 (group) => group.id,
-            ))}</ul></template></${this.$$__tag ?? 'deep-state-app'}>`;
+            )), `</ul></template></${this.$$__tag ?? 'deep-state-app'}>`];
 }
 
 
@@ -191,3 +191,4 @@ return _r0;
 DeepStateApp.$$__sheets = [..._s0];
 $__defineComponent('deep-state-app', DeepStateApp);
 DeepStateApp.prototype.$$__tag = 'deep-state-app';
+DeepStateApp.$$__propSafe = true;

@@ -25,8 +25,8 @@ const _t0 = $__template('<button type="button"><slot></slot></button>');
 
 export class SubmitButton extends Component {
     static formAssociated = true;
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'submit-button'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><button type="button"><slot></slot></button></template></${this.$$__tag ?? 'submit-button'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'submit-button'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><button type="button"><slot></slot></button></template></${this.$$__tag ?? 'submit-button'}>`];
 }
 
 
@@ -44,3 +44,4 @@ return _r0;
 SubmitButton.$$__sheets = [..._s0];
 $__defineComponent('submit-button', SubmitButton);
 SubmitButton.prototype.$$__tag = 'submit-button';
+SubmitButton.$$__propSafe = true;

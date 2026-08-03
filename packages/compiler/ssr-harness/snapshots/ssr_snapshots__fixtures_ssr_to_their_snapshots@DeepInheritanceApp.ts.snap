@@ -32,8 +32,8 @@ export class DeepBase extends Component {
     $$__effects(): void {
         $__effect(() => this.mirrorBase());
     }
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'deep-base'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${baseCss}</style>${(() => {const _t0 = (this.state.count);return `<button class="btn" data-t="${$__ssrLen(_t0)}">count ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'deep-base'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'deep-base'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${baseCss}</style>${(() => {const _t0 = (this.state.count);return `<button class="btn" data-t="${$__ssrLen(_t0)}">count ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'deep-base'}>`];
 }
 
 
@@ -67,6 +67,7 @@ return _r0;
 DeepBase.$$__sheets = [..._s0];
 $__defineComponent('deep-base', DeepBase);
 DeepBase.prototype.$$__tag = 'deep-base';
+DeepBase.$$__propSafe = true;
 
 const _s1 = $__sheet(middleCss);
 export class DeepMiddle extends DeepBase {
@@ -90,6 +91,7 @@ export class DeepMiddle extends DeepBase {
 DeepMiddle.$$__sheets = [...(Object.getPrototypeOf(DeepMiddle).$$__sheets ?? []), ..._s1];
 $__defineComponent('deep-middle', DeepMiddle);
 DeepMiddle.prototype.$$__tag = 'deep-middle';
+DeepMiddle.$$__propSafe = true;
 
 const _s2 = $__sheet(legCss);
 export class DeepLeg extends DeepMiddle {
@@ -113,6 +115,7 @@ export class DeepLeg extends DeepMiddle {
 DeepLeg.$$__sheets = [...(Object.getPrototypeOf(DeepLeg).$$__sheets ?? []), ..._s2];
 $__defineComponent('deep-leg', DeepLeg);
 DeepLeg.prototype.$$__tag = 'deep-leg';
+DeepLeg.$$__propSafe = true;
 
 const _s3 = $__sheet(leafCss);
 export class DeepLeaf extends DeepLeg {
@@ -136,3 +139,4 @@ export class DeepLeaf extends DeepLeg {
 DeepLeaf.$$__sheets = [...(Object.getPrototypeOf(DeepLeaf).$$__sheets ?? []), ..._s3];
 $__defineComponent('deep-leaf', DeepLeaf);
 DeepLeaf.prototype.$$__tag = 'deep-leaf';
+DeepLeaf.$$__propSafe = true;

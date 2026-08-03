@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ViewDataMid.ts
 ---
@@ -14,8 +13,8 @@ import type { VData } from './ViewDataApp';
 const _t0 = $__template('<div class="mid"><span class="count"> </span><view-data-leaf></view-data-leaf></div>');
 
 export class ViewDataMid extends Component<unknown, VData> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'view-data-mid'}><template shadowrootmode="open" shadowrootserializable=""><div class="mid"><span class="count">${$__ssrText(this.viewData.count)}</span>${$__ssrChild('view-data-leaf', {})}</div></template></${this.$$__tag ?? 'view-data-mid'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'view-data-mid'}><template shadowrootmode="open" shadowrootserializable=""><div class="mid"><span class="count">`, $__ssrText(this.viewData.count), `</span>`, $__ssrChild('view-data-leaf', {}), `</div></template></${this.$$__tag ?? 'view-data-mid'}>`];
 }
 
     $$__view(): DocumentFragment {
@@ -29,3 +28,4 @@ return _r0;
 }
 $__defineComponent('view-data-mid', ViewDataMid);
 ViewDataMid.prototype.$$__tag = 'view-data-mid';
+ViewDataMid.$$__propSafe = true;

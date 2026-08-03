@@ -24,8 +24,8 @@ export class AsyncApp extends Component {
     $$__effects(): void {
         $__effect(() => this.mirror());
     }
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'async-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="async"><span class="phase">${$__ssrText(this.state.phase)}</span><span class="ticks">${$__ssrText(this.state.ticks)}</span><button class="bump">+1</button></div></template></${this.$$__tag ?? 'async-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'async-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="async"><span class="phase">`, $__ssrText(this.state.phase), `</span><span class="ticks">`, $__ssrText(this.state.ticks), `</span><button class="bump">+1</button></div></template></${this.$$__tag ?? 'async-app'}>`];
 }
 
     state = $__state<State>({ phase: 'init', ticks: 0 });
@@ -74,3 +74,4 @@ return _r0;
 }
 $__defineComponent('async-app', AsyncApp);
 AsyncApp.prototype.$$__tag = 'async-app';
+AsyncApp.$$__propSafe = true;

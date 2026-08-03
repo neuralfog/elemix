@@ -1,0 +1,8 @@
+---
+source: ssr-harness/ssr.rs
+assertion_line: 328
+expression: method
+---
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'my-tag'}><b>x</b></${this.$$__tag ?? 'my-tag'}>`];
+}

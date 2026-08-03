@@ -1,7 +1,8 @@
 ---
 source: ssr-harness/ssr.rs
+assertion_line: 151
 expression: method
 ---
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'no-shadow-app'}><div class="light"><span class="count">${$__ssrText(this.state.count)}</span><button class="inc">+1</button></div></${this.$$__tag ?? 'no-shadow-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'no-shadow-app'}><div class="light"><span class="count">`, $__ssrText(this.state.count), `</span><button class="inc">+1</button></div></${this.$$__tag ?? 'no-shadow-app'}>`];
 }

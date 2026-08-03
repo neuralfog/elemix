@@ -7,8 +7,14 @@
 //! untouched — these only assert the extra method.
 
 use elemix_compiler::ssr::ssr_method;
-use elemix_compiler::template::parse::ssr_inner;
+use elemix_compiler::template::parse::{fmt_array, ssr_inner, Chunk};
 use elemix_compiler::{compile_hydrate, compile_ssr};
+
+/// A single static chunk - the inner rope for `ssr_method` framing tests that
+/// don't care about hole serialization.
+fn static_inner(html: &str) -> Vec<Chunk> {
+    vec![Chunk::Static(html.to_string())]
+}
 
 /// The `$$__hydrate(root: Node) { … }` block from a `--hydrate` compile, or the
 /// empty string if none — the client hydration slice of the output. Brace-balanced
@@ -178,13 +184,22 @@ fn ssr_inner_drops_client_holes_and_keeps_text_attr() {
         "repeat(this.items, (i) => tpl`<li></li>`)".to_string(),
     ];
     let inner = ssr_inner(&statics, &holes);
-    assert_eq!(
-        inner,
-        "<button${$__ssrClass(this.tone)}${$__ssrStyle(this.box)}\
-         ${$__ssrAttr('title', this.hint)}${$__ssrAttr('value', (this.value).value)}>\
-         ${$__ssrText(this.label)}</button>\
-         <ul>${($__ssrRepeat(this.items, (i) => `<li></li>`))}</ul>"
+    let rope = fmt_array(&inner);
+    assert!(
+        rope.contains("$__ssrClass(this.tone)")
+            && rope.contains("$__ssrStyle(this.box)")
+            && rope.contains("$__ssrAttr('title', this.hint)")
+            && rope.contains("$__ssrAttr('value', (this.value).value)"),
+        "text/attr holes must survive: {rope}"
     );
+    assert!(
+        !rope.contains("this.click")
+            && !rope.contains("this.onChange")
+            && !rope.contains("this.data")
+            && !rope.contains("this.el"),
+        "client-only sigil holes must be dropped: {rope}"
+    );
+    insta::assert_snapshot!("ssr_inner_holes", rope);
 }
 
 #[test]
@@ -259,11 +274,18 @@ fn ssr_inner_renders_nested_component_via_child_helper() {
         "this.onHover".to_string(),
     ];
     let inner = ssr_inner(&statics, &holes);
-    assert_eq!(
-        inner,
-        "<div>${$__ssrChild('user-card', \
-         {name: (this.props.name), role: (this.props.role)})}</div>"
+    let rope = fmt_array(&inner);
+    assert!(
+        rope.contains(
+            "$__ssrChild('user-card', {name: (this.props.name), role: (this.props.role)})"
+        ),
+        "nested component must lower to $__ssrChild: {rope}"
     );
+    assert!(
+        !rope.contains("this.cardEl") && !rope.contains("this.onHover"),
+        "client-only holes must be dropped: {rope}"
+    );
+    insta::assert_snapshot!("ssr_inner_child", rope);
 }
 
 #[test]
@@ -271,7 +293,7 @@ fn ssr_inner_renders_propless_nested_component() {
     let statics = ["<user-card />".to_string()];
     let holes: [String; 0] = [];
     let inner = ssr_inner(&statics, &holes);
-    assert_eq!(inner, "${$__ssrChild('user-card', {})}");
+    insta::assert_snapshot!("ssr_inner_propless_child", fmt_array(&inner));
 }
 
 #[test]
@@ -282,35 +304,28 @@ fn ssr_method_shadow_wraps_with_style() {
         false,
         false,
         "",
-        "<b>${$__ssrText(this.x)}</b>",
+        static_inner("<b>x</b>"),
     );
-    assert_eq!(
-        method,
-        "$$__ssr(): string {\nreturn `<${this.$$__tag ?? 'my-tag'}>\
-         <template shadowrootmode=\"open\" shadowrootserializable=\"\">\
-         <style data-ssr>${css}</style>\
-         <b>${$__ssrText(this.x)}</b></template></${this.$$__tag ?? 'my-tag'}>`;\n}"
-    );
+    insta::assert_snapshot!("ssr_method_shadow_style", method);
 }
 
 #[test]
 fn ssr_method_shadow_without_css_has_no_style() {
-    let method = ssr_method("my-tag", None, false, false, "", "<b>x</b>");
-    assert_eq!(
-        method,
-        "$$__ssr(): string {\nreturn `<${this.$$__tag ?? 'my-tag'}>\
-         <template shadowrootmode=\"open\" shadowrootserializable=\"\">\
-         <b>x</b></template></${this.$$__tag ?? 'my-tag'}>`;\n}"
-    );
+    let method = ssr_method("my-tag", None, false, false, "", static_inner("<b>x</b>"));
+    insta::assert_snapshot!("ssr_method_shadow_no_css", method);
 }
 
 #[test]
 fn ssr_method_no_shadow_is_bare() {
-    let method = ssr_method("my-tag", Some("${css}"), true, false, "", "<b>x</b>");
-    assert_eq!(
-        method,
-        "$$__ssr(): string {\nreturn `<${this.$$__tag ?? 'my-tag'}><b>x</b></${this.$$__tag ?? 'my-tag'}>`;\n}"
+    let method = ssr_method(
+        "my-tag",
+        Some("${css}"),
+        true,
+        false,
+        "",
+        static_inner("<b>x</b>"),
     );
+    insta::assert_snapshot!("ssr_method_no_shadow", method);
 }
 
 #[test]
@@ -321,10 +336,7 @@ fn ssr_method_emits_prelude_before_return() {
         true,
         false,
         "const { x } = this;",
-        "<b>${x}</b>",
+        static_inner("<b>x</b>"),
     );
-    assert_eq!(
-        method,
-        "$$__ssr(): string {\nconst { x } = this;\nreturn `<${this.$$__tag ?? 'my-tag'}><b>${x}</b></${this.$$__tag ?? 'my-tag'}>`;\n}"
-    );
+    insta::assert_snapshot!("ssr_method_prelude", method);
 }

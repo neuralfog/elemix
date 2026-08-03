@@ -1,10 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ViewDataRichApp.ts
 ---
-import { $__ssrText, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__list, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -24,15 +23,15 @@ const _t0 = $__template('<div class="rich"><span class="str"> </span><span class
 const _t1 = $__templateEl('<li class="row"><!---->:<!----></li>');
 
 export class ViewDataRichApp extends Component<unknown, RichData> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'view-data-rich-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="rich"><span class="str">${$__ssrText(this.viewData.str)}</span><span class="num">${$__ssrText(this.viewData.num)}</span><span class="bool">${$__ssrText(this.viewData.bool ? 'yes' : 'no')}</span><span class="nil">${$__ssrText(this.viewData.nil ?? 'none')}</span><span class="tags">${$__ssrText(this.viewData.tags.join(','))}</span><span class="scores-len">${$__ssrText(this.viewData.scores.length)}</span><span class="scores-sum">${$__ssrText(this.viewData.scores.reduce(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'view-data-rich-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="rich"><span class="str">`, $__ssrText(this.viewData.str), `</span><span class="num">`, $__ssrText(this.viewData.num), `</span><span class="bool">`, $__ssrText(this.viewData.bool ? 'yes' : 'no'), `</span><span class="nil">`, $__ssrText(this.viewData.nil ?? 'none'), `</span><span class="tags">`, $__ssrText(this.viewData.tags.join(',')), `</span><span class="scores-len">`, $__ssrText(this.viewData.scores.length), `</span><span class="scores-sum">`, $__ssrText(this.viewData.scores.reduce(
                 (a, b) => a + b,
                 0,
-            ))}</span><span class="obj-a">${$__ssrText(this.viewData.obj.a)}</span><span class="obj-b">${$__ssrText(this.viewData.obj.b)}</span><span class="deep">${$__ssrText(this.viewData.nested.deep.value)}</span><ul class="rows">${($__ssrRepeat(
+            )), `</span><span class="obj-a">`, $__ssrText(this.viewData.obj.a), `</span><span class="obj-b">`, $__ssrText(this.viewData.obj.b), `</span><span class="deep">`, $__ssrText(this.viewData.nested.deep.value), `</span><ul class="rows">`, ($__ssrRepeat(
                     this.viewData.rows,
-                    (row) => `<li class="row">${$__ssrText(row.id)}:${$__ssrText(row.label)}</li>`,
+                    (row) => $__ssrTpl(`<li class="row">`, $__ssrText(row.id), `:`, $__ssrText(row.label), `</li>`),
                     (row) => row.id,
-                ))}</ul></div></template></${this.$$__tag ?? 'view-data-rich-app'}>`;
+                )), `</ul></div></template></${this.$$__tag ?? 'view-data-rich-app'}>`];
 }
 
     $$__view(): DocumentFragment {
@@ -100,3 +99,4 @@ return _r0;
 }
 $__defineComponent('view-data-rich-app', ViewDataRichApp);
 ViewDataRichApp.prototype.$$__tag = 'view-data-rich-app';
+ViewDataRichApp.$$__propSafe = true;

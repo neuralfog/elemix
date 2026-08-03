@@ -56,8 +56,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="stepper"><button>−</button><span class="count"> </span><button>+</button></div>');
 
 export class StepperWidget extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ui-stepper'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stepper"><button>−</button><span class="count">${$__ssrText(this.state.count)}</span><button>+</button></div></template></${this.$$__tag ?? 'ui-stepper'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ui-stepper'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stepper"><button>−</button><span class="count">`, $__ssrText(this.state.count), `</span><button>+</button></div></template></${this.$$__tag ?? 'ui-stepper'}>`];
 }
 
     state = $__state<State>({ count: 0 });
@@ -86,3 +86,4 @@ return _r0;
 StepperWidget.$$__sheets = [..._s0];
 $__defineComponent('ui-stepper', StepperWidget);
 StepperWidget.prototype.$$__tag = 'ui-stepper';
+StepperWidget.$$__propSafe = true;

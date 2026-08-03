@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/BeforeMountStoreApp.ts
 ---
@@ -20,8 +19,8 @@ export class BeforeMountStoreApp extends Component {
     $$__beforeMount(): void {
         this.seed();
     }
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'before-mount-store-app'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _t0 = (counter.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'before-mount-store-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'before-mount-store-app'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _t0 = (counter.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'before-mount-store-app'}>`];
 }
 
     seed(): void {
@@ -47,3 +46,4 @@ return _r0;
 }
 $__defineComponent('before-mount-store-app', BeforeMountStoreApp);
 BeforeMountStoreApp.prototype.$$__tag = 'before-mount-store-app';
+BeforeMountStoreApp.$$__propSafe = true;

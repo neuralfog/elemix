@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/CollectionApp.ts
 ---
-import { $__ssrText, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -26,17 +26,17 @@ const _t1 = $__templateEl('<li class="tag"> </li>');
 const _t2 = $__templateEl('<li class="score"><!---->: <!----></li>');
 
 export class CollectionApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'collection-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section class="set"><span class="set-size">${$__ssrText(this.state.tags.size)}</span><span class="set-has">${$__ssrText(this.state.tags.has('vip'))}</span><span class="set-keys">${$__ssrText(this.setKeys)}</span><span class="set-values">${$__ssrText(this.setValues)}</span><span class="set-entries">${$__ssrText(this.setEntries)}</span><span class="set-iter">${$__ssrText(this.setIter)}</span><span class="set-foreach">${$__ssrText(this.setForEach)}</span></section><section class="map"><span class="map-size">${$__ssrText(this.state.scores.size)}</span><span class="map-get">${$__ssrText(this.state.scores.get('alice'))}</span><span class="map-has">${$__ssrText(this.state.scores.has('alice'))}</span><span class="map-keys">${$__ssrText(this.mapKeys)}</span><span class="map-values">${$__ssrText(this.mapValues)}</span><span class="map-entries">${$__ssrText(this.mapEntries)}</span><span class="map-iter">${$__ssrText(this.mapIter)}</span><span class="map-total">${$__ssrText(this.total)}</span></section><section class="weak"><span class="ws-has">${$__ssrText(this.state.seen.has(this.token))}</span><span class="wm-has">${$__ssrText(this.state.meta.has(this.token))}</span><span class="wm-get">${$__ssrText(this.state.meta.get(this.token))}</span></section><div class="controls"><button class="add-tag">add tag</button><button class="remove-tag">remove tag</button><button class="clear-tags">clear tags</button><button class="bump-alice">bump</button><button class="set-bob">bob</button><button class="del-alice">del alice</button><button class="clear-scores">wipe</button><button class="add-seen">add seen</button><button class="del-seen">del seen</button><button class="set-meta">set meta</button><button class="del-meta">del meta</button></div><ul class="tags">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'collection-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section class="set"><span class="set-size">`, $__ssrText(this.state.tags.size), `</span><span class="set-has">`, $__ssrText(this.state.tags.has('vip')), `</span><span class="set-keys">`, $__ssrText(this.setKeys), `</span><span class="set-values">`, $__ssrText(this.setValues), `</span><span class="set-entries">`, $__ssrText(this.setEntries), `</span><span class="set-iter">`, $__ssrText(this.setIter), `</span><span class="set-foreach">`, $__ssrText(this.setForEach), `</span></section><section class="map"><span class="map-size">`, $__ssrText(this.state.scores.size), `</span><span class="map-get">`, $__ssrText(this.state.scores.get('alice')), `</span><span class="map-has">`, $__ssrText(this.state.scores.has('alice')), `</span><span class="map-keys">`, $__ssrText(this.mapKeys), `</span><span class="map-values">`, $__ssrText(this.mapValues), `</span><span class="map-entries">`, $__ssrText(this.mapEntries), `</span><span class="map-iter">`, $__ssrText(this.mapIter), `</span><span class="map-total">`, $__ssrText(this.total), `</span></section><section class="weak"><span class="ws-has">`, $__ssrText(this.state.seen.has(this.token)), `</span><span class="wm-has">`, $__ssrText(this.state.meta.has(this.token)), `</span><span class="wm-get">`, $__ssrText(this.state.meta.get(this.token)), `</span></section><div class="controls"><button class="add-tag">add tag</button><button class="remove-tag">remove tag</button><button class="clear-tags">clear tags</button><button class="bump-alice">bump</button><button class="set-bob">bob</button><button class="del-alice">del alice</button><button class="clear-scores">wipe</button><button class="add-seen">add seen</button><button class="del-seen">del seen</button><button class="set-meta">set meta</button><button class="del-meta">del meta</button></div><ul class="tags">`, ($__ssrRepeat(
                 [...this.state.tags],
-                (tag) => `<li class="tag">${$__ssrText(tag)}</li>`,
+                (tag) => $__ssrTpl(`<li class="tag">`, $__ssrText(tag), `</li>`),
                 (tag) => tag,
-            ))}</ul><ul class="scores">${($__ssrRepeat(
+            )), `</ul><ul class="scores">`, ($__ssrRepeat(
                 [...this.state.scores.keys()],
                 (name) =>
-                    `<li class="score">${$__ssrText(name)}: ${$__ssrText(this.state.scores.get(name))}</li>`,
+                    $__ssrTpl(`<li class="score">`, $__ssrText(name), `: `, $__ssrText(this.state.scores.get(name)), `</li>`),
                 (name) => name,
-            ))}</ul></template></${this.$$__tag ?? 'collection-app'}>`;
+            )), `</ul></template></${this.$$__tag ?? 'collection-app'}>`];
 }
 
 
@@ -273,3 +273,4 @@ return _r0;
 CollectionApp.$$__sheets = [..._s0];
 $__defineComponent('collection-app', CollectionApp);
 CollectionApp.prototype.$$__tag = 'collection-app';
+CollectionApp.$$__propSafe = true;

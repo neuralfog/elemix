@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ViewDataApp.ts
 ---
@@ -19,8 +18,8 @@ export type VData = {
 const _t0 = $__template('<div class="app"><h1 class="title"> </h1><view-data-mid></view-data-mid></div>');
 
 export class ViewDataApp extends Component<unknown, VData> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'view-data-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="app"><h1 class="title">${$__ssrText(this.viewData.title)}</h1>${$__ssrChild('view-data-mid', {})}</div></template></${this.$$__tag ?? 'view-data-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'view-data-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="app"><h1 class="title">`, $__ssrText(this.viewData.title), `</h1>`, $__ssrChild('view-data-mid', {}), `</div></template></${this.$$__tag ?? 'view-data-app'}>`];
 }
 
     $$__view(): DocumentFragment {
@@ -34,3 +33,4 @@ return _r0;
 }
 $__defineComponent('view-data-app', ViewDataApp);
 ViewDataApp.prototype.$$__tag = 'view-data-app';
+ViewDataApp.$$__propSafe = true;

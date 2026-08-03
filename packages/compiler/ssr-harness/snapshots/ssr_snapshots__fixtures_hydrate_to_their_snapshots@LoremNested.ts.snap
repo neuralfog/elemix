@@ -1,0 +1,64 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: compile_hydrate(&source).0
+input_file: fixtures/LoremNested.ts
+---
+import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    index: number;
+    text: string;
+};
+
+const css = `
+    :host { display: block; }
+    .para {
+        margin: 0;
+        padding: 12px 16px;
+        border-left: 3px solid #6366f1;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #1e293b;
+        font: 14px/1.6 system-ui, sans-serif;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="node"><p class="para"><!---->: <!----></p><slot></slot></div>');
+
+export class LoremNested extends Component<Props> {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _d1 = $__dynLens(_n0);
+const _v2 = $__splitRun(_n0.firstChild as Text, [0, 2], _d1);
+$__effect(() => {
+$__setText(_v2[0], (this.props.index));
+});
+$__effect(() => {
+$__setText(_v2[1], (this.props.text));
+});
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _x3 = document.createTextNode('');
+_n1.replaceWith(_x3);
+const _x4 = document.createTextNode('');
+_n2.replaceWith(_x4);
+$__effect(() => {
+$__setText(_x3, (this.props.index));
+});
+$__effect(() => {
+$__setText(_x4, (this.props.text));
+});
+return _r0;
+}
+}
+LoremNested.$$__sheets = [..._s0];
+$__defineComponent('lorem-nested', LoremNested);
+LoremNested.prototype.$$__tag = 'lorem-nested';

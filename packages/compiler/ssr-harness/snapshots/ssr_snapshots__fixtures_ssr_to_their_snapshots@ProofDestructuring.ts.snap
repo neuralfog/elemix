@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ProofDestructuring.ts
 ---
@@ -39,9 +38,9 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div><button class="dec">−</button><span class="count"> </span><button class="inc">+</button></div>');
 
 export class ProofDestructuring extends Component {
-$$__ssr(): string {
+$$__ssr(): unknown[] {
 const { inc, dec } = this;
-return `<${this.$$__tag ?? 'proof-destructuring'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div><button class="dec">−</button><span class="count">${$__ssrText(this.state.count)}</span><button class="inc">+</button></div></template></${this.$$__tag ?? 'proof-destructuring'}>`;
+return [`<${this.$$__tag ?? 'proof-destructuring'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div><button class="dec">−</button><span class="count">`, $__ssrText(this.state.count), `</span><button class="inc">+</button></div></template></${this.$$__tag ?? 'proof-destructuring'}>`];
 }
 
     state = $__state<State>({ count: 0 });
@@ -71,3 +70,4 @@ return _r0;
 ProofDestructuring.$$__sheets = [..._s0];
 $__defineComponent('proof-destructuring', ProofDestructuring);
 ProofDestructuring.prototype.$$__tag = 'proof-destructuring';
+ProofDestructuring.$$__propSafe = true;

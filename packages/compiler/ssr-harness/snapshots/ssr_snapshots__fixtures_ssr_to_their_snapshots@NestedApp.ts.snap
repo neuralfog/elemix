@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/NestedApp.ts
 ---
-import { $__ssrText, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -76,16 +76,16 @@ const _t1 = $__templateEl('<div class="category"><div class="head"><strong> </st
 const _t2 = $__templateEl('<li> </li>');
 
 export class NestedApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'nested-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="tree">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'nested-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="tree">`, ($__ssrRepeat(
                 this.state.categories,
-                (category) => `<div class="category"><div class="head"><strong>${$__ssrText(category.name)}</strong><button>+ item</button></div><ul>${($__ssrRepeat(
+                (category) => $__ssrTpl(`<div class="category"><div class="head"><strong>`, $__ssrText(category.name), `</strong><button>+ item</button></div><ul>`, ($__ssrRepeat(
                             category.items,
-                            (item) => `<li>${$__ssrText(item.name)}</li>`,
+                            (item) => $__ssrTpl(`<li>`, $__ssrText(item.name), `</li>`),
                             (item) => item.id,
-                        ))}</ul></div>`,
+                        )), `</ul></div>`),
                 (category) => category.id,
-            ))}</div></template></${this.$$__tag ?? 'nested-app'}>`;
+            )), `</div></template></${this.$$__tag ?? 'nested-app'}>`];
 }
 
 
@@ -141,3 +141,4 @@ return _r0;
 NestedApp.$$__sheets = [..._s0];
 $__defineComponent('nested-app', NestedApp);
 NestedApp.prototype.$$__tag = 'nested-app';
+NestedApp.$$__propSafe = true;

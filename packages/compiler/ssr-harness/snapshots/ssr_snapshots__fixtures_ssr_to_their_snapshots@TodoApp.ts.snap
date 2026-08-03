@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/TodoApp.ts
 ---
-import { $__ssrText, $__ssrAttr, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrAttr, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__model, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
@@ -76,12 +76,12 @@ const _t0 = $__template('<h3>Todos</h3><div class="row"><input type="text" place
 const _t1 = $__templateEl('<li><span> </span><button class="remove">×</button></li>');
 
 export class TodoApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'todo-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><h3>Todos</h3><div class="row"><input type="text" placeholder="What needs doing?"${$__ssrAttr('value', (this.state.draft).value)}/><button class="add">Add</button></div><ul>${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'todo-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><h3>Todos</h3><div class="row"><input type="text" placeholder="What needs doing?"${$__ssrAttr('value', (this.state.draft).value)}/><button class="add">Add</button></div><ul>`, ($__ssrRepeat(
                 this.state.todos,
-                (todo) => `<li><span>${$__ssrText(todo.text)}</span><button class="remove">×</button></li>`,
+                (todo) => $__ssrTpl(`<li><span>`, $__ssrText(todo.text), `</span><button class="remove">×</button></li>`),
                 (todo) => todo.id,
-            ))}</ul></template></${this.$$__tag ?? 'todo-app'}>`;
+            )), `</ul></template></${this.$$__tag ?? 'todo-app'}>`];
 }
 
 
@@ -130,3 +130,4 @@ return _r0;
 TodoApp.$$__sheets = [..._s0];
 $__defineComponent('todo-app', TodoApp);
 TodoApp.prototype.$$__tag = 'todo-app';
+TodoApp.$$__propSafe = true;

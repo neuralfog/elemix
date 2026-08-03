@@ -1,10 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrCycleApp.ts
 ---
-import { $__ssrText, $__ssrChild, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrChild, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -19,14 +18,14 @@ const _t2 = $__templateEl('<span class="empty">unmounted</span>');
 const _t3 = $__templateEl('<li> </li>');
 
 export class SsrCycleApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-cycle-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="stage">${(this.state.mounted
-                    ? `${$__ssrChild('ssr-cycle-probe', {})}`
-                    : `<span class="empty">unmounted</span>`)}</div><button class="toggle">toggle</button><ul class="log">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-cycle-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="stage">`, (this.state.mounted
+                    ? $__ssrTpl($__ssrChild('ssr-cycle-probe', {}))
+                    : $__ssrTpl(`<span class="empty">unmounted</span>`)), `</div><button class="toggle">toggle</button><ul class="log">`, ($__ssrRepeat(
                 cycle.entries,
-                (entry) => `<li>${$__ssrText(entry.event)}</li>`,
+                (entry) => $__ssrTpl(`<li>`, $__ssrText(entry.event), `</li>`),
                 (entry) => String(entry.id),
-            ))}</ul></template></${this.$$__tag ?? 'ssr-cycle-app'}>`;
+            )), `</ul></template></${this.$$__tag ?? 'ssr-cycle-app'}>`];
 }
 
     state = $__state<State>({ mounted: true });
@@ -63,3 +62,4 @@ return _r0;
 }
 $__defineComponent('ssr-cycle-app', SsrCycleApp);
 SsrCycleApp.prototype.$$__tag = 'ssr-cycle-app';
+SsrCycleApp.$$__propSafe = true;

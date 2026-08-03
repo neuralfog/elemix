@@ -1,11 +1,12 @@
 ---
 source: ssr-harness/ssr.rs
+assertion_line: 115
 expression: method
 ---
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'app-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card">${(this.hasSlot('header')
-                ? `<div class="header"><slot name="header"></slot></div>`
-                : '')} <div class="body"><slot></slot></div> ${(this.hasSlot('footer')
-                ? `<div class="footer"><slot name="footer"></slot></div>`
-                : '')}</div></template></${this.$$__tag ?? 'app-card'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'app-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card">`, (this.hasSlot('header')
+                ? $__ssrTpl(`<div class="header"><slot name="header"></slot></div>`)
+                : ''), ` <div class="body"><slot></slot></div> `, (this.hasSlot('footer')
+                ? $__ssrTpl(`<div class="footer"><slot name="footer"></slot></div>`)
+                : ''), `</div></template></${this.$$__tag ?? 'app-card'}>`];
 }

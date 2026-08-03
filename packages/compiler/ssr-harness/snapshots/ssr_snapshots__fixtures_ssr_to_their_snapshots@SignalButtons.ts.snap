@@ -29,8 +29,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="buttons"><button>−</button><button>Reset</button><button>+</button></div>');
 
 export class SignalButtons extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'signal-buttons'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="buttons"><button>−</button><button>Reset</button><button>+</button></div></template></${this.$$__tag ?? 'signal-buttons'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'signal-buttons'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="buttons"><button>−</button><button>Reset</button><button>+</button></div></template></${this.$$__tag ?? 'signal-buttons'}>`];
 }
 
 
@@ -60,3 +60,4 @@ return _r0;
 SignalButtons.$$__sheets = [..._s0];
 $__defineComponent('signal-buttons', SignalButtons);
 SignalButtons.prototype.$$__tag = 'signal-buttons';
+SignalButtons.$$__propSafe = true;

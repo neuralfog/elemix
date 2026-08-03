@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrStoreControls.ts
 ---
@@ -15,8 +14,8 @@ const _t0 = $__template('<div class="panel"><span class="label">Child controls</
 
 export class SsrStoreControls extends Component<Props> {
     static $$__client = true;
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-store-controls'}></${this.$$__tag ?? 'ssr-store-controls'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-store-controls'}></${this.$$__tag ?? 'ssr-store-controls'}>`];
 }
 
     dec = (): void => {

@@ -28,8 +28,8 @@ export class InheritBase extends Component {
     $$__effects(): void {
         $__effect(() => this.mirrorBase());
     }
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'inherit-base'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${baseCss}</style>${(() => {const _t0 = (this.state.count);return `<button class="btn" data-t="${$__ssrLen(_t0)}">count ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'inherit-base'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'inherit-base'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${baseCss}</style>${(() => {const _t0 = (this.state.count);return `<button class="btn" data-t="${$__ssrLen(_t0)}">count ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'inherit-base'}>`];
 }
 
 
@@ -63,6 +63,7 @@ return _r0;
 InheritBase.$$__sheets = [..._s0];
 $__defineComponent('inherit-base', InheritBase);
 InheritBase.prototype.$$__tag = 'inherit-base';
+InheritBase.$$__propSafe = true;
 
 const _s1 = $__sheet(derivedCss);
 export class InheritDerived extends InheritBase {
@@ -86,3 +87,4 @@ export class InheritDerived extends InheritBase {
 InheritDerived.$$__sheets = [...(Object.getPrototypeOf(InheritDerived).$$__sheets ?? []), ..._s1];
 $__defineComponent('inherit-derived', InheritDerived);
 InheritDerived.prototype.$$__tag = 'inherit-derived';
+InheritDerived.$$__propSafe = true;

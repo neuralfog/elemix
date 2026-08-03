@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrStoreApp.ts
 ---
@@ -17,8 +16,8 @@ type State = {
 const _t0 = $__template('<div class="readout">Parent reads: <strong> </strong></div><ssr-store-controls></ssr-store-controls>');
 
 export class SsrStoreApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-store-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="readout">Parent reads: <strong>${$__ssrText(this.state.counter.value)}</strong></div>${$__ssrChild('ssr-store-controls', {counter: (this.state.counter)})}</template></${this.$$__tag ?? 'ssr-store-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-store-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="readout">Parent reads: <strong>`, $__ssrText(this.state.counter.value), `</strong></div>`, $__ssrChild('ssr-store-controls', {counter: (this.state.counter)}), `</template></${this.$$__tag ?? 'ssr-store-app'}>`];
 }
 
     state = $__state<State>({
@@ -40,3 +39,4 @@ return _r0;
 }
 $__defineComponent('ssr-store-app', SsrStoreApp);
 SsrStoreApp.prototype.$$__tag = 'ssr-store-app';
+SsrStoreApp.$$__propSafe = true;

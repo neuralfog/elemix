@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/TwoComponents.ts
 ---
@@ -12,8 +11,8 @@ const _t0 = $__template('<button class="first"> </button>');
 const _t1 = $__template('<button class="second"> </button>');
 
 export class FirstWidget extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'first-widget'}><template shadowrootmode="open" shadowrootserializable=""><button class="first">${$__ssrText(this.state.n)}</button></template></${this.$$__tag ?? 'first-widget'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'first-widget'}><template shadowrootmode="open" shadowrootserializable=""><button class="first">`, $__ssrText(this.state.n), `</button></template></${this.$$__tag ?? 'first-widget'}>`];
 }
 
     state = $__state<{ n: number }>({ n: 1 });
@@ -33,10 +32,11 @@ return _r0;
 }
 $__defineComponent('first-widget', FirstWidget);
 FirstWidget.prototype.$$__tag = 'first-widget';
+FirstWidget.$$__propSafe = true;
 
 export class SecondWidget extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'second-widget'}><template shadowrootmode="open" shadowrootserializable=""><button class="second">${$__ssrText(this.state.label)}</button></template></${this.$$__tag ?? 'second-widget'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'second-widget'}><template shadowrootmode="open" shadowrootserializable=""><button class="second">`, $__ssrText(this.state.label), `</button></template></${this.$$__tag ?? 'second-widget'}>`];
 }
 
     state = $__state<{ label: string }>({ label: 'hi' });
@@ -56,3 +56,4 @@ return _r3;
 }
 $__defineComponent('second-widget', SecondWidget);
 SecondWidget.prototype.$$__tag = 'second-widget';
+SecondWidget.$$__propSafe = true;

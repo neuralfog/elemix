@@ -585,37 +585,175 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
     }
 }
 
-/// Walk the tree producing an SSR template-literal body: static HTML plus
-/// `${...}` interpolations that call the SSR runtime helpers. Mirrors [`serialize`]
-/// but emits string content destined for a JS template literal (backticks are
-/// added by the caller) rather than DOM-clone markup + positioned holes.
+/// A piece of an SSR rope: either a STATIC run (static HTML plus leaf `${...}`
+/// interpolations - backtick-wrapped at emit) or a CONTENT-hole expression
+/// (emitted bare; evaluates at runtime to a nested rope). Splitting content out
+/// of the backtick run is what makes deep nesting O(total) instead of O(depth^2):
+/// a child references its slot rope, it is never copied into a growing string.
+pub enum Chunk {
+    Static(String),
+    Content(String),
+}
+
+/// Accumulates chunks, coalescing adjacent static runs so the emitted rope is a
+/// flat sequence of references.
+pub struct Rope {
+    pub chunks: Vec<Chunk>,
+}
+
+impl Default for Rope {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Rope {
+    pub fn new() -> Self {
+        Rope { chunks: Vec::new() }
+    }
+
+    /// Append static/leaf text, merging into the trailing static chunk.
+    pub fn static_str(&mut self, s: &str) {
+        if s.is_empty() {
+            return;
+        }
+        if let Some(Chunk::Static(last)) = self.chunks.last_mut() {
+            last.push_str(s);
+        } else {
+            self.chunks.push(Chunk::Static(s.to_string()));
+        }
+    }
+
+    /// Append a content-hole expression as its own chunk.
+    pub fn content(&mut self, expr: String) {
+        self.chunks.push(Chunk::Content(expr));
+    }
+
+    /// Fold another rope's chunks in, preserving the static-coalescing.
+    pub fn extend(&mut self, other: Vec<Chunk>) {
+        for c in other {
+            match c {
+                Chunk::Static(s) => self.static_str(&s),
+                Chunk::Content(e) => self.content(e),
+            }
+        }
+    }
+}
+
+fn fmt_chunk(c: &Chunk) -> String {
+    match c {
+        Chunk::Static(s) => format!("`{s}`"),
+        Chunk::Content(e) => e.clone(),
+    }
+}
+
+/// Format chunks as a JS array literal (a rope) - used for a `$$__ssr` return.
+pub fn fmt_array(chunks: &[Chunk]) -> String {
+    let parts: Vec<String> = chunks.iter().map(fmt_chunk).collect();
+    format!("[{}]", parts.join(", "))
+}
+
+/// Format chunks as a single rope expression: one chunk unwrapped, many as an
+/// array, none as the empty string. Used for a nested slot value.
+fn fmt_rope(chunks: &[Chunk]) -> String {
+    match chunks.len() {
+        0 => "''".to_string(),
+        1 => fmt_chunk(&chunks[0]),
+        _ => fmt_array(chunks),
+    }
+}
+
+/// The light-DOM direct-child slot names (`<x slot="header">`) of a component's
+/// slotted content, known statically at compile time. Passed to `$__ssrChild` so
+/// `hasSlot(name)` resolves during the child's own server render - no runtime
+/// scan of the (possibly huge) rendered slot string.
+fn collect_slot_names(children: &[Child]) -> Vec<String> {
+    let mut names = Vec::new();
+    for child in children {
+        if let Child::Elem(el) = child {
+            if let Some(name) = static_attr_value(&el.static_attrs, "slot") {
+                names.push(name);
+            }
+        }
+    }
+    names
+}
+
+/// Read a static `name="value"` attribute out of a raw attribute string, guarding
+/// against a suffix match (`data-slot=` is not `slot=`). Returns the value.
+fn static_attr_value(attrs: &str, name: &str) -> Option<String> {
+    let needle = format!("{name}=\"");
+    let at = attrs.find(&needle)?;
+    if at > 0 && !attrs.as_bytes()[at - 1].is_ascii_whitespace() {
+        return None;
+    }
+    let rest = &attrs[at + needle.len()..];
+    let end = rest.find('"')?;
+    Some(rest[..end].to_string())
+}
+
+/// Emit a nested-component content chunk: `$__ssrChild(tag, {props}, slot?, attrs?,
+/// slotNames?)`. Trailing optional args are filled with placeholders only when a
+/// later one is present.
+fn emit_child(tag: &str, props: &str, slot: &[Chunk], attrs: &str, names: &[String]) -> String {
+    let mut args = vec![format!("'{tag}'"), format!("{{{props}}}")];
+    let need_names = !names.is_empty();
+    let need_attrs = !attrs.is_empty() || need_names;
+    let need_slot = !slot.is_empty() || need_attrs;
+    if need_slot {
+        args.push(if slot.is_empty() {
+            "undefined".to_string()
+        } else {
+            fmt_rope(slot)
+        });
+    }
+    if need_attrs {
+        args.push(if attrs.is_empty() {
+            "''".to_string()
+        } else {
+            format!("`{attrs}`")
+        });
+    }
+    if need_names {
+        let list: Vec<String> = names.iter().map(|n| format!("'{n}'")).collect();
+        args.push(format!("[{}]", list.join(", ")));
+    }
+    format!("$__ssrChild({})", args.join(", "))
+}
+
+/// Walk the tree producing an SSR rope: static runs (static HTML plus leaf
+/// `${...}` interpolations) interspersed with content-hole chunks. Mirrors
+/// [`serialize`] but emits string content for a JS rope rather than DOM-clone
+/// markup + positioned holes.
 ///
 /// Hole handling:
-///   * Text content → `${$__ssrText(expr)}`.
+///   * Text content → leaf `${$__ssrText(expr)}` in the current static run.
 ///   * List/Child content (`repeat`/`when`/`choose`/`match`, ternary/nested `tpl`)
-///     → SSR-lowered to a string via [`crate::ssr_expr::rewrite_content_expr`].
-///   * A nested component (`<my-tag>`) → `${$__ssrChild('my-tag', {props}, slot)}`.
-///   * Attr/Class/Style attribute holes → `name="${$__ssrAttr(expr)}"`.
+///     → a content chunk via [`crate::ssr_expr::rewrite_content_expr`].
+///   * A nested component (`<my-tag>`) → a `$__ssrChild(...)` content chunk.
+///   * Attr/Class/Style attribute holes → `name="${$__ssrAttr(expr)}"` (leaf).
 ///   * Event/Model/OnModel/Prop/Ref attribute holes → dropped (client wiring).
 ///
 /// The dropped set is matched by the same sigils [`crate::grammar`] classifies
 /// on (`@` → event, `~` → model/onmodel, `:` → prop and `:ref` → ref); every one
 /// of those is client-only and has no server-rendered form.
-fn serialize_ssr(children: &[Child], out: &mut String, counter: &mut usize, hydratable: bool) {
+fn serialize_ssr(children: &[Child], r: &mut Rope, counter: &mut usize, hydratable: bool) {
     for child in children {
         match child {
-            Child::Text(t) => out.push_str(&esc_tpl(t)),
+            Child::Text(t) => r.static_str(&esc_tpl(t)),
             Child::Anchor(expr, _) => {
                 if crate::grammar::is_text_content(expr) {
-                    out.push_str(&format!("${{$__ssrText({expr})}}"));
+                    // A text hole is emitted as its OWN chunk (not baked into the
+                    // backtick run): `$__ssrText` passes a projected `` tpl`…` ``
+                    // rope through untouched, and a run would force it to a string
+                    // - the O(depth^2) copy. A plain string value stays escaped.
+                    r.content(format!("$__ssrText({expr})"));
                 } else {
                     // A directive hole (`repeat`/`when`/`choose`/`match`) or a
-                    // nested `tpl` - SSR-lower it to a string (slice 3). The
-                    // rewrite renders any nested `tpl` and reaches components
+                    // nested `tpl` - SSR-lower it to a rope-producing expression.
+                    // The rewrite renders any nested `tpl` and reaches components
                     // through directives via `$__ssrChild`.
-                    out.push_str("${");
-                    out.push_str(&crate::ssr_expr::rewrite_content_expr(expr));
-                    out.push('}');
+                    r.content(crate::ssr_expr::rewrite_content_expr(expr));
                 }
             }
             // A hyphenated tag is a custom element - a nested elemix component.
@@ -638,32 +776,17 @@ fn serialize_ssr(children: &[Child], out: &mut String, counter: &mut usize, hydr
                     props.push_str(expr);
                     props.push(')');
                 }
-                let mut slot = String::new();
+                let mut slot = Rope::new();
                 serialize_ssr(&el.children, &mut slot, counter, hydratable);
                 // Static attributes on the host (e.g. `name="rating"` on a
                 // form-associated child) must render too - the child's own
                 // `$$__ssr()` can't know them, so pass them for `$__ssrChild` to
                 // splice onto the host tag (like `data-h`).
                 let attrs = esc_tpl(&el.static_attrs);
-                out.push_str("${$__ssrChild('");
-                out.push_str(&el.tag);
-                out.push_str("', {");
-                out.push_str(&props);
-                out.push('}');
-                if !attrs.is_empty() {
-                    out.push_str(", `");
-                    out.push_str(&slot);
-                    out.push_str("`, `");
-                    out.push_str(&attrs);
-                    out.push('`');
-                } else if !slot.is_empty() {
-                    out.push_str(", `");
-                    out.push_str(&slot);
-                    out.push('`');
-                }
-                out.push_str(")}");
+                let names = collect_slot_names(&el.children);
+                r.content(emit_child(&el.tag, &props, &slot.chunks, &attrs, &names));
             }
-            Child::Elem(el) => serialize_element(el, out, counter, hydratable),
+            Child::Elem(el) => serialize_element(el, r, counter, hydratable),
         }
     }
 }
@@ -674,18 +797,18 @@ fn serialize_ssr(children: &[Child], out: &mut String, counter: &mut usize, hydr
 /// inlines the values - so the served HTML carries NO `<!---->` markers and
 /// hydration recovers the dynamic text nodes by splitting the merged run at those
 /// lengths. Elements without dynamic text serialize flat.
-fn serialize_element(el: &El, out: &mut String, counter: &mut usize, hydratable: bool) {
+fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: bool) {
     if el.self_closing {
-        out.push('<');
-        out.push_str(&el.tag);
-        out.push_str(&esc_tpl(&el.static_attrs));
-        emit_attr_holes(el, out);
+        r.static_str("<");
+        r.static_str(&el.tag);
+        r.static_str(&esc_tpl(&el.static_attrs));
+        r.static_str(&attr_holes_str(el));
         if VOID.contains(&el.tag.as_str()) {
-            out.push_str("/>");
+            r.static_str("/>");
         } else {
-            out.push_str("></");
-            out.push_str(&el.tag);
-            out.push('>');
+            r.static_str("></");
+            r.static_str(&el.tag);
+            r.static_str(">");
         }
         return;
     }
@@ -707,64 +830,103 @@ fn serialize_element(el: &El, out: &mut String, counter: &mut usize, hydratable:
     };
 
     if text_count == 0 {
-        out.push('<');
-        out.push_str(&el.tag);
-        out.push_str(&esc_tpl(&el.static_attrs));
-        emit_attr_holes(el, out);
-        out.push('>');
-        serialize_ssr(&el.children, out, counter, hydratable);
-        out.push_str("</");
-        out.push_str(&el.tag);
-        out.push('>');
+        r.static_str("<");
+        r.static_str(&el.tag);
+        r.static_str(&esc_tpl(&el.static_attrs));
+        r.static_str(&attr_holes_str(el));
+        r.static_str(">");
+        serialize_ssr(&el.children, r, counter, hydratable);
+        r.static_str("</");
+        r.static_str(&el.tag);
+        r.static_str(">");
         return;
     }
 
+    // The element has hydratable dynamic text merged with siblings: stamp `data-t`
+    // lengths and inline the values (see the doc on `serialize_element`). The text
+    // values are evaluated ONCE into `_t` consts inside an IIFE. If the element
+    // also holds content holes (components / directives) it must render as a rope
+    // (a content chunk); a pure-text element stays a string leaf in the run.
     let base = *counter;
     *counter += text_count;
-    out.push_str("${(() => {");
+    let has_content = el.children.iter().any(|c| match c {
+        Child::Anchor(e, _) => !crate::grammar::is_text_content(e),
+        Child::Elem(_) => true,
+        _ => false,
+    });
+
+    let mut decls = String::new();
     let mut ti = 0;
     for child in &el.children {
         if let Child::Anchor(e, _) = child {
             if crate::grammar::is_text_content(e) {
-                out.push_str(&format!("const _t{} = ({e});", base + ti));
+                decls.push_str(&format!("const _t{} = ({e});", base + ti));
                 ti += 1;
             }
         }
     }
-    out.push_str("return `<");
-    out.push_str(&el.tag);
-    out.push_str(&esc_tpl(&el.static_attrs));
-    emit_attr_holes(el, out);
-    out.push_str(" data-t=\"");
+
+    let mut open = String::new();
+    open.push('<');
+    open.push_str(&el.tag);
+    open.push_str(&esc_tpl(&el.static_attrs));
+    open.push_str(&attr_holes_str(el));
+    open.push_str(" data-t=\"");
     for i in 0..text_count {
         if i > 0 {
-            out.push(',');
+            open.push(',');
         }
-        out.push_str(&format!("${{$__ssrLen(_t{})}}", base + i));
+        open.push_str(&format!("${{$__ssrLen(_t{})}}", base + i));
     }
-    out.push_str("\">");
+    open.push_str("\">");
+    let close = format!("</{}>", el.tag);
+
+    if !has_content {
+        // Pure-text: one string via an IIFE, embedded as a leaf in the run.
+        let mut body = String::new();
+        let mut tj = 0;
+        for child in &el.children {
+            match child {
+                Child::Text(t) => body.push_str(&esc_tpl(t)),
+                Child::Anchor(e, _) if crate::grammar::is_text_content(e) => {
+                    body.push_str(&format!("${{$__ssrText(_t{})}}", base + tj));
+                    tj += 1;
+                }
+                _ => {}
+            }
+        }
+        r.static_str(&format!(
+            "${{(() => {{{decls}return `{open}{body}{close}`;}})()}}"
+        ));
+        return;
+    }
+
+    // Mixed text + content: the IIFE returns a rope array.
+    let mut inner = Rope::new();
+    inner.static_str(&open);
     let mut tj = 0;
     for child in &el.children {
         match child {
-            Child::Text(t) => out.push_str(&esc_tpl(t)),
+            Child::Text(t) => inner.static_str(&esc_tpl(t)),
             Child::Anchor(e, _) if crate::grammar::is_text_content(e) => {
-                out.push_str(&format!("${{$__ssrText(_t{})}}", base + tj));
+                inner.static_str(&format!("${{$__ssrText(_t{})}}", base + tj));
                 tj += 1;
             }
             Child::Anchor(e, _) => {
-                out.push_str("${");
-                out.push_str(&crate::ssr_expr::rewrite_content_expr(e));
-                out.push('}');
+                inner.content(crate::ssr_expr::rewrite_content_expr(e));
             }
-            _ => serialize_ssr(std::slice::from_ref(child), out, counter, hydratable),
+            _ => serialize_ssr(std::slice::from_ref(child), &mut inner, counter, hydratable),
         }
     }
-    out.push_str("</");
-    out.push_str(&el.tag);
-    out.push_str(">`;})()}");
+    inner.static_str(&close);
+    r.content(format!(
+        "(() => {{{decls}return {};}})()",
+        fmt_array(&inner.chunks)
+    ));
 }
 
-fn emit_attr_holes(el: &El, out: &mut String) {
+fn attr_holes_str(el: &El) -> String {
+    let mut out = String::new();
     for (name, expr, _) in &el.attr_holes {
         // `~model` two-way binds a ref to the input. It's client wiring, but the
         // ref's CURRENT value must render server-side as the `value` attribute -
@@ -790,6 +952,7 @@ fn emit_attr_holes(el: &El, out: &mut String) {
             _ => out.push_str(&format!("${{$__ssrAttr('{name}', {expr})}}")),
         }
     }
+    out
 }
 
 /// Escape the three JS template-literal metacharacters so a static HTML run sits
@@ -813,24 +976,26 @@ pub fn esc_tpl(s: &str) -> String {
 /// HTML with `${...}` interpolations that call the SSR runtime helpers. Backticks
 /// are added by the caller ([`crate::ssr::ssr_method`]). Constructs the node tree
 /// exactly like [`parse_spanned`], then serializes via [`serialize_ssr`].
-pub fn ssr_inner(statics: &[String], holes: &[String]) -> String {
+pub fn ssr_inner(statics: &[String], holes: &[String]) -> Vec<Chunk> {
     ssr_body(statics, holes, true)
 }
 
 /// Serialize a nested `` tpl`…` `` (found inside a structural content hole) to a
-/// backtick-wrapped SSR string literal. `hydratable = false`: content in a
-/// structural region is server-rendered but never split-hydrated, so no `data-t`
-/// machinery is emitted (text holes inline as `${$__ssrText(...)}`). Used by
-/// [`crate::ssr_expr::rewrite_content_expr`].
+/// `$__ssrTpl(...)` rope descriptor - eager, so its dynamic values are captured at
+/// construction (not deferred). `hydratable = false`: content in a structural
+/// region is server-rendered but never split-hydrated, so no `data-t` machinery
+/// is emitted (text holes inline as `${$__ssrText(...)}`). Used by
+/// [`crate::ssr_expr::rewrite_content_expr`] and [`crate::free_template`].
 pub fn ssr_nested_tpl(statics: &[String], holes: &[String]) -> String {
-    format!("`{}`", ssr_body(statics, holes, false))
+    let chunks = ssr_body(statics, holes, false);
+    let parts: Vec<String> = chunks.iter().map(fmt_chunk).collect();
+    format!("$__ssrTpl({})", parts.join(", "))
 }
 
-/// Build the SSR template-literal body from a template's statics + holes.
-/// `hydratable` gates the markerless `data-t` machinery: `true` at the top level
-/// (the component's own reactive text hydrates), `false` inside a structural
-/// region.
-fn ssr_body(statics: &[String], holes: &[String], hydratable: bool) -> String {
+/// Build the SSR rope from a template's statics + holes. `hydratable` gates the
+/// markerless `data-t` machinery: `true` at the top level (the component's own
+/// reactive text hydrates), `false` inside a structural region.
+fn ssr_body(statics: &[String], holes: &[String], hydratable: bool) -> Vec<Chunk> {
     let mut p = Parser::new();
     for (i, s) in statics.iter().enumerate() {
         p.feed_static(s);
@@ -842,10 +1007,10 @@ fn ssr_body(statics: &[String], holes: &[String], hydratable: bool) -> String {
     let mut root = p.stack.swap_remove(0);
     normalize(&mut root.children);
 
-    let mut out = String::new();
+    let mut r = Rope::new();
     let mut counter = 0;
-    serialize_ssr(&root.children, &mut out, &mut counter, hydratable);
-    out
+    serialize_ssr(&root.children, &mut r, &mut counter, hydratable);
+    r.chunks
 }
 
 /// A top-level structural content hole (`repeat`/`when`/`choose`/`match` or a

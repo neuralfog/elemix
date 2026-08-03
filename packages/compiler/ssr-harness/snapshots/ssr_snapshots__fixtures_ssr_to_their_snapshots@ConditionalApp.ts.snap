@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ConditionalApp.ts
 ---
-import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -82,12 +82,12 @@ const _t2 = $__templateEl('<div class="card guest"><strong>You are signed out</s
 const _t3 = $__templateEl('<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>');
 
 export class ConditionalApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'conditional-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel">${(this.state.loggedIn
-                    ? `<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>`
-                    : `<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>`)} ${(this.state.showTip
-                    ? `<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>`
-                    : '')}</div><div class="buttons"><button>${$__ssrText(this.state.loggedIn ? 'Sign out' : 'Sign in')}</button><button class="ghost">${$__ssrText(this.state.showTip ? 'Hide tip' : 'Show tip')}</button></div></template></${this.$$__tag ?? 'conditional-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'conditional-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel">`, (this.state.loggedIn
+                    ? $__ssrTpl(`<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>`)
+                    : $__ssrTpl(`<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>`)), ` `, (this.state.showTip
+                    ? $__ssrTpl(`<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>`)
+                    : ''), `</div><div class="buttons"><button>`, $__ssrText(this.state.loggedIn ? 'Sign out' : 'Sign in'), `</button><button class="ghost">`, $__ssrText(this.state.showTip ? 'Hide tip' : 'Show tip'), `</button></div></template></${this.$$__tag ?? 'conditional-app'}>`];
 }
 
 
@@ -141,3 +141,4 @@ return _r0;
 ConditionalApp.$$__sheets = [..._s0];
 $__defineComponent('conditional-app', ConditionalApp);
 ConditionalApp.prototype.$$__tag = 'conditional-app';
+ConditionalApp.$$__propSafe = true;

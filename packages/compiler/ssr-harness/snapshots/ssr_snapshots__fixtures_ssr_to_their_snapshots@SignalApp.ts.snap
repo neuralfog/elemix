@@ -43,8 +43,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<signal-value></signal-value><signal-buttons></signal-buttons>');
 
 export class SignalApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'signal-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${$__ssrChild('signal-value', {})}${$__ssrChild('signal-buttons', {})}</template></${this.$$__tag ?? 'signal-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'signal-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>`, $__ssrChild('signal-value', {}), $__ssrChild('signal-buttons', {}), `</template></${this.$$__tag ?? 'signal-app'}>`];
 }
 
 
@@ -56,3 +56,4 @@ return _r0;
 SignalApp.$$__sheets = [..._s0];
 $__defineComponent('signal-app', SignalApp);
 SignalApp.prototype.$$__tag = 'signal-app';
+SignalApp.$$__propSafe = true;

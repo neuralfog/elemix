@@ -1,10 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/MethodHelperApp.ts
 ---
-import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -16,10 +15,10 @@ const _t2 = $__templateEl('<div class="open"><!----><span class="count"> </span>
 const _t3 = $__templateEl('<div class="closed">closed</div>');
 
 export class MethodHelperApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'method-helper-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="panel"><div class="row">${(`<span class="chip">${$__ssrText('a')}</span>`)}${(`<span class="chip">${$__ssrText('b')}</span>`)}</div> ${(this.state.open
-                        ? `<div class="open">${(`<span class="chip">${$__ssrText('open')}</span>`)}<span class="count">${$__ssrText(this.state.count)}</span></div>`
-                        : `<div class="closed">closed</div>`)} <button class="toggle">toggle</button><button class="inc">+1</button></div></template></${this.$$__tag ?? 'method-helper-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'method-helper-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="panel"><div class="row">`, ($__ssrTpl(`<span class="chip">`, $__ssrText('a'), `</span>`)), ($__ssrTpl(`<span class="chip">`, $__ssrText('b'), `</span>`)), `</div> `, (this.state.open
+                        ? $__ssrTpl(`<div class="open">`, ($__ssrTpl(`<span class="chip">`, $__ssrText('open'), `</span>`)), `<span class="count">`, $__ssrText(this.state.count), `</span></div>`)
+                        : $__ssrTpl(`<div class="closed">closed</div>`)), ` <button class="toggle">toggle</button><button class="inc">+1</button></div></template></${this.$$__tag ?? 'method-helper-app'}>`];
 }
 
     state = $__state<State>({ open: true, count: 0 });
@@ -85,3 +84,4 @@ return _r0;
 }
 $__defineComponent('method-helper-app', MethodHelperApp);
 MethodHelperApp.prototype.$$__tag = 'method-helper-app';
+MethodHelperApp.$$__propSafe = true;

@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/RefApp.ts
 ---
-import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__ref, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 
@@ -69,10 +69,10 @@ const _t0 = $__template('<input type="text" placeholder="Type something…"/><di
 const _t1 = $__templateEl('<div class="out">Input is <!---->px wide</div>');
 
 export class RefApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ref-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><input type="text" placeholder="Type something…"/><div class="buttons"><button>Focus</button><button class="ghost">Measure width</button></div> ${(this.state.width
-                ? `<div class="out">Input is ${$__ssrText(this.state.width)}px wide</div>`
-                : '')}</template></${this.$$__tag ?? 'ref-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ref-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><input type="text" placeholder="Type something…"/><div class="buttons"><button>Focus</button><button class="ghost">Measure width</button></div> `, (this.state.width
+                ? $__ssrTpl(`<div class="out">Input is `, $__ssrText(this.state.width), `px wide</div>`)
+                : ''), `</template></${this.$$__tag ?? 'ref-app'}>`];
 }
 
 
@@ -115,3 +115,4 @@ return _r0;
 RefApp.$$__sheets = [..._s0];
 $__defineComponent('ref-app', RefApp);
 RefApp.prototype.$$__tag = 'ref-app';
+RefApp.$$__propSafe = true;

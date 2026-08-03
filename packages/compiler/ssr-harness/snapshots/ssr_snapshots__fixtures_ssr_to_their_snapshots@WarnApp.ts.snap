@@ -14,8 +14,8 @@ import { Component } from '@neuralfog/elemix';
 const _t0 = $__template('<span>hi</span>');
 
 export class WarnApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'warnapp'}><template shadowrootmode="open" shadowrootserializable=""><span>hi</span></template></${this.$$__tag ?? 'warnapp'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'warnapp'}><template shadowrootmode="open" shadowrootserializable=""><span>hi</span></template></${this.$$__tag ?? 'warnapp'}>`];
 }
 
     $$__view(): DocumentFragment {
@@ -25,3 +25,4 @@ return _r0;
 }
 $__defineComponent('warnapp', WarnApp);
 WarnApp.prototype.$$__tag = 'warnapp';
+WarnApp.$$__propSafe = true;

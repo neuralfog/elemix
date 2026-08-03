@@ -51,8 +51,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="panel"><span class="label">Child controls</span><div class="buttons"><button>−</button><span class="value"> </span><button>+</button></div></div>');
 
 export class StoreControls extends Component<Props> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'store-controls'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel"><span class="label">Child controls</span><div class="buttons"><button>−</button><span class="value">${$__ssrText(this.props.counter.value)}</span><button>+</button></div></div></template></${this.$$__tag ?? 'store-controls'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'store-controls'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel"><span class="label">Child controls</span><div class="buttons"><button>−</button><span class="value">`, $__ssrText(this.props.counter.value), `</span><button>+</button></div></div></template></${this.$$__tag ?? 'store-controls'}>`];
 }
 
 

@@ -12,9 +12,9 @@ type State = { count: number };
 const _t0 = $__template('<div class="method"><span class="lbl"> </span><span class="count"> </span><button class="inc">+1</button></div>');
 
 export class MethodApp extends Component {
-$$__ssr(): string {
+$$__ssr(): unknown[] {
 const label = 'count';
-return `<${this.$$__tag ?? 'method-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="method"><span class="lbl">${$__ssrText(label)}</span><span class="count">${$__ssrText(this.state.count)}</span><button class="inc">+1</button></div></template></${this.$$__tag ?? 'method-app'}>`;
+return [`<${this.$$__tag ?? 'method-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="method"><span class="lbl">`, $__ssrText(label), `</span><span class="count">`, $__ssrText(this.state.count), `</span><button class="inc">+1</button></div></template></${this.$$__tag ?? 'method-app'}>`];
 }
 
     state = $__state<State>({ count: 0 });
@@ -41,3 +41,4 @@ return _r0;
 }
 $__defineComponent('method-app', MethodApp);
 MethodApp.prototype.$$__tag = 'method-app';
+MethodApp.$$__propSafe = true;

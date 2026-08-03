@@ -10,7 +10,9 @@
 //! [`crate::imports::add_ssr_runtime_import`]) as free identifiers, imported from
 //! `@neuralfog/elemix/ssr-runtime`, not the CSR runtime.
 
-/// Build the `$$__ssr(): string` method text for one component.
+use crate::template::parse::{fmt_array, Chunk, Rope};
+
+/// Build the `$$__ssr(): unknown[]` method text for one component.
 ///
 /// `host_tag` is the registered custom-element tag; `style_body` is the verbatim
 /// inner of the inline `<style data-ssr>` for shadow components — the caller
@@ -25,7 +27,7 @@ pub fn ssr_method(
     no_shadow: bool,
     client: bool,
     prelude: &str,
-    inner: &str,
+    inner: Vec<Chunk>,
 ) -> String {
     // The host wrapper uses the instance's RUNTIME tag (`$$__tag`, stamped next to
     // `$__defineComponent`), not a baked literal - so a subclass inheriting this
@@ -35,22 +37,33 @@ pub fn ssr_method(
     // `#client` — emit ONLY the bare host tag: no DSD, no content, no prelude. The
     // client has no server DOM to hydrate, so it mounts the CSR view fresh.
     if client {
-        return format!("$$__ssr(): string {{\nreturn `<{tag}></{tag}>`;\n}}");
+        return format!("$$__ssr(): unknown[] {{\nreturn [`<{tag}></{tag}>`];\n}}");
     }
-    let wrapped = if no_shadow {
-        format!("<{tag}>{inner}</{tag}>")
+    let (open, close) = if no_shadow {
+        (format!("<{tag}>"), format!("</{tag}>"))
     } else {
         let style = match style_body {
             Some(body) => format!("<style data-ssr>{body}</style>"),
             None => String::new(),
         };
-        format!(
-            "<{tag}><template shadowrootmode=\"open\" shadowrootserializable=\"\">{style}{inner}</template></{tag}>"
+        (
+            format!("<{tag}><template shadowrootmode=\"open\" shadowrootserializable=\"\">{style}"),
+            format!("</template></{tag}>"),
         )
     };
+    // Frame the inner rope with the host open/close as static runs (merged into
+    // adjacent static chunks). The result is emitted as an array so `$$__ssr`
+    // always returns a rope: element 0 is the `<tag …` open (where `$__ssrChild`
+    // splices in `data-h`/attrs) and the last element ends `</tag>` (where a
+    // parent splices slot content) - both O(1), no growing-string copy.
+    let mut r = Rope::new();
+    r.static_str(&open);
+    r.extend(inner);
+    r.static_str(&close);
+    let arr = fmt_array(&r.chunks);
     if prelude.is_empty() {
-        format!("$$__ssr(): string {{\nreturn `{wrapped}`;\n}}")
+        format!("$$__ssr(): unknown[] {{\nreturn {arr};\n}}")
     } else {
-        format!("$$__ssr(): string {{\n{prelude}\nreturn `{wrapped}`;\n}}")
+        format!("$$__ssr(): unknown[] {{\n{prelude}\nreturn {arr};\n}}")
     }
 }

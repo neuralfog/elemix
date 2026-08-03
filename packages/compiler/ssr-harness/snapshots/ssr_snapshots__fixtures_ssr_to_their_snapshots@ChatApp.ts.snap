@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ChatApp.ts
 ---
-import { $__ssrText, $__ssrAttr, $__ssrClass, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrAttr, $__ssrClass, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__model, $__list, $__effect, $__setText, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
@@ -94,12 +94,12 @@ const _t0 = $__template('<div class="log"><!----></div><div class="composer"><in
 const _t1 = $__templateEl('<div> </div>');
 
 export class ChatApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'chat-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="log">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'chat-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="log">`, ($__ssrRepeat(
                 this.state.messages,
-                (m) => `<div${$__ssrClass({ msg: true, me: m.me })}>${$__ssrText(m.text)}</div>`,
+                (m) => $__ssrTpl(`<div${$__ssrClass({ msg: true, me: m.me })}>`, $__ssrText(m.text), `</div>`),
                 (m) => m.id,
-            ))}</div><div class="composer"><input type="text" placeholder="Type a message…"${$__ssrAttr('value', (this.state.draft).value)}/><button>Send</button></div></template></${this.$$__tag ?? 'chat-app'}>`;
+            )), `</div><div class="composer"><input type="text" placeholder="Type a message…"${$__ssrAttr('value', (this.state.draft).value)}/><button>Send</button></div></template></${this.$$__tag ?? 'chat-app'}>`];
 }
 
 
@@ -153,3 +153,4 @@ return _r0;
 ChatApp.$$__sheets = [..._s0];
 $__defineComponent('chat-app', ChatApp);
 ChatApp.prototype.$$__tag = 'chat-app';
+ChatApp.$$__propSafe = true;

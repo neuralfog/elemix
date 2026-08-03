@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/LogView.ts
 ---
-import { $__ssrText, $__ssrClass, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrClass, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__list, $__effect, $__setText, $__setClass, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -41,14 +41,14 @@ const _t1 = $__templateEl('<div><span class="n"> </span><!---->()</div>');
 const _t2 = $__templateEl('<div class="empty">No events yet — mount the child.</div>');
 
 export class LogView extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'log-view'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="log">${(log.entries.length
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'log-view'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="log">`, (log.entries.length
                 ? $__ssrRepeat(
                       log.entries,
-                      (e) => `<div${$__ssrClass({ entry: true, [e.event]: true })}><span class="n">${$__ssrText(e.id)}</span>${$__ssrText(e.event)}()</div>`,
+                      (e) => $__ssrTpl(`<div${$__ssrClass({ entry: true, [e.event]: true })}><span class="n">`, $__ssrText(e.id), `</span>`, $__ssrText(e.event), `()</div>`),
                       (e) => String(e.id),
                   )
-                : `<div class="empty">No events yet — mount the child.</div>`)}</div></template></${this.$$__tag ?? 'log-view'}>`;
+                : $__ssrTpl(`<div class="empty">No events yet — mount the child.</div>`)), `</div></template></${this.$$__tag ?? 'log-view'}>`];
 }
 
 
@@ -84,3 +84,4 @@ return _r0;
 LogView.$$__sheets = [..._s0];
 $__defineComponent('log-view', LogView);
 LogView.prototype.$$__tag = 'log-view';
+LogView.$$__propSafe = true;

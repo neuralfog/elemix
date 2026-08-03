@@ -18,8 +18,8 @@ export class EffectApp extends Component {
         $__effect(() => this.mirror());
         $__effect(() => this.report());
     }
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'effect-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="effect"><span class="count">${$__ssrText(this.state.count)}</span><button class="inc">+1</button></div></template></${this.$$__tag ?? 'effect-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'effect-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="effect"><span class="count">`, $__ssrText(this.state.count), `</span><button class="inc">+1</button></div></template></${this.$$__tag ?? 'effect-app'}>`];
 }
 
     state = $__state<State>({ count: 0 });
@@ -51,3 +51,4 @@ return _r0;
 }
 $__defineComponent('effect-app', EffectApp);
 EffectApp.prototype.$$__tag = 'effect-app';
+EffectApp.$$__propSafe = true;

@@ -17,8 +17,8 @@ export class BeforeMountApp extends Component {
     $$__beforeMount(): void {
         this.seed();
     }
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'before-mount-app'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _t0 = (this.state.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'before-mount-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'before-mount-app'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _t0 = (this.state.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'before-mount-app'}>`];
 }
 
     state = $__state<State>({ count: 0 });
@@ -46,3 +46,4 @@ return _r0;
 }
 $__defineComponent('before-mount-app', BeforeMountApp);
 BeforeMountApp.prototype.$$__tag = 'before-mount-app';
+BeforeMountApp.$$__propSafe = true;

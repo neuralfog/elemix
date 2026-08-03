@@ -1,9 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SecondHelper.ts
 ---
+import { $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -16,8 +16,8 @@ const _t1 = $__template('<div class="card"><!----><p class="body">body</p></div>
 const _t2 = $__templateEl('<h2 class="heading">Title</h2>');
 
 export class PlainNote extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'plain-note'}><template shadowrootmode="open" shadowrootserializable=""><span class="plain">plain</span></template></${this.$$__tag ?? 'plain-note'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'plain-note'}><template shadowrootmode="open" shadowrootserializable=""><span class="plain">plain</span></template></${this.$$__tag ?? 'plain-note'}>`];
 }
 
     $$__view(): DocumentFragment {
@@ -27,10 +27,11 @@ return _r0;
 }
 $__defineComponent('plain-note', PlainNote);
 PlainNote.prototype.$$__tag = 'plain-note';
+PlainNote.$$__propSafe = true;
 
 export class TitledNote extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'titled-note'}><template shadowrootmode="open" shadowrootserializable=""><div class="card">${(`<h2 class="heading">Title</h2>`)}<p class="body">body</p></div></template></${this.$$__tag ?? 'titled-note'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'titled-note'}><template shadowrootmode="open" shadowrootserializable=""><div class="card">`, ($__ssrTpl(`<h2 class="heading">Title</h2>`)), `<p class="body">body</p></div></template></${this.$$__tag ?? 'titled-note'}>`];
 }
 
     
@@ -46,3 +47,4 @@ return _r1;
 }
 $__defineComponent('titled-note', TitledNote);
 TitledNote.prototype.$$__tag = 'titled-note';
+TitledNote.$$__propSafe = true;

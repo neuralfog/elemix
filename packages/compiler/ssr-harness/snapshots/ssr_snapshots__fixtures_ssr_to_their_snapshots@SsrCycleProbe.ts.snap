@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrCycleProbe.ts
 ---
@@ -24,8 +23,8 @@ export class SsrCycleProbe extends Component {
     $$__beforeMount(): void {
         this.prepare();
     }
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-cycle-probe'}><template shadowrootmode="open" shadowrootserializable=""><span class="status">${$__ssrText(this.state.ready ? 'ready' : 'pending')}</span></template></${this.$$__tag ?? 'ssr-cycle-probe'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-cycle-probe'}><template shadowrootmode="open" shadowrootserializable=""><span class="status">`, $__ssrText(this.state.ready ? 'ready' : 'pending'), `</span></template></${this.$$__tag ?? 'ssr-cycle-probe'}>`];
 }
 
     state = $__state<State>({ ready: false });
@@ -54,3 +53,4 @@ return _r0;
 }
 $__defineComponent('ssr-cycle-probe', SsrCycleProbe);
 SsrCycleProbe.prototype.$$__tag = 'ssr-cycle-probe';
+SsrCycleProbe.$$__propSafe = true;

@@ -31,8 +31,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="card"><span class="name"> </span><span class="role"> </span></div>');
 
 export class UserCard extends Component<Props> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'user-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card"><span class="name">${$__ssrText(this.props.name)}</span><span class="role">${$__ssrText(this.props.role)}</span></div></template></${this.$$__tag ?? 'user-card'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'user-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card"><span class="name">`, $__ssrText(this.props.name), `</span><span class="role">`, $__ssrText(this.props.role), `</span></div></template></${this.$$__tag ?? 'user-card'}>`];
 }
 
 
@@ -52,3 +52,4 @@ return _r0;
 UserCard.$$__sheets = [..._s0];
 $__defineComponent('user-card', UserCard);
 UserCard.prototype.$$__tag = 'user-card';
+UserCard.$$__propSafe = true;

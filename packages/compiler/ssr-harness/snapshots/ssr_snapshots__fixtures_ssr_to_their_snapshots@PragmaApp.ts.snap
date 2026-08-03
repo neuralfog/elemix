@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/PragmaApp.ts
 ---
@@ -17,8 +16,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<span class="label"> </span>');
 
 export class PragmaApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'pragma-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><span class="label">${$__ssrText(this.state.label)}</span></template></${this.$$__tag ?? 'pragma-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'pragma-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><span class="label">`, $__ssrText(this.state.label), `</span></template></${this.$$__tag ?? 'pragma-app'}>`];
 }
 
     state = $__state({ label: 'hello' });
@@ -35,3 +34,4 @@ return _r0;
 PragmaApp.$$__sheets = [..._s0];
 $__defineComponent('pragma-app', PragmaApp);
 PragmaApp.prototype.$$__tag = 'pragma-app';
+PragmaApp.$$__propSafe = true;

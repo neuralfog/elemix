@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/RawApp.ts
 ---
-import { $__ssrText, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, raw } from '@neuralfog/elemix';
 
@@ -38,13 +38,13 @@ const _t0 = $__template('<span class="ticks"> </span><span class="count"> </span
 const _t1 = $__templateEl('<li class="row"><span class="rid"> </span><span class="rlabel"> </span></li>');
 
 export class RawApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'raw-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><span class="ticks">${$__ssrText(this.state.sw.ticks)}</span><span class="count">${$__ssrText(this.state.count)}</span><div class="controls"><button class="tick">tick</button><button class="refresh">refresh</button><button class="inc">inc</button><button class="add-row">row</button></div><ul class="rows">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'raw-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><span class="ticks">`, $__ssrText(this.state.sw.ticks), `</span><span class="count">`, $__ssrText(this.state.count), `</span><div class="controls"><button class="tick">tick</button><button class="refresh">refresh</button><button class="inc">inc</button><button class="add-row">row</button></div><ul class="rows">`, ($__ssrRepeat(
                 this.state.rows,
                 (row) =>
-                    `<li class="row"><span class="rid">${$__ssrText(row.id)}</span><span class="rlabel">${$__ssrText(row.label)}</span></li>`,
+                    $__ssrTpl(`<li class="row"><span class="rid">`, $__ssrText(row.id), `</span><span class="rlabel">`, $__ssrText(row.label), `</span></li>`),
                 (row) => row.id,
-            ))}</ul></template></${this.$$__tag ?? 'raw-app'}>`;
+            )), `</ul></template></${this.$$__tag ?? 'raw-app'}>`];
 }
 
 
@@ -106,3 +106,4 @@ return _r0;
 RawApp.$$__sheets = [..._s0];
 $__defineComponent('raw-app', RawApp);
 RawApp.prototype.$$__tag = 'raw-app';
+RawApp.$$__propSafe = true;

@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/FormApp.ts
 ---
-import { $__ssrText, $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrChild, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -72,10 +72,10 @@ const _t0 = $__template('<form><label>Name <input name="name" type="text" value=
 const _t1 = $__templateEl('<pre class="out"> </pre>');
 
 export class FormApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'form-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><form><label>Name <input name="name" type="text" value="Ada"/></label><label>Rating ${$__ssrChild('rating-input', {}, ``, ` name="rating"`)}</label>${$__ssrChild('submit-button', {}, `Submit`)}</form> ${(this.state.result
-                ? `<pre class="out">${$__ssrText(this.state.result)}</pre>`
-                : '')}</template></${this.$$__tag ?? 'form-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'form-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><form><label>Name <input name="name" type="text" value="Ada"/></label><label>Rating `, $__ssrChild('rating-input', {}, undefined, ` name="rating"`), `</label>`, $__ssrChild('submit-button', {}, `Submit`), `</form> `, (this.state.result
+                ? $__ssrTpl(`<pre class="out">`, $__ssrText(this.state.result), `</pre>`)
+                : ''), `</template></${this.$$__tag ?? 'form-app'}>`];
 }
 
 
@@ -108,3 +108,4 @@ return _r0;
 FormApp.$$__sheets = [..._s0];
 $__defineComponent('form-app', FormApp);
 FormApp.prototype.$$__tag = 'form-app';
+FormApp.$$__propSafe = true;

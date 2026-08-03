@@ -46,8 +46,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="readout">Parent reads: <strong> </strong></div><store-controls></store-controls>');
 
 export class StoreApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'store-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="readout">Parent reads: <strong>${$__ssrText(this.state.counter.value)}</strong></div>${$__ssrChild('store-controls', {counter: (this.state.counter)})}</template></${this.$$__tag ?? 'store-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'store-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="readout">Parent reads: <strong>`, $__ssrText(this.state.counter.value), `</strong></div>`, $__ssrChild('store-controls', {counter: (this.state.counter)}), `</template></${this.$$__tag ?? 'store-app'}>`];
 }
 
 
@@ -71,3 +71,4 @@ return _r0;
 StoreApp.$$__sheets = [..._s0];
 $__defineComponent('store-app', StoreApp);
 StoreApp.prototype.$$__tag = 'store-app';
+StoreApp.$$__propSafe = true;

@@ -1,0 +1,6 @@
+---
+source: ssr-harness/ssr.rs
+assertion_line: 296
+expression: fmt_array(&inner)
+---
+[$__ssrChild('user-card', {})]

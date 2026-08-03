@@ -1,0 +1,6 @@
+---
+source: ssr-harness/ssr.rs
+assertion_line: 288
+expression: rope
+---
+[`<div>`, $__ssrChild('user-card', {name: (this.props.name), role: (this.props.role)}), `</div>`]

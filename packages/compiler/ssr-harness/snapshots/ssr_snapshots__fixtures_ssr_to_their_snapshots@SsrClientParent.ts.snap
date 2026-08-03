@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrClientParent.ts
 ---
@@ -13,8 +12,8 @@ const _t0 = $__template('<div class="parent"><span class="pn"> </span><button cl
 
 export class SsrClientParent extends Component {
     static $$__client = true;
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-client-parent'}></${this.$$__tag ?? 'ssr-client-parent'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-client-parent'}></${this.$$__tag ?? 'ssr-client-parent'}>`];
 }
 
     state = $__state({

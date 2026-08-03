@@ -36,8 +36,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="card"><div class="avatar"> </div><div class="info"><strong> </strong><span> </span></div><div class="likes">❤️ <!----></div></div>');
 
 export class ProfileCard extends Component<Props> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'profile-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card"><div class="avatar">${$__ssrText(this.props.name.charAt(0))}</div><div class="info"><strong>${$__ssrText(this.props.name)}</strong><span>${$__ssrText(this.props.role)}</span></div>${(() => {const _t0 = (this.props.likes);return `<div class="likes" data-t="${$__ssrLen(_t0)}">❤️ ${$__ssrText(_t0)}</div>`;})()}</div></template></${this.$$__tag ?? 'profile-card'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'profile-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card"><div class="avatar">`, $__ssrText(this.props.name.charAt(0)), `</div><div class="info"><strong>`, $__ssrText(this.props.name), `</strong><span>`, $__ssrText(this.props.role), `</span></div>${(() => {const _t0 = (this.props.likes);return `<div class="likes" data-t="${$__ssrLen(_t0)}">❤️ ${$__ssrText(_t0)}</div>`;})()}</div></template></${this.$$__tag ?? 'profile-card'}>`];
 }
 
 

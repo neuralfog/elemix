@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrMixedLeaf.ts
 ---
@@ -13,8 +12,8 @@ type State = { n: number };
 const _t0 = $__template('<div class="leaf">leaf <span class="ln"> </span><button class="lb">leaf+</button></div>');
 
 export class SsrMixedLeaf extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-mixed-leaf'}><template shadowrootmode="open" shadowrootserializable=""><div class="leaf">leaf <span class="ln">${$__ssrText(this.state.n)}</span><button class="lb">leaf+</button></div></template></${this.$$__tag ?? 'ssr-mixed-leaf'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-mixed-leaf'}><template shadowrootmode="open" shadowrootserializable=""><div class="leaf">leaf <span class="ln">`, $__ssrText(this.state.n), `</span><button class="lb">leaf+</button></div></template></${this.$$__tag ?? 'ssr-mixed-leaf'}>`];
 }
 
     state = $__state<State>({ n: 0 });
@@ -36,3 +35,4 @@ return _r0;
 }
 $__defineComponent('ssr-mixed-leaf', SsrMixedLeaf);
 SsrMixedLeaf.prototype.$$__tag = 'ssr-mixed-leaf';
+SsrMixedLeaf.$$__propSafe = true;

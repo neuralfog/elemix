@@ -1,0 +1,8 @@
+---
+source: ssr-harness/ssr.rs
+assertion_line: 309
+expression: method
+---
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'my-tag'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><b>x</b></template></${this.$$__tag ?? 'my-tag'}>`];
+}

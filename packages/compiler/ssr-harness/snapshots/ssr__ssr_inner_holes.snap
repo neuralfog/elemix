@@ -1,0 +1,6 @@
+---
+source: ssr-harness/ssr.rs
+assertion_line: 202
+expression: rope
+---
+[`<button${$__ssrClass(this.tone)}${$__ssrStyle(this.box)}${$__ssrAttr('title', this.hint)}${$__ssrAttr('value', (this.value).value)}>`, $__ssrText(this.label), `</button><ul>`, ($__ssrRepeat(this.items, (i) => $__ssrTpl(`<li></li>`))), `</ul>`]

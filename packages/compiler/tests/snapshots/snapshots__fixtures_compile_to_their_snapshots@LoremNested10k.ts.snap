@@ -1,0 +1,71 @@
+---
+source: tests/snapshots.rs
+assertion_line: 14
+expression: compile(&source)
+input_file: fixtures/LoremNested10k.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__setProp, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+const _ft0 = $__template('');
+const _ft1 = $__template('<lorem-nested> </lorem-nested>');
+import { Component } from '@neuralfog/elemix';
+
+import './LoremNested';
+
+const LOREM =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
+
+const css = `
+    :host { display: block; }
+    .lorem {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 24px;
+        max-width: 720px;
+        margin: 0 auto;
+        background: #f1f5f9;
+    }
+`;
+
+const nest = (depth: number): Template => {
+    let inner: Template = (() => {
+const _r0 = $__clone(_ft0);
+return _r0;
+})();
+    for (let i = depth - 1; i >= 0; i--) {
+        inner = (() => {
+const _r1 = $__clone(_ft1);
+const _n2 = _r1.firstChild!;
+const _n3 = _n2.firstChild!;
+$__effect(() => {
+$__setProp(_n2, 'index', (i));
+});
+$__effect(() => {
+$__setProp(_n2, 'text', (LOREM));
+});
+$__effect(() => {
+$__setText(_n3, (inner));
+});
+return _r1;
+})();
+    }
+    return inner;
+};
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="lorem"> </div>');
+
+export class LoremNested10k extends Component {
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+$__effect(() => {
+$__setText(_n1, (nest(10000)));
+});
+return _r0;
+}
+}
+LoremNested10k.$$__sheets = [..._s0];
+$__defineComponent('lorem-nested10k', LoremNested10k);
+LoremNested10k.prototype.$$__tag = 'lorem-nested10k';

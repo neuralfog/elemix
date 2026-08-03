@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/StatusApp.ts
 ---
-import { $__ssrText, $__ssrLen, $__ssrWhen, $__ssrChoose } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrLen, $__ssrTpl, $__ssrWhen, $__ssrChoose } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -97,16 +97,16 @@ const _t4 = $__templateEl('<div class="card loading"><span class="spinner"></spa
 const _t5 = $__templateEl('<pre class="log">status = <!----></pre>');
 
 export class StatusApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'status-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage">${($__ssrChoose([
-                [this.state.status === 'loading', () => `<div class="card loading"><span class="spinner"></span>Working…</div>`],
-                [this.state.status === 'ready', () => `<div class="card ready">✓ Deployed</div>`],
-                [this.state.status === 'failed', () => `<div class="card failed">✕ Build failed</div>`],
-                [true, () => `<div class="card idle">Pick a status above</div>`],
-            ]))}</div>${(() => {const _t0 = (this.state.showLog ? 'Hide' : 'Show');return `<button class="link" data-t="${$__ssrLen(_t0)}">${$__ssrText(_t0)} log</button>`;})()} ${($__ssrWhen(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'status-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage">`, ($__ssrChoose([
+                [this.state.status === 'loading', () => $__ssrTpl(`<div class="card loading"><span class="spinner"></span>Working…</div>`)],
+                [this.state.status === 'ready', () => $__ssrTpl(`<div class="card ready">✓ Deployed</div>`)],
+                [this.state.status === 'failed', () => $__ssrTpl(`<div class="card failed">✕ Build failed</div>`)],
+                [true, () => $__ssrTpl(`<div class="card idle">Pick a status above</div>`)],
+            ])), `</div>${(() => {const _t0 = (this.state.showLog ? 'Hide' : 'Show');return `<button class="link" data-t="${$__ssrLen(_t0)}">${$__ssrText(_t0)} log</button>`;})()} `, ($__ssrWhen(
             this.state.showLog,
-            () => `<pre class="log">status = ${$__ssrText(this.state.status)}</pre>`,
-        ))}</template></${this.$$__tag ?? 'status-app'}>`;
+            () => $__ssrTpl(`<pre class="log">status = `, $__ssrText(this.state.status), `</pre>`),
+        )), `</template></${this.$$__tag ?? 'status-app'}>`];
 }
 
 
@@ -172,3 +172,4 @@ return _r0;
 StatusApp.$$__sheets = [..._s0];
 $__defineComponent('status-app', StatusApp);
 StatusApp.prototype.$$__tag = 'status-app';
+StatusApp.$$__propSafe = true;

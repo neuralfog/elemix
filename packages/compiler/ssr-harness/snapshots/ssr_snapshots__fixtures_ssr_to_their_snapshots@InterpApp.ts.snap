@@ -43,8 +43,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<p class="full"><span class="k">full:</span> <!----><!----></p><p class="dash"><span class="k">dash:</span> <!---->-<!----></p><p class="middle"><span class="k">middle:</span> [<!---->]</p><p class="num"><span class="k">num:</span> <!----></p><button>swap</button><button>set middle</button><button>inc</button>');
 
 export class InterpApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'interp-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.state.first);const _t1 = (this.state.last);return `<p class="full" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}"><span class="k">full:</span> ${$__ssrText(_t0)}${$__ssrText(_t1)}</p>`;})()}${(() => {const _t2 = (this.state.first);const _t3 = (this.state.last);return `<p class="dash" data-t="${$__ssrLen(_t2)},${$__ssrLen(_t3)}"><span class="k">dash:</span> ${$__ssrText(_t2)}-${$__ssrText(_t3)}</p>`;})()}${(() => {const _t4 = (this.state.middle);return `<p class="middle" data-t="${$__ssrLen(_t4)}"><span class="k">middle:</span> [${$__ssrText(_t4)}]</p>`;})()}${(() => {const _t5 = (this.state.n);return `<p class="num" data-t="${$__ssrLen(_t5)}"><span class="k">num:</span> ${$__ssrText(_t5)}</p>`;})()}<button>swap</button><button>set middle</button><button>inc</button></template></${this.$$__tag ?? 'interp-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'interp-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>`, (() => {const _t0 = (this.state.first);const _t1 = (this.state.last);return [`<p class="full" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}"><span class="k">full:</span> ${$__ssrText(_t0)}${$__ssrText(_t1)}</p>`];})(), (() => {const _t2 = (this.state.first);const _t3 = (this.state.last);return [`<p class="dash" data-t="${$__ssrLen(_t2)},${$__ssrLen(_t3)}"><span class="k">dash:</span> ${$__ssrText(_t2)}-${$__ssrText(_t3)}</p>`];})(), (() => {const _t4 = (this.state.middle);return [`<p class="middle" data-t="${$__ssrLen(_t4)}"><span class="k">middle:</span> [${$__ssrText(_t4)}]</p>`];})(), (() => {const _t5 = (this.state.n);return [`<p class="num" data-t="${$__ssrLen(_t5)}"><span class="k">num:</span> ${$__ssrText(_t5)}</p>`];})(), `<button>swap</button><button>set middle</button><button>inc</button></template></${this.$$__tag ?? 'interp-app'}>`];
 }
 
 
@@ -111,3 +111,4 @@ return _r0;
 InterpApp.$$__sheets = [..._s0];
 $__defineComponent('interp-app', InterpApp);
 InterpApp.prototype.$$__tag = 'interp-app';
+InterpApp.$$__propSafe = true;

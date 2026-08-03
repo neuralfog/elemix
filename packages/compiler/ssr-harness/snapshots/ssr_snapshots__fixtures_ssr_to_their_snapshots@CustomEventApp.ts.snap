@@ -12,8 +12,8 @@ type State = { caught: number };
 const _t0 = $__template('<button class="fire">fire</button><span class="caught"> </span>');
 
 export class CustomEventApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'custom-event-app'}><template shadowrootmode="open" shadowrootserializable=""><button class="fire">fire</button><span class="caught">${$__ssrText(this.state.caught)}</span></template></${this.$$__tag ?? 'custom-event-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'custom-event-app'}><template shadowrootmode="open" shadowrootserializable=""><button class="fire">fire</button><span class="caught">`, $__ssrText(this.state.caught), `</span></template></${this.$$__tag ?? 'custom-event-app'}>`];
 }
 
     state = $__state<State>({ caught: 0 });
@@ -42,3 +42,4 @@ return _r0;
 }
 $__defineComponent('custom-event-app', CustomEventApp);
 CustomEventApp.prototype.$$__tag = 'custom-event-app';
+CustomEventApp.$$__propSafe = true;

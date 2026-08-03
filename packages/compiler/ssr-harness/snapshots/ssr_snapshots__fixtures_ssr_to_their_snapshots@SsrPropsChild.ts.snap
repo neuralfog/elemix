@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrPropsChild.ts
 ---
@@ -20,8 +19,8 @@ const _t0 = $__template('<div class="child"><span class="label"> </span><span cl
 
 export class SsrPropsChild extends Component<Props> {
     static $$__client = true;
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-props-child'}></${this.$$__tag ?? 'ssr-props-child'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-props-child'}></${this.$$__tag ?? 'ssr-props-child'}>`];
 }
 
     $$__view(): DocumentFragment {

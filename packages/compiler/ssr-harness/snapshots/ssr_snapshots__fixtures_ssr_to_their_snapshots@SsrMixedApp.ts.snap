@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrMixedApp.ts
 ---
@@ -15,8 +14,8 @@ type State = { n: number };
 const _t0 = $__template('<div class="outer">outer <span class="on"> </span><button class="ob">outer+</button><ssr-mixed-client></ssr-mixed-client></div>');
 
 export class SsrMixedApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-mixed-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="outer">outer <span class="on">${$__ssrText(this.state.n)}</span><button class="ob">outer+</button>${$__ssrChild('ssr-mixed-client', {})}</div></template></${this.$$__tag ?? 'ssr-mixed-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-mixed-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="outer">outer <span class="on">`, $__ssrText(this.state.n), `</span><button class="ob">outer+</button>`, $__ssrChild('ssr-mixed-client', {}), `</div></template></${this.$$__tag ?? 'ssr-mixed-app'}>`];
 }
 
     state = $__state<State>({ n: 0 });
@@ -38,3 +37,4 @@ return _r0;
 }
 $__defineComponent('ssr-mixed-app', SsrMixedApp);
 SsrMixedApp.prototype.$$__tag = 'ssr-mixed-app';
+SsrMixedApp.$$__propSafe = true;

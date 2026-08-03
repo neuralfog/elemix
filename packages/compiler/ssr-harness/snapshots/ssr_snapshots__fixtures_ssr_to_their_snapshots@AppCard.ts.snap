@@ -3,6 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/AppCard.ts
 ---
+import { $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -37,12 +38,12 @@ const _t1 = $__templateEl('<div class="header"><slot name="header"></slot></div>
 const _t2 = $__templateEl('<div class="footer"><slot name="footer"></slot></div>');
 
 export class AppCard extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'app-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card">${(this.hasSlot('header')
-                ? `<div class="header"><slot name="header"></slot></div>`
-                : '')} <div class="body"><slot></slot></div> ${(this.hasSlot('footer')
-                ? `<div class="footer"><slot name="footer"></slot></div>`
-                : '')}</div></template></${this.$$__tag ?? 'app-card'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'app-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card">`, (this.hasSlot('header')
+                ? $__ssrTpl(`<div class="header"><slot name="header"></slot></div>`)
+                : ''), ` <div class="body"><slot></slot></div> `, (this.hasSlot('footer')
+                ? $__ssrTpl(`<div class="footer"><slot name="footer"></slot></div>`)
+                : ''), `</div></template></${this.$$__tag ?? 'app-card'}>`];
 }
 
 
@@ -68,3 +69,4 @@ return _r0;
 AppCard.$$__sheets = [..._s0];
 $__defineComponent('app-card', AppCard);
 AppCard.prototype.$$__tag = 'app-card';
+AppCard.$$__propSafe = true;

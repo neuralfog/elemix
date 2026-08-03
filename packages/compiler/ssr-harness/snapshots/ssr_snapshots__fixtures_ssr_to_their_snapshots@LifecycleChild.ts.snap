@@ -43,8 +43,8 @@ export class LifecycleChild extends Component<ChildProps> {
         $__effect(() => this.trackA());
         $__effect(() => this.trackB());
     }
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'lifecycle-child'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.props.tick);return `<div class="child" data-t="${$__ssrLen(_t0)}">Child · tick ${$__ssrText(_t0)}</div>`;})()}</template></${this.$$__tag ?? 'lifecycle-child'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'lifecycle-child'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.props.tick);return `<div class="child" data-t="${$__ssrLen(_t0)}">Child · tick ${$__ssrText(_t0)}</div>`;})()}</template></${this.$$__tag ?? 'lifecycle-child'}>`];
 }
 
 
@@ -100,3 +100,4 @@ return _r0;
 LifecycleChild.$$__sheets = [..._s0];
 $__defineComponent('lifecycle-child', LifecycleChild);
 LifecycleChild.prototype.$$__tag = 'lifecycle-child';
+LifecycleChild.$$__propSafe = true;

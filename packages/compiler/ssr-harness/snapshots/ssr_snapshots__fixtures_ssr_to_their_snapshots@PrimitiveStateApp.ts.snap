@@ -56,8 +56,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="row"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="row"><span class="active"> </span><button>toggle</button></div><div class="row"><strong class="label"> </strong><button>rename</button></div>');
 
 export class PrimitiveStateApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'primitive-state-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="row"><span class="count">${$__ssrText(this.count)}</span><button>+1</button><button>reset</button></div><div class="row"><span class="active">${$__ssrText(this.active ? 'on' : 'off')}</span><button>toggle</button></div><div class="row"><strong class="label">${$__ssrText(this.label)}</strong><button>rename</button></div></template></${this.$$__tag ?? 'primitive-state-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'primitive-state-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="row"><span class="count">`, $__ssrText(this.count), `</span><button>+1</button><button>reset</button></div><div class="row"><span class="active">`, $__ssrText(this.active ? 'on' : 'off'), `</span><button>toggle</button></div><div class="row"><strong class="label">`, $__ssrText(this.label), `</strong><button>rename</button></div></template></${this.$$__tag ?? 'primitive-state-app'}>`];
 }
 
 
@@ -144,3 +144,4 @@ return _r0;
 PrimitiveStateApp.$$__sheets = [..._s0];
 $__defineComponent('primitive-state-app', PrimitiveStateApp);
 PrimitiveStateApp.prototype.$$__tag = 'primitive-state-app';
+PrimitiveStateApp.$$__propSafe = true;

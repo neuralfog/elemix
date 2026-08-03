@@ -1,10 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/PanelApp.ts
 ---
-import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -65,8 +64,8 @@ const _t1 = $__templateEl('<h2> </h2>');
 const _t2 = $__templateEl('<p class="stat"><!----> open</p>');
 
 export class PanelApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'panel-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel">${(`<h2>${$__ssrText(this.state.title)}</h2>`)} ${(`<p class="stat">${$__ssrText(this.state.count)} open</p>`)} <button>add</button><button>rename</button></div></template></${this.$$__tag ?? 'panel-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'panel-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel">`, ($__ssrTpl(`<h2>`, $__ssrText(this.state.title), `</h2>`)), ` `, ($__ssrTpl(`<p class="stat">`, $__ssrText(this.state.count), ` open</p>`)), ` <button>add</button><button>rename</button></div></template></${this.$$__tag ?? 'panel-app'}>`];
 }
 
 
@@ -117,3 +116,4 @@ return _r0;
 PanelApp.$$__sheets = [..._s0];
 $__defineComponent('panel-app', PanelApp);
 PanelApp.prototype.$$__tag = 'panel-app';
+PanelApp.$$__propSafe = true;

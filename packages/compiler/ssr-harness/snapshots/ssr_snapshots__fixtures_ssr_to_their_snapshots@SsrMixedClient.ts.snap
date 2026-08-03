@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrMixedClient.ts
 ---
@@ -15,8 +14,8 @@ const _t0 = $__template('<div class="mid">mid <span class="mn"> </span><button c
 
 export class SsrMixedClient extends Component {
     static $$__client = true;
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-mixed-client'}></${this.$$__tag ?? 'ssr-mixed-client'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-mixed-client'}></${this.$$__tag ?? 'ssr-mixed-client'}>`];
 }
 
     state = $__state<State>({ n: 0 });

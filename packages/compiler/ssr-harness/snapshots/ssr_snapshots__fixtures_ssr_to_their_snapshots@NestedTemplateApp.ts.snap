@@ -1,10 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/NestedTemplateApp.ts
 ---
-import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -68,8 +67,8 @@ const _t1 = $__templateEl('<h2> </h2>');
 const _t2 = $__templateEl('<span class="chip"> </span>');
 
 export class NestedTemplateApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'nested-template-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section>${(`<h2>${$__ssrText(this.state.title)}</h2>`)} <div class="chips">${(`<span class="chip">${$__ssrText(this.state.tag)}</span>`)} and again ${(`<span class="chip">${$__ssrText(this.state.tag)}</span>`)}</div><button>change title</button><button>change tag</button></section></template></${this.$$__tag ?? 'nested-template-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'nested-template-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section>`, ($__ssrTpl(`<h2>`, $__ssrText(this.state.title), `</h2>`)), ` <div class="chips">`, ($__ssrTpl(`<span class="chip">`, $__ssrText(this.state.tag), `</span>`)), ` and again `, ($__ssrTpl(`<span class="chip">`, $__ssrText(this.state.tag), `</span>`)), `</div><button>change title</button><button>change tag</button></section></template></${this.$$__tag ?? 'nested-template-app'}>`];
 }
 
 
@@ -126,3 +125,4 @@ return _r0;
 NestedTemplateApp.$$__sheets = [..._s0];
 $__defineComponent('nested-template-app', NestedTemplateApp);
 NestedTemplateApp.prototype.$$__tag = 'nested-template-app';
+NestedTemplateApp.$$__propSafe = true;

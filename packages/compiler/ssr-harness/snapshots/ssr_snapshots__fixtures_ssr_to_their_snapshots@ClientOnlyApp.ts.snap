@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ClientOnlyApp.ts
 ---
@@ -18,8 +17,8 @@ export class ClientOnlyApp extends Component {
         this.seed();
     }
     static $$__client = true;
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'client-only-app'}></${this.$$__tag ?? 'client-only-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'client-only-app'}></${this.$$__tag ?? 'client-only-app'}>`];
 }
 
     state = $__state<State>({ count: 0 });

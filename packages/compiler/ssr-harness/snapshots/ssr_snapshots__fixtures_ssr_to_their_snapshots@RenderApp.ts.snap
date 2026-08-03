@@ -58,8 +58,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="value"> </div><div class="buttons"><button class="ghost">Increment (silent)</button><button>Increment + render()</button></div>');
 
 export class RenderApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'render-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="value">${$__ssrText(this.count)}</div><div class="buttons"><button class="ghost">Increment (silent)</button><button>Increment + render()</button></div></template></${this.$$__tag ?? 'render-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'render-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="value">`, $__ssrText(this.count), `</div><div class="buttons"><button class="ghost">Increment (silent)</button><button>Increment + render()</button></div></template></${this.$$__tag ?? 'render-app'}>`];
 }
 
 
@@ -90,3 +90,4 @@ return _r0;
 RenderApp.$$__sheets = [..._s0];
 $__defineComponent('render-app', RenderApp);
 RenderApp.prototype.$$__tag = 'render-app';
+RenderApp.$$__propSafe = true;

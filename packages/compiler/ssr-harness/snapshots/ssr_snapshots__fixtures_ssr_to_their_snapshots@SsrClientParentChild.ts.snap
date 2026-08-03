@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SsrClientParentChild.ts
 ---
@@ -15,8 +14,8 @@ type Props = {
 const _t0 = $__template('<div class="child"><span class="from-parent"> </span><span class="local"> </span><button class="tick">tick</button></div>');
 
 export class SsrClientParentChild extends Component<Props> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'ssr-client-parent-child'}><template shadowrootmode="open" shadowrootserializable=""><div class="child"><span class="from-parent">${$__ssrText(this.props.value)}</span><span class="local">${$__ssrText(this.state.local)}</span><button class="tick">tick</button></div></template></${this.$$__tag ?? 'ssr-client-parent-child'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'ssr-client-parent-child'}><template shadowrootmode="open" shadowrootserializable=""><div class="child"><span class="from-parent">`, $__ssrText(this.props.value), `</span><span class="local">`, $__ssrText(this.state.local), `</span><button class="tick">tick</button></div></template></${this.$$__tag ?? 'ssr-client-parent-child'}>`];
 }
 
     state = $__state({
@@ -44,3 +43,4 @@ return _r0;
 }
 $__defineComponent('ssr-client-parent-child', SsrClientParentChild);
 SsrClientParentChild.prototype.$$__tag = 'ssr-client-parent-child';
+SsrClientParentChild.$$__propSafe = true;

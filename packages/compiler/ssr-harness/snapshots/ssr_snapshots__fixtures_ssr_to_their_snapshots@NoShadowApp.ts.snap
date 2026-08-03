@@ -17,8 +17,8 @@ const _t0 = $__template('<div class="light"><span class="count"> </span><button 
 
 export class NoShadowApp extends Component {
     static $$__noShadow = true;
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'no-shadow-app'}><div class="light"><span class="count">${$__ssrText(this.state.count)}</span><button class="inc">+1</button></div></${this.$$__tag ?? 'no-shadow-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'no-shadow-app'}><div class="light"><span class="count">`, $__ssrText(this.state.count), `</span><button class="inc">+1</button></div></${this.$$__tag ?? 'no-shadow-app'}>`];
 }
 
     styles = css;
@@ -42,3 +42,4 @@ return _r0;
 }
 $__defineComponent('no-shadow-app', NoShadowApp);
 NoShadowApp.prototype.$$__tag = 'no-shadow-app';
+NoShadowApp.$$__propSafe = true;

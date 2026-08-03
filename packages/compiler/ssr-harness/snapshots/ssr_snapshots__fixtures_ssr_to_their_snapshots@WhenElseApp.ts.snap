@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/WhenElseApp.ts
 ---
-import { $__ssrWhen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrTpl, $__ssrWhen } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -14,12 +14,12 @@ const _t1 = $__templateEl('<div class="card ready">✓ Welcome back</div>');
 const _t2 = $__templateEl('<div class="card idle">Please log in</div>');
 
 export class WhenElseApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'when-else-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="stage">${($__ssrWhen(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'when-else-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="stage">`, ($__ssrWhen(
                     this.state.loggedIn,
-                    () => `<div class="card ready">✓ Welcome back</div>`,
-                    () => `<div class="card idle">Please log in</div>`,
-                ))}</div><button class="toggle">toggle</button></template></${this.$$__tag ?? 'when-else-app'}>`;
+                    () => $__ssrTpl(`<div class="card ready">✓ Welcome back</div>`),
+                    () => $__ssrTpl(`<div class="card idle">Please log in</div>`),
+                )), `</div><button class="toggle">toggle</button></template></${this.$$__tag ?? 'when-else-app'}>`];
 }
 
     state = $__state<State>({ loggedIn: false });
@@ -45,3 +45,4 @@ return _r0;
 }
 $__defineComponent('when-else-app', WhenElseApp);
 WhenElseApp.prototype.$$__tag = 'when-else-app';
+WhenElseApp.$$__propSafe = true;

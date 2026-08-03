@@ -29,11 +29,22 @@
 - [ ] Once `elemix.dev` is live verify publisher on vscode marketplace with DNS record
 - [ ] Add a curated `clanker` skill, include it in the monorepo, add it to `elemix.dev`
 
+***I Need More Speed 🚗🚓💨***
+
+- Heavy renderer optimisations, there was a serious issue with recursive rendering of nested components, not any more 😌💨
+- When I say SSR is just string apparently I am the crazy one 🤷🙄
+- I was going to make a joke about `React`, but this is not funny... This is borderline pathetic 🤢 Even worse, those are the
+  people we should be looking up to 🤡 Those are the people who shout the loudest 🤡🤡 Those are the leaders of our industry 🤡🤡🤡
+  This is the go-to technology constantly pushed on everyone 🤡🤡🤡🤡  It's not news that React is slow, but what the hell
+  are they doing ❓🤡 What is the point ❓🤡 Literally the entire point of SSR is speed of delivery, and here we are 🪦
+  `React` is just a joke 😒 Just keeps on giving... 
+
+![batman vs mutant](.roadmap/ssr-speed.png)
+
 ***Resistance Is Futile 🛰️🔩***
 
 - Fixed a significant bug with deep props reactivity 🔨🐞🛡️
-
-- SSR is here 🚨🔔 Just happened 😃😌
+- **SSR** is here 🚨🔔 Just happened 😃😌
 - SSR == string. The only responsibility of the server is to produce a string as fast as possible and send it over the wire 🔠
 - Elemix SSR is a synchronous string render. No async component tree, no waterfall, no serialising a tree over the wire to reconcile
   on the client - no garbage 🤮

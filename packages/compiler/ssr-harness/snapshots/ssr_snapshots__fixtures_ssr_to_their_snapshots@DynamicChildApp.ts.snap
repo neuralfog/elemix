@@ -22,13 +22,13 @@ const _t0 = $__template('<div class="icons"><!----></div><div class="swap"> </di
 const _t1 = $__templateEl('<span class="row"> </span>');
 
 export class DynamicChildApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'dynamic-child-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="icons">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'dynamic-child-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="icons">`, ($__ssrRepeat(
                     items,
                     (it) =>
-                        `<span class="row"${$__ssrAttr('data-id', it.id)}>${$__ssrText(it.icon())}</span>`,
+                        $__ssrTpl(`<span class="row"${$__ssrAttr('data-id', it.id)}>`, $__ssrText(it.icon()), `</span>`),
                     (it) => it.id,
-                ))}</div><div class="swap">${$__ssrText(this.pick)}</div><button class="toggle">toggle</button></template></${this.$$__tag ?? 'dynamic-child-app'}>`;
+                )), `</div><div class="swap">`, $__ssrText(this.pick), `</div><button class="toggle">toggle</button></template></${this.$$__tag ?? 'dynamic-child-app'}>`];
 }
 
     state = $__state<State>({ fancy: false });
@@ -65,3 +65,4 @@ return _r0;
 }
 $__defineComponent('dynamic-child-app', DynamicChildApp);
 DynamicChildApp.prototype.$$__tag = 'dynamic-child-app';
+DynamicChildApp.$$__propSafe = true;

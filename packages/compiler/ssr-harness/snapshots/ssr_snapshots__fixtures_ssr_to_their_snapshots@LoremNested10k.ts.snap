@@ -1,0 +1,57 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/LoremNested10k.ts
+---
+import { $__ssrText, $__ssrChild, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './LoremNested';
+
+const LOREM =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
+
+const css = `
+    :host { display: block; }
+    .lorem {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 24px;
+        max-width: 720px;
+        margin: 0 auto;
+        background: #f1f5f9;
+    }
+`;
+
+const nest = (depth: number): Template => {
+    let inner: Template = $__ssrTpl();
+    for (let i = depth - 1; i >= 0; i--) {
+        inner = $__ssrTpl($__ssrChild('lorem-nested', {index: (i), text: (LOREM)}, $__ssrText(inner)));
+    }
+    return inner;
+};
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="lorem"> </div>');
+
+export class LoremNested10k extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'lorem-nested10k'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="lorem">`, $__ssrText(nest(10000)), `</div></template></${this.$$__tag ?? 'lorem-nested10k'}>`];
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+$__effect(() => {
+$__setText(_n1, (nest(10000)));
+});
+return _r0;
+}
+}
+LoremNested10k.$$__sheets = [..._s0];
+$__defineComponent('lorem-nested10k', LoremNested10k);
+LoremNested10k.prototype.$$__tag = 'lorem-nested10k';
+LoremNested10k.$$__propSafe = true;

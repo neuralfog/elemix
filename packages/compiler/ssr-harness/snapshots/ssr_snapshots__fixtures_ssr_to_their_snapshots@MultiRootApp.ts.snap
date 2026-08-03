@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/MultiRootApp.ts
 ---
-import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -14,10 +14,10 @@ const _t1 = $__templateEl('<div class="empty">empty</div>');
 const _t2 = $__template('<div class="a">a<!----></div><div class="b">b</div>');
 
 export class MultiRootApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'multi-root-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="stack">${(this.state.count < 0
-                        ? `<div class="empty">empty</div>`
-                        : `<div class="a">a${$__ssrText(this.state.count)}</div><div class="b">b</div>`)}</div><button class="inc">+1</button></template></${this.$$__tag ?? 'multi-root-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'multi-root-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="stack">`, (this.state.count < 0
+                        ? $__ssrTpl(`<div class="empty">empty</div>`)
+                        : $__ssrTpl(`<div class="a">a`, $__ssrText(this.state.count), `</div><div class="b">b</div>`)), `</div><button class="inc">+1</button></template></${this.$$__tag ?? 'multi-root-app'}>`];
 }
 
     state = $__state<State>({ count: 0 });
@@ -51,3 +51,4 @@ return _r0;
 }
 $__defineComponent('multi-root-app', MultiRootApp);
 MultiRootApp.prototype.$$__tag = 'multi-root-app';
+MultiRootApp.$$__propSafe = true;

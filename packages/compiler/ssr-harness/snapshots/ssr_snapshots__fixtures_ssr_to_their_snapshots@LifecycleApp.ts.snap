@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/LifecycleApp.ts
 ---
-import { $__ssrText, $__ssrAttr, $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrAttr, $__ssrChild, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__setAttr, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -71,10 +71,10 @@ const _t1 = $__templateEl('<lifecycle-child></lifecycle-child>');
 const _t2 = $__templateEl('<div class="empty">child unmounted</div>');
 
 export class LifecycleApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'lifecycle-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stage">${(this.state.mounted
-                    ? `${$__ssrChild('lifecycle-child', {tick: (this.state.tick)})}`
-                    : `<div class="empty">child unmounted</div>`)}</div><div class="buttons"><button>${$__ssrText(this.state.mounted ? 'Unmount' : 'Mount')}</button><button${$__ssrAttr('disabled', !this.state.mounted)}>Update child</button><button class="ghost">Clear log</button></div>${$__ssrChild('log-view', {})}</template></${this.$$__tag ?? 'lifecycle-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'lifecycle-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stage">`, (this.state.mounted
+                    ? $__ssrTpl($__ssrChild('lifecycle-child', {tick: (this.state.tick)}))
+                    : $__ssrTpl(`<div class="empty">child unmounted</div>`)), `</div><div class="buttons"><button>`, $__ssrText(this.state.mounted ? 'Unmount' : 'Mount'), `</button><button${$__ssrAttr('disabled', !this.state.mounted)}>Update child</button><button class="ghost">Clear log</button></div>`, $__ssrChild('log-view', {}), `</template></${this.$$__tag ?? 'lifecycle-app'}>`];
 }
 
 
@@ -126,3 +126,4 @@ return _r0;
 LifecycleApp.$$__sheets = [..._s0];
 $__defineComponent('lifecycle-app', LifecycleApp);
 LifecycleApp.prototype.$$__tag = 'lifecycle-app';
+LifecycleApp.$$__propSafe = true;

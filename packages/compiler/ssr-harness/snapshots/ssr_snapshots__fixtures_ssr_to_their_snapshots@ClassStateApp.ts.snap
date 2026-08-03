@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ClassStateApp.ts
 ---
-import { $__ssrText, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -74,12 +74,12 @@ const _t0 = $__template('<section class="summary"><span class="count"> </span><s
 const _t1 = $__templateEl('<li class="item"><span class="name"> </span><span class="qty"> </span><span class="line"> </span></li>');
 
 export class ClassStateApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'class-state-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section class="summary"><span class="count">${$__ssrText(this.state.cart.count)}</span><span class="subtotal">${$__ssrText(this.state.cart.subtotal)}</span><span class="coupon">${$__ssrText(this.state.cart.coupon)}</span><span class="total">${$__ssrText(this.state.cart.total)}</span></section><div class="controls"><button class="add">add</button><button class="bump">bump</button><button class="coupon-btn">coupon</button><button class="remove">remove</button><button class="clear">clear</button></div><ul class="items">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'class-state-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section class="summary"><span class="count">`, $__ssrText(this.state.cart.count), `</span><span class="subtotal">`, $__ssrText(this.state.cart.subtotal), `</span><span class="coupon">`, $__ssrText(this.state.cart.coupon), `</span><span class="total">`, $__ssrText(this.state.cart.total), `</span></section><div class="controls"><button class="add">add</button><button class="bump">bump</button><button class="coupon-btn">coupon</button><button class="remove">remove</button><button class="clear">clear</button></div><ul class="items">`, ($__ssrRepeat(
                 this.state.cart.items,
-                (item) => `<li class="item"><span class="name">${$__ssrText(item.name)}</span><span class="qty">${$__ssrText(item.qty)}</span><span class="line">${$__ssrText(item.lineTotal)}</span></li>`,
+                (item) => $__ssrTpl(`<li class="item"><span class="name">`, $__ssrText(item.name), `</span><span class="qty">`, $__ssrText(item.qty), `</span><span class="line">`, $__ssrText(item.lineTotal), `</span></li>`),
                 (item) => item.id,
-            ))}</ul></template></${this.$$__tag ?? 'class-state-app'}>`;
+            )), `</ul></template></${this.$$__tag ?? 'class-state-app'}>`];
 }
 
 
@@ -157,3 +157,4 @@ return _r0;
 ClassStateApp.$$__sheets = [..._s0];
 $__defineComponent('class-state-app', ClassStateApp);
 ClassStateApp.prototype.$$__tag = 'class-state-app';
+ClassStateApp.$$__propSafe = true;

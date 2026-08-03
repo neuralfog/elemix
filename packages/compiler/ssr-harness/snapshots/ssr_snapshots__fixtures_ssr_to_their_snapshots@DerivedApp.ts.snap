@@ -45,8 +45,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div><div class="row"><button class="add-qty">qty +1</button><span class="num qty"> </span></div><div class="row"><button class="bump-price">price +5</button><span class="num price"> </span></div><div class="row"><span>subtotal</span><span class="num subtotal"> </span></div><div class="row"><span>total +20%</span><span class="num total"> </span></div></div>');
 
 export class DerivedApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'derived-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div><div class="row"><button class="add-qty">qty +1</button><span class="num qty">${$__ssrText(this.state.qty)}</span></div><div class="row"><button class="bump-price">price +5</button><span class="num price">${$__ssrText(this.state.price)}</span></div><div class="row"><span>subtotal</span><span class="num subtotal">${$__ssrText(this.subtotal)}</span></div><div class="row"><span>total +20%</span><span class="num total">${$__ssrText(this.total)}</span></div></div></template></${this.$$__tag ?? 'derived-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'derived-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div><div class="row"><button class="add-qty">qty +1</button><span class="num qty">`, $__ssrText(this.state.qty), `</span></div><div class="row"><button class="bump-price">price +5</button><span class="num price">`, $__ssrText(this.state.price), `</span></div><div class="row"><span>subtotal</span><span class="num subtotal">`, $__ssrText(this.subtotal), `</span></div><div class="row"><span>total +20%</span><span class="num total">`, $__ssrText(this.total), `</span></div></div></template></${this.$$__tag ?? 'derived-app'}>`];
 }
 
     state = $__state<State>({ qty: 2, price: 10 });
@@ -95,3 +95,4 @@ return _r0;
 DerivedApp.$$__sheets = [..._s0];
 $__defineComponent('derived-app', DerivedApp);
 DerivedApp.prototype.$$__tag = 'derived-app';
+DerivedApp.$$__propSafe = true;

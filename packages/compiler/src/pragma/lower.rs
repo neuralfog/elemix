@@ -54,6 +54,47 @@ pub fn expand(source: &str) -> Result<String, ExpandError> {
     expand_mode(source, false)
 }
 
+/// True when a component can hydrate WITHOUT its props being present, so
+/// `$__ssrChild` may omit `data-h`. Safe only if EVERY `this.props` in the class
+/// body is a bare terminal read `this.props.<ident>`; a dereference
+/// (`this.props.x.y`, `.x()`, `.x[...]`, `.x?.`) or any non-`.<ident>` use would
+/// throw on `undefined` at hydrate time (before the writer's hydration no-op is
+/// reached) if the parent hasn't bound props yet. Conservative: any ambiguity
+/// returns false (keep `data-h`) - never a false "safe".
+fn props_safe(body: &str) -> bool {
+    let key = "this.props";
+    let mut base = 0;
+    while let Some(rel) = body[base..].find(key) {
+        let pos = base + rel;
+        base = pos + key.len();
+        // Skip a false match inside a larger identifier / member chain
+        // (`xthis.props`, `foo.this.props`) - not the real `this`.
+        if pos > 0 {
+            let prev = body[..pos].chars().next_back().unwrap();
+            if prev.is_alphanumeric() || prev == '_' || prev == '$' || prev == '.' {
+                continue;
+            }
+        }
+        let rest = &body[base..];
+        if !rest.starts_with('.') {
+            return false; // bare `this.props`, `this.props?.`, `this.props[`
+        }
+        let ident = &rest[1..];
+        let end = ident
+            .char_indices()
+            .find(|(_, c)| !(c.is_alphanumeric() || *c == '_' || *c == '$'))
+            .map_or(ident.len(), |(i, _)| i);
+        if end == 0 {
+            return false; // `this.props.` with no identifier
+        }
+        match ident[end..].chars().next() {
+            Some('.') | Some('(') | Some('[') | Some('?') | Some('`') => return false,
+            _ => {}
+        }
+    }
+    true
+}
+
 pub fn expand_mode(source: &str, ssr: bool) -> Result<String, ExpandError> {
     let located = locate(source).map_err(|e| ExpandError::Locate(e.err))?;
     let no_pragmas = located.states.is_empty()
@@ -269,6 +310,16 @@ pub fn expand_mode(source: &str, ssr: bool) -> Result<String, ExpandError> {
             // its ancestor's `$$__ssr()` (no own template) still server-renders with
             // its OWN tag, read at runtime as `this.$$__tag`.
             after.push_str(&format!("\n{}.prototype.$$__tag = '{tag}';", class.name));
+            // SSR only: mark a component whose props NEVER get dereferenced at
+            // hydrate time (bare reads only). `$__ssrChild` then skips `data-h` for
+            // it - a hydrating parent re-supplies the props via `$__setProp`, and the
+            // DOM writers no-op during hydration so there is no flash. A component
+            // that dereferences a prop (`this.props.x.y`) would throw on `undefined`
+            // before the parent binds, so it keeps `data-h`. `#client` always keeps
+            // it (mounts fresh). Absence of the flag = keep `data-h` (safe default).
+            if ssr && !meta.client && props_safe(&source[class.body_open..class.end]) {
+                after.push_str(&format!("\n{}.$$__propSafe = true;", class.name));
+            }
         }
         if !after.is_empty() {
             edits.push((class.end, class.end, after));

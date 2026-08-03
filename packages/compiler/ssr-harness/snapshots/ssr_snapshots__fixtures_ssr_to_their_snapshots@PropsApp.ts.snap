@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/PropsApp.ts
 ---
@@ -18,8 +17,8 @@ type State = {
 const _t0 = $__template('<div class="parent">count <span class="pcount"> </span> tags <span class="ptags"> </span></div><props-child></props-child>');
 
 export class PropsApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'props-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="parent">count <span class="pcount">${$__ssrText(this.state.count)}</span> tags <span class="ptags">${$__ssrText(this.state.tags.join(','))}</span></div>${$__ssrChild('props-child', {label: ('hello'), count: (this.state.count), flag: (true), tags: (this.state.tags), onBump: (this.bump), onAdd: (this.add)})}</template></${this.$$__tag ?? 'props-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'props-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="parent">count <span class="pcount">`, $__ssrText(this.state.count), `</span> tags <span class="ptags">`, $__ssrText(this.state.tags.join(',')), `</span></div>`, $__ssrChild('props-child', {label: ('hello'), count: (this.state.count), flag: (true), tags: (this.state.tags), onBump: (this.bump), onAdd: (this.add)}), `</template></${this.$$__tag ?? 'props-app'}>`];
 }
 
     state = $__state<State>({
@@ -56,3 +55,4 @@ return _r0;
 }
 $__defineComponent('props-app', PropsApp);
 PropsApp.prototype.$$__tag = 'props-app';
+PropsApp.$$__propSafe = true;

@@ -131,7 +131,7 @@ pub fn compile_ssr(source: &str, minify: bool) -> (String, Vec<Diagnostic>) {
             no_shadow,
             client,
             &comp.prelude,
-            &inner,
+            inner,
         );
         inserts.push((comp.body_open, format!("\n{method}\n")));
     }

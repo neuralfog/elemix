@@ -19,8 +19,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="card"><h2>SCSS styles</h2><p>Imported from a <code>.scss</code> file as <code>?inline</code> and adopted via <code>#styles</code>.</p><button>count is <!----></button></div>');
 
 export class ScssApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'scss-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card"><h2>SCSS styles</h2><p>Imported from a <code>.scss</code> file as <code>?inline</code> and adopted via <code>#styles</code>.</p>${(() => {const _t0 = (this.state.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</div></template></${this.$$__tag ?? 'scss-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'scss-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card"><h2>SCSS styles</h2><p>Imported from a <code>.scss</code> file as <code>?inline</code> and adopted via <code>#styles</code>.</p>${(() => {const _t0 = (this.state.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</div></template></${this.$$__tag ?? 'scss-app'}>`];
 }
 
 
@@ -46,3 +46,4 @@ return _r0;
 ScssApp.$$__sheets = [..._s0];
 $__defineComponent('scss-app', ScssApp);
 ScssApp.prototype.$$__tag = 'scss-app';
+ScssApp.$$__propSafe = true;

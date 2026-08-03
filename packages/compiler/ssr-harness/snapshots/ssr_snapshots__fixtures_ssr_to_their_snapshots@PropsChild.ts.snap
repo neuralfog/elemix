@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/PropsChild.ts
 ---
@@ -20,8 +19,8 @@ type Props = {
 const _t0 = $__template('<div class="child"><span class="label"> </span><span class="count"> </span><span class="flag"> </span><span class="tags"> </span><button class="bump">bump</button><button class="add">add</button><button class="push">push</button></div>');
 
 export class PropsChild extends Component<Props> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'props-child'}><template shadowrootmode="open" shadowrootserializable=""><div class="child"><span class="label">${$__ssrText(this.props.label)}</span><span class="count">${$__ssrText(this.props.count)}</span><span class="flag">${$__ssrText(this.props.flag ? 'yes' : 'no')}</span><span class="tags">${$__ssrText(this.props.tags.join(','))}</span><button class="bump">bump</button><button class="add">add</button><button class="push">push</button></div></template></${this.$$__tag ?? 'props-child'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'props-child'}><template shadowrootmode="open" shadowrootserializable=""><div class="child"><span class="label">`, $__ssrText(this.props.label), `</span><span class="count">`, $__ssrText(this.props.count), `</span><span class="flag">`, $__ssrText(this.props.flag ? 'yes' : 'no'), `</span><span class="tags">`, $__ssrText(this.props.tags.join(',')), `</span><button class="bump">bump</button><button class="add">add</button><button class="push">push</button></div></template></${this.$$__tag ?? 'props-child'}>`];
 }
 
     $$__view(): DocumentFragment {

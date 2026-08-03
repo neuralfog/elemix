@@ -73,8 +73,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<label>Name (<code>~model</code>) <input type="text"/></label><div class="out">Hello, <!----></div><label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"/></label><div class="out">Volume: <!----></div>');
 
 export class ModelApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'model-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><label>Name (<code>~model</code>) <input type="text"${$__ssrAttr('value', (this.state.name).value)}/></label>${(() => {const _t0 = (this.state.name.value || '…');return `<div class="out" data-t="${$__ssrLen(_t0)}">Hello, ${$__ssrText(_t0)}</div>`;})()}<label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"${$__ssrAttr('value', (this.state.volume).value)}/></label>${(() => {const _t1 = (this.state.volume.value);return `<div class="out" data-t="${$__ssrLen(_t1)}">Volume: ${$__ssrText(_t1)}</div>`;})()}</template></${this.$$__tag ?? 'model-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'model-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><label>Name (<code>~model</code>) <input type="text"${$__ssrAttr('value', (this.state.name).value)}/></label>${(() => {const _t0 = (this.state.name.value || '…');return `<div class="out" data-t="${$__ssrLen(_t0)}">Hello, ${$__ssrText(_t0)}</div>`;})()}<label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"${$__ssrAttr('value', (this.state.volume).value)}/></label>${(() => {const _t1 = (this.state.volume.value);return `<div class="out" data-t="${$__ssrLen(_t1)}">Volume: ${$__ssrText(_t1)}</div>`;})()}</template></${this.$$__tag ?? 'model-app'}>`];
 }
 
 
@@ -108,3 +108,4 @@ return _r0;
 ModelApp.$$__sheets = [..._s0];
 $__defineComponent('model-app', ModelApp);
 ModelApp.prototype.$$__tag = 'model-app';
+ModelApp.$$__propSafe = true;

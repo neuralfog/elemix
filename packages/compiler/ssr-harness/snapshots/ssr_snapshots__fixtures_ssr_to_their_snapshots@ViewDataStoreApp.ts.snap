@@ -1,6 +1,5 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ViewDataStoreApp.ts
 ---
@@ -13,8 +12,8 @@ import { counter, type Seed } from './ViewDataStore';
 const _t0 = $__template('<div class="store-app"><span class="count"> </span><button class="inc">+</button></div>');
 
 export class ViewDataStoreApp extends Component<unknown, Seed> {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'view-data-store-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="store-app"><span class="count">${$__ssrText(counter.count)}</span><button class="inc">+</button></div></template></${this.$$__tag ?? 'view-data-store-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'view-data-store-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="store-app"><span class="count">`, $__ssrText(counter.count), `</span><button class="inc">+</button></div></template></${this.$$__tag ?? 'view-data-store-app'}>`];
 }
 
     inc = (): void => {
@@ -34,3 +33,4 @@ return _r0;
 }
 $__defineComponent('view-data-store-app', ViewDataStoreApp);
 ViewDataStoreApp.prototype.$$__tag = 'view-data-store-app';
+ViewDataStoreApp.$$__propSafe = true;

@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/RatingInput.ts
 ---
-import { $__ssrClass, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrClass, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -37,12 +37,12 @@ export class RatingInput extends Component {
         this.initFormValue();
     }
     static formAssociated = true;
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'rating-input'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stars">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'rating-input'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stars">`, ($__ssrRepeat(
             [1, 2, 3, 4, 5],
-            (n) => `<button type="button"${$__ssrClass({ star: true, on: n <= this.state.value })}>★</button>`,
+            (n) => $__ssrTpl(`<button type="button"${$__ssrClass({ star: true, on: n <= this.state.value })}>★</button>`),
             (n) => String(n),
-        ))}</div></template></${this.$$__tag ?? 'rating-input'}>`;
+        )), `</div></template></${this.$$__tag ?? 'rating-input'}>`];
 }
 
 
@@ -74,3 +74,4 @@ return _r0;
 RatingInput.$$__sheets = [..._s0];
 $__defineComponent('rating-input', RatingInput);
 RatingInput.prototype.$$__tag = 'rating-input';
+RatingInput.$$__propSafe = true;

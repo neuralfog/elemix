@@ -42,8 +42,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="controls"><label>Name <input type="text"/></label><label>Role <input type="text"/></label><button>👍 Like</button></div><profile-card></profile-card>');
 
 export class ProfileApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'profile-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="controls"><label>Name <input type="text"${$__ssrAttr('value', (this.state.name).value)}/></label><label>Role <input type="text"${$__ssrAttr('value', (this.state.role).value)}/></label><button>👍 Like</button></div>${$__ssrChild('profile-card', {name: (this.state.name.value), role: (this.state.role.value), likes: (this.state.likes)})}</template></${this.$$__tag ?? 'profile-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'profile-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="controls"><label>Name <input type="text"${$__ssrAttr('value', (this.state.name).value)}/></label><label>Role <input type="text"${$__ssrAttr('value', (this.state.role).value)}/></label><button>👍 Like</button></div>`, $__ssrChild('profile-card', {name: (this.state.name.value), role: (this.state.role.value), likes: (this.state.likes)}), `</template></${this.$$__tag ?? 'profile-app'}>`];
 }
 
 
@@ -81,3 +81,4 @@ return _r0;
 ProfileApp.$$__sheets = [..._s0];
 $__defineComponent('profile-app', ProfileApp);
 ProfileApp.prototype.$$__tag = 'profile-app';
+ProfileApp.$$__propSafe = true;

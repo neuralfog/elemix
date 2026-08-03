@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/CardListApp.ts
 ---
-import { $__ssrChild, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrChild, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -57,12 +57,12 @@ const _t0 = $__template('<div class="bar"><button>Add user</button></div><div cl
 const _t1 = $__templateEl('<div class="row"><user-card></user-card><button class="promote">promote</button><button class="drop">×</button></div>');
 
 export class CardListApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'card-list-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Add user</button></div><div class="list">${($__ssrRepeat(
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'card-list-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Add user</button></div><div class="list">`, ($__ssrRepeat(
                 this.state.users,
-                (user) => `<div class="row">${$__ssrChild('user-card', {name: (user.name), role: (user.role)})}<button class="promote">promote</button><button class="drop">×</button></div>`,
+                (user) => $__ssrTpl(`<div class="row">`, $__ssrChild('user-card', {name: (user.name), role: (user.role)}), `<button class="promote">promote</button><button class="drop">×</button></div>`),
                 (user) => user.id,
-            ))}</div></template></${this.$$__tag ?? 'card-list-app'}>`;
+            )), `</div></template></${this.$$__tag ?? 'card-list-app'}>`];
 }
 
 
@@ -120,3 +120,4 @@ return _r0;
 CardListApp.$$__sheets = [..._s0];
 $__defineComponent('card-list-app', CardListApp);
 CardListApp.prototype.$$__tag = 'card-list-app';
+CardListApp.$$__propSafe = true;

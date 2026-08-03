@@ -29,8 +29,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="value"> </div>');
 
 export class SignalValue extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'signal-value'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="value">${$__ssrText(counter.count)}</div></template></${this.$$__tag ?? 'signal-value'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'signal-value'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="value">`, $__ssrText(counter.count), `</div></template></${this.$$__tag ?? 'signal-value'}>`];
 }
 
 
@@ -46,3 +46,4 @@ return _r0;
 SignalValue.$$__sheets = [..._s0];
 $__defineComponent('signal-value', SignalValue);
 SignalValue.prototype.$$__tag = 'signal-value';
+SignalValue.$$__propSafe = true;

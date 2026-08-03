@@ -70,8 +70,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="slice"><span class="count"> </span><button>+1</button><button>reset</button></div><div class="slice"><strong class="name"> </strong><span class="status"> </span><button>toggle status</button><button>rename</button></div>');
 
 export class MultiStateApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'multi-state-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="slice"><span class="count">${$__ssrText(this.counter.count)}</span><button>+1</button><button>reset</button></div><div class="slice"><strong class="name">${$__ssrText(this.user.name)}</strong><span class="status">${$__ssrText(this.user.online ? 'online' : 'offline')}</span><button>toggle status</button><button>rename</button></div></template></${this.$$__tag ?? 'multi-state-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'multi-state-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="slice"><span class="count">`, $__ssrText(this.counter.count), `</span><button>+1</button><button>reset</button></div><div class="slice"><strong class="name">`, $__ssrText(this.user.name), `</strong><span class="status">`, $__ssrText(this.user.online ? 'online' : 'offline'), `</span><button>toggle status</button><button>rename</button></div></template></${this.$$__tag ?? 'multi-state-app'}>`];
 }
 
 
@@ -122,3 +122,4 @@ return _r0;
 MultiStateApp.$$__sheets = [..._s0];
 $__defineComponent('multi-state-app', MultiStateApp);
 MultiStateApp.prototype.$$__tag = 'multi-state-app';
+MultiStateApp.$$__propSafe = true;

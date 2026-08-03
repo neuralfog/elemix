@@ -38,8 +38,8 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<button>count is <!----></button>');
 
 export class CounterApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'counter-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.state.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'counter-app'}>`;
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'counter-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.state.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'counter-app'}>`];
 }
 
 
@@ -65,3 +65,4 @@ return _r0;
 CounterApp.$$__sheets = [..._s0];
 $__defineComponent('counter-app', CounterApp);
 CounterApp.prototype.$$__tag = 'counter-app';
+CounterApp.$$__propSafe = true;

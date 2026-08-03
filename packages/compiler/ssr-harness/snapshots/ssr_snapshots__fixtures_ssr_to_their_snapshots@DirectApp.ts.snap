@@ -94,13 +94,13 @@ const _s0 = $__sheet(css);
 const _t0 = $__template('<div>class</div><div class="toggles"><button>active</button><button>rounded</button><button>large</button></div><label class="prop-demo"><input type="checkbox"/> Disable the button (<code>disabled</code>)</label><button class="action">Action</button>');
 
 export class DirectApp extends Component {
-$$__ssr(): string {
-return `<${this.$$__tag ?? 'direct-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div${$__ssrClass({
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'direct-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div${$__ssrClass({
                 box: true,
                 active: this.state.active,
                 rounded: this.state.rounded,
                 large: this.state.large,
-            })}>class</div><div class="toggles"><button>active</button><button>rounded</button><button>large</button></div><label class="prop-demo"><input type="checkbox"${$__ssrAttr('checked', this.state.disabled)}/> Disable the button (<code>disabled</code>)</label><button class="action"${$__ssrAttr('disabled', this.state.disabled)}>Action</button></template></${this.$$__tag ?? 'direct-app'}>`;
+            })}>class</div><div class="toggles"><button>active</button><button>rounded</button><button>large</button></div><label class="prop-demo"><input type="checkbox"${$__ssrAttr('checked', this.state.disabled)}/> Disable the button (<code>disabled</code>)</label><button class="action"${$__ssrAttr('disabled', this.state.disabled)}>Action</button></template></${this.$$__tag ?? 'direct-app'}>`];
 }
 
 
@@ -144,3 +144,4 @@ return _r0;
 DirectApp.$$__sheets = [..._s0];
 $__defineComponent('direct-app', DirectApp);
 DirectApp.prototype.$$__tag = 'direct-app';
+DirectApp.$$__propSafe = true;
