@@ -26,6 +26,13 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-nvim` | Neovim Plugin For Elemix. | [README](packages/nvim/README.md) |
 | `create-elemix-app` | Scaffold A New Elemix App. | [README](packages/create-app/README.md) |
 
+## SSR
+
+| Package | Description | Docs |
+| --- | --- | --- |
+| `@neuralfog/hydris` | SSR Server Framework For Elemix. | [README](packages/hydris/README.md) |
+| `@neuralfog/elemix-ssr-plugin` | SSR Build Plugin For Elemix. | [README](packages/ssr-plugin/README.md) |
+
 ## Contributing
 
 - **Thanks for your interest!** Third-party contributions are not accepted as external pull requests - only selected contributors can raise one. I'm fully capable of maintaining my own project and code, and I don't need yours.

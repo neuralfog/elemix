@@ -32,25 +32,21 @@ struct Cli {
     #[arg(long)]
     stdin: bool,
 
-    /// Also emit a `$$__ssr(): string` server-render method into every registered
-    /// component (slice 1). Off by default — the CSR output is byte-identical.
+    /// Emit the server-render (SSR) code for every registered component.
+    /// Off by default.
     #[arg(long)]
     ssr: bool,
 
-    /// Also emit a `$$__hydrate(root)` client-hydration method into every
-    /// registered component (the client build for an SSR app). Off by default.
+    /// Emit the client-hydration code for every registered component.
+    /// Off by default.
     #[arg(long)]
     hydrate: bool,
 
-    /// Precompile-minify each `#styles` sheet baked into an SSR `<style data-ssr>`
-    /// block (resolvable static literals only). Only affects `--ssr`. Off by
-    /// default so the dev SSR output stays readable.
+    /// Minify CSS in SSR mode.
     #[arg(long)]
     minify: bool,
 
-    /// Also produce a line-level source map back to the original. With `--stdin`
-    /// stdout becomes a `{"code","map"}` JSON envelope; with `--out` a sidecar
-    /// `<file>.map` is written and the compiled file gets a `sourceMappingURL`.
+    /// Emit sourcemaps.
     #[arg(long)]
     sourcemap: bool,
 }

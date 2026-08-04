@@ -970,6 +970,100 @@ jobs:
           echo "publishing create-elemix-app@$VERSION under dist-tag: $TAG"
           npm publish --access public --provenance --tag "$TAG"
 
+  # ── FULL releases only: bump the @neuralfog/elemix* deps in the downstream
+  #    consumer repos, refresh their lockfiles, and push a `v<version>` commit.
+  #    Skipped for dev/pre-release versions (the `-dev.N` suffix). Runs after all
+  #    the npm publishes so `pnpm install` can resolve the just-released versions.
+  #    Needs a REPO_SYNC_TOKEN secret (a PAT with push access to the three repos);
+  #    it's embedded in the clone URL, so the push authenticates as its owner.
+  sync-consumers:
+    name: sync ${{ matrix.repo }}
+    needs:
+      - version
+      - publish-compiler
+      - publish-analyzer
+      - publish-formatter
+      - publish-wasm
+      - publish-elemix
+      - publish-storybook
+      - publish-testing-library
+      - publish-vite
+    # Only full releases: a dev version carries a `-dev.N` suffix.
+    if: ${{ !contains(needs.version.outputs.value, '-') }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: [compiler-explorer, elemix-playground, elemix-template]
+    steps:
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Clone ${{ matrix.repo }}
+        env:
+          REPO_SYNC_TOKEN: ${{ secrets.REPO_SYNC_TOKEN }}
+        run: |
+          git clone --depth 1 \
+            "https://x-access-token:${REPO_SYNC_TOKEN}@github.com/neuralfog/${{ matrix.repo }}.git" repo
+
+      # Pin every @neuralfog/elemix* dependency to this release (exact version).
+      # Excludes non-elemix @neuralfog packages (e.g. @neuralfog/biome-config),
+      # which version independently. Indentation is detected + preserved so the
+      # only diff is the version strings.
+      - name: Bump @neuralfog/elemix* deps
+        working-directory: repo
+        env:
+          VERSION: ${{ needs.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = process.env.VERSION;
+            const raw = fs.readFileSync("package.json", "utf8");
+            const indent = raw.match(/^([ \t]+)"/m)?.[1] ?? "  ";
+            const p = JSON.parse(raw);
+            const isElemix = (n) => n === "@neuralfog/elemix" || n.startsWith("@neuralfog/elemix-");
+            let changed = 0;
+            for (const field of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]) {
+              const deps = p[field];
+              if (!deps) continue;
+              for (const name of Object.keys(deps)) {
+                if (isElemix(name)) { deps[name] = v; changed++; }
+              }
+            }
+            fs.writeFileSync("package.json", JSON.stringify(p, null, indent) + "\n");
+            console.log(`${process.env.GITHUB_REPOSITORY ?? ""} -> bumped ${changed} @neuralfog/elemix* dep(s) to ${v}`);
+          '
+
+      # `pnpm install` (NOT frozen) refreshes the lockfile against the new
+      # versions. Retry to ride out npm CDN propagation of the just-published deps.
+      - name: Refresh lockfile
+        working-directory: repo
+        run: |
+          for i in $(seq 1 6); do
+            pnpm install --no-frozen-lockfile && exit 0
+            echo "pnpm install failed (attempt $i) — deps may still be propagating; retrying..."
+            sleep 10
+          done
+          echo "::error::pnpm install did not succeed for ${{ matrix.repo }}"
+          exit 1
+
+      - name: Commit + push v${{ needs.version.outputs.value }}
+        working-directory: repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "no dependency changes for ${{ matrix.repo }} — nothing to push"
+            exit 0
+          fi
+          git add -A
+          git commit -m "v${{ needs.version.outputs.value }}"
+          git push
+
   # ── after everything is on npm: one GitHub Release from the changelog ───────
   release-notes:
     name: GitHub Release
