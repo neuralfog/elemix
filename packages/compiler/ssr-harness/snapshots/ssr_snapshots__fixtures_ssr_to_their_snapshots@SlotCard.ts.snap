@@ -1,0 +1,76 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SlotCard.ts
+---
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__effect, $__setProp, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './SlotChip';
+import './SlotItem';
+import './SlotPanel';
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .card {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        max-width: 520px;
+        padding: 28px;
+        border-radius: 20px;
+        background: linear-gradient(180deg, #f8fafc, #eef2ff);
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="card"><slot-item><slot-panel><slot-chip></slot-chip><slot-chip></slot-chip><slot-chip></slot-chip></slot-panel></slot-item><slot-item><slot-panel><slot-chip></slot-chip><slot-chip></slot-chip><slot-chip></slot-chip></slot-panel></slot-item></div>');
+
+export class SlotCard extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'slot-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card">`, $__ssrChild('slot-item', {title: ('Group One')}, $__ssrChild('slot-panel', {}, [$__ssrChild('slot-chip', {label: ('Alpha')}), $__ssrChild('slot-chip', {label: ('Beta')}), $__ssrChild('slot-chip', {label: ('Gamma')})])), $__ssrChild('slot-item', {title: ('Group Two')}, $__ssrChild('slot-panel', {}, [$__ssrChild('slot-chip', {label: ('Delta')}), $__ssrChild('slot-chip', {label: ('Epsilon')}), $__ssrChild('slot-chip', {label: ('Zeta')})])), `</div></template></${this.$$__tag ?? 'slot-card'}>`];
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!.firstChild!;
+const _n3 = _n1.firstChild!.firstChild!.nextSibling!;
+const _n4 = _n1.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n6 = _n5.firstChild!.firstChild!;
+const _n7 = _n5.firstChild!.firstChild!.nextSibling!;
+const _n8 = _n5.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__effect(() => {
+$__setProp(_n1, 'title', ('Group One'));
+});
+$__effect(() => {
+$__setProp(_n2, 'label', ('Alpha'));
+});
+$__effect(() => {
+$__setProp(_n3, 'label', ('Beta'));
+});
+$__effect(() => {
+$__setProp(_n4, 'label', ('Gamma'));
+});
+$__effect(() => {
+$__setProp(_n5, 'title', ('Group Two'));
+});
+$__effect(() => {
+$__setProp(_n6, 'label', ('Delta'));
+});
+$__effect(() => {
+$__setProp(_n7, 'label', ('Epsilon'));
+});
+$__effect(() => {
+$__setProp(_n8, 'label', ('Zeta'));
+});
+return _r0;
+}
+}
+SlotCard.$$__sheets = [..._s0];
+$__defineComponent('slot-card', SlotCard);
+SlotCard.prototype.$$__tag = 'slot-card';
+SlotCard.$$__propSafe = true;

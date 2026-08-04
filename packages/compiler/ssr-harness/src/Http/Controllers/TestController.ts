@@ -67,6 +67,7 @@ import { ScssApp } from '../../../../fixtures/ScssApp';
 import { MatchApp } from '../../../../fixtures/MatchApp';
 import { ModelApp } from '../../../../fixtures/ModelApp';
 import { SlotApp } from '../../../../fixtures/SlotApp';
+import { SlotCard } from '../../../../fixtures/SlotCard';
 import { WhenElseApp } from '../../../../fixtures/WhenElseApp';
 
 export class TestController {
@@ -92,6 +93,10 @@ export class TestController {
 
     slotApp(): Reply {
         return Reply.view(SlotApp);
+    }
+
+    slotCard(): Reply {
+        return Reply.view(SlotCard);
     }
 
     whenElseApp(): Reply {

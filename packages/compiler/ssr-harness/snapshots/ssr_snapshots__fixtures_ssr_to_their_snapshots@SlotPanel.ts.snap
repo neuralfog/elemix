@@ -1,0 +1,39 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SlotPanel.ts
+---
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const css = `
+    :host { display: block; }
+    .panel {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 16px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="panel"><slot></slot></div>');
+
+export class SlotPanel extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'slot-panel'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel"><slot></slot></div></template></${this.$$__tag ?? 'slot-panel'}>`];
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+SlotPanel.$$__sheets = [..._s0];
+$__defineComponent('slot-panel', SlotPanel);
+SlotPanel.prototype.$$__tag = 'slot-panel';
+SlotPanel.$$__propSafe = true;
