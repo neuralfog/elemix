@@ -50,18 +50,22 @@ pub fn compile(source: &str) -> String {
 /// Like [`compile`], but also returns the diagnostics it inlined so a build
 /// front-end can report them (and fail fast on errors).
 pub fn compile_diagnostics(source: &str) -> (String, Vec<Diagnostic>) {
-    compile_diagnostics_mode(source, false)
+    compile_diagnostics_mode(source, false, false)
 }
 
 /// The shared CSR pipeline, with `ssr` selecting how free `tpl` templates lower:
 /// `false` (CSR / `--hydrate`) → DOM-cloning IIFEs; `true` (the `--ssr` server
 /// build) → `$__ssrTpl(`…`)` string descriptors (see [`free_template::lower`]).
-fn compile_diagnostics_mode(source: &str, ssr: bool) -> (String, Vec<Diagnostic>) {
+pub fn compile_diagnostics_mode(
+    source: &str,
+    ssr: bool,
+    minify: bool,
+) -> (String, Vec<Diagnostic>) {
     let spliced = splice::inline_helpers(source);
     let diags = pragma::diagnose::collect(&spliced);
     // Best-effort transform: a pragma error makes `expand` bail, so the
     // pragmas pass through unexpanded — the inlined `throw` is what surfaces it.
-    let expanded = pragma::expand_mode(&spliced, ssr).unwrap_or(spliced);
+    let expanded = pragma::expand_mode(&spliced, ssr, minify).unwrap_or(spliced);
     let lowered = free_template::lower(&rewrite::rewrite(&expanded), ssr);
     let compiled = imports::merge_runtime_imports(&lowered);
     let out = diagnostics::inline(&compiled, &diags);
@@ -100,17 +104,18 @@ pub fn compile_ssr(source: &str, minify: bool) -> (String, Vec<Diagnostic>) {
         let Some(decl) = registered.iter().find(|d| d.class == comp.class_name) else {
             continue;
         };
-        let (no_shadow, client, css_value) = located
+        let (no_shadow, client, document, css_value) = located
             .as_ref()
             .and_then(|l| l.classes.iter().find(|c| c.name == comp.class_name))
             .map(|c| {
                 let meta = pragma::resolve(&c.directives).ok();
                 let no_shadow = meta.as_ref().map(|m| m.no_shadow).unwrap_or(false);
                 let client = meta.as_ref().map(|m| m.client).unwrap_or(false);
+                let document = meta.as_ref().map(|m| m.document).unwrap_or(false);
                 let css = c.styles.first().map(|s| s.value.clone());
-                (no_shadow, client, css)
+                (no_shadow, client, document, css)
             })
-            .unwrap_or((false, false, None));
+            .unwrap_or((false, false, false, None));
 
         // The `<style data-ssr>` inner: dynamic `${expr}` by default, or - behind
         // `--minify`, when the stylesheet resolves to a static literal - the CSS
@@ -130,6 +135,7 @@ pub fn compile_ssr(source: &str, minify: bool) -> (String, Vec<Diagnostic>) {
             style_body.as_deref(),
             no_shadow,
             client,
+            document,
             &comp.prelude,
             inner,
         );
@@ -142,7 +148,7 @@ pub fn compile_ssr(source: &str, minify: bool) -> (String, Vec<Diagnostic>) {
         injected.insert_str(at, &text);
     }
 
-    let (out, diags) = compile_diagnostics_mode(&injected, true);
+    let (out, diags) = compile_diagnostics_mode(&injected, true, minify);
     (imports::add_ssr_runtime_import(&out), diags)
 }
 
@@ -154,7 +160,7 @@ pub fn compile_ssr(source: &str, minify: bool) -> (String, Vec<Diagnostic>) {
 /// build for an SSR app: the normal CSR `view()` is still emitted (fresh-render
 /// fallback / islands), plus this hydrate method. Packaging mirrors [`compile_ssr`]:
 /// inject at each class body's open brace, then run the CSR pipeline over it.
-pub fn compile_hydrate(source: &str) -> (String, Vec<Diagnostic>) {
+pub fn compile_hydrate(source: &str, minify: bool) -> (String, Vec<Diagnostic>) {
     // Splice helpers first (see [`compile_ssr`]): the hydrate holes must be the
     // inlined nested `tpl`, else `${this.chip(x)}` classifies as a TEXT hole and
     // hydrates via `$__setText(node, this.chip(x))` - stringifying a Template.
@@ -189,7 +195,7 @@ pub fn compile_hydrate(source: &str) -> (String, Vec<Diagnostic>) {
         injected = format!("{decls}\n{injected}");
     }
 
-    let (out, diags) = compile_diagnostics(&injected);
+    let (out, diags) = compile_diagnostics_mode(&injected, false, minify);
     (imports::add_hydrate_runtime_import(&out), diags)
 }
 

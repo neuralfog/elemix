@@ -5,9 +5,6 @@ import type { Plugin } from 'vite';
 
 const require = createRequire(import.meta.url);
 
-// Every elemix compiler hint. A file is compiled if it carries ANY of them, so
-// this list IS the gate — drop one and that pragma silently bleeds through
-// uncompiled (a module-level `// #state` store would stay a dead plain object).
 export const PRAGMAS = [
     'component',
     'tag',
@@ -32,8 +29,6 @@ const PRAGMA = new RegExp(`^\\s*//\\s*#(${PRAGMAS.join('|')})\\b`, 'm');
 export const needsCompile = (code: string): boolean =>
     code.includes('tpl`') || PRAGMA.test(code);
 
-// Resolve the host's prebuilt `elemix-compiler` binary from its platform package
-// (the same scheme the `ec` launcher uses).
 const resolveBin = (): string => {
     const ext = process.platform === 'win32' ? '.exe' : '';
     const pkg = `@neuralfog/elemix-compiler-${process.platform}-${process.arch}`;
@@ -41,7 +36,6 @@ const resolveBin = (): string => {
     return join(dirname(pkgJson), `elemix-compiler${ext}`);
 };
 
-// A Source Map v3 object (only the fields we touch are typed).
 interface SourceMap {
     version: 3;
     sources: string[];
@@ -55,10 +49,6 @@ interface Compiled {
     map: SourceMap;
 }
 
-// Pipe one module's source through `elemix-compiler --stdin --sourcemap`, which
-// answers with a `{ code, map }` JSON envelope. Returning the map keeps the
-// source-map chain intact — Vite composes it with esbuild's TS→JS map so
-// breakpoints / stack traces resolve to the original `tpl` source.
 const compile = (bin: string, source: string): Promise<Compiled> =>
     new Promise((resolve, reject) => {
         const child = spawn(bin, ['--stdin', '--sourcemap']);
@@ -116,8 +106,6 @@ export const elemix = (options: ElemixPluginOptions = {}): Plugin => {
             }
             if (!bin) bin = resolveBin();
             const { code: compiled, map } = await compile(bin, code);
-            // The compiler emits a placeholder source name; point it at the
-            // real module so Vite resolves the original file in devtools.
             map.sources = [id];
             return { code: compiled, map };
         },

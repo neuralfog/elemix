@@ -5,7 +5,6 @@ import { $__state as state } from '../src/runtime/state';
 type Row = { id: number };
 const rows = (ids: number[]): Row[] => ids.map((id) => ({ id }));
 
-// deterministic LCG so a failure is reproducible
 const makeRand = (seed: number) => {
     let s = seed;
     return () => {
@@ -89,7 +88,6 @@ describe('_list reconciler', () => {
                 next = [];
                 for (let k = 0; k < n; k++) next.push(nextId++);
             }
-            // op === 7: no structural change (re-set identical order)
 
             const survivors = next.filter((id) => cur.includes(id));
 
@@ -97,11 +95,9 @@ describe('_list reconciler', () => {
 
             const dom = t.domRows();
             expect(dom.map((n) => Number(n.textContent))).toEqual(next);
-            // each position holds the exact node instance bound to that id
             for (let p = 0; p < next.length; p++) {
                 expect(dom[p]).toBe(t.node.get(next[p]));
             }
-            // survivors keep their node — never re-rendered
             for (const id of survivors) {
                 expect(t.renderCount.get(id)).toBe(1);
             }
@@ -117,7 +113,6 @@ describe('_list reconciler', () => {
 
         const after = t.domRows();
         expect(after.map((n) => Number(n.textContent))).toEqual(swapped);
-        // every node instance is reused (no row re-created on a pure swap)
         for (let i = 0; i < 20; i++) {
             expect(t.node.get(i)).toBe(before[i]);
         }
@@ -126,10 +121,6 @@ describe('_list reconciler', () => {
 
     test('in-place reactive swap converges (transient duplicate key survived)', () => {
         const t = setup(Array.from({ length: 20 }, (_, i) => i));
-        // Mutating the reactive array in place fires a reconcile per index write.
-        // The first write leaves a transient DUPLICATE key (id 18 in two slots) —
-        // the reconciler must bail on that pass and let the next (unique) pass do
-        // the real swap, never throwing.
         const data = t.st.list;
         const tmp = data[1];
         data[1] = data[18];

@@ -65,6 +65,12 @@ pub struct ComponentMeta {
     /// a bare host tag, no DSD, no server lifecycle), so the client ships its CSR
     /// module and mounts it fresh on upgrade - no hydration.
     pub client: bool,
+    /// `#document` — a document-frame view: `$$__ssr()` emits the RAW template (no
+    /// host-tag wrapper, no shadow, `<!doctype html>` prepended) so it can be the
+    /// `<html>` root. Rendered SSR-only by hydris, which splices the page + scripts
+    /// into its `<slot></slot>`. Implies `#component` (so it gets a `$$__ssr`) and
+    /// `#no-shadow`.
+    pub document: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -94,6 +100,7 @@ pub fn is_known_directive(name: &str) -> bool {
             | "no-shadow"
             | "shadow"
             | "client"
+            | "document"
             | "styles"
             | "state"
             | "effect"
@@ -124,6 +131,13 @@ pub fn resolve(directives: &[Directive]) -> Result<ComponentMeta, PragmaError> {
             "no-shadow" => meta.no_shadow = true,
             "shadow" => meta.shadow = true,
             "client" => meta.client = true,
+            // A document frame: a registered, shadow-less view whose `$$__ssr()`
+            // is the raw `<html>` frame (see `ssr_method`).
+            "document" => {
+                meta.document = true;
+                meta.register = true;
+                meta.no_shadow = true;
+            }
             "styles" | "state" | "effect" | "before-mount" | "mount" | "dispose" => {
                 return Err(PragmaError::OnClass(d.name.clone()))
             }

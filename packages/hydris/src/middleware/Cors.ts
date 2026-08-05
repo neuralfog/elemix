@@ -94,8 +94,6 @@ export class Cors extends BaseMiddleware {
     }
 }
 
-// Built-in middleware is not processed by the app's DI plugin, so declare the
-// injected dependencies explicitly - the same metadata the plugin would emit.
 Object.defineProperty(Cors, Symbol.for('ssr.inject'), {
     value: [CorsConfig],
 });

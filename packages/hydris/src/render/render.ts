@@ -9,6 +9,24 @@ import './env';
 
 export type ViewClass = new () => Component;
 
+let defaultDocument: ViewClass | undefined;
+let documentLocked = false;
+
+export const setDefaultDocument = (document: ViewClass | undefined): void => {
+    if (documentLocked) {
+        throw new Error(
+            'App.document() must be called before App.serve(); the default document is locked once the server boots.',
+        );
+    }
+    defaultDocument = document;
+};
+
+export const lockDefaultDocument = (): void => {
+    documentLocked = true;
+};
+
+export const getDefaultDocument = (): ViewClass | undefined => defaultDocument;
+
 interface Renderable {
     $$__attachFormInternals?(): void;
     $$__beforeMount?(): void;

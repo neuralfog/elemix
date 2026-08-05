@@ -1,0 +1,46 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/DocumentPageApp.ts
+---
+import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { DocumentFrame } from './DocumentFrame';
+
+type State = {
+    count: number;
+};
+
+const _t0 = $__template('<button>count is <!----></button>');
+
+export class DocumentPageApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'document-page-app'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _t0 = (this.state.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'document-page-app'}>`];
+}
+
+
+    state = $__state<State>({ count: 0 });
+
+    increment = (): void => {
+        this.state.count++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.nextSibling!;
+$__event(_n1, 'click', this.increment);
+const _x3 = document.createTextNode('');
+_n2.replaceWith(_x3);
+$__effect(() => {
+$__setText(_x3, (this.state.count));
+});
+return _r0;
+}
+}
+$__defineComponent('document-page-app', DocumentPageApp);
+DocumentPageApp.prototype.$$__tag = 'document-page-app';
+DocumentPageApp.$$__propSafe = true;
+DocumentPageApp.$$__document = DocumentFrame;

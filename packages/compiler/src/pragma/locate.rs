@@ -78,6 +78,9 @@ pub struct ClassInfo {
     /// to `directives` but kept separate so the transform path stays span-free.
     pub directive_spans: Vec<SpannedDirective>,
     pub styles: Vec<StyleField>,
+    /// A field-level `#document` (`document = SomeDoc`): the referenced document
+    /// class + the range to strip. Stamped as `Class.$$__document` by `lower`.
+    pub document_field: Option<StyleField>,
     pub effects: Vec<String>,
     /// `#before-mount`-tagged methods, in source order.
     pub before_mounts: Vec<String>,
@@ -258,6 +261,7 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                 directives: Vec::new(),
                 directive_spans: Vec::new(),
                 styles: Vec::new(),
+                document_field: None,
                 effects: Vec::new(),
                 before_mounts: Vec::new(),
                 mounts: Vec::new(),
@@ -331,6 +335,13 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                     strip: (line, field_block_end(source, *prop_end)),
                     comment: (line, cend + usize::from(source[cend..].starts_with('\n'))),
                 }),
+                "document" => {
+                    classes[*class_idx].document_field = Some(StyleField {
+                        value: slice(source, *value),
+                        strip: (line, field_block_end(source, *prop_end)),
+                        comment: (line, cend + usize::from(source[cend..].starts_with('\n'))),
+                    })
+                }
                 // `#state` tags reactive DATA — never a function. An arrow/function
                 // field can't be wrapped in `state()` meaningfully; skip it and
                 // record a precise issue.

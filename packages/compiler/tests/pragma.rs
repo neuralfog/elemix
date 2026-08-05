@@ -64,6 +64,7 @@ fn resolves_component_and_tag() {
             no_shadow: false,
             shadow: false,
             client: false,
+            document: false,
         })
     );
 }

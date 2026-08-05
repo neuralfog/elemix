@@ -1,7 +1,11 @@
 import { basename } from 'node:path';
 import type { Component } from '@neuralfog/elemix';
 import { $__runStores } from '@neuralfog/elemix/ssr-runtime';
-import { renderView, type ViewClass } from '../render/render';
+import {
+    getDefaultDocument,
+    renderView,
+    type ViewClass,
+} from '../render/render';
 
 type ViewData<V> = V extends new () => Component<unknown, infer D> ? D : never;
 
@@ -10,13 +14,36 @@ const viewDataScript = (data: unknown): string =>
         ? ''
         : `<script>window.__elemix_vd=${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 
+const clientScript = (name: string | undefined): string =>
+    name === undefined
+        ? ''
+        : `<script type="module" src="/_elemix/${name}.js"></script>`;
+
+const bundleName = (View: unknown): string | undefined => {
+    const bundle = (View as { $$__module?: string }).$$__module;
+    return bundle === undefined
+        ? undefined
+        : basename(bundle).replace(/\.[tj]s$/, '');
+};
+
+const OUTLET = '<slot></slot>';
+
+interface Pending {
+    View: ViewClass;
+    data: unknown;
+    name: string | undefined;
+}
+
 export type HandlerResult = Reply | Response;
 
 export class Reply {
+    private documentOverride?: ViewClass;
+
     private constructor(
         private readonly body: BodyInit | null,
         private code: number,
         private readonly headers: Record<string, string>,
+        private readonly pending?: Pending,
     ) {}
 
     static html(body: string): Reply {
@@ -29,11 +56,7 @@ export class Reply {
         View: V,
         data?: ViewData<V>,
     ): Reply {
-        const bundle = (View as { $$__module?: string }).$$__module;
-        const name =
-            bundle === undefined
-                ? undefined
-                : basename(bundle).replace(/\.[tj]s$/, '');
+        const name = bundleName(View);
         const proto = (View as { prototype?: Record<string, unknown> })
             .prototype;
 
@@ -46,12 +69,11 @@ export class Reply {
             return Reply.html(`<div data-elemix-view>${html}</div>${script}`);
         }
 
-        const script =
-            name === undefined
-                ? ''
-                : `<script type="module" src="/_elemix/${name}.js"></script>`;
-        return Reply.html(
-            viewDataScript(data) + renderView(View as ViewClass, data) + script,
+        return new Reply(
+            null,
+            200,
+            { 'content-type': 'text/html; charset=utf-8' },
+            { View: View as ViewClass, data, name },
         );
     }
 
@@ -81,11 +103,35 @@ export class Reply {
         return this;
     }
 
+    document(document: ViewClass): this {
+        this.documentOverride = document;
+        return this;
+    }
+
     toResponse(): Response {
-        return new Response(this.body, {
+        const body = this.pending ? this.renderPending() : this.body;
+        return new Response(body, {
             status: this.code,
             headers: this.headers,
         });
+    }
+
+    private renderPending(): string {
+        const { View, data, name } = this.pending as Pending;
+        const page = viewDataScript(data) + renderView(View, data);
+        const document =
+            this.documentOverride ??
+            (View as { $$__document?: ViewClass }).$$__document ??
+            getDefaultDocument();
+        if (document === undefined) return page + clientScript(name);
+        const frame = renderView(document, data);
+        const inner =
+            page + clientScript(bundleName(document)) + clientScript(name);
+        if (frame.includes(OUTLET)) return frame.replace(OUTLET, inner);
+        if (frame.includes('</body>')) {
+            return frame.replace('</body>', `${inner}</body>`);
+        }
+        return frame + inner;
     }
 }
 

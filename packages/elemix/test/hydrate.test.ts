@@ -10,12 +10,6 @@ import { $__dynLens, $__splitRun } from '../src/runtime/hydrate';
 import { $__effect } from '../src/runtime/reactive';
 import { $__state } from '../src/runtime/state';
 
-// Hand-written to match the compiler's --hydrate output for a CounterApp:
-//   template = tpl`<button>count is ${this.state.count}</button>` + @click
-// so this exercises the runtime hydration path (constructor DSD-adopt guard,
-// connectedCallback hydrate branch, markerless $__dynLens/$__splitRun, reactive
-// text, event) against a simulated server render, without shelling out to the
-// compiler.
 const _t0 = $__template('<button>count is <!----></button>');
 
 class CounterApp extends Component {
@@ -50,18 +44,12 @@ class CounterApp extends Component {
     }
 }
 
-// The markerless shadow markup the SSR emit produces (minus the DSD <template>
-// wrapper the browser turns into this shadow root): the SSR inline style plus the
-// button carrying `data-t` (the rendered length of the dynamic count) and clean,
-// comment-free text.
 const serverShadow =
     '<style data-ssr>button{color:red}</style>' +
     '<button data-t="1">count is 0</button>';
 
 describe('hydration', () => {
     test('adopts the server shadow and becomes reactive without rebuilding', () => {
-        // Simulate a declaratively-shadowed, server-rendered element: the shadow
-        // root exists and is populated BEFORE the component is defined/upgraded.
         const host = document.createElement('counter-app-h') as CounterApp;
         const shadow = host.attachShadow({ mode: 'open' });
         shadow.innerHTML = serverShadow;
@@ -70,12 +58,8 @@ describe('hydration', () => {
 
         const button = host.shadowRoot?.querySelector('button');
         expect(button).not.toBeNull();
-        // Exactly one button: hydration reused the server node, did not append a
-        // second freshly-rendered one.
         expect(host.shadowRoot?.querySelectorAll('button').length).toBe(1);
-        // The SSR-only inline style is stripped (adoptedStyleSheets replaces it).
         expect(host.shadowRoot?.querySelector('style[data-ssr]')).toBeNull();
-        // No comment markers survive, and `data-t` is stripped on hydration.
         expect(button?.getAttribute('data-t')).toBeNull();
         expect(
             [...(button?.childNodes ?? [])].filter((n) => n.nodeType === 8)

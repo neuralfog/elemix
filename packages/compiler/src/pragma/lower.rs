@@ -51,7 +51,7 @@ impl std::fmt::Display for ExpandError {
 
 /// Expand every pragma in `source`. Identity when there are none.
 pub fn expand(source: &str) -> Result<String, ExpandError> {
-    expand_mode(source, false)
+    expand_mode(source, false, false)
 }
 
 /// True when a component can hydrate WITHOUT its props being present, so
@@ -95,12 +95,13 @@ fn props_safe(body: &str) -> bool {
     true
 }
 
-pub fn expand_mode(source: &str, ssr: bool) -> Result<String, ExpandError> {
+pub fn expand_mode(source: &str, ssr: bool, minify: bool) -> Result<String, ExpandError> {
     let located = locate(source).map_err(|e| ExpandError::Locate(e.err))?;
     let no_pragmas = located.states.is_empty()
         && located.classes.iter().all(|c| {
             c.directives.is_empty()
                 && c.styles.is_empty()
+                && c.document_field.is_none()
                 && c.effects.is_empty()
                 && c.before_mounts.is_empty()
                 && c.mounts.is_empty()
@@ -146,6 +147,7 @@ pub fn expand_mode(source: &str, ssr: bool) -> Result<String, ExpandError> {
     for class in &located.classes {
         if class.directives.is_empty()
             && class.styles.is_empty()
+            && class.document_field.is_none()
             && class.effects.is_empty()
             && class.before_mounts.is_empty()
             && class.mounts.is_empty()
@@ -181,7 +183,25 @@ pub fn expand_mode(source: &str, ssr: bool) -> Result<String, ExpandError> {
                     let v = format!("_s{counter}");
                     counter += 1;
                     needs_sheet = true;
-                    hoist.push_str(&format!("const {v} = $__sheet({});\n", sf.value));
+                    // Behind --minify, shrink the sheet at compile time (resolvable
+                    // static literals only) so the client bundle ships collapsed
+                    // CSS - same treatment the SSR `<style data-ssr>` gets. Falls
+                    // back to the dynamic emit when the CSS isn't a static literal.
+                    let value = if minify {
+                        crate::ssr_style::resolve_css(&sf.value, source)
+                            .map(|css| {
+                                format!(
+                                    "`{}`",
+                                    crate::template::parse::esc_tpl(&crate::ssr_style::minify_css(
+                                        &css
+                                    ),)
+                                )
+                            })
+                            .unwrap_or_else(|| sf.value.clone())
+                    } else {
+                        sf.value.clone()
+                    };
+                    hoist.push_str(&format!("const {v} = $__sheet({value});\n"));
                     seen.insert(sf.value.clone(), v.clone());
                     v
                 }
@@ -320,6 +340,12 @@ pub fn expand_mode(source: &str, ssr: bool) -> Result<String, ExpandError> {
             if ssr && !meta.client && props_safe(&source[class.body_open..class.end]) {
                 after.push_str(&format!("\n{}.$$__propSafe = true;", class.name));
             }
+        }
+        // Field-level `#document document = X`: strip the field, stamp the chosen
+        // document class as a static the SSR host reads to wrap this view.
+        if let Some(df) = &class.document_field {
+            edits.push((df.strip.0, df.strip.1, String::new()));
+            after.push_str(&format!("\n{}.$$__document = {};", class.name, df.value));
         }
         if !after.is_empty() {
             edits.push((class.end, class.end, after));

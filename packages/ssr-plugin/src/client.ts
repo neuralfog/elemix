@@ -1,30 +1,48 @@
 import { Glob } from 'bun';
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { resolveCompiler } from './compiler';
 
 const COMPILER = resolveCompiler();
 
 const VIEW_CALL = /Reply\s*\.\s*view\s*\(\s*([A-Za-z_$][\w$]*)/g;
+const DOCUMENT_REF = /\bdocument\s*[=(]\s*([A-Za-z_$][\w$]*)/g;
 
 const SKIP = /\/(?:node_modules|dist|public|\.git)\//;
 
 export const findViews = async (root = process.cwd()): Promise<string[]> => {
     const glob = new Glob('**/*.ts');
     const views = new Set<string>();
-    for (const file of glob.scanSync({ cwd: root, absolute: true })) {
-        if (SKIP.test(file)) continue;
-        const source = await Bun.file(file).text();
+    const queue: string[] = [];
+
+    const scan = async (file: string, source: string): Promise<void> => {
         const names = new Set<string>();
         for (const match of source.matchAll(VIEW_CALL)) names.add(match[1]);
+        for (const match of source.matchAll(DOCUMENT_REF)) names.add(match[1]);
         for (const name of names) {
             const imported = new RegExp(
                 `import[^;]*\\b${name}\\b[^;]*from\\s*['"]([^'"]+)['"]`,
             ).exec(source);
             const spec = imported?.[1];
-            if (spec === undefined || !spec.startsWith('.')) continue;
-            const path = resolve(dirname(file), spec);
-            views.add(/\.[tj]s$/.test(path) ? path : `${path}.ts`);
+            if (spec === undefined) continue;
+            let path: string;
+            try {
+                path = Bun.resolveSync(spec, dirname(file));
+            } catch {
+                continue;
+            }
+            if (SKIP.test(path) || views.has(path)) continue;
+            views.add(path);
+            queue.push(path);
         }
+    };
+
+    for (const file of glob.scanSync({ cwd: root, absolute: true })) {
+        if (SKIP.test(file)) continue;
+        await scan(file, await Bun.file(file).text());
+    }
+    while (queue.length > 0) {
+        const file = queue.shift() as string;
+        await scan(file, await Bun.file(file).text());
     }
     return [...views];
 };
@@ -35,7 +53,9 @@ const needsCompile = (source: string): boolean =>
     source.includes('#state');
 
 const compileHydrate = async (source: string): Promise<string> => {
-    const proc = Bun.spawn([COMPILER, '--stdin', '--hydrate'], {
+    const args = ['--stdin', '--hydrate'];
+    if (process.env.ELEMIX_SSR_MINIFY === '1') args.push('--minify');
+    const proc = Bun.spawn([COMPILER, ...args], {
         stdin: Buffer.from(source),
         stdout: 'pipe',
         stderr: 'inherit',

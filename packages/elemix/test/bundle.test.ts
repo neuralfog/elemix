@@ -14,7 +14,6 @@ const bundleUrl = pathToFileURL(bundlePath).href;
 
 describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
     beforeAll(() => {
-        // Always rebuild so the assertions below reflect the current source.
         execSync('npm run build:bundle --silent', {
             cwd: repoRoot,
             stdio: 'inherit',
@@ -41,25 +40,17 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             >;
         });
 
-        // The bundle entry re-exports ./index + ./runtime. Every public name is
-        // a function (Component is a class — still typeof 'function').
         const required = [
-            // index: component + registration + utilities
             'Component',
             'defineComponent',
             'ref',
-            // the compile-only template tag (erased by the compiler at build time)
             'tpl',
-            // runtime: reactive core (all $__-prefixed so compiled output can
-            // never clash with a user's own module-scope bindings)
             '$__state',
             '$__reactive',
             '$__effect',
             '$__untrack',
-            // compile-reactivity primitives (codegen target for compiled bindings)
             '$__bind',
             '$__depOf',
-            // runtime: DOM-wiring primitives (the codegen contract)
             '$__defineComponent',
             '$__template',
             '$__clone',
@@ -69,7 +60,6 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             '$__ref',
             '$__child',
             '$__list',
-            // grouped-write binders (one effect per template instance)
             '$__setText',
             '$__setAttr',
             '$__setClass',
@@ -84,9 +74,6 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             });
         }
 
-        // The interpreter is gone — these must never reappear in the bundle.
-        // (repeat/when/choose still exist, but on the separate /directives
-        // subpath; when/choose are compile-time-only and erased to _child.)
         const absent = [
             'html',
             'signal',
@@ -114,11 +101,7 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
             bundleText = readFileSync(bundlePath, 'utf-8');
         });
 
-        const forbiddenIdentifiers = [
-            // testing helpers
-            'present',
-            'MockCSSStyleSheet',
-        ];
+        const forbiddenIdentifiers = ['present', 'MockCSSStyleSheet'];
 
         for (const id of forbiddenIdentifiers) {
             test(`does not contain \`${id}\``, () => {
@@ -127,7 +110,6 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
         }
 
         test('does not import any /testing path', () => {
-            // CJS or ESM import strings should not reference our /testing paths.
             expect(bundleText).not.toMatch(/['"`]\.{1,2}\/testing/);
             expect(bundleText).not.toMatch(/@neuralfog\/elemix\/testing/);
         });

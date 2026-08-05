@@ -3,6 +3,11 @@ import type { ErrorRenderer, ErrorReporter } from './error/render';
 import type { Request } from './http/Request';
 import type { Middleware } from './middleware/Middleware';
 import { clientAsset } from './render/client';
+import {
+    lockDefaultDocument,
+    setDefaultDocument,
+    type ViewClass,
+} from './render/render';
 import { container, router } from './routing/Route';
 
 export interface ServeOptions {
@@ -28,6 +33,10 @@ export class App {
         router.use(middlewares);
     }
 
+    static document(document: ViewClass): void {
+        setDefaultDocument(document);
+    }
+
     static onError(reporter: ErrorReporter): void {
         router.onError(reporter);
     }
@@ -49,6 +58,7 @@ export class App {
     }
 
     static serve(options: ServeOptions = {}): void {
+        lockDefaultDocument();
         const server = Bun.serve({
             port: 3000,
             hostname: 'localhost',

@@ -35,7 +35,6 @@ const build = (n: number): Item[] =>
         selected: false,
     }));
 
-// One compiled-style row: <tr class><td>{id}</td><td><a data-id>{label}</a></td>
 const rowTpl = template('<tr><td></td><td><a></a></td></tr>');
 const buildRow = (item: Item): HTMLElement => {
     c.rebuilt++;
@@ -46,7 +45,6 @@ const buildRow = (item: Item): HTMLElement => {
     const idText = td0.appendChild(document.createTextNode(''));
     const labelText = a.appendChild(document.createTextNode(''));
     const ci = tr.getAttribute('class') ?? '';
-    // One grouped effect per row — exactly what the compiler now emits.
     effect(() => {
         _setClass(tr, ci, item.selected ? 'danger' : '');
         _setText(idText, item.id);
@@ -63,7 +61,7 @@ class CostList extends Component {
         const root = clone(listTpl);
         const tbody = (root.firstChild as HTMLElement)
             .firstChild as HTMLElement;
-        const anchor = tbody.firstChild as Node; // the <!----> list anchor
+        const anchor = tbody.firstChild as Node;
         _list(
             anchor,
             () => this.state.data,
@@ -81,9 +79,6 @@ const measureComponent = (tag: string): Result[] => {
     document.body.innerHTML = `<${tag}></${tag}>`;
     const cmp = document.querySelector(tag) as unknown as CostList;
 
-    // A keyed move is one insertBefore, but the observer reports it as a removal
-    // from the old slot AND an addition at the new slot. Dedupe by node identity
-    // so a moved row counts once: "nodes touched" = distinct nodes added/removed.
     const touched = new Set<Node>();
     const countNodes = (records: MutationRecord[]) => {
         for (const r of records) {
@@ -98,7 +93,7 @@ const measureComponent = (tag: string): Result[] => {
     const measure = (label: string, mutate: () => void): void => {
         c.rebuilt = c.textW = c.attrW = 0;
         touched.clear();
-        mutate(); // reactive effects re-run synchronously
+        mutate();
         countNodes(mo.takeRecords());
         results.push({
             operation: label,
@@ -120,8 +115,6 @@ const measureComponent = (tag: string): Result[] => {
         cmp.state.data[2].selected = true;
     });
     measure('swap', () => {
-        // index assignment is NOT reactive — swap via an array reassign, exactly
-        // as the compiler lowers it; _list reconciles to minimal (LIS) moves.
         const d = cmp.state.data.slice();
         const t = d[1];
         d[1] = d[998];
@@ -174,7 +167,6 @@ test('render cost', { timeout: 60_000 }, ({ expect }) => {
         c.attrW++;
         return origAttr.apply(this, a);
     };
-    // _text writes through CharacterData.data (not textContent).
     const dataDesc = Object.getOwnPropertyDescriptor(
         CharacterData.prototype,
         'data',
@@ -199,8 +191,6 @@ test('render cost', { timeout: 60_000 }, ({ expect }) => {
         `\nElemix render cost — compiled _list, reactive 1000-row list (mutations via cmp.state.data):\n${table('keyed _list reconcile', results)}\n`,
     );
 
-    // The fine-grained runtime is O(changed), not O(n): mutating a mounted list
-    // never rebuilds existing rows, and a point change touches only its own node.
     const byOp = Object.fromEntries(
         results.map((r) => [r.operation, r]),
     ) as Record<string, Result>;

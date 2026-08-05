@@ -29,5 +29,5 @@ pub fn compile_ssr(source: &str) -> String {
 /// that binds onto server-rendered DOM. Diagnostics are inlined.
 #[wasm_bindgen]
 pub fn compile_hydrate(source: &str) -> String {
-    crate::compile_hydrate(source).0
+    crate::compile_hydrate(source, false).0
 }

@@ -152,9 +152,6 @@ export const injectMetadata = (code: string): InjectResult | null => {
 };
 
 const COMPONENT_CLASS = /\bclass\s+([A-Za-z_$][\w$]*)\s+extends\s+Component\b/g;
-// A free-standing `tpl` view lowers (behind `--ssr`) to
-// `export const <name> = () => $__ssrTpl(...)`; stamp it like a component so
-// `Reply.view(render)` can find its client bundle.
 const FREE_VIEW =
     /\bexport\s+const\s+([A-Za-z_$][\w$]*)\s*=\s*\(\)\s*=>\s*\$__ssrTpl\b/g;
 

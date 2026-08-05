@@ -27,11 +27,6 @@ const pathnameOf = (url: string): string => {
     return query === -1 ? url.slice(start) : url.slice(start, query);
 };
 
-// The file that defined a route, derived from the call stack at registration
-// time - so routes carry the marker of the file they live in (e.g. routes/api.ts
-// -> "api") with no per-file boilerplate. Works for both source (.ts) and
-// per-file-compiled (.js) output, so it holds once the framework ships as dist;
-// only a bundler that collapses files would break it (marker = the bundle).
 const callerFile = (): string | null => {
     const stack = new Error().stack;
     if (stack === undefined) return null;

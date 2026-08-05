@@ -6,7 +6,7 @@ use elemix_compiler::diagnostics::{Diagnostic, Severity};
 use elemix_compiler::emit::TsEmitter;
 use elemix_compiler::sourcemap::{json_string, line_map};
 use elemix_compiler::{
-    collect_ts_files, compile_diagnostics, compile_hydrate, compile_ssr, find_html_templates,
+    collect_ts_files, compile_diagnostics_mode, compile_hydrate, compile_ssr, find_html_templates,
     FoundTemplate,
 };
 use std::fs;
@@ -64,11 +64,11 @@ fn main() {
         // surface in the browser) and echoed to stderr (so they show in the
         // Vite terminal); the compile always succeeds and HMR stays alive.
         let (code, diags) = if cli.hydrate {
-            compile_hydrate(&source)
+            compile_hydrate(&source, cli.minify)
         } else if cli.ssr {
             compile_ssr(&source, cli.minify)
         } else {
-            compile_diagnostics(&source)
+            compile_diagnostics_mode(&source, false, cli.minify)
         };
         report(None, &diags);
         let payload = if cli.sourcemap {
@@ -204,11 +204,11 @@ fn emit(
     let dest = dir.join(name);
 
     let (code, diags) = if hydrate {
-        compile_hydrate(source)
+        compile_hydrate(source, minify)
     } else if ssr {
         compile_ssr(source, minify)
     } else {
-        compile_diagnostics(source)
+        compile_diagnostics_mode(source, false, minify)
     };
     report(Some(src), &diags);
 

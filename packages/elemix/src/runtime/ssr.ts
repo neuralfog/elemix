@@ -66,22 +66,11 @@ export const $__scopedStore = <T extends object>(factory: () => T): T => {
     }) as T;
 };
 
-// SSR builds output as a ROPE - a tree of string chunks - never by copying a
-// growing string. A component's `$$__ssr()` returns a `Rope`; nesting a child is
-// O(1) (it references the child's rope and the slot's rope, no re-copy). The
-// whole tree is flattened to a string exactly once, at the top, by `$__render`.
-// This makes deep nesting O(total-output) instead of O(depth^2).
 export type Rope = string | Rope[];
 
-// A `` tpl`…` `` in server code lowers to this: its chunks wrapped as a `Rope`,
-// typed back to the public `Template` so user annotations (`let x: Template`)
-// still hold. Single chunk stays unwrapped to avoid a needless array layer.
 export const $__ssrTpl = (...parts: unknown[]): Template =>
     (parts.length === 1 ? parts[0] : parts) as unknown as Template;
 
-// Flatten a rope to its HTML string. ITERATIVE (explicit stack) so a rope
-// thousands of levels deep can't overflow the call stack - the whole point of
-// the model is that depth is free.
 export const $__render = (rope: Rope): string => {
     if (typeof rope === 'string') return rope;
     const parts: string[] = [];
@@ -97,10 +86,6 @@ export const $__render = (rope: Rope): string => {
     return parts.join('');
 };
 
-// A content hole `${x}`: if `x` is already a rope (a projected `` tpl`…` ``) pass
-// it THROUGH untouched - it is server-rendered HTML, not user text, and copying
-// it here is exactly the O(depth^2) trap. Otherwise it is user text: coerce and
-// escape. Passthrough keeps deep projection O(1) per level.
 export const $__ssrText = (value: unknown): Rope => {
     if (Array.isArray(value)) return value as Rope;
     return value == null
@@ -197,11 +182,6 @@ interface SsrComponent {
     children?: unknown[];
 }
 
-// Splice a child into the output rope WITHOUT copying the growing slot: the
-// child's own rope, the slot rope, and the host tags all sit side by side as
-// references, flattened once at the end. `slotNames` are the child's light-DOM
-// direct-child slot names (compile-time constant), stamped as fake children so
-// `hasSlot(name)` works during the child's own server render.
 export const $__ssrChild = (
     tag: string,
     props: Record<string, unknown>,
@@ -213,11 +193,6 @@ export const $__ssrChild = (
         | (new () => SsrComponent)
         | undefined;
     if (ctor === undefined) return '';
-    // `data-h` (the JSON prop snapshot for client hydration) is emitted unless the
-    // child is prop-safe: a component that only reads props as bare `${this.props.x}`
-    // hydrates fine without them (a hydrating parent re-supplies them and the DOM
-    // writers no-op mid-hydration). `#client` mounts fresh, so it always needs it.
-    // Skipping it also skips the JSON.stringify - the dominant per-child SSR cost.
     const clientOnly = (ctor as { $$__client?: boolean }).$$__client === true;
     const propSafe = (ctor as { $$__propSafe?: boolean }).$$__propSafe === true;
     const inject = `${attrs}${clientOnly || !propSafe ? dataAttr(props) : ''}`;
@@ -244,10 +219,6 @@ export const $__ssrChild = (
     if (inject !== '') {
         const first = parts[0];
         if (typeof first === 'string') {
-            // The open chunk always starts `<tag`; splice `inject` in with
-            // slice+concat rather than String.replace, which additionally scans
-            // the whole string for the pattern and the replacement for `$`
-            // substitutions - ~3.7ms/10k children of pure overhead.
             const open = `<${tag}`;
             parts[0] = first.startsWith(open)
                 ? `${open}${inject}${first.slice(open.length)}`

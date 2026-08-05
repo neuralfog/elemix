@@ -10,9 +10,6 @@ g.document ??= {
 g.CSSStyleSheet ??= class {
     replaceSync(): void {}
 };
-// A real tag -> constructor registry, not a no-op: SSR looks children up by tag
-// (`$__ssrChild`) to render each nested component's `$$__ssr()` inline, so the
-// definitions the compiled output registers must actually be retrievable.
 const registry = new Map<string, unknown>();
 g.customElements ??= {
     get: (tag: string) => registry.get(tag),

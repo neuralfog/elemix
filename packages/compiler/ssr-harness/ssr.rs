@@ -209,7 +209,7 @@ fn hydrate_binds_events_and_reactive_text_onto_server_nodes() {
     // onto the node after the `<!---->` marker via `$__hydrateText` - no clone, no
     // return, zero DOM created.
     let source = std::fs::read_to_string("fixtures/CounterApp.ts").expect("read fixture");
-    let (compiled, diags) = compile_hydrate(&source);
+    let (compiled, diags) = compile_hydrate(&source, false);
     assert!(diags.is_empty(), "unexpected diagnostics: {diags:?}");
     assert!(
         compiled.contains("from '@neuralfog/elemix/ssr-runtime/client'"),
@@ -225,7 +225,7 @@ fn hydrate_takes_over_a_when_via_reanchor_and_child() {
     // `$__child` builder drives it. The sibling toggle button's `@click` still
     // binds by a stable path (it doesn't cross the structural region).
     let source = std::fs::read_to_string("fixtures/WhenElseApp.ts").expect("read fixture");
-    let (compiled, diags) = compile_hydrate(&source);
+    let (compiled, diags) = compile_hydrate(&source, false);
     assert!(diags.is_empty(), "unexpected diagnostics: {diags:?}");
     let method = hydrate_method_text(&compiled);
     assert!(
@@ -244,7 +244,7 @@ fn hydrate_takes_over_a_repeat_via_reanchor_and_list() {
     // `repeat` of components becomes a reactive keyed list on the client:
     // `$__reanchor` + `$__list` with the full row builder (props + row `@click`s).
     let source = std::fs::read_to_string("fixtures/CardListApp.ts").expect("read fixture");
-    let (compiled, diags) = compile_hydrate(&source);
+    let (compiled, diags) = compile_hydrate(&source, false);
     assert!(diags.is_empty(), "unexpected diagnostics: {diags:?}");
     let method = hydrate_method_text(&compiled);
     assert!(
@@ -303,6 +303,7 @@ fn ssr_method_shadow_wraps_with_style() {
         Some("${css}"),
         false,
         false,
+        false,
         "",
         static_inner("<b>x</b>"),
     );
@@ -311,7 +312,15 @@ fn ssr_method_shadow_wraps_with_style() {
 
 #[test]
 fn ssr_method_shadow_without_css_has_no_style() {
-    let method = ssr_method("my-tag", None, false, false, "", static_inner("<b>x</b>"));
+    let method = ssr_method(
+        "my-tag",
+        None,
+        false,
+        false,
+        false,
+        "",
+        static_inner("<b>x</b>"),
+    );
     insta::assert_snapshot!("ssr_method_shadow_no_css", method);
 }
 
@@ -321,6 +330,7 @@ fn ssr_method_no_shadow_is_bare() {
         "my-tag",
         Some("${css}"),
         true,
+        false,
         false,
         "",
         static_inner("<b>x</b>"),
@@ -334,6 +344,7 @@ fn ssr_method_emits_prelude_before_return() {
         "my-tag",
         None,
         true,
+        false,
         false,
         "const { x } = this;",
         static_inner("<b>x</b>"),

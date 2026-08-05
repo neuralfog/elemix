@@ -12,6 +12,7 @@ import { ConditionalApp } from '../../../../fixtures/ConditionalApp';
 import { CounterApp } from '../../../../fixtures/CounterApp';
 import { CustomEventApp } from '../../../../fixtures/CustomEventApp';
 import { DeepLeaf } from '../../../../fixtures/DeepInheritanceApp';
+import { DocumentPageApp } from '../../../../fixtures/DocumentPageApp';
 import { DeepStateApp } from '../../../../fixtures/DeepStateApp';
 import { DerivedApp } from '../../../../fixtures/DerivedApp';
 import { DirectApp } from '../../../../fixtures/DirectApp';
@@ -73,6 +74,10 @@ import { WhenElseApp } from '../../../../fixtures/WhenElseApp';
 export class TestController {
     counterApp(): Reply {
         return Reply.view(CounterApp);
+    }
+
+    documentPageApp(): Reply {
+        return Reply.view(DocumentPageApp);
     }
 
     beforeMountApp(): Reply {

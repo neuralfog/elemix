@@ -1,0 +1,35 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/DocumentChrome.ts
+---
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const css = `
+    :host { display: block; }
+    .bar {
+        padding: 8px 16px;
+        font: 700 14px system-ui, sans-serif;
+        color: #fff;
+        background: #1e293b;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<div class="bar">Harness</div>');
+
+export class DocumentChrome extends Component {
+$$__hydrate(root: Node): void {
+
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+DocumentChrome.$$__sheets = [..._s0];
+$__defineComponent('document-chrome', DocumentChrome);
+DocumentChrome.prototype.$$__tag = 'document-chrome';

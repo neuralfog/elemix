@@ -26,9 +26,24 @@ pub fn ssr_method(
     style_body: Option<&str>,
     no_shadow: bool,
     client: bool,
+    document: bool,
     prelude: &str,
     inner: Vec<Chunk>,
 ) -> String {
+    // `#document` — a document frame. Emit the template RAW: no host-tag wrapper,
+    // no shadow, with `<!doctype html>` prepended so it's a valid document root.
+    // The `<slot></slot>` stays literal; hydris splices the page + scripts there.
+    if document {
+        let mut r = Rope::new();
+        r.static_str("<!doctype html>");
+        r.extend(inner);
+        let arr = fmt_array(&r.chunks);
+        return if prelude.is_empty() {
+            format!("$$__ssr(): unknown[] {{\nreturn {arr};\n}}")
+        } else {
+            format!("$$__ssr(): unknown[] {{\n{prelude}\nreturn {arr};\n}}")
+        };
+    }
     // The host wrapper uses the instance's RUNTIME tag (`$$__tag`, stamped next to
     // `$__defineComponent`), not a baked literal - so a subclass inheriting this
     // `$$__ssr()` (its template lives on an ancestor) still renders with its OWN
