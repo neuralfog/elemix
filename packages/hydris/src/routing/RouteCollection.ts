@@ -6,21 +6,31 @@ const matchSegments = (
     segments: Segment[],
     parts: string[],
 ): Record<string, string> | null => {
-    if (segments.length !== parts.length) return null;
     const params: Record<string, string> = {};
     for (let i = 0; i < segments.length; i++) {
         const seg = segments[i];
+        if ('wildcard' in seg) {
+            params['*'] = parts.slice(i).map(decodeURIComponent).join('/');
+            return params;
+        }
+        if (i >= parts.length) return null;
         if (seg.param) params[seg.name] = decodeURIComponent(parts[i]);
         else if (seg.value !== parts[i]) return null;
     }
-    return params;
+    return parts.length === segments.length ? params : null;
 };
 
+const rank = (seg: Segment): number =>
+    'wildcard' in seg ? 0 : seg.param ? 1 : 2;
+
 const isMoreSpecific = (a: Segment[], b: Segment[]): boolean => {
-    for (let i = 0; i < a.length; i++) {
-        if (a[i].param !== b[i].param) return !a[i].param;
+    const len = Math.min(a.length, b.length);
+    for (let i = 0; i < len; i++) {
+        const ra = rank(a[i]);
+        const rb = rank(b[i]);
+        if (ra !== rb) return ra > rb;
     }
-    return false;
+    return a.length > b.length;
 };
 
 export interface RouteMatch {
@@ -35,13 +45,20 @@ export class RouteCollection {
         return this.routes.length;
     }
 
-    add(method: Method, path: string, handler: Handler): RouteDefinition {
+    add(
+        method: Method,
+        path: string,
+        handler: Handler,
+        isStatic = false,
+    ): RouteDefinition {
         const route: RouteDefinition = {
             method,
             path,
             handler,
             segments: compile(path),
             middlewares: [],
+            skip: [],
+            isStatic,
         };
         this.routes.push(route);
         return route;

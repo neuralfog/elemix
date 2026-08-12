@@ -1,5 +1,8 @@
 import type { ServiceProviderClass } from './container/ServiceProvider';
 import type { ErrorRenderer, ErrorReporter } from './error/render';
+import { type AssetConfig, assetHandler, isVersioned } from './http/assets';
+import type { Context } from './http/Context';
+import { resolveIp, resolveProtocol } from './http/proxy';
 import type { Request } from './http/Request';
 import type { Middleware } from './middleware/Middleware';
 import { clientAsset } from './render/client';
@@ -8,6 +11,7 @@ import {
     setDefaultDocument,
     type ViewClass,
 } from './render/render';
+import { lockAssetVersion, setAssetVersion } from './render/version';
 import { container, router } from './routing/Route';
 
 export interface ServeOptions {
@@ -19,6 +23,8 @@ export interface ServeOptions {
     idleTimeout?: number;
     maxRequestBodySize?: number;
     tls?: Bun.TLSOptions | Bun.TLSOptions[];
+    trustProxy?: boolean;
+    elemixAssets?: { maxAge?: number };
 }
 
 export class App {
@@ -31,6 +37,15 @@ export class App {
 
     static middlewares(middlewares: Middleware[]): void {
         router.use(middlewares);
+    }
+
+    static assets(prefix: string, config: AssetConfig): void {
+        const base = `/${prefix.split('/').filter(Boolean).join('/')}`;
+        router.registerStatic(`${base}/*`, assetHandler(config));
+    }
+
+    static version(token: string): void {
+        setAssetVersion(token);
     }
 
     static document(document: ViewClass): void {
@@ -59,17 +74,51 @@ export class App {
 
     static serve(options: ServeOptions = {}): void {
         lockDefaultDocument();
+        lockAssetVersion();
+        const { trustProxy = false, elemixAssets, ...serveOptions } = options;
+
+        router.registerStatic('/_elemix/*', (ctx: Context) => {
+            const bundle = clientAsset(
+                `/_elemix/${ctx.param('*')}`,
+                elemixAssets?.maxAge,
+                isVersioned(ctx.req.url),
+            );
+            return bundle ?? new Response('Not Found', { status: 404 });
+        });
+
         const server = Bun.serve({
             port: 3000,
             hostname: 'localhost',
-            ...options,
-            fetch: (req: globalThis.Request) => {
-                const asset = clientAsset(new URL(req.url).pathname);
-                return asset ?? router.dispatch(req as Request);
+            ...serveOptions,
+            fetch: (req: globalThis.Request, srv: Bun.Server) => {
+                const request = req as Request;
+                const socketIp = srv.requestIP(req)?.address ?? '';
+                request.ip = resolveIp(request, socketIp, trustProxy);
+                request.protocol = resolveProtocol(request, trustProxy);
+                return router.dispatch(request);
             },
         } as Parameters<typeof Bun.serve>[0]);
         console.log(
             `Server running at ${server.url.protocol}//${server.hostname}:${server.port}`,
         );
+
+        let closing = false;
+        const shutdown = async (signal: string): Promise<void> => {
+            if (closing) return;
+            closing = true;
+            console.log(`${signal} received, draining connections...`);
+            await server.stop();
+            await container.dispose();
+            process.exit(0);
+        };
+        process.on('SIGTERM', () => void shutdown('SIGTERM'));
+        process.on('SIGINT', () => void shutdown('SIGINT'));
+
+        process.on('unhandledRejection', (reason) => {
+            console.error(reason);
+        });
+        process.on('uncaughtException', (error) => {
+            console.error(error);
+        });
     }
 }

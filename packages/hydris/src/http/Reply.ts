@@ -1,11 +1,12 @@
 import { basename } from 'node:path';
 import type { Component } from '@neuralfog/elemix';
-import { $__runStores } from '@neuralfog/elemix/ssr-runtime';
 import {
     getDefaultDocument,
     renderView,
     type ViewClass,
 } from '../render/render';
+import { getAssetVersion } from '../render/version';
+import { type CookieOptions, serializeCookie } from './Cookie';
 
 type ViewData<V> = V extends new () => Component<unknown, infer D> ? D : never;
 
@@ -14,10 +15,15 @@ const viewDataScript = (data: unknown): string =>
         ? ''
         : `<script>window.__elemix_vd=${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 
+const assetQuery = (): string => {
+    const version = getAssetVersion();
+    return version === undefined ? '' : `?v=${version}`;
+};
+
 const clientScript = (name: string | undefined): string =>
     name === undefined
         ? ''
-        : `<script type="module" src="/_elemix/${name}.js"></script>`;
+        : `<script type="module" src="/_elemix/${name}.js${assetQuery()}"></script>`;
 
 const bundleName = (View: unknown): string | undefined => {
     const bundle = (View as { $$__module?: string }).$$__module;
@@ -38,6 +44,7 @@ export type HandlerResult = Reply | Response;
 
 export class Reply {
     private documentOverride?: ViewClass;
+    private readonly cookies: string[] = [];
 
     private constructor(
         private readonly body: BodyInit | null,
@@ -52,28 +59,12 @@ export class Reply {
         });
     }
 
-    static view<V extends ViewClass | (() => unknown)>(
-        View: V,
-        data?: ViewData<V>,
-    ): Reply {
-        const name = bundleName(View);
-        const proto = (View as { prototype?: Record<string, unknown> })
-            .prototype;
-
-        if (proto === undefined || !('$$__ssr' in proto)) {
-            const html = $__runStores(() => String((View as () => unknown)()));
-            const script =
-                name === undefined
-                    ? ''
-                    : `<script type="module">import { render } from "/_elemix/${name}.js"; for (const el of document.querySelectorAll("[data-elemix-view]")) el.replaceChildren(render());</script>`;
-            return Reply.html(`<div data-elemix-view>${html}</div>${script}`);
-        }
-
+    static view<V extends ViewClass>(View: V, data?: ViewData<V>): Reply {
         return new Reply(
             null,
             200,
             { 'content-type': 'text/html; charset=utf-8' },
-            { View: View as ViewClass, data, name },
+            { View, data, name: bundleName(View) },
         );
     }
 
@@ -103,6 +94,16 @@ export class Reply {
         return this;
     }
 
+    cookie(name: string, value: string, options?: CookieOptions): this {
+        this.cookies.push(serializeCookie(name, value, options));
+        return this;
+    }
+
+    clearCookie(name: string, options?: CookieOptions): this {
+        this.cookies.push(serializeCookie(name, '', { ...options, maxAge: 0 }));
+        return this;
+    }
+
     document(document: ViewClass): this {
         this.documentOverride = document;
         return this;
@@ -110,10 +111,9 @@ export class Reply {
 
     toResponse(): Response {
         const body = this.pending ? this.renderPending() : this.body;
-        return new Response(body, {
-            status: this.code,
-            headers: this.headers,
-        });
+        const headers = new Headers(this.headers);
+        for (const cookie of this.cookies) headers.append('Set-Cookie', cookie);
+        return new Response(body, { status: this.code, headers });
     }
 
     private renderPending(): string {

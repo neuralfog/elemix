@@ -20,6 +20,10 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
         },
+        "./config": {
+            "types": "./dist/config/index.d.ts",
+            "import": "./dist/config/index.js"
+        },
         "./container": {
             "types": "./dist/container/index.d.ts",
             "import": "./dist/container/index.js"
@@ -54,7 +58,7 @@
         "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings && tsc --noEmit"
     },
     "peerDependencies": {
-        "@neuralfog/elemix": "0.9.0-dev.27"
+        "@neuralfog/elemix": "0.9.3"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.5",

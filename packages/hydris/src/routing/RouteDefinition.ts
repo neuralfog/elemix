@@ -5,7 +5,8 @@ import type { Method } from './Method';
 
 export type Segment =
     | { param: false; value: string }
-    | { param: true; name: string };
+    | { param: true; name: string }
+    | { wildcard: true };
 
 export interface RouteDefinition {
     method: Method;
@@ -13,6 +14,8 @@ export interface RouteDefinition {
     handler: Handler;
     segments: Segment[];
     middlewares: Middleware[];
+    skip: Middleware[];
+    isStatic: boolean;
     renderer?: ErrorRenderer;
 }
 
@@ -20,8 +23,8 @@ export const compile = (path: string): Segment[] =>
     path
         .split('/')
         .filter(Boolean)
-        .map((seg) =>
-            seg.startsWith(':')
-                ? { param: true, name: seg.slice(1) }
-                : { param: false, value: seg },
-        );
+        .map((seg) => {
+            if (seg === '*') return { wildcard: true };
+            if (seg.startsWith(':')) return { param: true, name: seg.slice(1) };
+            return { param: false, value: seg };
+        });

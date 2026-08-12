@@ -4,6 +4,7 @@ import {
     type ErrorRenderer,
     type ErrorReporter,
     defaultErrorRenderer,
+    statusOf,
 } from '../error/render';
 import {
     MethodNotAllowedException,
@@ -26,6 +27,11 @@ const pathnameOf = (url: string): string => {
     const query = url.indexOf('?', start);
     return query === -1 ? url.slice(start) : url.slice(start, query);
 };
+
+const isSkipped = (entry: Middleware, skip: Middleware[]): boolean =>
+    skip.some(
+        (s) => s === entry || (typeof s === 'function' && entry instanceof s),
+    );
 
 const callerFile = (): string | null => {
     const stack = new Error().stack;
@@ -131,9 +137,31 @@ export class Router {
         return route;
     }
 
+    registerStatic(path: string, handler: Handler): RouteDefinition {
+        return this.routes.add('GET', path, handler, true);
+    }
+
     async dispatch(req: Request): Promise<Response> {
         const parts = pathnameOf(req.url).split('/').filter(Boolean);
         const matched = this.routes.match(req.method as Method, parts);
+
+        if (matched?.route.isStatic) {
+            const ctx = new Context(
+                req,
+                new MatchedRoute(matched.route, matched.params),
+            );
+            try {
+                return toResponse(
+                    await invokeHandler(
+                        matched.route.handler,
+                        this.container,
+                        ctx,
+                    ),
+                );
+            } catch (error) {
+                return this.failure(error, ctx, matched.route, this.container);
+            }
+        }
 
         const scope = this.container.scope();
         req.id = Bun.randomUUIDv7();
@@ -171,14 +199,13 @@ export class Router {
             );
         };
 
+        const globals =
+            def !== null && def.skip.length > 0
+                ? this.globalMiddlewares.filter((m) => !isSkipped(m, def.skip))
+                : this.globalMiddlewares;
+
         try {
-            return await Pipeline.run(
-                ctx,
-                scope,
-                this.globalMiddlewares,
-                core,
-                onError,
-            );
+            return await Pipeline.run(ctx, scope, globals, core, onError);
         } catch (error) {
             return this.failure(error, ctx, def, scope);
         } finally {
@@ -192,6 +219,10 @@ export class Router {
     }
 
     private async report(error: unknown, ctx: Context): Promise<void> {
+        if (this.reporters.length === 0) {
+            if (statusOf(error) >= 500) console.error(error);
+            return;
+        }
         for (const reporter of this.reporters) {
             try {
                 await reporter(error, ctx);

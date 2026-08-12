@@ -10,4 +10,6 @@ export abstract class BaseMiddleware {
     ): HandlerResult | Promise<HandlerResult>;
 }
 
-export type Middleware = new (...args: never[]) => BaseMiddleware;
+export type MiddlewareClass = new (...args: never[]) => BaseMiddleware;
+
+export type Middleware = MiddlewareClass | BaseMiddleware;

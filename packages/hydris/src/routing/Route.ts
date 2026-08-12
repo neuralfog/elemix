@@ -27,6 +27,11 @@ class RouteBuilder {
         return this;
     }
 
+    skipMiddlewares(middlewares: Middleware[]): this {
+        this.definition.skip.push(...middlewares);
+        return this;
+    }
+
     renderError(renderer: ErrorRenderer): this {
         this.definition.renderer = renderer;
         return this;
@@ -42,6 +47,13 @@ class GroupBuilder {
     middlewares(middlewares: Middleware[]): this {
         for (const route of this.routes) {
             route.middlewares.unshift(...middlewares);
+        }
+        return this;
+    }
+
+    skipMiddlewares(middlewares: Middleware[]): this {
+        for (const route of this.routes) {
+            route.skip.push(...middlewares);
         }
         return this;
     }

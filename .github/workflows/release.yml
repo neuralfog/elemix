@@ -916,6 +916,144 @@ jobs:
           echo "publishing @neuralfog/elemix-vite@$VERSION under dist-tag: $TAG"
           npm publish --access public --provenance --tag "$TAG"
 
+  publish-hydris:
+    name: publish @neuralfog/hydris
+    # After elemix is on npm (exact-pinned peer dependency, shared runtime).
+    needs: [publish-elemix, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      # hydris pins its `@neuralfog/elemix` peer to the exact release version.
+      - name: Stamp version + elemix peer-dep
+        env:
+          VERSION: ${{ needs.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = process.env.VERSION;
+            const f = "packages/hydris/package.json";
+            const p = JSON.parse(fs.readFileSync(f, "utf8"));
+            p.version = v;
+            p.peerDependencies["@neuralfog/elemix"] = v;
+            fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            console.log(`hydris@${v} (peer @neuralfog/elemix ${v})`);
+          '
+
+      # hydris builds against elemix's types — build the library first.
+      - name: Build
+        run: |
+          pnpm --filter @neuralfog/elemix build
+          pnpm --filter @neuralfog/hydris build
+
+      # `needs: publish-elemix` already ran the publish — ride out CDN lag.
+      - name: Wait for the elemix peer dependency
+        run: |
+          DEP="${{ needs.version.outputs.value }}"
+          echo "waiting for @neuralfog/elemix@$DEP on npm..."
+          for i in $(seq 1 30); do
+            if npm view "@neuralfog/elemix@$DEP" version >/dev/null 2>&1; then
+              echo "✓ @neuralfog/elemix@$DEP is published"
+              exit 0
+            fi
+            echo "  not yet ($i/30)..."; sleep 5
+          done
+          echo "::error::@neuralfog/elemix@$DEP did not propagate in time"
+          exit 1
+
+      - name: Stage changelog
+        run: cp CHANGELOG.md packages/hydris/CHANGELOG.md
+
+      - name: Publish
+        working-directory: packages/hydris
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/hydris@$VERSION under dist-tag: $TAG"
+          pnpm publish --access public --provenance --no-git-checks --tag "$TAG"
+
+  publish-ssr-plugin:
+    name: publish @neuralfog/elemix-ssr-plugin
+    # After the compiler is on npm (spawned at build/render time).
+    needs: [publish-compiler, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      # The plugin spawns the native compiler; pin the dep to the release version.
+      - name: Stamp version + compiler dep
+        env:
+          VERSION: ${{ needs.version.outputs.value }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = process.env.VERSION;
+            const f = "packages/ssr-plugin/package.json";
+            const p = JSON.parse(fs.readFileSync(f, "utf8"));
+            p.version = v;
+            p.dependencies["@neuralfog/elemix-compiler"] = v;
+            fs.writeFileSync(f, JSON.stringify(p, null, 4) + "\n");
+            console.log(`elemix-ssr-plugin@${v} (compiler dep ${v})`);
+          '
+
+      # `needs: publish-compiler` already ran the publish — ride out CDN lag.
+      - name: Wait for the compiler dependency
+        run: |
+          DEP="${{ needs.version.outputs.value }}"
+          echo "waiting for @neuralfog/elemix-compiler@$DEP on npm..."
+          for i in $(seq 1 30); do
+            if npm view "@neuralfog/elemix-compiler@$DEP" version >/dev/null 2>&1; then
+              echo "✓ @neuralfog/elemix-compiler@$DEP is published"
+              exit 0
+            fi
+            echo "  not yet ($i/30)..."; sleep 5
+          done
+          echo "::error::@neuralfog/elemix-compiler@$DEP did not propagate in time"
+          exit 1
+
+      - name: Stage changelog
+        run: cp CHANGELOG.md packages/ssr-plugin/CHANGELOG.md
+
+      - name: Publish
+        working-directory: packages/ssr-plugin
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.value }}"
+          TAG=latest
+          [[ "$VERSION" == *-* ]] && TAG=dev
+          echo "publishing @neuralfog/elemix-ssr-plugin@$VERSION under dist-tag: $TAG"
+          pnpm publish --access public --provenance --no-git-checks --tag "$TAG"
+
   # ── publish create-elemix-app to npm ────────────────────────────────────────
   #    Standalone scaffolding CLI (unscoped). It only clones the template repo,
   #    so it has no cross-package deps and just rides the test + changelog gate.
@@ -983,6 +1121,8 @@ jobs:
       - publish-storybook
       - publish-testing-library
       - publish-vite
+      - publish-hydris
+      - publish-ssr-plugin
       - publish-create-app
       - publish-vscode
     runs-on: ubuntu-latest

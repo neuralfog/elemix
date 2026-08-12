@@ -19,7 +19,6 @@ import { DirectApp } from '../../../../fixtures/DirectApp';
 import { DynamicChildApp } from '../../../../fixtures/DynamicChildApp';
 import { EffectApp } from '../../../../fixtures/EffectApp';
 import { FormApp } from '../../../../fixtures/FormApp';
-import { render as freeTemplateView } from '../../../../fixtures/FreeTemplate';
 import { InheritDerived } from '../../../../fixtures/InheritanceApp';
 import { InterpApp } from '../../../../fixtures/InterpApp';
 import { LifecycleApp } from '../../../../fixtures/LifecycleApp';
@@ -170,10 +169,6 @@ export class TestController {
 
     formApp(): Reply {
         return Reply.view(FormApp);
-    }
-
-    freeTemplate(): Reply {
-        return Reply.view(freeTemplateView);
     }
 
     inheritanceApp(): Reply {

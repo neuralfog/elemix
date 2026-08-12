@@ -1,4 +1,3 @@
-import { token } from '../container/Token';
 import type { Context } from '../http/Context';
 import { BaseMiddleware, type Next } from './Middleware';
 
@@ -11,8 +10,6 @@ export interface CorsConfig {
     maxAge: number;
 }
 
-export const CorsConfig = token<CorsConfig>('CorsConfig');
-
 export const defaultCorsOptions: CorsConfig = {
     origin: '*',
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -23,77 +20,83 @@ export const defaultCorsOptions: CorsConfig = {
 };
 
 export class Cors extends BaseMiddleware {
-    constructor(private readonly options: CorsConfig) {
+    private readonly options: CorsConfig;
+
+    constructor(options: Partial<CorsConfig> = {}) {
         super();
+        this.options = { ...defaultCorsOptions, ...options };
     }
 
-    async handle(ctx: Context, next: Next): Promise<Response> {
-        const requestOrigin = ctx.req.headers.get('origin');
+    handle(ctx: Context, next: Next): Response | Promise<Response> {
+        const origin = ctx.req.headers.get('origin');
+        return ctx.req.method === 'OPTIONS'
+            ? this.preflight(ctx, origin)
+            : this.decorate(next, origin);
+    }
 
-        if (ctx.req.method === 'OPTIONS') {
-            const headers = new Headers();
-            this.applyOrigin(headers, requestOrigin);
-            headers.set(
-                'Access-Control-Allow-Methods',
-                this.options.methods.join(', '),
-            );
-            const requested = ctx.req.headers.get(
-                'access-control-request-headers',
-            );
-            const allowed =
-                this.options.allowedHeaders.length > 0
-                    ? this.options.allowedHeaders.join(', ')
-                    : requested;
-            if (allowed) headers.set('Access-Control-Allow-Headers', allowed);
-            headers.set('Access-Control-Max-Age', String(this.options.maxAge));
-            this.appendVary(headers, 'Access-Control-Request-Headers');
-            return new Response(null, { status: 204, headers });
-        }
+    private preflight(ctx: Context, origin: string | null): Response {
+        const { methods, allowedHeaders, maxAge } = this.options;
+        const headers = new Headers();
 
+        this.applyOrigin(headers, origin);
+        headers.set('Access-Control-Allow-Methods', methods.join(', '));
+
+        const requested = ctx.req.headers.get('access-control-request-headers');
+        const allowed = allowedHeaders.length
+            ? allowedHeaders.join(', ')
+            : requested;
+        if (allowed) headers.set('Access-Control-Allow-Headers', allowed);
+
+        headers.set('Access-Control-Max-Age', String(maxAge));
+        appendVary(headers, 'Access-Control-Request-Headers');
+
+        return new Response(null, { status: 204, headers });
+    }
+
+    private async decorate(
+        next: Next,
+        origin: string | null,
+    ): Promise<Response> {
         const res = await next();
-        this.applyOrigin(res.headers, requestOrigin);
-        if (this.options.exposedHeaders.length > 0) {
+        const { exposedHeaders } = this.options;
+
+        this.applyOrigin(res.headers, origin);
+        if (exposedHeaders.length) {
             res.headers.set(
                 'Access-Control-Expose-Headers',
-                this.options.exposedHeaders.join(', '),
+                exposedHeaders.join(', '),
             );
         }
         return res;
     }
 
-    private applyOrigin(headers: Headers, requestOrigin: string | null): void {
-        const value = this.resolveOrigin(requestOrigin);
+    private applyOrigin(headers: Headers, origin: string | null): void {
+        const value = this.resolveOrigin(origin);
         if (value === null) return;
+
         headers.set('Access-Control-Allow-Origin', value);
         if (this.options.credentials) {
             headers.set('Access-Control-Allow-Credentials', 'true');
         }
-        if (value !== '*') this.appendVary(headers, 'Origin');
+        if (value !== '*') appendVary(headers, 'Origin');
     }
 
-    private resolveOrigin(requestOrigin: string | null): string | null {
-        const { origin, credentials } = this.options;
-        if (origin === '*') return credentials ? requestOrigin : '*';
-        if (requestOrigin === null) return null;
-        if (Array.isArray(origin)) {
-            return origin.includes(requestOrigin) ? requestOrigin : null;
-        }
-        return origin === requestOrigin ? requestOrigin : null;
-    }
+    private resolveOrigin(origin: string | null): string | null {
+        const { origin: allowed, credentials } = this.options;
+        if (allowed === '*') return credentials ? origin : '*';
+        if (origin === null) return null;
 
-    private appendVary(headers: Headers, field: string): void {
-        const existing = headers.get('Vary');
-        if (!existing) {
-            headers.set('Vary', field);
-            return;
-        }
-        const parts = existing.split(',').map((part) => part.trim());
-        if (!parts.includes(field)) {
-            headers.set('Vary', `${existing}, ${field}`);
-        }
+        const list = Array.isArray(allowed) ? allowed : [allowed];
+        return list.includes(origin) ? origin : null;
     }
 }
 
-Object.defineProperty(Cors, Symbol.for('ssr.inject'), {
-    value: [CorsConfig],
-});
+const appendVary = (headers: Headers, field: string): void => {
+    const existing = headers.get('Vary');
+    if (!existing) {
+        headers.set('Vary', field);
+        return;
+    }
+    const parts = existing.split(',').map((part) => part.trim());
+    if (!parts.includes(field)) headers.set('Vary', `${existing}, ${field}`);
+};
