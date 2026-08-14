@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'bun:test';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 import { Router } from '../src/routing/Router';
 
 const req = (method: string, path: string): Request =>
-    ({
+    new Request({
         url: `http://localhost${path}`,
         method,
         headers: new Headers(),
-    }) as unknown as Request;
+    } as unknown as globalThis.Request);
 
 const captureErrors = async (fn: () => Promise<void>): Promise<unknown[]> => {
     const errors: unknown[] = [];

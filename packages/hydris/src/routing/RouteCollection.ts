@@ -33,10 +33,10 @@ const isMoreSpecific = (a: Segment[], b: Segment[]): boolean => {
     return a.length > b.length;
 };
 
-export interface RouteMatch {
+export type RouteMatch = {
     route: RouteDefinition;
     params: Record<string, string>;
-}
+};
 
 export class RouteCollection {
     private routes: RouteDefinition[] = [];

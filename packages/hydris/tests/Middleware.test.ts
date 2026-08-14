@@ -1,18 +1,20 @@
 import { describe, expect, it } from 'bun:test';
-import type { Context } from '../src/http/Context';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
 import { Route, router } from '../src/routing/Route';
 
 const req = (method: string, path: string): Request =>
-    ({ url: `http://localhost${path}`, method }) as unknown as Request;
+    new Request({
+        url: `http://localhost${path}`,
+        method,
+    } as unknown as globalThis.Request);
 
 describe('route middlewares', () => {
     it('runs before and after the handler in onion order', async () => {
         const order: string[] = [];
         class A extends BaseMiddleware {
-            async handle(_ctx: Context, next: Next): Promise<Response> {
+            async handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('a:before');
                 const res = await next();
                 order.push('a:after');
@@ -20,7 +22,7 @@ describe('route middlewares', () => {
             }
         }
         class B extends BaseMiddleware {
-            async handle(_ctx: Context, next: Next): Promise<Response> {
+            async handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('b:before');
                 const res = await next();
                 order.push('b:after');
@@ -63,7 +65,7 @@ describe('route middlewares', () => {
 
     it('lets a middleware rewrite the downstream response', async () => {
         class Wrap extends BaseMiddleware {
-            async handle(_ctx: Context, next: Next): Promise<Response> {
+            async handle(_ctx: Request, next: Next): Promise<Response> {
                 const res = await next();
                 return new Response(`[${await res.text()}]`, {
                     status: res.status,
@@ -80,13 +82,13 @@ describe('route middlewares', () => {
     it('chains additional middlewares in call order', async () => {
         const order: string[] = [];
         class First extends BaseMiddleware {
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('first');
                 return next();
             }
         }
         class Second extends BaseMiddleware {
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('second');
                 return next();
             }
@@ -104,7 +106,7 @@ describe('route middlewares', () => {
         let created = 0;
         class Counting extends BaseMiddleware {
             private readonly id = ++created;
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 seen.push(this.id);
                 return next();
             }
@@ -121,8 +123,8 @@ describe('group middlewares', () => {
     it('applies to every route in the group', async () => {
         const hits: string[] = [];
         class Track extends BaseMiddleware {
-            handle(ctx: Context, next: Next): Promise<Response> {
-                hits.push(new URL(ctx.req.url).pathname);
+            handle(ctx: Request, next: Next): Promise<Response> {
+                hits.push(new URL(ctx.url).pathname);
                 return next();
             }
         }
@@ -139,13 +141,13 @@ describe('group middlewares', () => {
     it('runs group middlewares before route middlewares', async () => {
         const order: string[] = [];
         class Group extends BaseMiddleware {
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('group');
                 return next();
             }
         }
         class RouteMw extends BaseMiddleware {
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('route');
                 return next();
             }
@@ -161,19 +163,19 @@ describe('group middlewares', () => {
     it('nests group middlewares outermost-first', async () => {
         const order: string[] = [];
         class Api extends BaseMiddleware {
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('api');
                 return next();
             }
         }
         class V2 extends BaseMiddleware {
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('v2');
                 return next();
             }
         }
         class RouteMw extends BaseMiddleware {
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('route');
                 return next();
             }

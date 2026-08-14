@@ -10,7 +10,7 @@ import {
     MethodNotAllowedException,
     NotFoundException,
 } from '../error/HttpException';
-import { Context } from '../http/Context';
+import { resolveIp, resolveProtocol } from '../http/proxy';
 import { type HandlerResult, toResponse } from '../http/Reply';
 import { Request } from '../http/Request';
 import type { Middleware } from '../middleware/Middleware';
@@ -51,15 +51,15 @@ const callerFile = (): string | null => {
     return null;
 };
 
-interface PrefixRenderer {
+type PrefixRenderer = {
     prefix: string;
     renderer: ErrorRenderer;
-}
+};
 
-interface NamedGroup {
+type NamedGroup = {
     routes: RouteDefinition[];
     prefix: string;
-}
+};
 
 export class Router {
     private readonly routes = new RouteCollection();
@@ -141,43 +141,44 @@ export class Router {
         return this.routes.add('GET', path, handler, true);
     }
 
-    async dispatch(req: Request): Promise<Response> {
+    async dispatch(
+        req: Request,
+        socketIp = '',
+        trustProxy = false,
+    ): Promise<Response> {
         const parts = pathnameOf(req.url).split('/').filter(Boolean);
         const matched = this.routes.match(req.method as Method, parts);
+        req.route = matched
+            ? new MatchedRoute(matched.route, matched.params)
+            : null;
+        const route = req.route;
 
         if (matched?.route.isStatic) {
-            const ctx = new Context(
-                req,
-                new MatchedRoute(matched.route, matched.params),
-            );
             try {
                 return toResponse(
                     await invokeHandler(
                         matched.route.handler,
                         this.container,
-                        ctx,
+                        req,
                     ),
                 );
             } catch (error) {
-                return this.failure(error, ctx, matched.route, this.container);
+                return this.failure(error, req, matched.route, this.container);
             }
         }
 
-        const scope = this.container.scope();
         req.id = Bun.randomUUIDv7();
-        req.bag = {};
-        const route = matched
-            ? new MatchedRoute(matched.route, matched.params)
-            : null;
-        const ctx = new Context(req, route);
-        scope.value(Context, ctx);
+        req.ip = resolveIp(req, socketIp, trustProxy);
+        req.protocol = resolveProtocol(req, trustProxy);
+
+        const scope = this.container.scope();
         scope.value(DiContainer, scope);
         scope.value(Request, req);
         if (route) scope.value(MatchedRoute, route);
 
         const def = matched?.route ?? null;
         const onError: ErrorSink = (error) =>
-            this.failure(error, ctx, def, scope);
+            this.failure(error, req, def, scope);
 
         const core = async (): Promise<Response> => {
             if (matched === null) {
@@ -188,12 +189,12 @@ export class Router {
             }
             const matchedDef = matched.route;
             return Pipeline.run(
-                ctx,
+                req,
                 scope,
                 matchedDef.middlewares,
                 async () =>
                     toResponse(
-                        await invokeHandler(matchedDef.handler, scope, ctx),
+                        await invokeHandler(matchedDef.handler, scope, req),
                     ),
                 onError,
             );
@@ -205,42 +206,42 @@ export class Router {
                 : this.globalMiddlewares;
 
         try {
-            return await Pipeline.run(ctx, scope, globals, core, onError);
+            return await Pipeline.run(req, scope, globals, core, onError);
         } catch (error) {
-            return this.failure(error, ctx, def, scope);
+            return this.failure(error, req, def, scope);
         } finally {
             try {
                 const disposal = scope.dispose();
                 if (disposal) await disposal;
             } catch (error) {
-                await this.report(error, ctx);
+                await this.report(error, req);
             }
         }
     }
 
-    private async report(error: unknown, ctx: Context): Promise<void> {
+    private async report(error: unknown, req: Request): Promise<void> {
         if (this.reporters.length === 0) {
             if (statusOf(error) >= 500) console.error(error);
             return;
         }
         for (const reporter of this.reporters) {
             try {
-                await reporter(error, ctx);
+                await reporter(error, req);
             } catch {}
         }
     }
 
     private async failure(
         error: unknown,
-        ctx: Context,
+        req: Request,
         def: RouteDefinition | null,
         scope: DiContainer,
     ): Promise<Response> {
-        await this.report(error, ctx);
-        const renderer = this.resolveRenderer(ctx, def);
+        await this.report(error, req);
+        const renderer = this.resolveRenderer(req, def);
         let res: Response;
         try {
-            res = toResponse(await this.render(renderer, error, ctx, scope));
+            res = toResponse(await this.render(renderer, error, req, scope));
         } catch {
             res = new Response('Internal Server Error', { status: 500 });
         }
@@ -256,21 +257,21 @@ export class Router {
     private render(
         renderer: ErrorRenderer,
         error: unknown,
-        ctx: Context,
+        req: Request,
         scope: DiContainer,
     ): HandlerResult | Promise<HandlerResult> {
         if (isErrorHandlerClass(renderer)) {
-            return scope.get(renderer).render(error, ctx);
+            return scope.get(renderer).render(error, req);
         }
-        return renderer(error, ctx);
+        return renderer(error, req);
     }
 
     private resolveRenderer(
-        ctx: Context,
+        req: Request,
         def: RouteDefinition | null,
     ): ErrorRenderer {
         if (def?.renderer) return def.renderer;
-        const path = pathnameOf(ctx.req.url);
+        const path = pathnameOf(req.url);
         let best: PrefixRenderer | null = null;
         for (const entry of this.prefixRenderers) {
             const p = entry.prefix;

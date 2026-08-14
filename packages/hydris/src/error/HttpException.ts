@@ -1,9 +1,11 @@
+import { STATUS_CODES } from 'node:http';
+
 export class HttpException extends Error {
     constructor(
         public readonly status: number,
         message?: string,
     ) {
-        super(message ?? `HTTP ${status}`);
+        super(message ?? STATUS_CODES[status] ?? `HTTP ${status}`);
         this.name = new.target.name;
     }
 }

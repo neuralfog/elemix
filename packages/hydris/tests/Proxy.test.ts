@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'bun:test';
-import { Context } from '../src/http/Context';
 import { resolveIp, resolveProtocol } from '../src/http/proxy';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 
 const request = (url: string, headers: Record<string, string> = {}): Request =>
-    ({
+    new Request({
         url: `http://localhost${url}`,
         method: 'GET',
         headers: new Headers(headers),
-    }) as unknown as Request;
+    } as unknown as globalThis.Request);
 
 describe('resolveIp', () => {
     it('returns the socket ip when proxy is not trusted', () => {
@@ -61,19 +60,18 @@ describe('resolveProtocol', () => {
     });
 });
 
-describe('ctx.ip and ctx.protocol', () => {
+describe('request.ip and request.protocol', () => {
     it('read resolved values off the request', () => {
         const req = request('/');
         req.ip = '203.0.113.7';
         req.protocol = 'https';
-        const ctx = new Context(req, null);
-        expect(ctx.ip).toBe('203.0.113.7');
-        expect(ctx.protocol).toBe('https');
+        expect(req.ip).toBe('203.0.113.7');
+        expect(req.protocol).toBe('https');
     });
 
     it('default to empty ip and url-derived protocol when unresolved', () => {
-        const ctx = new Context(request('/'), null);
-        expect(ctx.ip).toBe('');
-        expect(ctx.protocol).toBe('http');
+        const req = request('/');
+        expect(req.ip).toBe('');
+        expect(req.protocol).toBe('http');
     });
 });

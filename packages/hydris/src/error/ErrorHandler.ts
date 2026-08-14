@@ -1,10 +1,10 @@
-import type { Context } from '../http/Context';
 import type { HandlerResult } from '../http/Reply';
+import type { Request } from '../http/Request';
 
 export abstract class ErrorHandler {
     abstract render(
         error: unknown,
-        ctx: Context,
+        req: Request,
     ): HandlerResult | Promise<HandlerResult>;
 }
 

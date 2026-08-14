@@ -20,10 +20,10 @@ const SERVICE_LIFETIME: Record<DiServiceType, BuildableLifetime> = {
     [DiServiceType.Transient]: 'transient',
 };
 
-interface Registration {
+type Registration = {
     lifetime: BuildableLifetime;
     factory: Factory<unknown>;
-}
+};
 
 const hasDispose = (value: unknown): value is Disposable =>
     typeof value === 'object' &&

@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'bun:test';
 import { container, Route, router } from '../src/routing/Route';
-import { Context } from '../src/http/Context';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
 import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
 
 const req = (method: string, path: string): Request =>
-    ({ url: `http://localhost${path}`, method }) as unknown as Request;
+    new Request({
+        url: `http://localhost${path}`,
+        method,
+    } as unknown as globalThis.Request);
 
 describe('handler dependency injection', () => {
     it('injects a registered service into the handler', async () => {
@@ -19,7 +21,7 @@ describe('handler dependency injection', () => {
 
         class GreetHandler {
             constructor(private readonly greeter: Greeter) {}
-            show(ctx: Context): Reply {
+            show(ctx: Request): Reply {
                 return Reply.text(this.greeter.hi(ctx.param('name') ?? '?'));
             }
         }
@@ -31,9 +33,9 @@ describe('handler dependency injection', () => {
 
     it('injects the request Context into the handler', async () => {
         class CtxHandler {
-            constructor(private readonly ctx: Context) {}
+            constructor(private readonly ctx: Request) {}
             show(): Reply {
-                return Reply.text(new URL(this.ctx.req.url).pathname);
+                return Reply.text(new URL(this.ctx.url).pathname);
             }
         }
         Route.get('/di/ctx', [CtxHandler, 'show']);
@@ -74,8 +76,8 @@ describe('middleware dependency injection', () => {
             constructor(private readonly audit: Audit) {
                 super();
             }
-            handle(ctx: Context, next: Next): Promise<Response> {
-                this.audit.paths.push(new URL(ctx.req.url).pathname);
+            handle(ctx: Request, next: Next): Promise<Response> {
+                this.audit.paths.push(new URL(ctx.url).pathname);
                 return next();
             }
         }
@@ -91,7 +93,7 @@ describe('middleware dependency injection', () => {
             constructor(private readonly request: Request) {
                 super();
             }
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 seen.push(new URL(this.request.url).pathname);
                 return next();
             }
@@ -108,7 +110,7 @@ describe('request id', () => {
         const ids: string[] = [];
         Route.get('/id', (ctx) => {
             ids.push(ctx.id);
-            return Reply.text(ctx.req.id);
+            return Reply.text(ctx.id);
         });
 
         const a = await (await router.dispatch(req('GET', '/id'))).text();
@@ -130,11 +132,13 @@ describe('body parsing', () => {
             return Reply.text(parsed.name);
         });
 
-        const request = new globalThis.Request('http://localhost/body/json', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ name: 'ada' }),
-        }) as unknown as Request;
+        const request = new Request(
+            new globalThis.Request('http://localhost/body/json', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ name: 'ada' }),
+            }),
+        );
 
         const res = await router.dispatch(request);
         expect(parsed).toEqual({ name: 'ada' });
@@ -144,10 +148,12 @@ describe('body parsing', () => {
     it('parses a text body via ctx.text', async () => {
         Route.post('/body/text', async (ctx) => Reply.text(await ctx.text()));
 
-        const request = new globalThis.Request('http://localhost/body/text', {
-            method: 'POST',
-            body: 'hello',
-        }) as unknown as Request;
+        const request = new Request(
+            new globalThis.Request('http://localhost/body/text', {
+                method: 'POST',
+                body: 'hello',
+            }),
+        );
 
         expect(await (await router.dispatch(request)).text()).toBe('hello');
     });
@@ -157,7 +163,7 @@ describe('request bag', () => {
     it('gives every request an empty bag by default', async () => {
         let seen: unknown;
         Route.get('/bag/default', (ctx) => {
-            seen = ctx.req.bag;
+            seen = ctx.bag;
             return Reply.text('ok');
         });
 
@@ -170,14 +176,14 @@ describe('request bag', () => {
             user: string;
         }
         class SetUser extends BaseMiddleware {
-            handle(ctx: Context<AuthBag>, next: Next): Promise<Response> {
-                ctx.req.bag.user = 'ada';
+            handle(ctx: Request<AuthBag>, next: Next): Promise<Response> {
+                ctx.bag.user = 'ada';
                 return next();
             }
         }
         class MeHandler {
-            show(ctx: Context<AuthBag>): Reply {
-                return Reply.text(ctx.req.bag.user);
+            show(ctx: Request<AuthBag>): Reply {
+                return Reply.text(ctx.bag.user);
             }
         }
         Route.get('/bag/me', [MeHandler, 'show']).middlewares([SetUser]);
@@ -190,7 +196,7 @@ describe('request bag', () => {
         interface CountBag {
             n: number;
         }
-        Route.get('/bag/ctx', (ctx: Context<CountBag>) => {
+        Route.get('/bag/ctx', (ctx: Request<CountBag>) => {
             ctx.bag.n = 7;
             return Reply.text(String(ctx.bag.n));
         });
@@ -223,7 +229,7 @@ describe('method injection', () => {
 
     it('falls back to passing ctx when a method has no metadata', async () => {
         class PlainHandler {
-            show(ctx: Context): Reply {
+            show(ctx: Request): Reply {
                 return Reply.text(ctx.param('id') ?? 'none');
             }
         }

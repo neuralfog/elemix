@@ -1,20 +1,19 @@
 import { describe, expect, it } from 'bun:test';
-import type { Context } from '../src/http/Context';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
 import { Router } from '../src/routing/Router';
 
 const request = (path: string): Request =>
-    ({
+    new Request({
         url: `http://localhost${path}`,
         method: 'GET',
         headers: new Headers(),
-    }) as unknown as Request;
+    } as unknown as globalThis.Request);
 
 class Tagger extends BaseMiddleware {
     static hits = 0;
-    async handle(_ctx: Context, next: Next): Promise<Response> {
+    async handle(_ctx: Request, next: Next): Promise<Response> {
         Tagger.hits++;
         return next();
     }

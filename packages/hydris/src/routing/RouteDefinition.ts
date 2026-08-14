@@ -8,7 +8,7 @@ export type Segment =
     | { param: true; name: string }
     | { wildcard: true };
 
-export interface RouteDefinition {
+export type RouteDefinition = {
     method: Method;
     path: string;
     handler: Handler;
@@ -17,7 +17,7 @@ export interface RouteDefinition {
     skip: Middleware[];
     isStatic: boolean;
     renderer?: ErrorRenderer;
-}
+};
 
 export const compile = (path: string): Segment[] =>
     path

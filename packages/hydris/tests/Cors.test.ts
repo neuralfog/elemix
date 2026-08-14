@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'bun:test';
-import type { Context } from '../src/http/Context';
-import type { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
+import { Request } from '../src/http/Request';
 import { Cors } from '../src/middleware/Cors';
 import type { Next } from '../src/middleware/Middleware';
 import { Route, router } from '../src/routing/Route';
 
-const ctx = (method: string, headers: Record<string, string> = {}): Context =>
-    ({ req: { method, headers: new Headers(headers) } }) as unknown as Context;
+const ctx = (method: string, headers: Record<string, string> = {}): Request =>
+    new Request({
+        method,
+        headers: new Headers(headers),
+    } as unknown as globalThis.Request);
 
 const ok: Next = async () => new Response('ok', { status: 200 });
 
@@ -74,11 +76,11 @@ describe('Cors instance in the route pipeline', () => {
             new Cors({ origin: 'https://app.example' }),
         ]);
 
-        const req = {
+        const req = new Request({
             url: 'http://localhost/cors/ping',
             method: 'GET',
             headers: new Headers({ origin: 'https://app.example' }),
-        } as unknown as Request;
+        } as unknown as globalThis.Request);
 
         const res = await router.dispatch(req);
         expect(await res.text()).toBe('pong');

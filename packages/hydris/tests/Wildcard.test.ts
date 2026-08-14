@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { Reply } from '../src/http/Reply';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 import { RouteCollection } from '../src/routing/RouteCollection';
 import { Route, router } from '../src/routing/Route';
 
@@ -8,11 +8,11 @@ type AddHandler = Parameters<RouteCollection['add']>[2];
 const noop = (() => new Response('ok')) as unknown as AddHandler;
 const parts = (path: string): string[] => path.split('/').filter(Boolean);
 const request = (path: string): Request =>
-    ({
+    new Request({
         url: `http://localhost${path}`,
         method: 'GET',
         headers: new Headers(),
-    }) as unknown as Request;
+    } as unknown as globalThis.Request);
 
 describe('wildcard route matching', () => {
     it('matches the base and captures the rest under *', () => {

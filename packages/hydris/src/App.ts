@@ -1,9 +1,7 @@
 import type { ServiceProviderClass } from './container/ServiceProvider';
 import type { ErrorRenderer, ErrorReporter } from './error/render';
 import { type AssetConfig, assetHandler, isVersioned } from './http/assets';
-import type { Context } from './http/Context';
-import { resolveIp, resolveProtocol } from './http/proxy';
-import type { Request } from './http/Request';
+import { Request } from './http/Request';
 import type { Middleware } from './middleware/Middleware';
 import { clientAsset } from './render/client';
 import {
@@ -14,7 +12,7 @@ import {
 import { lockAssetVersion, setAssetVersion } from './render/version';
 import { container, router } from './routing/Route';
 
-export interface ServeOptions {
+export type ServeOptions = {
     port?: number;
     hostname?: string;
     unix?: string;
@@ -25,7 +23,7 @@ export interface ServeOptions {
     tls?: Bun.TLSOptions | Bun.TLSOptions[];
     trustProxy?: boolean;
     elemixAssets?: { maxAge?: number };
-}
+};
 
 export class App {
     static providers(providers: ServiceProviderClass[]): void {
@@ -77,11 +75,11 @@ export class App {
         lockAssetVersion();
         const { trustProxy = false, elemixAssets, ...serveOptions } = options;
 
-        router.registerStatic('/_elemix/*', (ctx: Context) => {
+        router.registerStatic('/_elemix/*', (req: Request) => {
             const bundle = clientAsset(
-                `/_elemix/${ctx.param('*')}`,
+                `/_elemix/${req.param('*')}`,
                 elemixAssets?.maxAge,
-                isVersioned(ctx.req.url),
+                isVersioned(req.url),
             );
             return bundle ?? new Response('Not Found', { status: 404 });
         });
@@ -90,13 +88,12 @@ export class App {
             port: 3000,
             hostname: 'localhost',
             ...serveOptions,
-            fetch: (req: globalThis.Request, srv: Bun.Server) => {
-                const request = req as Request;
-                const socketIp = srv.requestIP(req)?.address ?? '';
-                request.ip = resolveIp(request, socketIp, trustProxy);
-                request.protocol = resolveProtocol(request, trustProxy);
-                return router.dispatch(request);
-            },
+            fetch: (req: globalThis.Request, srv: Bun.Server) =>
+                router.dispatch(
+                    new Request(req),
+                    srv.requestIP(req)?.address ?? '',
+                    trustProxy,
+                ),
         } as Parameters<typeof Bun.serve>[0]);
         console.log(
             `Server running at ${server.url.protocol}//${server.hostname}:${server.port}`,

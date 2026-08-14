@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'bun:test';
-import type { Context } from '../src/http/Context';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
 import { Route, router } from '../src/routing/Route';
 
 const req = (method: string, path: string): Request =>
-    ({ url: `http://localhost${path}`, method }) as unknown as Request;
+    new Request({
+        url: `http://localhost${path}`,
+        method,
+    } as unknown as globalThis.Request);
 
 describe('Route facade', () => {
     it('registers each verb on the shared router', async () => {
@@ -52,7 +54,7 @@ describe('Route facade', () => {
 
     it('passes the context to the instance method', async () => {
         class UserHandler {
-            show(ctx: Context): Reply {
+            show(ctx: Request): Reply {
                 return Reply.text(`user ${ctx.param('id')}`);
             }
         }

@@ -12,9 +12,9 @@ const INJECT_METHODS_KEY = 'Symbol.for("ssr.inject.methods")';
 
 type ClassNode = ClassDeclaration | ClassExpression;
 
-export interface InjectResult {
+export type InjectResult = {
     code: string;
-}
+};
 
 type Insert = { pos: number; text: string };
 

@@ -1,10 +1,10 @@
 import type { BuildableLifetime } from './types';
 
-export interface Binding {
+export type Binding = {
     singleton(): void;
     scoped(): void;
     transient(): void;
-}
+};
 
 export const binding = (
     set: (lifetime: BuildableLifetime) => void,

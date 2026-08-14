@@ -3,7 +3,7 @@ import { ErrorHandler } from '../src/error/ErrorHandler';
 import { NotFoundException } from '../src/error/HttpException';
 import { statusOf } from '../src/error/render';
 import { Reply } from '../src/http/Reply';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
 import { Router } from '../src/routing/Router';
 
@@ -12,11 +12,11 @@ const req = (
     path: string,
     headers?: Record<string, string>,
 ): Request =>
-    ({
+    new Request({
         url: `http://localhost${path}`,
         method,
         headers: new Headers(headers),
-    }) as unknown as Request;
+    } as unknown as globalThis.Request);
 
 describe('error boundary', () => {
     it('renders an unexpected throw as 500 without leaking the message', async () => {

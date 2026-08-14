@@ -1,19 +1,19 @@
-import type { Context } from '../http/Context';
+import type { Request } from '../http/Request';
 import { BaseMiddleware, type Next } from './Middleware';
 
-export interface HstsConfig {
+export type HstsConfig = {
     maxAge: number;
     includeSubDomains?: boolean;
     preload?: boolean;
-}
+};
 
-export interface SecureHeadersConfig {
+export type SecureHeadersConfig = {
     contentTypeOptions: boolean;
     frameOptions: 'DENY' | 'SAMEORIGIN' | false;
     referrerPolicy: string | false;
     hsts: HstsConfig | false;
     contentSecurityPolicy: string | false;
-}
+};
 
 export const defaultSecureHeaders: SecureHeadersConfig = {
     contentTypeOptions: true,
@@ -31,7 +31,7 @@ export class SecureHeaders extends BaseMiddleware {
         this.options = { ...defaultSecureHeaders, ...options };
     }
 
-    async handle(_ctx: Context, next: Next): Promise<Response> {
+    async handle(_req: Request, next: Next): Promise<Response> {
         const res = await next();
         this.apply(res.headers);
         return res;

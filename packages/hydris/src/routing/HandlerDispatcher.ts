@@ -1,10 +1,10 @@
 import type { DiContainer } from '../container/DiContainer';
 import type { TokenLike } from '../container/Token';
-import type { Context } from '../http/Context';
 import type { HandlerResult } from '../http/Reply';
+import type { Request } from '../http/Request';
 
 export type HandlerFn = (
-    ctx: Context<any>,
+    req: Request<any>,
 ) => HandlerResult | Promise<HandlerResult>;
 
 type HandlerMethod = (...args: any[]) => HandlerResult | Promise<HandlerResult>;
@@ -29,9 +29,9 @@ type MethodTable = Record<PropertyKey, readonly TokenLike<unknown>[]>;
 export const invokeHandler = (
     handler: Handler,
     scope: DiContainer,
-    ctx: Context,
+    req: Request,
 ): HandlerResult | Promise<HandlerResult> => {
-    if (typeof handler === 'function') return handler(ctx);
+    if (typeof handler === 'function') return handler(req);
     const [HandlerClass, method] = handler;
     const instance = scope.get(HandlerClass) as Record<
         PropertyKey,
@@ -44,5 +44,5 @@ export const invokeHandler = (
     if (deps) {
         return instance[method](...deps.map((dep) => scope.get(dep)));
     }
-    return instance[method](ctx);
+    return instance[method](req);
 };

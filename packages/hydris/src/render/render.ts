@@ -27,11 +27,11 @@ export const lockDefaultDocument = (): void => {
 
 export const getDefaultDocument = (): ViewClass | undefined => defaultDocument;
 
-interface Renderable {
+type Renderable = {
     $$__attachFormInternals?(): void;
     $$__beforeMount?(): void;
     $$__ssr(): Rope;
-}
+};
 
 export const renderView = (View: ViewClass, data?: unknown): string =>
     $__runStores(() => {

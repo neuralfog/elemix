@@ -3,13 +3,13 @@ import { clientPlugin, findViews } from './client';
 import { ssrPlugin } from './plugin';
 import { sassPlugin } from './sass';
 
-export interface AppBuildOptions {
+export type AppBuildOptions = {
     root?: string;
     serverEntry?: string;
     serverOut?: string;
     clientOut?: string;
     minify?: boolean;
-}
+};
 
 const SERVER_ENTRY = './src/index.ts';
 const SERVER_OUT = './dist';

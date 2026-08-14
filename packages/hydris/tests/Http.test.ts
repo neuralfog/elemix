@@ -1,23 +1,22 @@
 import { describe, expect, it } from 'bun:test';
-import { Context } from '../src/http/Context';
 import { parseCookies, serializeCookie } from '../src/http/Cookie';
 import { Reply } from '../src/http/Reply';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 import { Route, router } from '../src/routing/Route';
 
 const request = (
     path: string,
     headers: Record<string, string> = {},
     method = 'GET',
-): Request =>
+): globalThis.Request =>
     ({
         url: `http://localhost${path}`,
         method,
         headers: new Headers(headers),
-    }) as unknown as Request;
+    }) as unknown as globalThis.Request;
 
-const ctx = (path: string, headers?: Record<string, string>): Context =>
-    new Context(request(path, headers), null);
+const ctx = (path: string, headers?: Record<string, string>): Request =>
+    new Request(request(path, headers), null);
 
 describe('ctx.query', () => {
     it('parses the query string into an object', () => {
@@ -110,7 +109,7 @@ describe('cookie helpers', () => {
 describe('query and cookies through the router', () => {
     it('a handler reads ctx.query', async () => {
         Route.get('/e2e/query', (c) => Reply.json(c.query));
-        const res = await router.dispatch(request('/e2e/query?x=1&y=two'));
+        const res = await router.dispatch(ctx('/e2e/query?x=1&y=two'));
         expect(await res.json()).toEqual({ x: '1', y: 'two' });
     });
 
@@ -119,7 +118,7 @@ describe('query and cookies through the router', () => {
             Reply.text(c.cookies.get('in') ?? 'none').cookie('out', 'set'),
         );
         const res = await router.dispatch(
-            request('/e2e/cookie', { cookie: 'in=value' }),
+            ctx('/e2e/cookie', { cookie: 'in=value' }),
         );
         expect(await res.text()).toBe('value');
         expect(res.headers.get('set-cookie')).toContain('out=set');

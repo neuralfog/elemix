@@ -1,14 +1,14 @@
-import type { Context } from '../http/Context';
+import type { Request } from '../http/Request';
 import { BaseMiddleware, type Next } from './Middleware';
 
-export interface CorsConfig {
+export type CorsConfig = {
     origin: string | string[];
     methods: string[];
     allowedHeaders: string[];
     exposedHeaders: string[];
     credentials: boolean;
     maxAge: number;
-}
+};
 
 export const defaultCorsOptions: CorsConfig = {
     origin: '*',
@@ -27,21 +27,21 @@ export class Cors extends BaseMiddleware {
         this.options = { ...defaultCorsOptions, ...options };
     }
 
-    handle(ctx: Context, next: Next): Response | Promise<Response> {
-        const origin = ctx.req.headers.get('origin');
-        return ctx.req.method === 'OPTIONS'
-            ? this.preflight(ctx, origin)
+    handle(req: Request, next: Next): Response | Promise<Response> {
+        const origin = req.headers.get('origin');
+        return req.method === 'OPTIONS'
+            ? this.preflight(req, origin)
             : this.decorate(next, origin);
     }
 
-    private preflight(ctx: Context, origin: string | null): Response {
+    private preflight(req: Request, origin: string | null): Response {
         const { methods, allowedHeaders, maxAge } = this.options;
         const headers = new Headers();
 
         this.applyOrigin(headers, origin);
         headers.set('Access-Control-Allow-Methods', methods.join(', '));
 
-        const requested = ctx.req.headers.get('access-control-request-headers');
+        const requested = req.headers.get('access-control-request-headers');
         const allowed = allowedHeaders.length
             ? allowedHeaders.join(', ')
             : requested;

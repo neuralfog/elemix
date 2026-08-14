@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'bun:test';
-import type { Context } from '../src/http/Context';
+import type { Request } from '../src/http/Request';
 import type { Next } from '../src/middleware/Middleware';
 import { SecureHeaders } from '../src/middleware/SecureHeaders';
 
 const ok: Next = async () => new Response('ok', { status: 200 });
 const run = (mw: SecureHeaders): Promise<Response> =>
-    mw.handle({} as Context, ok);
+    mw.handle({} as Request, ok);
 
 describe('SecureHeaders', () => {
     it('sets the safe defaults', async () => {

@@ -1,12 +1,12 @@
 import { join, resolve, sep } from 'node:path';
 import { DEFAULT_ASSET_MAX_AGE } from '../render/client';
-import type { Context } from './Context';
+import type { Request } from './Request';
 
-export interface AssetConfig {
+export type AssetConfig = {
     dir: string;
     maxAge?: number;
     immutable?: boolean;
-}
+};
 
 const within = (target: string, dir: string): boolean =>
     target === dir || target.startsWith(dir + sep);
@@ -23,18 +23,18 @@ const notFound = (): Response => new Response('Not Found', { status: 404 });
 
 export const assetHandler = (
     config: AssetConfig,
-): ((ctx: Context) => Promise<Response>) => {
+): ((req: Request) => Promise<Response>) => {
     const dir = resolve(config.dir);
     const bare = cacheControl(config);
     const busted = `public, max-age=${config.maxAge ?? DEFAULT_ASSET_MAX_AGE}, immutable`;
-    return async (ctx: Context): Promise<Response> => {
-        const rel = ctx.param('*');
+    return async (req: Request): Promise<Response> => {
+        const rel = req.param('*');
         if (!rel) return notFound();
         const target = resolve(join(dir, rel));
         if (!within(target, dir)) return notFound();
         const file = Bun.file(target);
         if (!(await file.exists())) return notFound();
-        const cache = isVersioned(ctx.req.url) ? busted : bare;
+        const cache = isVersioned(req.url) ? busted : bare;
         return new Response(
             file,
             cache ? { headers: { 'cache-control': cache } } : undefined,

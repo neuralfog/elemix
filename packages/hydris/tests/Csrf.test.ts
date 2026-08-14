@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'bun:test';
-import { Context } from '../src/http/Context';
-import type { Request as HydrisRequest } from '../src/http/Request';
+import { Reply } from '../src/http/Reply';
+import { Request as HydrisRequest } from '../src/http/Request';
 import { Csrf } from '../src/middleware/Csrf';
 import type { Next } from '../src/middleware/Middleware';
+import { Router } from '../src/routing/Router';
 
 const SECRET = 'test-secret-key';
 const ok: Next = async () => new Response('ok', { status: 200 });
@@ -14,15 +15,15 @@ const contextFor = (
         body?: BodyInit;
         headers?: Record<string, string>;
     } = {},
-): Context => {
+): HydrisRequest => {
     const headers = new Headers(init.headers);
     if (init.cookie) headers.set('cookie', init.cookie);
-    const req = new Request('http://localhost/', {
+    const raw = new Request('http://localhost/', {
         method,
         headers,
         body: init.body,
-    }) as unknown as HydrisRequest;
-    return new Context(req, null);
+    });
+    return new HydrisRequest(raw, null);
 };
 
 const cookieValue = (res: Response): string => {
@@ -59,11 +60,9 @@ describe('Csrf', () => {
     });
 
     it('rejects an unsafe request with no token', async () => {
-        const res = await new Csrf({ secret: SECRET }).handle(
-            contextFor('POST'),
-            ok,
-        );
-        expect(res.status).toBe(403);
+        await expect(
+            new Csrf({ secret: SECRET }).handle(contextFor('POST'), ok),
+        ).rejects.toThrow('Invalid CSRF token');
     });
 
     it('accepts a POST whose header token matches the cookie', async () => {
@@ -77,35 +76,41 @@ describe('Csrf', () => {
 
     it('rejects a POST whose header token does not match', async () => {
         const { cookie } = await issue();
-        const res = await new Csrf({ secret: SECRET }).handle(
-            contextFor('POST', {
-                cookie,
-                headers: { 'x-csrf-token': 'not-the-token' },
-            }),
-            ok,
-        );
-        expect(res.status).toBe(403);
+        await expect(
+            new Csrf({ secret: SECRET }).handle(
+                contextFor('POST', {
+                    cookie,
+                    headers: { 'x-csrf-token': 'not-the-token' },
+                }),
+                ok,
+            ),
+        ).rejects.toThrow('Invalid CSRF token');
     });
 
     it('rejects a POST with a tampered cookie signature', async () => {
         const { token, cookie } = await issue();
-        const res = await new Csrf({ secret: SECRET }).handle(
-            contextFor('POST', {
-                cookie: `${cookie}tampered`,
-                headers: { 'x-csrf-token': token },
-            }),
-            ok,
-        );
-        expect(res.status).toBe(403);
+        await expect(
+            new Csrf({ secret: SECRET }).handle(
+                contextFor('POST', {
+                    cookie: `${cookie}tampered`,
+                    headers: { 'x-csrf-token': token },
+                }),
+                ok,
+            ),
+        ).rejects.toThrow('Invalid CSRF token');
     });
 
     it('rejects a token signed with a different secret', async () => {
         const { token, cookie } = await issue();
-        const res = await new Csrf({ secret: 'other-secret' }).handle(
-            contextFor('POST', { cookie, headers: { 'x-csrf-token': token } }),
-            ok,
-        );
-        expect(res.status).toBe(403);
+        await expect(
+            new Csrf({ secret: 'other-secret' }).handle(
+                contextFor('POST', {
+                    cookie,
+                    headers: { 'x-csrf-token': token },
+                }),
+                ok,
+            ),
+        ).rejects.toThrow('Invalid CSRF token');
     });
 
     it('accepts a token submitted as a form field', async () => {
@@ -126,17 +131,18 @@ describe('Csrf', () => {
             secret: SECRET,
             trustedOrigins: ['https://app.example'],
         });
-        const bad = await mw.handle(
-            contextFor('POST', {
-                cookie,
-                headers: {
-                    'x-csrf-token': token,
-                    origin: 'https://evil.example',
-                },
-            }),
-            ok,
-        );
-        expect(bad.status).toBe(403);
+        await expect(
+            mw.handle(
+                contextFor('POST', {
+                    cookie,
+                    headers: {
+                        'x-csrf-token': token,
+                        origin: 'https://evil.example',
+                    },
+                }),
+                ok,
+            ),
+        ).rejects.toThrow('Invalid CSRF token');
 
         const good = await mw.handle(
             contextFor('POST', {
@@ -149,5 +155,40 @@ describe('Csrf', () => {
             ok,
         );
         expect(good.status).toBe(200);
+    });
+});
+
+describe('Csrf failure rendering (content negotiation)', () => {
+    const guarded = (): Router => {
+        const r = new Router();
+        r.register('POST', '/guard', () => Reply.text('ok')).middlewares.push(
+            new Csrf({ secret: SECRET }),
+        );
+        return r;
+    };
+
+    const post = (accept: string): HydrisRequest =>
+        new HydrisRequest(
+            new Request('http://localhost/guard', {
+                method: 'POST',
+                headers: { accept },
+            }),
+        );
+
+    it('renders a JSON 403 for an AJAX request (Accept: application/json)', async () => {
+        const res = await guarded().dispatch(post('application/json'));
+        expect(res.status).toBe(403);
+        expect(res.headers.get('content-type')).toContain('application/json');
+        expect(await res.json()).toEqual({
+            error: 'Invalid CSRF token',
+            status: 403,
+        });
+    });
+
+    it('renders an HTML 403 for a browser request (Accept: text/html)', async () => {
+        const res = await guarded().dispatch(post('text/html'));
+        expect(res.status).toBe(403);
+        expect(res.headers.get('content-type')).toContain('text/html');
+        expect(await res.text()).toContain('Invalid CSRF token');
     });
 });

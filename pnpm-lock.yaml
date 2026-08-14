@@ -172,6 +172,9 @@ importers:
       '@babel/parser':
         specifier: 7.28.4
         version: 7.28.4
+      '@neuralfog/elemix-compiler':
+        specifier: 0.0.0-dev.2
+        version: 0.0.0-dev.2
       sass:
         specifier: 1.101.0
         version: 1.101.0

@@ -1,9 +1,9 @@
 declare const TYPE: unique symbol;
 
-export interface Token<T> {
+export type Token<T> = {
     readonly [TYPE]: T;
     readonly description: string;
-}
+};
 
 export type Ctor<T> = new (...args: never[]) => T;
 

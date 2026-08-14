@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'bun:test';
 import { App } from '../src/App';
-import { Context } from '../src/http/Context';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
 import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
@@ -8,15 +7,18 @@ import { Route, router } from '../src/routing/Route';
 import { Router } from '../src/routing/Router';
 
 const req = (method: string, path: string): Request =>
-    ({ url: `http://localhost${path}`, method }) as unknown as Request;
+    new Request({
+        url: `http://localhost${path}`,
+        method,
+    } as unknown as globalThis.Request);
 
 describe('global middlewares', () => {
     it('runs a registered global middleware for every route', async () => {
         const r = new Router();
         const hits: string[] = [];
         class Global extends BaseMiddleware {
-            handle(ctx: Context, next: Next): Promise<Response> {
-                hits.push(new URL(ctx.req.url).pathname);
+            handle(ctx: Request, next: Next): Promise<Response> {
+                hits.push(new URL(ctx.url).pathname);
                 return next();
             }
         }
@@ -33,7 +35,7 @@ describe('global middlewares', () => {
         const r = new Router();
         const order: string[] = [];
         class Outer extends BaseMiddleware {
-            async handle(_ctx: Context, next: Next): Promise<Response> {
+            async handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('global:before');
                 const res = await next();
                 order.push('global:after');
@@ -41,7 +43,7 @@ describe('global middlewares', () => {
             }
         }
         class Inner extends BaseMiddleware {
-            async handle(_ctx: Context, next: Next): Promise<Response> {
+            async handle(_ctx: Request, next: Next): Promise<Response> {
                 order.push('route:before');
                 const res = await next();
                 order.push('route:after');
@@ -69,9 +71,9 @@ describe('global middlewares', () => {
         const r = new Router();
         const hits: string[] = [];
         class Preflight extends BaseMiddleware {
-            handle(ctx: Context, next: Next): Promise<Response> | Response {
-                hits.push(ctx.req.method);
-                if (ctx.req.method === 'OPTIONS') {
+            handle(ctx: Request, next: Next): Promise<Response> | Response {
+                hits.push(ctx.method);
+                if (ctx.method === 'OPTIONS') {
                     return new Response(null, { status: 204 });
                 }
                 return next();
@@ -89,7 +91,7 @@ describe('global middlewares', () => {
         const r = new Router();
         let ran = false;
         class Mark extends BaseMiddleware {
-            handle(_ctx: Context, next: Next): Promise<Response> {
+            handle(_ctx: Request, next: Next): Promise<Response> {
                 ran = true;
                 return next();
             }
@@ -104,8 +106,8 @@ describe('global middlewares', () => {
     it('App.middlewares registers a global middleware on the app router', async () => {
         const seen: string[] = [];
         class Track extends BaseMiddleware {
-            handle(ctx: Context, next: Next): Promise<Response> {
-                seen.push(new URL(ctx.req.url).pathname);
+            handle(ctx: Request, next: Next): Promise<Response> {
+                seen.push(new URL(ctx.url).pathname);
                 return next();
             }
         }

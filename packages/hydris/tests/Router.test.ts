@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'bun:test';
-import type { Context } from '../src/http/Context';
-import type { Request } from '../src/http/Request';
+import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
 import { Router } from '../src/routing/Router';
 
 const get = (path: string): Request =>
-    ({ url: `http://localhost${path}`, method: 'GET' }) as unknown as Request;
+    new Request({
+        url: `http://localhost${path}`,
+        method: 'GET',
+    } as unknown as globalThis.Request);
 
 describe('Router dispatch', () => {
     it('returns an html response', async () => {
@@ -224,19 +226,19 @@ describe('registration order', () => {
     });
 });
 
-describe('Context', () => {
-    it('exposes the raw request and a param accessor', async () => {
+describe('Request', () => {
+    it('passes the request through and exposes a param accessor', async () => {
         const router = new Router();
-        let seen: Context | undefined;
+        let seen: Request | undefined;
         router.register('GET', '/x/:id', (ctx) => {
-            seen = ctx as Context;
+            seen = ctx;
             return Reply.text(ctx.param('id') ?? 'none');
         });
 
         const req = get('/x/5');
         const res = await router.dispatch(req);
         expect(await res.text()).toBe('5');
-        expect(seen?.req).toBe(req);
+        expect(seen).toBe(req);
         expect(seen?.param('missing')).toBeUndefined();
     });
 });

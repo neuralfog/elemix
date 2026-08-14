@@ -34,11 +34,11 @@ const bundleName = (View: unknown): string | undefined => {
 
 const OUTLET = '<slot></slot>';
 
-interface Pending {
+type Pending = {
     View: ViewClass;
     data: unknown;
     name: string | undefined;
-}
+};
 
 export type HandlerResult = Reply | Response;
 

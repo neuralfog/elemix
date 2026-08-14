@@ -1,10 +1,10 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
-import type { Context } from '../http/Context';
+import { ForbiddenException } from '../error/HttpException';
 import { type CookieOptions, serializeCookie } from '../http/Cookie';
 import type { Request } from '../http/Request';
 import { BaseMiddleware, type Next } from './Middleware';
 
-export interface CsrfOptions {
+export type CsrfOptions = {
     secret: string;
     cookieName?: string;
     headerName?: string;
@@ -12,11 +12,11 @@ export interface CsrfOptions {
     safeMethods?: string[];
     trustedOrigins?: string[];
     cookie?: CookieOptions;
-}
+};
 
-interface ResolvedCsrf extends Required<Omit<CsrfOptions, 'cookie'>> {
+type ResolvedCsrf = Required<Omit<CsrfOptions, 'cookie'>> & {
     cookie: CookieOptions;
-}
+};
 
 const defaults: Omit<ResolvedCsrf, 'secret'> = {
     cookieName: 'csrf',
@@ -35,14 +35,14 @@ export class Csrf extends BaseMiddleware {
         this.options = { ...defaults, ...options };
     }
 
-    async handle(ctx: Context, next: Next): Promise<Response> {
-        const cookieToken = this.read(ctx);
+    async handle(req: Request, next: Next): Promise<Response> {
+        const cookieToken = this.read(req);
         const token = cookieToken ?? this.generate();
-        ctx.req.csrfToken = token;
+        req.csrf = token;
 
-        if (!this.options.safeMethods.includes(ctx.req.method)) {
-            if (!(await this.verify(ctx, cookieToken))) {
-                return new Response('Invalid CSRF token', { status: 403 });
+        if (!this.options.safeMethods.includes(req.method)) {
+            if (!(await this.verify(req, cookieToken))) {
+                throw new ForbiddenException('Invalid CSRF token');
             }
         }
 
@@ -60,8 +60,8 @@ export class Csrf extends BaseMiddleware {
         return res;
     }
 
-    private read(ctx: Context): string | null {
-        const raw = ctx.cookies.get(this.options.cookieName);
+    private read(req: Request): string | null {
+        const raw = req.cookies.get(this.options.cookieName);
         if (raw === undefined) return null;
         const dot = raw.lastIndexOf('.');
         if (dot === -1) return null;
@@ -70,18 +70,18 @@ export class Csrf extends BaseMiddleware {
     }
 
     private async verify(
-        ctx: Context,
+        req: Request,
         cookieToken: string | null,
     ): Promise<boolean> {
         if (cookieToken === null) return false;
-        if (!this.originAllowed(ctx)) return false;
-        const submitted = await this.submitted(ctx.req);
+        if (!this.originAllowed(req)) return false;
+        const submitted = await this.submitted(req);
         return submitted !== null && equal(submitted, cookieToken);
     }
 
-    private originAllowed(ctx: Context): boolean {
+    private originAllowed(req: Request): boolean {
         if (this.options.trustedOrigins.length === 0) return true;
-        const origin = ctx.req.headers.get('origin');
+        const origin = req.headers.get('origin');
         if (origin === null) return true;
         return this.options.trustedOrigins.includes(origin);
     }

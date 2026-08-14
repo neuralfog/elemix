@@ -1,4 +1,4 @@
-export interface CookieOptions {
+export type CookieOptions = {
     maxAge?: number;
     expires?: Date;
     path?: string;
@@ -6,7 +6,7 @@ export interface CookieOptions {
     secure?: boolean;
     httpOnly?: boolean;
     sameSite?: 'Strict' | 'Lax' | 'None';
-}
+};
 
 export const parseCookies = (header: string | null): Map<string, string> => {
     const jar = new Map<string, string>();

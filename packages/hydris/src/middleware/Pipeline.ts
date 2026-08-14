@@ -1,13 +1,13 @@
 import type { DiContainer } from '../container/DiContainer';
-import type { Context } from '../http/Context';
 import { toResponse } from '../http/Reply';
+import type { Request } from '../http/Request';
 import { BaseMiddleware, type Middleware } from './Middleware';
 
 export type ErrorSink = (error: unknown) => Promise<Response>;
 
 export class Pipeline {
     static run(
-        ctx: Context,
+        req: Request,
         scope: DiContainer,
         middlewares: Middleware[],
         core: () => Promise<Response>,
@@ -20,7 +20,7 @@ export class Pipeline {
                 const middleware =
                     entry instanceof BaseMiddleware ? entry : scope.get(entry);
                 return toResponse(
-                    await middleware.handle(ctx, () => step(index + 1)),
+                    await middleware.handle(req, () => step(index + 1)),
                 );
             } catch (error) {
                 return onError(error);

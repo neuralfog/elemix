@@ -1,16 +1,16 @@
-import type { Context } from '../http/Context';
 import { type HandlerResult, Reply } from '../http/Reply';
+import type { Request } from '../http/Request';
 import type { ErrorHandlerClass } from './ErrorHandler';
 import { HttpException } from './HttpException';
 
 export type ErrorReporter = (
     error: unknown,
-    ctx: Context,
+    req: Request,
 ) => void | Promise<void>;
 
 export type ErrorRendererFn = (
     error: unknown,
-    ctx: Context,
+    req: Request,
 ) => HandlerResult | Promise<HandlerResult>;
 
 export type ErrorRenderer = ErrorRendererFn | ErrorHandlerClass;
@@ -32,8 +32,8 @@ const ESCAPE: Record<string, string> = {
 const escapeHtml = (value: string): string =>
     value.replace(/[&<>"']/g, (char) => ESCAPE[char]);
 
-const wantsJson = (ctx: Context): boolean =>
-    (ctx.req.headers?.get('accept') ?? '').includes('application/json');
+const wantsJson = (req: Request): boolean =>
+    (req.headers?.get('accept') ?? '').includes('application/json');
 
 const page = (status: number, message: string): string =>
     `<!doctype html><html lang="en"><head><meta charset="utf-8">` +
@@ -45,10 +45,10 @@ const page = (status: number, message: string): string =>
     `${status}</h1><p style="opacity:.7">${escapeHtml(message)}</p></main>` +
     `</body></html>`;
 
-export const defaultErrorRenderer: ErrorRendererFn = (error, ctx) => {
+export const defaultErrorRenderer: ErrorRendererFn = (error, req) => {
     const status = statusOf(error);
     const message = messageOf(error);
-    if (wantsJson(ctx)) {
+    if (wantsJson(req)) {
         return Reply.json({ error: message, status }).status(status);
     }
     return Reply.html(page(status, message)).status(status);
