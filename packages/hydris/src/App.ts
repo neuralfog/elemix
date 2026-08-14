@@ -11,6 +11,11 @@ import {
 } from './render/render';
 import { lockAssetVersion, setAssetVersion } from './render/version';
 import { container, router } from './routing/Route';
+import {
+    handleUnhandled,
+    setUnhandledHandler,
+    type UnhandledHandler,
+} from './unhandled';
 
 export type ServeOptions = {
     port?: number;
@@ -26,6 +31,10 @@ export type ServeOptions = {
 };
 
 export class App {
+    static onUnhandled(handler: UnhandledHandler): void {
+        setUnhandledHandler(handler);
+    }
+
     static providers(providers: ServiceProviderClass[]): void {
         const instances = providers.map((Provider) => new Provider());
         for (const provider of instances) provider.register(container);
@@ -112,10 +121,10 @@ export class App {
         process.on('SIGINT', () => void shutdown('SIGINT'));
 
         process.on('unhandledRejection', (reason) => {
-            console.error(reason);
+            handleUnhandled(reason);
         });
         process.on('uncaughtException', (error) => {
-            console.error(error);
+            handleUnhandled(error);
         });
     }
 }
