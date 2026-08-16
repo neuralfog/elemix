@@ -3,6 +3,7 @@ export { DiContainer } from './DiContainer';
 export { container } from '../routing/Route';
 export {
     CircularDependencyError,
+    ForbiddenDependencyError,
     ScopeRequiredError,
     UnboundTokenError,
 } from './errors';

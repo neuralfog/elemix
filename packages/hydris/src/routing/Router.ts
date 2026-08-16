@@ -73,6 +73,11 @@ export class Router {
 
     constructor(container: DiContainer = new DiContainer()) {
         this.container = container;
+        this.container.contextTokens(
+            'http',
+            [Request, MatchedRoute],
+            'jobs have no HTTP request; read what you need at enqueue and pass it via job args',
+        );
     }
 
     get size(): number {

@@ -1,6 +1,7 @@
 import { type Binding, binding } from './Binding';
 import {
     CircularDependencyError,
+    ForbiddenDependencyError,
     ScopeRequiredError,
     UnboundTokenError,
 } from './errors';
@@ -35,6 +36,9 @@ export class DiContainer {
     private instances: Map<object, unknown> | null = null;
     private disposables: Disposable[] | null = null;
     private building: Set<object> | null = null;
+    private forbidden: Set<string> | null = null;
+    private contextByToken: Map<object, string> | null = null;
+    private contextHint: Map<string, string> | null = null;
     private readonly root_: DiContainer;
 
     constructor(private readonly parent: DiContainer | null = null) {
@@ -127,6 +131,38 @@ export class DiContainer {
         return new Scope(this);
     }
 
+    contextTokens(
+        name: string,
+        tokens: readonly TokenLike<unknown>[],
+        hint?: string,
+    ): this {
+        const root = this.root_;
+        if (root.contextByToken === null) root.contextByToken = new Map();
+        for (const t of tokens) root.contextByToken.set(t as object, name);
+        if (hint !== undefined) {
+            if (root.contextHint === null) root.contextHint = new Map();
+            root.contextHint.set(name, hint);
+        }
+        return this;
+    }
+
+    forbid(name: string): this {
+        if (this.forbidden === null) this.forbidden = new Set();
+        this.forbidden.add(name);
+        return this;
+    }
+
+    noHttp(): this {
+        return this.forbid('http');
+    }
+
+    private forbids(context: string): boolean {
+        for (let c: DiContainer | null = this; c !== null; c = c.parent) {
+            if (c.forbidden?.has(context)) return true;
+        }
+        return false;
+    }
+
     get<T>(token: TokenLike<T>): T {
         return this.resolve(token as object) as T;
     }
@@ -146,6 +182,17 @@ export class DiContainer {
     }
 
     private resolve(key: object): unknown {
+        const context = this.root_.contextByToken?.get(key);
+        if (context !== undefined && this.forbids(context)) {
+            const building = this.root_.building;
+            const chain = building === null ? [key] : [...building, key];
+            throw new ForbiddenDependencyError(
+                context,
+                chain.map(describe),
+                this.root_.contextHint?.get(context),
+            );
+        }
+
         for (let c: DiContainer | null = this; c !== null; c = c.parent) {
             const instances = c.instances;
             if (instances?.has(key)) {

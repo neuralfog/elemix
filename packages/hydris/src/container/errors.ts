@@ -18,3 +18,15 @@ export class CircularDependencyError extends Error {
         this.name = 'CircularDependencyError';
     }
 }
+
+export class ForbiddenDependencyError extends Error {
+    readonly context: string;
+    readonly chain: string[];
+    constructor(context: string, chain: string[], hint?: string) {
+        const base = `Cannot resolve ${chain.join(' -> ')}: this scope has no '${context}' context`;
+        super(hint === undefined ? base : `${base} (${hint})`);
+        this.name = 'ForbiddenDependencyError';
+        this.context = context;
+        this.chain = chain;
+    }
+}
