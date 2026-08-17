@@ -312,7 +312,10 @@ impl Parser<'_> {
     fn parse_raw_text(&mut self, tag: &str) -> Vec<Node> {
         let start = self.i;
         let close = format!("</{tag}");
-        while self.i < self.b.len() && !self.src[self.i..].to_ascii_lowercase().starts_with(&close)
+        while self.i < self.b.len()
+            && !self.b[self.i..]
+                .to_ascii_lowercase()
+                .starts_with(close.as_bytes())
         {
             self.i += 1;
         }
