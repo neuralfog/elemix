@@ -1,6 +1,6 @@
 {
     "name": "@neuralfog/hydris",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "license": "MIT",
     "author": "brownhounds",
     "repository": {
@@ -58,7 +58,7 @@
         "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings && tsc --noEmit"
     },
     "peerDependencies": {
-        "@neuralfog/elemix": "0.9.3"
+        "@neuralfog/elemix": "0.9.4"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.5",
