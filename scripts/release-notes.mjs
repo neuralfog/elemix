@@ -12,6 +12,8 @@ const PACKAGES = [
     '@neuralfog/elemix-analyzer',
     '@neuralfog/elemix-template-formatter',
     '@neuralfog/elemix-vite',
+    '@neuralfog/hydris',
+    '@neuralfog/elemix-ssr-plugin',
     'create-elemix-app',
 ];
 
