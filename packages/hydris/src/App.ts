@@ -1,3 +1,4 @@
+import type { DiContainer } from './container/DiContainer';
 import type { ServiceProviderClass } from './container/ServiceProvider';
 import type { ErrorRenderer, ErrorReporter } from './error/render';
 import { type AssetConfig, assetHandler, isVersioned } from './http/assets';
@@ -31,6 +32,10 @@ export type ServeOptions = {
 };
 
 export class App {
+    static get container(): DiContainer {
+        return container;
+    }
+
     static onUnhandled(handler: UnhandledHandler): void {
         setUnhandledHandler(handler);
     }
