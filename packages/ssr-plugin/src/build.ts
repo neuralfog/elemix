@@ -11,6 +11,10 @@ export type AppBuildOptions = {
     minify?: boolean;
 };
 
+type DevMessage = {
+    __hydris_dev__?: { watch?: string };
+};
+
 const SERVER_ENTRY = './src/index.ts';
 const SERVER_OUT = './dist';
 const CLIENT_OUT = './public/_elemix';
@@ -67,22 +71,56 @@ export const build = async (opts: AppBuildOptions = {}): Promise<void> => {
 
 export const dev = async (opts: AppBuildOptions = {}): Promise<void> => {
     const root = opts.root ?? process.cwd();
+    const entry = opts.serverEntry ?? SERVER_ENTRY;
+
     const rebuild = async (): Promise<void> => {
         const result = await buildClient(opts);
         if (result === 'built') console.log('[client] hydrate assets rebuilt');
         else if (result === 'empty') console.log('[client] no views to build');
     };
 
-    await rebuild();
-
+    let watching = false;
+    let queued: Promise<void> = Promise.resolve();
     let pending: ReturnType<typeof setTimeout> | undefined;
-    watch(`${root}/src`, { recursive: true }, (_event, filename) => {
-        if (filename === null || !filename.endsWith('.ts')) return;
-        clearTimeout(pending);
-        pending = setTimeout(rebuild, 80);
-    });
+    const startWatch = (dir: string): void => {
+        if (watching) return;
+        watching = true;
+        watch(`${root}/${dir}`, { recursive: true }, () => {
+            clearTimeout(pending);
+            pending = setTimeout(() => {
+                queued = queued.then(async () => {
+                    await rebuild();
+                    await restartServer();
+                });
+            }, 120);
+        });
+    };
 
-    Bun.spawn(['bun', 'run', '--watch', opts.serverEntry ?? SERVER_ENTRY], {
-        stdio: ['inherit', 'inherit', 'inherit'],
-    });
+    let server: Bun.Subprocess | undefined;
+    const startServer = (): void => {
+        server = Bun.spawn(['bun', entry], {
+            ipc(message: DevMessage) {
+                const watchDir = message.__hydris_dev__?.watch;
+                if (watchDir !== undefined) startWatch(watchDir);
+            },
+            stdio: ['inherit', 'inherit', 'inherit'],
+        });
+    };
+    const restartServer = async (): Promise<void> => {
+        if (server) {
+            server.kill('SIGKILL');
+            await server.exited;
+        }
+        startServer();
+    };
+
+    await rebuild();
+    startServer();
+
+    const stop = (): void => {
+        server?.kill('SIGKILL');
+        process.exit(0);
+    };
+    process.on('SIGINT', stop);
+    process.on('SIGTERM', stop);
 };

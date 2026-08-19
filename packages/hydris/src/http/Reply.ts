@@ -1,5 +1,6 @@
 import { basename } from 'node:path';
 import type { Component } from '@neuralfog/elemix';
+import { devReloadScript } from '../render/dev';
 import {
     getDefaultDocument,
     renderView,
@@ -118,15 +119,19 @@ export class Reply {
 
     private renderPending(): string {
         const { View, data, name } = this.pending as Pending;
+        const dev = devReloadScript();
         const page = viewDataScript(data) + renderView(View, data);
         const document =
             this.documentOverride ??
             (View as { $$__document?: ViewClass }).$$__document ??
             getDefaultDocument();
-        if (document === undefined) return page + clientScript(name);
+        if (document === undefined) return page + clientScript(name) + dev;
         const frame = renderView(document, data);
         const inner =
-            page + clientScript(bundleName(document)) + clientScript(name);
+            page +
+            clientScript(bundleName(document)) +
+            clientScript(name) +
+            dev;
         if (frame.includes(OUTLET)) return frame.replace(OUTLET, inner);
         if (frame.includes('</body>')) {
             return frame.replace('</body>', `${inner}</body>`);

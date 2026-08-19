@@ -6,6 +6,13 @@ import { Request } from './http/Request';
 import type { Middleware } from './middleware/Middleware';
 import { clientAsset } from './render/client';
 import {
+    type DevOptions,
+    enableDevMode,
+    isLiveReload,
+    LIVERELOAD_PATH,
+    liveReloadResponse,
+} from './render/dev';
+import {
     lockDefaultDocument,
     setDefaultDocument,
     type ViewClass,
@@ -60,6 +67,10 @@ export class App {
         setAssetVersion(token);
     }
 
+    static devMode(options?: DevOptions): void {
+        enableDevMode(options);
+    }
+
     static document(document: ViewClass): void {
         setDefaultDocument(document);
     }
@@ -97,6 +108,10 @@ export class App {
             );
             return bundle ?? new Response('Not Found', { status: 404 });
         });
+
+        if (isLiveReload()) {
+            router.registerStatic(LIVERELOAD_PATH, () => liveReloadResponse());
+        }
 
         const server = Bun.serve({
             port: 3000,
