@@ -112,18 +112,18 @@ export const $__model = (
     el: HTMLInputElement,
     get: Getter<{ value: string }>,
 ): void => {
-    $__effect(() => {
-        const ref = get();
-        if (el.value === ref.value) return;
-        el.value = ref.value;
-    });
     el.oninput = (): void => {
         const ref = get();
-        if (el.value === ref.value) return;
+        if (!ref || el.value === ref.value) return;
         const transform = (el as OnModelEl).__onmodel;
         if (transform) el.value = transform(el.value);
         ref.value = el.value;
     };
+    $__effect(() => {
+        const ref = get();
+        if (!ref || el.value === ref.value) return;
+        el.value = ref.value;
+    });
 };
 
 export const $__onmodel = (

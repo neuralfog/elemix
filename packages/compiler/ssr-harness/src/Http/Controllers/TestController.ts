@@ -66,6 +66,8 @@ import { FirstWidget } from '../../../../fixtures/TwoComponents';
 import { ScssApp } from '../../../../fixtures/ScssApp';
 import { MatchApp } from '../../../../fixtures/MatchApp';
 import { ModelApp } from '../../../../fixtures/ModelApp';
+import { ModelDeepApp } from '../../../../fixtures/ModelDeepApp';
+import { ModelForwardApp } from '../../../../fixtures/ModelForwardApp';
 import { SlotApp } from '../../../../fixtures/SlotApp';
 import { SlotCard } from '../../../../fixtures/SlotCard';
 import { WhenElseApp } from '../../../../fixtures/WhenElseApp';
@@ -117,6 +119,14 @@ export class TestController {
 
     modelApp(): Reply {
         return Reply.view(ModelApp);
+    }
+
+    modelForwardApp(): Reply {
+        return Reply.view(ModelForwardApp);
+    }
+
+    modelDeepApp(): Reply {
+        return Reply.view(ModelDeepApp);
     }
 
     cardListApp(): Reply {

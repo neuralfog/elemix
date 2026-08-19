@@ -1,0 +1,29 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/ModelDeepOuter.ts
+---
+import { $__template, $__clone, $__effect, $__setProp, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import type { Ref } from '@neuralfog/elemix/types';
+
+import './ModelDeepMiddle';
+
+type Props = {
+    model: Ref<string>;
+};
+
+const _t0 = $__template('<model-deep-middle></model-deep-middle>');
+
+export class ModelDeepOuter extends Component<Props> {
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+$__effect(() => {
+$__setProp(_n1, 'model', (this.props.model));
+});
+return _r0;
+}
+}
+$__defineComponent('model-deep-outer', ModelDeepOuter);
+ModelDeepOuter.prototype.$$__tag = 'model-deep-outer';

@@ -1,0 +1,30 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/ModelDeepInner.ts
+---
+import { $__template, $__clone, $__model, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import type { Ref } from '@neuralfog/elemix/types';
+
+type Props = {
+    model: Ref<string>;
+};
+
+const _t0 = $__template('<input class="in"/>');
+
+export class ModelDeepInner extends Component<Props> {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+$__model(_n0 as HTMLInputElement, () => (this.props.model));
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+$__model(_n1 as HTMLInputElement, () => (this.props.model));
+return _r0;
+}
+}
+$__defineComponent('model-deep-inner', ModelDeepInner);
+ModelDeepInner.prototype.$$__tag = 'model-deep-inner';

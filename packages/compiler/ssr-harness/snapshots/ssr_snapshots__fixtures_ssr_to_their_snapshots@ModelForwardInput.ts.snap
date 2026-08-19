@@ -1,0 +1,31 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ModelForwardInput.ts
+---
+import { $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__model, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import type { Ref } from '@neuralfog/elemix/types';
+
+type Props = {
+    model: Ref<string>;
+};
+
+const _t0 = $__template('<input class="in"/>');
+
+export class ModelForwardInput extends Component<Props> {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'model-forward-input'}><template shadowrootmode="open" shadowrootserializable=""><input class="in"${$__ssrAttr('value', (this.props.model).value)}/></template></${this.$$__tag ?? 'model-forward-input'}>`];
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+$__model(_n1 as HTMLInputElement, () => (this.props.model));
+return _r0;
+}
+}
+$__defineComponent('model-forward-input', ModelForwardInput);
+ModelForwardInput.prototype.$$__tag = 'model-forward-input';
+ModelForwardInput.$$__propSafe = true;
