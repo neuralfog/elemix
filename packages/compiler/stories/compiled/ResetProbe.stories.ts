@@ -1,0 +1,31 @@
+import { expect } from '@neuralfog/elemix-testing-library';
+import { query } from '@neuralfog/elemix-testing-library/query';
+import './.emited/ResetProbe';
+
+export default { title: 'Compiled/ResetProbe' };
+
+type ConfigWindow = {
+    __elemix__?: { config?: Record<string, unknown> };
+};
+
+export const Default = {
+    render: () => {
+        // CSR path: the reset lives in the elemix config; adoptStyles prepends
+        // it into every component shadow on upgrade.
+        const w = window as unknown as ConfigWindow;
+        w.__elemix__ = {
+            config: {
+                ...(w.__elemix__?.config ?? {}),
+                reset: '.reset-probe{color:rgb(7,8,9)}',
+            },
+        };
+        return '<reset-probe></reset-probe>';
+    },
+    play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+        const el = query('.reset-probe', canvasElement)[0];
+        if (!el) throw new Error('reset-probe element missing');
+
+        expect(el.textContent).toBe('probe');
+        expect(getComputedStyle(el).color).toBe('rgb(7, 8, 9)');
+    },
+};

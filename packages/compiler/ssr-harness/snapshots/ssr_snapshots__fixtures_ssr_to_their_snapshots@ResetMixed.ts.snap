@@ -1,0 +1,29 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ResetMixed.ts
+---
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './ResetProbeLight';
+
+const _s0 = $__sheet(':host { display: block; }');
+const _t0 = $__template('<span class="reset-probe" data-part="shadow">shadow</span><reset-probe-light></reset-probe-light>');
+
+export class ResetMixed extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'reset-mixed'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${':host { display: block; }'}</style><span class="reset-probe" data-part="shadow">shadow</span>`, $__ssrChild('reset-probe-light', {}), `</template></${this.$$__tag ?? 'reset-mixed'}>`];
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+ResetMixed.$$__sheets = [..._s0];
+$__defineComponent('reset-mixed', ResetMixed);
+ResetMixed.prototype.$$__tag = 'reset-mixed';
+ResetMixed.$$__propSafe = true;

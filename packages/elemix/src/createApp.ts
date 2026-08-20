@@ -1,6 +1,7 @@
 export type ElemixConfig = {
     cloak?: string;
     shadow?: boolean;
+    reset?: string;
 };
 
 export type ElemixApp = {

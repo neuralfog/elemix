@@ -26,8 +26,8 @@ test.describe('ScssApp', () => {
             const sheets = (el as Element & { shadowRoot: ShadowRoot | null })
                 .shadowRoot?.adoptedStyleSheets;
             if (!sheets || sheets.length === 0) return '';
-            return Array.from(sheets[0].cssRules)
-                .map((r) => r.cssText)
+            return sheets
+                .flatMap((s) => Array.from(s.cssRules).map((r) => r.cssText))
                 .join('\n');
         });
         expect(cssText).toContain('#6366f1');

@@ -67,6 +67,9 @@ import { ScssApp } from '../../../../fixtures/ScssApp';
 import { MatchApp } from '../../../../fixtures/MatchApp';
 import { ModelApp } from '../../../../fixtures/ModelApp';
 import { ModelDeepApp } from '../../../../fixtures/ModelDeepApp';
+import { ResetMixed } from '../../../../fixtures/ResetMixed';
+import { ResetProbe } from '../../../../fixtures/ResetProbe';
+import { ResetProbeLight } from '../../../../fixtures/ResetProbeLight';
 import { ModelForwardApp } from '../../../../fixtures/ModelForwardApp';
 import { SlotApp } from '../../../../fixtures/SlotApp';
 import { SlotCard } from '../../../../fixtures/SlotCard';
@@ -127,6 +130,18 @@ export class TestController {
 
     modelDeepApp(): Reply {
         return Reply.view(ModelDeepApp);
+    }
+
+    resetProbe(): Reply {
+        return Reply.view(ResetProbe);
+    }
+
+    resetProbeLight(): Reply {
+        return Reply.view(ResetProbeLight);
+    }
+
+    resetMixed(): Reply {
+        return Reply.view(ResetMixed);
     }
 
     cardListApp(): Reply {

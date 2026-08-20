@@ -1,0 +1,23 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/ResetMixed.ts
+---
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './ResetProbeLight';
+
+const _s0 = $__sheet(':host { display: block; }');
+const _t0 = $__template('<span class="reset-probe" data-part="shadow">shadow</span><reset-probe-light></reset-probe-light>');
+
+export class ResetMixed extends Component {
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+ResetMixed.$$__sheets = [..._s0];
+$__defineComponent('reset-mixed', ResetMixed);
+ResetMixed.prototype.$$__tag = 'reset-mixed';

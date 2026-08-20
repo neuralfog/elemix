@@ -2,6 +2,11 @@ import { basename } from 'node:path';
 import type { Component } from '@neuralfog/elemix';
 import { devReloadScript } from '../render/dev';
 import {
+    applyResetToSsr,
+    resetConfigScript,
+    resetDocumentStyle,
+} from '../render/reset';
+import {
     getDefaultDocument,
     renderView,
     type ViewClass,
@@ -120,23 +125,29 @@ export class Reply {
     private renderPending(): string {
         const { View, data, name } = this.pending as Pending;
         const dev = devReloadScript();
+        const resetCfg = resetConfigScript() + resetDocumentStyle();
         const page = viewDataScript(data) + renderView(View, data);
         const document =
             this.documentOverride ??
             (View as { $$__document?: ViewClass }).$$__document ??
             getDefaultDocument();
-        if (document === undefined) return page + clientScript(name) + dev;
+        if (document === undefined) {
+            return applyResetToSsr(resetCfg + page + clientScript(name) + dev);
+        }
         const frame = renderView(document, data);
         const inner =
+            resetCfg +
             page +
             clientScript(bundleName(document)) +
             clientScript(name) +
             dev;
-        if (frame.includes(OUTLET)) return frame.replace(OUTLET, inner);
-        if (frame.includes('</body>')) {
-            return frame.replace('</body>', `${inner}</body>`);
+        if (frame.includes(OUTLET)) {
+            return applyResetToSsr(frame.replace(OUTLET, inner));
         }
-        return frame + inner;
+        if (frame.includes('</body>')) {
+            return applyResetToSsr(frame.replace('</body>', `${inner}</body>`));
+        }
+        return applyResetToSsr(frame + inner);
     }
 }
 

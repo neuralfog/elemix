@@ -1,0 +1,21 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/ResetProbe.ts
+---
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _s0 = $__sheet(':host { display: block; }');
+const _t0 = $__template('<span class="reset-probe">probe</span>');
+
+export class ResetProbe extends Component {
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+ResetProbe.$$__sheets = [..._s0];
+$__defineComponent('reset-probe', ResetProbe);
+ResetProbe.prototype.$$__tag = 'reset-probe';

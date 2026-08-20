@@ -17,6 +17,7 @@ import {
     setDefaultDocument,
     type ViewClass,
 } from './render/render';
+import { setResetStyles } from './render/reset';
 import { lockAssetVersion, setAssetVersion } from './render/version';
 import { container, router } from './routing/Route';
 import {
@@ -73,6 +74,10 @@ export class App {
 
     static document(document: ViewClass): void {
         setDefaultDocument(document);
+    }
+
+    static resetStyles(css: string): void {
+        setResetStyles(css);
     }
 
     static onError(reporter: ErrorReporter): void {

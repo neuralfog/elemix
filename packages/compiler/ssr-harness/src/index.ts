@@ -1,6 +1,8 @@
 import { App } from '@neuralfog/hydris';
 import './routes/web';
 
+App.resetStyles('.reset-probe{color:rgb(7,8,9)}');
+
 App.serve({
     port: Number(Bun.env.PORT ?? 4242),
     hostname: Bun.env.HOST ?? 'localhost',

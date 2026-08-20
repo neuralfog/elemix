@@ -35,6 +35,33 @@ const cloak = (): CSSStyleSheet => {
     return cloakSheet;
 };
 
+let resetSheet: CSSStyleSheet | undefined;
+let resetSource: string | undefined;
+
+const reset = (): CSSStyleSheet | undefined => {
+    const source = window.__elemix__?.config?.reset;
+    if (!source) return undefined;
+    if (source !== resetSource) {
+        resetSheet = new CSSStyleSheet();
+        resetSheet.replaceSync(source);
+        resetSource = source;
+    }
+    return resetSheet;
+};
+
+let resetDocumentDone = false;
+
+const resetDocument = (): void => {
+    if (resetDocumentDone) return;
+    const sheet = reset();
+    if (!sheet) return;
+    document.adoptedStyleSheets = [
+        ...(document.adoptedStyleSheets ?? []),
+        sheet,
+    ];
+    resetDocumentDone = true;
+};
+
 export class Component<
     ComponentProps = unknown,
     ViewData = unknown,
@@ -170,12 +197,16 @@ export class Component<
         input?: string | CSSStyleSheet | ReadonlyArray<string | CSSStyleSheet>,
     ): void {
         cloak();
+        resetDocument();
         const sheets =
             input !== undefined
                 ? $__sheet(input)
                 : (this.constructor as typeof Component).$$__sheets;
-        if (this.shadowRoot && sheets?.length) {
-            this.shadowRoot.adoptedStyleSheets = sheets;
+        if (!this.shadowRoot) return;
+        const base = reset();
+        const all = base ? [base, ...(sheets ?? [])] : sheets;
+        if (all?.length) {
+            this.shadowRoot.adoptedStyleSheets = all;
         }
     }
 

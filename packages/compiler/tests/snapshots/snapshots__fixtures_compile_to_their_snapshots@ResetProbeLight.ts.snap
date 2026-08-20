@@ -1,0 +1,19 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/ResetProbeLight.ts
+---
+import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<span class="reset-probe">probe</span>');
+
+export class ResetProbeLight extends Component {
+    static $$__noShadow = true;
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('reset-probe-light', ResetProbeLight);
+ResetProbeLight.prototype.$$__tag = 'reset-probe-light';
