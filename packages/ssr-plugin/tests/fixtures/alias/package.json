@@ -1,0 +1,6 @@
+{
+    "name": "alias-fixture",
+    "imports": {
+        "#s/*": "./styles/*"
+    }
+}
