@@ -8,6 +8,7 @@ import { clientAsset } from './render/client';
 import {
     type DevOptions,
     enableDevMode,
+    isDevMode,
     isLiveReload,
     LIVERELOAD_PATH,
     liveReloadResponse,
@@ -17,6 +18,7 @@ import {
     setDefaultDocument,
     type ViewClass,
 } from './render/render';
+import { brandDim, serveBanner } from './render/banner';
 import { setResetStyles } from './render/reset';
 import { lockAssetVersion, setAssetVersion } from './render/version';
 import { container, router } from './routing/Route';
@@ -130,14 +132,24 @@ export class App {
                 ),
         } as Parameters<typeof Bun.serve>[0]);
         console.log(
-            `Server running at ${server.url.protocol}//${server.hostname}:${server.port}`,
+            serveBanner({
+                host: server.hostname ?? 'localhost',
+                port: server.port ?? 0,
+                protocol: server.url.protocol,
+                dev:
+                    options.development ??
+                    process.env.NODE_ENV !== 'production',
+                ms: Math.round(performance.now()),
+            }),
         );
+        if (isLiveReload()) console.log(brandDim('live reload enabled'));
+        if (isDevMode()) process.send?.({ __hydris_dev__: { ready: true } });
 
         let closing = false;
         const shutdown = async (signal: string): Promise<void> => {
             if (closing) return;
             closing = true;
-            console.log(`${signal} received, draining connections...`);
+            console.log(brandDim(`${signal} - draining connections`));
             await server.stop();
             await container.dispose();
             process.exit(0);

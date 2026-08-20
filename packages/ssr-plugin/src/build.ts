@@ -1,5 +1,6 @@
 import { rmSync, watch } from 'node:fs';
 import { clientPlugin, findViews } from './client';
+import { log, logError } from './log';
 import { ssrPlugin } from './plugin';
 import { sassPlugin } from './sass';
 
@@ -8,11 +9,16 @@ export type AppBuildOptions = {
     serverEntry?: string;
     serverOut?: string;
     clientOut?: string;
+    host?: string;
     minify?: boolean;
 };
 
 type DevMessage = {
-    __hydris_dev__?: { watch?: string };
+    __hydris_dev__?: { watch?: string; ready?: boolean };
+};
+
+const clearScreen = (): void => {
+    if (process.stdout.isTTY) process.stdout.write('\x1b[2J\x1b[3J\x1b[H');
 };
 
 const SERVER_ENTRY = './src/index.ts';
@@ -62,22 +68,16 @@ export const build = async (opts: AppBuildOptions = {}): Promise<void> => {
     const client = await buildClient({ ...opts, minify: opts.minify ?? true });
     if (client === 'failed') process.exit(1);
     const serverOut = opts.serverOut ?? SERVER_OUT;
-    console.log(
+    log(
         client === 'built'
-            ? `Built to ${serverOut} + ${opts.clientOut ?? CLIENT_OUT}`
-            : `Built to ${serverOut} (no views)`,
+            ? `built ${serverOut} + ${opts.clientOut ?? CLIENT_OUT}`
+            : `built ${serverOut} (no views)`,
     );
 };
 
 export const dev = async (opts: AppBuildOptions = {}): Promise<void> => {
     const root = opts.root ?? process.cwd();
     const entry = opts.serverEntry ?? SERVER_ENTRY;
-
-    const rebuild = async (): Promise<void> => {
-        const result = await buildClient(opts);
-        if (result === 'built') console.log('[client] hydrate assets rebuilt');
-        else if (result === 'empty') console.log('[client] no views to build');
-    };
 
     let watching = false;
     let queued: Promise<void> = Promise.resolve();
@@ -89,21 +89,25 @@ export const dev = async (opts: AppBuildOptions = {}): Promise<void> => {
             clearTimeout(pending);
             pending = setTimeout(() => {
                 queued = queued
-                    .then(() => rebuild())
-                    .then(() => restartServer())
-                    .catch((err) =>
-                        console.error('[dev] rebuild failed:', err),
-                    );
+                    .then(() => reload(true))
+                    .catch((err) => logError('rebuild failed', err));
             }, 120);
         });
     };
 
     let server: Bun.Subprocess | undefined;
+    let onReady: (() => void) | undefined;
+    let ready: Promise<void> = Promise.resolve();
     const startServer = (): void => {
+        ready = new Promise<void>((resolve) => {
+            onReady = resolve;
+        });
         server = Bun.spawn(['bun', entry], {
+            env: opts.host ? { ...process.env, HOST: opts.host } : undefined,
             ipc(message: DevMessage) {
-                const watchDir = message.__hydris_dev__?.watch;
-                if (watchDir !== undefined) startWatch(watchDir);
+                const dev = message.__hydris_dev__;
+                if (dev?.watch !== undefined) startWatch(dev.watch);
+                if (dev?.ready) onReady?.();
             },
             stdio: ['inherit', 'inherit', 'inherit'],
         });
@@ -114,10 +118,18 @@ export const dev = async (opts: AppBuildOptions = {}): Promise<void> => {
             await server.exited;
         }
         startServer();
+        await ready;
     };
 
-    await rebuild();
-    startServer();
+    const reload = async (clear: boolean): Promise<void> => {
+        if (clear) clearScreen();
+        const result = await buildClient(opts);
+        await restartServer();
+        if (result === 'built') log('hydrate assets rebuilt');
+        else if (result === 'empty') log('no views to build');
+    };
+
+    await reload(false);
 
     const killServer = (): void => {
         server?.kill('SIGKILL');
