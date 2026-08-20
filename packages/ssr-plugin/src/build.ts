@@ -88,10 +88,12 @@ export const dev = async (opts: AppBuildOptions = {}): Promise<void> => {
         watch(`${root}/${dir}`, { recursive: true }, () => {
             clearTimeout(pending);
             pending = setTimeout(() => {
-                queued = queued.then(async () => {
-                    await rebuild();
-                    await restartServer();
-                });
+                queued = queued
+                    .then(() => rebuild())
+                    .then(() => restartServer())
+                    .catch((err) =>
+                        console.error('[dev] rebuild failed:', err),
+                    );
             }, 120);
         });
     };
@@ -117,10 +119,22 @@ export const dev = async (opts: AppBuildOptions = {}): Promise<void> => {
     await rebuild();
     startServer();
 
-    const stop = (): void => {
+    const killServer = (): void => {
         server?.kill('SIGKILL');
+    };
+    const stop = (): void => {
+        killServer();
         process.exit(0);
     };
+    const die = (err: unknown): void => {
+        console.error(err);
+        killServer();
+        process.exit(1);
+    };
+    process.on('exit', killServer);
     process.on('SIGINT', stop);
     process.on('SIGTERM', stop);
+    process.on('SIGHUP', stop);
+    process.on('uncaughtException', die);
+    process.on('unhandledRejection', die);
 };
