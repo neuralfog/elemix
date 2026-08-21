@@ -115,7 +115,9 @@ export class Component<
         if (useShadow && !this.shadowRoot) {
             this.attachShadow({ mode: 'open' });
         }
-        this.setAttribute('data-cloak', '');
+        if (!this.shadowRoot?.firstChild) {
+            this.setAttribute('data-cloak', '');
+        }
     }
 
     public template?(): Template;
@@ -131,6 +133,7 @@ export class Component<
         const hydrating = Boolean(this.$$__hydrate && root.firstChild);
 
         $__untrack(() => {
+            if (!hydrating) cloak();
             this.$$__adoptStyles();
             this.$$__attachFormInternals();
             this.$$__initProps();
@@ -196,7 +199,6 @@ export class Component<
     public $$__adoptStyles(
         input?: string | CSSStyleSheet | ReadonlyArray<string | CSSStyleSheet>,
     ): void {
-        cloak();
         resetDocument();
         const sheets =
             input !== undefined

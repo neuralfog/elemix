@@ -24,9 +24,18 @@ const FORMAT: Record<string, string> = {
     otf: 'opentype',
 };
 
-const cache = new Map<string, string>();
+const encoded = new Map<string, string>();
 
-const build = (font: FontFace): string => {
+const base64 = (src: string): string => {
+    let data = encoded.get(src);
+    if (data === undefined) {
+        data = readFileSync(src).toString('base64');
+        encoded.set(src, data);
+    }
+    return data;
+};
+
+export const fontFace = (font: FontFace): string => {
     const ext = font.src.split('.').pop()?.toLowerCase() ?? '';
     const mime = MIME[ext];
     const format = FORMAT[ext];
@@ -35,10 +44,9 @@ const build = (font: FontFace): string => {
             `hydris fontFace: unsupported font "${font.src}" (use woff2, woff, ttf or otf)`,
         );
     }
-    const data = readFileSync(font.src).toString('base64');
     const decl = [
         `font-family:'${font.family}'`,
-        `src:url(data:${mime};base64,${data}) format('${format}')`,
+        `src:url(data:${mime};base64,${base64(font.src)}) format('${format}')`,
         `font-weight:${font.weight ?? 'normal'}`,
         `font-style:${font.style ?? 'normal'}`,
         `font-display:${font.display ?? 'swap'}`,
@@ -46,16 +54,6 @@ const build = (font: FontFace): string => {
     if (font.stretch) decl.push(`font-stretch:${font.stretch}`);
     if (font.unicodeRange) decl.push(`unicode-range:${font.unicodeRange}`);
     return `@font-face{${decl.join(';')}}`;
-};
-
-export const fontFace = (font: FontFace): string => {
-    const key = JSON.stringify(font);
-    let css = cache.get(key);
-    if (css === undefined) {
-        css = build(font);
-        cache.set(key, css);
-    }
-    return css;
 };
 
 export const fontFaces = (fonts: FontFace[]): string =>
