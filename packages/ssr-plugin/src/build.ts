@@ -34,17 +34,17 @@ const report = (result: Bun.BuildOutput): boolean => {
 type ClientResult = 'built' | 'empty' | 'failed';
 
 const buildClient = async (opts: AppBuildOptions): Promise<ClientResult> => {
-    const entrypoints = await findViews(opts.root);
-    if (entrypoints.length === 0) return 'empty';
+    const views = await findViews(opts.root);
+    if (views.pages.length === 0) return 'empty';
     const built = report(
         await Bun.build({
-            entrypoints,
+            entrypoints: views.pages,
             outdir: opts.clientOut ?? CLIENT_OUT,
             target: 'browser',
             splitting: true,
             minify: opts.minify ?? false,
             naming: { entry: '[name].[ext]' },
-            plugins: [clientPlugin, sassPlugin],
+            plugins: [clientPlugin(views), sassPlugin],
         }),
     );
     return built ? 'built' : 'failed';

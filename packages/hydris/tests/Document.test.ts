@@ -55,12 +55,9 @@ describe('document cascade', () => {
         expect(html).not.toContain('Alt Frame');
     });
 
-    it('emits the document client script before the page script', async () => {
+    it('emits only the page client script (the document is bundled into it)', async () => {
         const html = await render(Reply.view(DocPage));
-        const docIdx = html.indexOf('/_elemix/DocFrame.js');
-        const pageIdx = html.indexOf('/_elemix/DocPage.js');
-        expect(docIdx).toBeGreaterThan(-1);
-        expect(pageIdx).toBeGreaterThan(-1);
-        expect(docIdx).toBeLessThan(pageIdx);
+        expect(html).toContain('/_elemix/DocPage.js');
+        expect(html).not.toContain('/_elemix/DocFrame.js');
     });
 });

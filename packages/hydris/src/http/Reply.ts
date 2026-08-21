@@ -135,12 +135,7 @@ export class Reply {
             return applyResetToSsr(resetCfg + page + clientScript(name) + dev);
         }
         const frame = renderView(document, data);
-        const inner =
-            resetCfg +
-            page +
-            clientScript(bundleName(document)) +
-            clientScript(name) +
-            dev;
+        const inner = resetCfg + page + clientScript(name) + dev;
         if (frame.includes(OUTLET)) {
             return applyResetToSsr(frame.replace(OUTLET, inner));
         }
