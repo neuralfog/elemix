@@ -65,9 +65,22 @@ const compileHydrate = async (source: string): Promise<string> => {
     return code;
 };
 
+const HYDRIS_CLIENT_SHIM =
+    'export const asset = (p) => p;\n' +
+    "export const fontFace = () => '';\n" +
+    "export const fontFaces = () => '';\n";
+
 export const clientPlugin: Bun.BunPlugin = {
     name: 'elemix-client',
     setup(build) {
+        build.onResolve({ filter: /^@neuralfog\/hydris$/ }, () => ({
+            path: '@neuralfog/hydris',
+            namespace: 'hydris-client-shim',
+        }));
+        build.onLoad({ filter: /.*/, namespace: 'hydris-client-shim' }, () => ({
+            contents: HYDRIS_CLIENT_SHIM,
+            loader: 'js',
+        }));
         build.onLoad({ filter: /\.ts$/ }, async (args) => {
             const source = await Bun.file(args.path).text();
             if (args.path.includes('/node_modules/') || !needsCompile(source)) {
