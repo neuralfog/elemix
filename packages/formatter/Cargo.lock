@@ -142,7 +142,7 @@ dependencies = [
 
 [[package]]
 name = "elemix-template-formatter"
-version = "0.9.4"
+version = "0.9.5"
 dependencies = [
  "clap",
  "glob",

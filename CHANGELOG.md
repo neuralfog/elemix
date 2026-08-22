@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.5] - 2026-08-22
+
+### Fixed
+
+- elemix/hydris bugfixing spree.
+
 ## [0.9.4] - 2026-08-17
 
 ### Added
