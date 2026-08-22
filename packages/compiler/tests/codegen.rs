@@ -190,15 +190,16 @@ fn multi_root_child_branch_returns_the_whole_fragment() {
 }
 
 #[test]
-fn multi_root_list_row_collapses_to_its_first_node() {
-    // `_list` tracks one node per key, so a multi-root row still collapses to its
-    // first node rather than returning a fragment the reconciler cannot key
+fn multi_root_list_row_returns_the_whole_fragment() {
+    // `_list` tracks a first..last range per key, so a multi-root row returns the
+    // whole cloned fragment rather than collapsing to its first node
     let out = gen(
         &["<div>", "</div>"],
         &["repeat(items, (e) => tpl`<a></a><b></b>`, (e) => e.id)"],
     );
     assert!(out.contains("$__list("));
-    assert!(out.contains("return _r2.firstChild!;"));
+    assert!(out.contains("return _r2;"));
+    assert!(!out.contains("_r2.firstChild!"));
 }
 
 #[test]

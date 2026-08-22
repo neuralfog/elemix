@@ -223,6 +223,42 @@ const removeRange = (
     }
 };
 
+const rowFirst = (node: Node): Node =>
+    node.nodeType === 11 ? (node.firstChild as Node) : node;
+
+const rowLast = (node: Node): Node =>
+    node.nodeType === 11 ? (node.lastChild as Node) : node;
+
+const removeRow = (first: Node, last: Node): void => {
+    if (first === last) {
+        (first as ChildNode).remove();
+        return;
+    }
+    const range = document.createRange();
+    range.setStartBefore(first);
+    range.setEndAfter(last);
+    range.deleteContents();
+};
+
+const moveRow = (
+    parent: Node,
+    first: Node,
+    last: Node,
+    ref: Node | null,
+): void => {
+    if (first === last) {
+        parent.insertBefore(first, ref);
+        return;
+    }
+    const end: ChildNode | null = (last as ChildNode).nextSibling;
+    let n: ChildNode | null = first as ChildNode;
+    while (n && n !== end) {
+        const next: ChildNode | null = n.nextSibling;
+        parent.insertBefore(n, ref);
+        n = next;
+    }
+};
+
 export const $__list = <T>(
     anchor: Node,
     items: Getter<readonly T[]>,
@@ -230,8 +266,19 @@ export const $__list = <T>(
     render: (item: T, index: number) => Node,
 ): void => {
     const nodes = new Map<unknown, Node>();
+    const tails = new Map<unknown, Node>();
     const rowScopes = new Map<unknown, Scope | null>();
     let order: unknown[] = [];
+    const place = (key: unknown, node: Node): void => {
+        nodes.set(key, rowFirst(node));
+        tails.set(key, rowLast(node));
+    };
+    const drop = (key: unknown): void => {
+        dispose(rowScopes.get(key) ?? null);
+        rowScopes.delete(key);
+        nodes.delete(key);
+        tails.delete(key);
+    };
     $__effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
@@ -251,7 +298,7 @@ export const $__list = <T>(
                 removeRange(
                     parent,
                     nodes.get(oldKeys[0]) as Node,
-                    nodes.get(oldKeys[oldLen - 1]) as Node,
+                    tails.get(oldKeys[oldLen - 1]) as Node,
                     anchor,
                 );
                 $__untrack(() => {
@@ -259,6 +306,7 @@ export const $__list = <T>(
                 });
                 rowScopes.clear();
                 nodes.clear();
+                tails.clear();
             }
             return;
         }
@@ -281,7 +329,7 @@ export const $__list = <T>(
                     for (let i = s; i <= ne; i++) {
                         const node = collect(() => render(list[i], i));
                         rowScopes.set(keys[i], takeScopes());
-                        nodes.set(keys[i], node);
+                        place(keys[i], node);
                         frag.appendChild(node);
                     }
                 });
@@ -293,10 +341,8 @@ export const $__list = <T>(
         if (s > ne) {
             for (let i = s; i <= oe; i++) {
                 const key = oldKeys[i];
-                (nodes.get(key) as ChildNode).remove();
-                dispose(rowScopes.get(key) ?? null);
-                rowScopes.delete(key);
-                nodes.delete(key);
+                removeRow(nodes.get(key) as Node, tails.get(key) as Node);
+                drop(key);
             }
             return;
         }
@@ -314,11 +360,13 @@ export const $__list = <T>(
                 }
             }
             if (trans) {
-                const a = nodes.get(oldKeys[ne]) as Node;
-                const b = nodes.get(oldKeys[s]) as Node;
-                const nextA = (a as ChildNode).nextSibling;
-                parent.insertBefore(a, b);
-                parent.insertBefore(b, nextA);
+                const aF = nodes.get(oldKeys[ne]) as Node;
+                const aL = tails.get(oldKeys[ne]) as Node;
+                const bF = nodes.get(oldKeys[s]) as Node;
+                const bL = tails.get(oldKeys[s]) as Node;
+                const nextA = (aL as ChildNode).nextSibling;
+                moveRow(parent, aF, aL, bF);
+                moveRow(parent, bF, bL, nextA);
                 return;
             }
         }
@@ -362,21 +410,16 @@ export const $__list = <T>(
             removeRange(
                 parent,
                 nodes.get(oldKeys[s]) as Node,
-                nodes.get(oldKeys[oe]) as Node,
+                tails.get(oldKeys[oe]) as Node,
                 ref,
             );
-            for (let q = 0; q < stale.length; q++) {
-                const key = stale[q];
-                dispose(rowScopes.get(key) ?? null);
-                rowScopes.delete(key);
-                nodes.delete(key);
-            }
+            for (let q = 0; q < stale.length; q++) drop(stale[q]);
             const frag = document.createDocumentFragment();
             $__untrack(() => {
                 for (let i = s; i <= ne; i++) {
                     const node = collect(() => render(list[i], i));
                     rowScopes.set(keys[i], takeScopes());
-                    nodes.set(keys[i], node);
+                    place(keys[i], node);
                     frag.appendChild(node);
                 }
             });
@@ -386,10 +429,8 @@ export const $__list = <T>(
 
         for (let q = 0; q < stale.length; q++) {
             const key = stale[q];
-            (nodes.get(key) as ChildNode).remove();
-            dispose(rowScopes.get(key) ?? null);
-            rowScopes.delete(key);
-            nodes.delete(key);
+            removeRow(nodes.get(key) as Node, tails.get(key) as Node);
+            drop(key);
         }
 
         let keep: Uint8Array | null = null;
@@ -420,10 +461,15 @@ export const $__list = <T>(
                 if (isFresh) {
                     const node = collect(() => render(list[ni], ni));
                     rowScopes.set(key, takeScopes());
-                    nodes.set(key, node);
+                    place(key, node);
                     parent.insertBefore(node, r);
                 } else {
-                    parent.insertBefore(nodes.get(key) as Node, r);
+                    moveRow(
+                        parent,
+                        nodes.get(key) as Node,
+                        tails.get(key) as Node,
+                        r,
+                    );
                 }
             }
         });

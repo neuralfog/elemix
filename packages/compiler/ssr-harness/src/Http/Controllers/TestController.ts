@@ -75,6 +75,7 @@ import { SlotApp } from '../../../../fixtures/SlotApp';
 import { SlotCard } from '../../../../fixtures/SlotCard';
 import { IconButtonApp } from '../../../../fixtures/IconButtonApp';
 import { TwinListApp } from '../../../../fixtures/TwinListApp';
+import { MultiRootRowApp } from '../../../../fixtures/MultiRootRowApp';
 import { WhenElseApp } from '../../../../fixtures/WhenElseApp';
 
 export class TestController {
@@ -116,6 +117,10 @@ export class TestController {
 
     twinListApp(): Reply {
         return Reply.view(TwinListApp);
+    }
+
+    multiRootRowApp(): Reply {
+        return Reply.view(MultiRootRowApp);
     }
 
     whenElseApp(): Reply {

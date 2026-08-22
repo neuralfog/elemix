@@ -409,8 +409,9 @@ pub fn codegen(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> S
 
 /// Generate one template body. `builder` switches the return between the whole
 /// fragment (a view) and an embedded builder. `multi_root` keeps the whole
-/// fragment for a builder used as a `_child` value (which can mount many roots);
-/// a `_list` row leaves it false so a multi-root row collapses to its first node.
+/// fragment for a builder that can mount many roots - both a `_child` value and a
+/// `_list` row (the reconciler tracks a first..last range per key, so a multi-root
+/// row returns its fragment rather than collapsing to its first node).
 fn gen_template(
     statics: &[String],
     holes: &[String],
@@ -660,7 +661,7 @@ fn lower_list(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) ->
     if let Some(r) = reactive {
         ctx.reactive.push(r);
     }
-    let render = substitute_html(&args[1], ctx, emitter, false);
+    let render = substitute_html(&args[1], ctx, emitter, true);
     if pushed {
         ctx.reactive.pop();
     }
@@ -783,7 +784,7 @@ fn lower_repeat_ternary(
     if let Some(r) = reactive {
         ctx.reactive.push(r);
     }
-    let render = substitute_html(&args[1], ctx, emitter, false);
+    let render = substitute_html(&args[1], ctx, emitter, true);
     if pushed {
         ctx.reactive.pop();
     }
