@@ -1,0 +1,107 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/IconButtonApp.ts
+---
+import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = {
+    label?: string;
+};
+
+const css = `
+    :host { display: inline-block; font-family: system-ui, sans-serif; }
+    button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font: inherit;
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: 1px solid #6366f1;
+        background: #eef2ff;
+        color: #1e293b;
+        cursor: pointer;
+    }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<button><!----><slot></slot></button>');
+const _t1 = $__template('<icon-button><span class="pip">★</span></icon-button><button class="set">set</button><button class="clear">clear</button>');
+
+export class IconButton extends Component<Props> {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _d1 = $__dynLens(_n0);
+const _v2 = $__splitRun(_n0.firstChild as Text, [0], _d1);
+$__effect(() => {
+$__setText(_v2[0], (this.props.label ?? ''));
+});
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _x2 = document.createTextNode('');
+_n1.replaceWith(_x2);
+$__effect(() => {
+$__setText(_x2, (this.props.label ?? ''));
+});
+return _r0;
+}
+}
+IconButton.$$__sheets = [..._s0];
+$__defineComponent('icon-button', IconButton);
+IconButton.prototype.$$__tag = 'icon-button';
+
+type State = {
+    label: string;
+};
+
+const appCss = `
+    :host { display: flex; gap: 12px; font-family: system-ui, sans-serif; }
+`;
+
+const _s1 = $__sheet(appCss);
+export class IconButtonApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _n1 = root.firstChild!.nextSibling!;
+const _n2 = root.firstChild!.nextSibling!.nextSibling!;
+$__event(_n1, 'click', this.setLabel);
+$__event(_n2, 'click', this.clearLabel);
+$__effect(() => {
+$__setProp(_n0, 'label', (this.state.label));
+});
+}
+
+
+    state = $__state<State>({ label: '' });
+
+    setLabel = (): void => {
+        this.state.label = 'Saved';
+    };
+
+    clearLabel = (): void => {
+        this.state.label = '';
+    };
+
+    $$__view(): DocumentFragment {
+const _r3 = $__clone(_t1);
+const _n4 = _r3.firstChild!;
+const _n5 = _r3.firstChild!.nextSibling!;
+const _n6 = _r3.firstChild!.nextSibling!.nextSibling!;
+$__event(_n5, 'click', this.setLabel);
+$__event(_n6, 'click', this.clearLabel);
+$__effect(() => {
+$__setProp(_n4, 'label', (this.state.label));
+});
+return _r3;
+}
+}
+IconButtonApp.$$__sheets = [..._s1];
+$__defineComponent('icon-button-app', IconButtonApp);
+IconButtonApp.prototype.$$__tag = 'icon-button-app';

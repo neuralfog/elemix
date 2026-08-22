@@ -14,6 +14,12 @@ export const $__splitRun = (
 ): Text[] => {
     const out: Text[] = [];
     let n = node;
+    if (n.nodeType !== 3) {
+        const anchor = n as unknown as Node;
+        const text = document.createTextNode('');
+        anchor.parentNode?.insertBefore(text, anchor);
+        n = text;
+    }
     for (let i = 0; i < dyns.length; i++) {
         const value = statics[i] > 0 ? n.splitText(statics[i]) : n;
         n = value.splitText(dyns[i]);

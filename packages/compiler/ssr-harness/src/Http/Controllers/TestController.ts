@@ -73,6 +73,7 @@ import { ResetProbeLight } from '../../../../fixtures/ResetProbeLight';
 import { ModelForwardApp } from '../../../../fixtures/ModelForwardApp';
 import { SlotApp } from '../../../../fixtures/SlotApp';
 import { SlotCard } from '../../../../fixtures/SlotCard';
+import { IconButtonApp } from '../../../../fixtures/IconButtonApp';
 import { WhenElseApp } from '../../../../fixtures/WhenElseApp';
 
 export class TestController {
@@ -106,6 +107,10 @@ export class TestController {
 
     slotCard(): Reply {
         return Reply.view(SlotCard);
+    }
+
+    iconButtonApp(): Reply {
+        return Reply.view(IconButtonApp);
     }
 
     whenElseApp(): Reply {
