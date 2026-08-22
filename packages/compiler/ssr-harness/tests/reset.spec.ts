@@ -35,7 +35,7 @@ test.describe('ResetProbe (App.resetStyles)', () => {
         // a #no-shadow component has no <style data-ssr>; the reset rides on a
         // document-level <style> so its light-DOM content is covered too
         expect(served).toContain(
-            '<style>.reset-probe{color:rgb(7,8,9)}</style>',
+            '<style data-reset>.reset-probe{color:rgb(7,8,9)}</style>',
         );
 
         await page.waitForFunction(

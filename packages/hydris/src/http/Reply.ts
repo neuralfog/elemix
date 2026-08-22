@@ -29,7 +29,7 @@ const assetQuery = (): string => {
 const clientScript = (name: string | undefined): string =>
     name === undefined
         ? ''
-        : `<script type="module" src="/_elemix/${name}.js${assetQuery()}"></script>`;
+        : `<script type="module" blocking="render" src="/_elemix/${name}.js${assetQuery()}"></script>`;
 
 const bundleName = (View: unknown): string | undefined => {
     const bundle = (View as { $$__module?: string }).$$__module;
@@ -123,19 +123,24 @@ export class Reply {
     }
 
     private renderPending(): string {
+        const SHIP_CLIENT = true;
         const { View, data, name } = this.pending as Pending;
         const dev = devReloadScript();
         const resetCfg = resetConfigScript() + resetDocumentStyle();
+        const client = SHIP_CLIENT ? clientScript(name) : '';
         const page = viewDataScript(data) + renderView(View, data);
         const document =
             this.documentOverride ??
             (View as { $$__document?: ViewClass }).$$__document ??
             getDefaultDocument();
         if (document === undefined) {
-            return applyResetToSsr(resetCfg + page + clientScript(name) + dev);
+            return applyResetToSsr(client + resetCfg + page + dev);
         }
-        const frame = renderView(document, data);
-        const inner = resetCfg + page + clientScript(name) + dev;
+        let frame = renderView(document, data);
+        if (client && frame.includes('</head>')) {
+            frame = frame.replace('</head>', `${client}</head>`);
+        }
+        const inner = resetCfg + page + dev;
         if (frame.includes(OUTLET)) {
             return applyResetToSsr(frame.replace(OUTLET, inner));
         }

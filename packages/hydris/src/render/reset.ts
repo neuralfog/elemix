@@ -10,7 +10,7 @@ export const applyResetToSsr = (html: string): string =>
         : html.replaceAll('<style data-ssr>', `<style data-ssr>${resetStyles}`);
 
 export const resetDocumentStyle = (): string =>
-    resetStyles === undefined ? '' : `<style>${resetStyles}</style>`;
+    resetStyles === undefined ? '' : `<style data-reset>${resetStyles}</style>`;
 
 export const resetConfigScript = (): string =>
     resetStyles === undefined

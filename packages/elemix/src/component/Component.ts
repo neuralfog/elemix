@@ -21,16 +21,22 @@ const DEFAULT_CLOAK = '[data-cloak],:not(:defined){visibility:hidden}';
 
 let cloakSheet: CSSStyleSheet | undefined;
 
+const isServerRendered = (): boolean =>
+    typeof document !== 'undefined' &&
+    document.querySelector('style[data-reset]') !== null;
+
 const cloak = (): CSSStyleSheet => {
     if (!cloakSheet) {
         cloakSheet = new CSSStyleSheet();
         cloakSheet.replaceSync(
             window.__elemix__?.config?.cloak ?? DEFAULT_CLOAK,
         );
-        document.adoptedStyleSheets = [
-            ...(document.adoptedStyleSheets ?? []),
-            cloakSheet,
-        ];
+        if (!isServerRendered()) {
+            document.adoptedStyleSheets = [
+                ...(document.adoptedStyleSheets ?? []),
+                cloakSheet,
+            ];
+        }
     }
     return cloakSheet;
 };
@@ -53,6 +59,10 @@ let resetDocumentDone = false;
 
 const resetDocument = (): void => {
     if (resetDocumentDone) return;
+    if (isServerRendered()) {
+        resetDocumentDone = true;
+        return;
+    }
     const sheet = reset();
     if (!sheet) return;
     document.adoptedStyleSheets = [
