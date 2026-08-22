@@ -57,6 +57,7 @@ pub fn add_hydrate_runtime_import(code: &str) -> String {
         "$__dynLens",
         "$__splitRun",
         "$__bounds",
+        "$__span",
         "$__reanchor",
         "$__seat",
         "$__resume",

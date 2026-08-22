@@ -74,6 +74,7 @@ import { ModelForwardApp } from '../../../../fixtures/ModelForwardApp';
 import { SlotApp } from '../../../../fixtures/SlotApp';
 import { SlotCard } from '../../../../fixtures/SlotCard';
 import { IconButtonApp } from '../../../../fixtures/IconButtonApp';
+import { TwinListApp } from '../../../../fixtures/TwinListApp';
 import { WhenElseApp } from '../../../../fixtures/WhenElseApp';
 
 export class TestController {
@@ -111,6 +112,10 @@ export class TestController {
 
     iconButtonApp(): Reply {
         return Reply.view(IconButtonApp);
+    }
+
+    twinListApp(): Reply {
+        return Reply.view(TwinListApp);
     }
 
     whenElseApp(): Reply {

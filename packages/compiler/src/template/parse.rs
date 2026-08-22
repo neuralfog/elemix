@@ -738,6 +738,23 @@ fn emit_child(tag: &str, props: &str, slot: &[Chunk], attrs: &str, names: &[Stri
 /// on (`@` → event, `~` → model/onmodel, `:` → prop and `:ref` → ref); every one
 /// of those is client-only and has no server-rendered form.
 fn serialize_ssr(children: &[Child], r: &mut Rope, counter: &mut usize, hydratable: bool) {
+    // A parent with two-or-more LIST regions cannot be hydrated by static child
+    // indices (a list's item count is unknown at compile time), so emit a `<!---->`
+    // delimiter after each region for the runtime `$__span` to locate it. Gated to
+    // all-list parents: single-root conditional/child regions are one node and keep
+    // the proven static-index `bounds` path (and its forward node-path grabs).
+    let regions: Vec<&String> = children
+        .iter()
+        .filter_map(|c| match c {
+            Child::Anchor(e, _) if !crate::grammar::is_text_content(e) => Some(e),
+            _ => None,
+        })
+        .collect();
+    let multi_region = hydratable
+        && regions.len() >= 2
+        && regions
+            .iter()
+            .all(|e| e.trim_start().starts_with("repeat("));
     for child in children {
         match child {
             Child::Text(t) => r.static_str(&esc_tpl(t)),
@@ -754,6 +771,12 @@ fn serialize_ssr(children: &[Child], r: &mut Rope, counter: &mut usize, hydratab
                     // The rewrite renders any nested `tpl` and reaches components
                     // through directives via `$__ssrChild`.
                     r.content(crate::ssr_expr::rewrite_content_expr(expr));
+                    if multi_region {
+                        // A distinctive delimiter: a region's own nested repeats
+                        // emit plain `<!---->` anchors as siblings here, so `$__span`
+                        // must not confuse them with the region boundary.
+                        r.static_str("<!--$-->");
+                    }
                 }
             }
             // A hyphenated tag is a custom element - a nested elemix component.

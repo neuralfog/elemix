@@ -108,6 +108,10 @@ impl Emitter for TsEmitter {
         format!("const {var} = $__bounds({parent}, {before}, {after});")
     }
 
+    fn span(&self, var: &str, parent: &str, lead: usize, ordinal: usize) -> String {
+        format!("const {var} = $__span({parent}, {lead}, {ordinal});")
+    }
+
     fn reanchor(&self, var: &str, parent: &str, bounds: &str) -> String {
         format!("const {var} = $__reanchor({parent}, {bounds}[0], {bounds}[1]);")
     }

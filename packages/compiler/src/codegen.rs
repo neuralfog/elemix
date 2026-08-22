@@ -143,6 +143,34 @@ pub fn generate_hydrate(statics: &[String], holes: &[String], emitter: &dyn Emit
 /// reactive changes. Everything else keeps the fresh-rebuild takeover (`$__reanchor`
 /// plus the CSR builder), correct for plain content and wrapped in `$__fresh` so
 /// its writes land.
+/// For each structural hole, decide whether its parent holds MULTIPLE regions and,
+/// if so, its `(ordinal, lead)` among the parent's `<!---->` delimiters: `ordinal`
+/// is its position among the parent's regions, `lead` the static nodes between the
+/// previous delimiter (or parent start) and this region. Single-region parents get
+/// `(false, 0, 0)` and keep the static-index `bounds` path.
+fn region_meta(holes: &[StructHole]) -> Vec<(bool, usize, usize)> {
+    let mut groups: Vec<(NodePath, Vec<usize>)> = Vec::new();
+    for (i, h) in holes.iter().enumerate() {
+        match groups.iter_mut().find(|(p, _)| *p == h.parent) {
+            Some(g) => g.1.push(i),
+            None => groups.push((h.parent.clone(), vec![i])),
+        }
+    }
+    let mut meta = vec![(false, 0usize, 0usize); holes.len()];
+    for (_, idxs) in &groups {
+        let multi = idxs.len() >= 2 && idxs.iter().all(|&i| holes[i].list);
+        for (ord, &i) in idxs.iter().enumerate() {
+            let lead = if ord == 0 {
+                holes[i].before
+            } else {
+                holes[i].before - holes[idxs[ord - 1]].before - 1
+            };
+            meta[i] = (multi, ord, lead);
+        }
+    }
+    meta
+}
+
 fn hydrate_bind(
     statics: &[String],
     holes: &[String],
@@ -254,8 +282,10 @@ fn hydrate_bind(
 
     // Phase 1 (pristine reads): grab every structural parent and capture its region
     // as node-ref bounds, before any seat/reanchor mutates sibling positions.
+    let all_holes = structural_holes(statics, holes);
+    let region_meta = region_meta(&all_holes);
     let mut prepared: Vec<(String, String, StructHole, bool)> = Vec::new();
-    for sh in structural_holes(statics, holes) {
+    for (i, sh) in all_holes.into_iter().enumerate() {
         let parent = grab(
             ctx,
             emitter,
@@ -265,7 +295,12 @@ fn hydrate_bind(
             &mut lines,
         );
         let bounds = ctx.var("b");
-        lines.push(emitter.bounds(&bounds, &parent, sh.before, sh.after));
+        let (multi, ordinal, lead) = region_meta[i];
+        if multi {
+            lines.push(emitter.span(&bounds, &parent, lead, ordinal));
+        } else {
+            lines.push(emitter.bounds(&bounds, &parent, sh.before, sh.after));
+        }
         let resumable = !sh.list
             && !sh.expr.contains("repeat(")
             && branch_has_component(&sh.expr)

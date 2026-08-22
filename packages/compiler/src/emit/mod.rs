@@ -64,6 +64,13 @@ pub trait Emitter {
     /// emitted up front, before any `reanchor`.
     fn bounds(&self, var: &str, parent: &str, before: usize, after: usize) -> String;
 
+    /// Like `bounds`, but for a parent with MULTIPLE structural regions, where a
+    /// dynamic sibling's node count is unknown at compile time so static indices
+    /// cannot delimit a region. Locates the region by the `<!---->` delimiter SSR
+    /// emits after it: `ordinal` is the region's index among the parent's delimiters
+    /// and `lead` the static nodes between the previous delimiter and this region.
+    fn span(&self, var: &str, parent: &str, lead: usize, ordinal: usize) -> String;
+
     /// Hydration takeover: insert a fresh comment anchor before the region's first
     /// node (captured in `bounds`), remove that region's `count` server nodes, and
     /// bind the anchor to `var` - so the normal `child`/`list` builder can drive the
