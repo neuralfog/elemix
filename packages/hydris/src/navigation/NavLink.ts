@@ -40,10 +40,5 @@ export class NavLink extends Component {
         this.addEventListener('click', this.onClick);
     }
 
-    // #dispose
-    unbind(): void {
-        this.removeEventListener('click', this.onClick);
-    }
-
     override template = (): Template => tpl`<slot></slot>`;
 }
