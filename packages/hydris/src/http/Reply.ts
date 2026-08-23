@@ -29,7 +29,7 @@ const assetQuery = (): string => {
 const clientScript = (name: string | undefined): string =>
     name === undefined
         ? ''
-        : `<script type="module" blocking="render" src="/_elemix/${name}.js${assetQuery()}"></script>`;
+        : `<script type="module" defer src="/_elemix/${name}.js${assetQuery()}"></script>`;
 
 const bundleName = (View: unknown): string | undefined => {
     const bundle = (View as { $$__module?: string }).$$__module;
@@ -134,20 +134,24 @@ export class Reply {
             (View as { $$__document?: ViewClass }).$$__document ??
             getDefaultDocument();
         if (document === undefined) {
-            return applyResetToSsr(client + resetCfg + page + dev);
+            return applyResetToSsr(resetCfg + page + dev + client);
         }
-        let frame = renderView(document, data);
-        if (client && frame.includes('</head>')) {
-            frame = frame.replace('</head>', `${client}</head>`);
-        }
+        const frame = renderView(document, data);
         const inner = resetCfg + page + dev;
+        let html: string;
         if (frame.includes(OUTLET)) {
-            return applyResetToSsr(frame.replace(OUTLET, inner));
+            html = frame.replace(OUTLET, inner);
+        } else if (frame.includes('</body>')) {
+            html = frame.replace('</body>', `${inner}</body>`);
+        } else {
+            html = frame + inner;
         }
-        if (frame.includes('</body>')) {
-            return applyResetToSsr(frame.replace('</body>', `${inner}</body>`));
+        if (client) {
+            html = html.includes('</body>')
+                ? html.replace('</body>', `${client}</body>`)
+                : html + client;
         }
-        return applyResetToSsr(frame + inner);
+        return applyResetToSsr(html);
     }
 }
 

@@ -69,10 +69,7 @@ const compileHydrate = async (source: string): Promise<string> => {
     return code;
 };
 
-const HYDRIS_CLIENT_SHIM =
-    'export const asset = (p) => p;\n' +
-    "export const fontFace = () => '';\n" +
-    "export const fontFaces = () => '';\n";
+const HYDRIS_CLIENT_SHIM = 'export const asset = (p) => p;\n';
 
 export const clientPlugin = (views: Views): Bun.BunPlugin => {
     const pages = new Set(views.pages);

@@ -79,6 +79,8 @@ export const dev = async (opts: AppBuildOptions = {}): Promise<void> => {
     const root = opts.root ?? process.cwd();
     const entry = opts.serverEntry ?? SERVER_ENTRY;
 
+    rmSync(opts.clientOut ?? CLIENT_OUT, { recursive: true, force: true });
+
     let watching = false;
     let queued: Promise<void> = Promise.resolve();
     let pending: ReturnType<typeof setTimeout> | undefined;
