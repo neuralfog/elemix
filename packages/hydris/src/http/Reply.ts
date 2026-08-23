@@ -40,6 +40,26 @@ const bundleName = (View: unknown): string | undefined => {
 
 const OUTLET = '<slot></slot>';
 
+const outletIndex = (html: string): number => {
+    let depth = 0;
+    let i = 0;
+    while (i < html.length) {
+        if (depth === 0 && html.startsWith(OUTLET, i)) return i;
+        if (html.startsWith('<template', i)) {
+            depth++;
+            i += 9;
+            continue;
+        }
+        if (html.startsWith('</template>', i)) {
+            if (depth > 0) depth--;
+            i += 11;
+            continue;
+        }
+        i++;
+    }
+    return -1;
+};
+
 type Pending = {
     View: ViewClass;
     data: unknown;
@@ -62,6 +82,7 @@ export class Reply {
     static html(body: string): Reply {
         return new Reply(body, 200, {
             'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'no-cache',
         });
     }
 
@@ -69,7 +90,10 @@ export class Reply {
         return new Reply(
             null,
             200,
-            { 'content-type': 'text/html; charset=utf-8' },
+            {
+                'content-type': 'text/html; charset=utf-8',
+                'cache-control': 'no-cache',
+            },
             { View, data, name: bundleName(View) },
         );
     }
@@ -137,14 +161,23 @@ export class Reply {
             return applyResetToSsr(resetCfg + page + dev + client);
         }
         const frame = renderView(document, data);
-        const inner = resetCfg + page + dev;
+        const inner = resetCfg + page;
         let html: string;
-        if (frame.includes(OUTLET)) {
-            html = frame.replace(OUTLET, inner);
+        const outlet = outletIndex(frame);
+        if (outlet >= 0) {
+            html =
+                frame.slice(0, outlet) +
+                inner +
+                frame.slice(outlet + OUTLET.length);
         } else if (frame.includes('</body>')) {
             html = frame.replace('</body>', `${inner}</body>`);
         } else {
             html = frame + inner;
+        }
+        if (dev) {
+            html = html.includes('</head>')
+                ? html.replace('</head>', `${dev}</head>`)
+                : dev + html;
         }
         if (client) {
             html = html.includes('</body>')

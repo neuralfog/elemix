@@ -77,10 +77,20 @@ import { IconButtonApp } from '../../../../fixtures/IconButtonApp';
 import { TwinListApp } from '../../../../fixtures/TwinListApp';
 import { MultiRootRowApp } from '../../../../fixtures/MultiRootRowApp';
 import { WhenElseApp } from '../../../../fixtures/WhenElseApp';
+import { NavHomeApp } from '../../nav/NavHomeApp';
+import { NavAboutApp } from '../../nav/NavAboutApp';
 
 export class TestController {
     counterApp(): Reply {
         return Reply.view(CounterApp);
+    }
+
+    navHomeApp(): Reply {
+        return Reply.view(NavHomeApp, { title: 'Home', page: 'home' });
+    }
+
+    navAboutApp(): Reply {
+        return Reply.view(NavAboutApp, { title: 'About', page: 'about' });
     }
 
     documentPageApp(): Reply {

@@ -47,6 +47,10 @@
         "./view": {
             "types": "./dist/render/index.d.ts",
             "import": "./dist/render/index.js"
+        },
+        "./navigation": {
+            "types": "./src/navigation/index.ts",
+            "import": "./src/navigation/index.ts"
         }
     },
     "scripts": {
