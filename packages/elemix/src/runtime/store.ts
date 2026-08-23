@@ -1,4 +1,4 @@
-import { $__effect } from './reactive';
+import { $__rootEffect } from './reactive';
 import { $__scopedStore } from './ssr';
 import { $__reactive, $__toRaw } from './state';
 
@@ -50,7 +50,7 @@ export const $__store = <T extends object>(name: string, factory: () => T): T =>
         if (typeof window !== 'undefined') {
             registry.set(name, store as object);
             let primed = false;
-            $__effect(() => {
+            $__rootEffect(() => {
                 const snapshot = JSON.stringify(store);
                 if (primed) persist?.(name, snapshot);
                 else primed = true;

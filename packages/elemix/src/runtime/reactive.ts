@@ -175,6 +175,16 @@ export const $__effect = (fn: () => void): void => {
     runScope(scope);
 };
 
+export const $__rootEffect = (fn: () => void): void => {
+    const prev = collecting;
+    collecting = false;
+    try {
+        $__effect(fn);
+    } finally {
+        collecting = prev;
+    }
+};
+
 export const $__bind = (fn: () => void, sources: Dep[]): void => {
     $__effect(() => {
         for (let i = 0; i < sources.length; i++) $__track(sources[i]);

@@ -398,6 +398,24 @@ test.describe('cookie store persistence', () => {
             .toContain('"count":2');
     });
 
+    test('write-through survives soft-nav away from the store creator', async ({
+        page,
+    }) => {
+        await page.goto('/nav-store-a');
+        await ready(page);
+        test.skip(!(await softNavSupported(page)), 'setHTMLUnsafe unsupported');
+
+        await page.click('#to-store-b');
+        await expect(page.locator('#count-b')).toBeVisible();
+        await page.click('#to-store-a');
+        await expect(page.locator('#inc')).toBeVisible();
+
+        await page.click('#inc');
+        await expect
+            .poll(() => readPrefsCookie(page), { timeout: 5000 })
+            .toContain('"count":1');
+    });
+
     test('reload restores the store from its cookie via SSR', async ({
         page,
     }) => {
