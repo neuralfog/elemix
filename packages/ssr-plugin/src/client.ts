@@ -54,7 +54,8 @@ export const findViews = async (root = process.cwd()): Promise<Views> => {
 const needsCompile = (source: string): boolean =>
     source.includes('#component') ||
     source.includes('tpl`') ||
-    source.includes('#state');
+    source.includes('#state') ||
+    source.includes('#store');
 
 const compileHydrate = async (source: string): Promise<string> => {
     const args = ['--stdin', '--hydrate'];

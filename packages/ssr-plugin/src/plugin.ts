@@ -7,7 +7,8 @@ const COMPILER = resolveCompiler();
 const needsCompile = (source: string): boolean =>
     source.includes('#component') ||
     source.includes('tpl`') ||
-    source.includes('#state');
+    source.includes('#state') ||
+    source.includes('#store');
 
 const compileSsr = async (source: string): Promise<string> => {
     const args = ['--stdin', '--ssr'];

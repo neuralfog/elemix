@@ -79,6 +79,8 @@ import { MultiRootRowApp } from '../../../../fixtures/MultiRootRowApp';
 import { WhenElseApp } from '../../../../fixtures/WhenElseApp';
 import { NavHomeApp } from '../../nav/NavHomeApp';
 import { NavAboutApp } from '../../nav/NavAboutApp';
+import { NavStoreAApp } from '../../nav/NavStoreAApp';
+import { NavStoreBApp } from '../../nav/NavStoreBApp';
 
 export class TestController {
     counterApp(): Reply {
@@ -91,6 +93,14 @@ export class TestController {
 
     navAboutApp(): Reply {
         return Reply.view(NavAboutApp, { title: 'About', page: 'about' });
+    }
+
+    navStoreA(): Reply {
+        return Reply.view(NavStoreAApp);
+    }
+
+    navStoreB(): Reply {
+        return Reply.view(NavStoreBApp);
     }
 
     documentPageApp(): Reply {

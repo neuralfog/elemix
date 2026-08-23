@@ -3,7 +3,7 @@
 //! extension point, tag derivation, and the full lowering.
 
 use elemix_compiler::pragma::locate::{locate, LocateError};
-use elemix_compiler::pragma::lower::{expand, ExpandError};
+use elemix_compiler::pragma::lower::{expand, expand_mode, ExpandError};
 use elemix_compiler::pragma::parse::{is_pragma, split_directives};
 use elemix_compiler::pragma::{kebab, resolve, ComponentMeta, Directive, PragmaError};
 
@@ -510,6 +510,60 @@ fn a_non_state_directive_on_a_const_errors() {
         expand("// #styles\nconst css = `x`;"),
         Err(ExpandError::Locate(LocateError::OnConst(
             "styles".to_string()
+        )))
+    );
+}
+
+// --- #store ------------------------------------------------------------------
+
+#[test]
+fn store_on_a_module_const_lowers_to_a_named_store_with_a_thunk() {
+    let src = "// #store user-prefs\nexport const prefs = { theme: 'system' };";
+    let out = expand(src).unwrap();
+    assert!(
+        out.contains("export const prefs = $__store('user-prefs', () => ({ theme: 'system' }));")
+    );
+    assert!(!out.contains("// #store"));
+}
+
+#[test]
+fn store_carries_the_type_annotation_as_a_generic() {
+    let src = "// #store user-prefs\nexport const prefs: Prefs = { theme: 'system' };";
+    let out = expand(src).unwrap();
+    assert!(out.contains(
+        "export const prefs = $__store<Prefs>('user-prefs', () => ({ theme: 'system' }));"
+    ));
+    assert!(!out.contains("prefs: Prefs"));
+}
+
+#[test]
+fn store_is_imported_from_runtime_in_the_csr_build() {
+    let src = "// #store user-prefs\nexport const prefs = { theme: 'system' };";
+    let out = expand(src).unwrap();
+    assert!(out.contains("import { $__store } from '@neuralfog/elemix/runtime';"));
+}
+
+#[test]
+fn store_is_imported_from_ssr_runtime_in_the_ssr_build() {
+    // `$__store` is isomorphic (it scopes per-request itself), so the repl is the
+    // same in SSR — only the import source differs (no `$__scopedStore` rewrite).
+    let src = "// #store user-prefs\nexport const prefs = { theme: 'system' };";
+    let staged = expand_mode(src, true, false).unwrap();
+    assert!(staged
+        .contains("export const prefs = $__store('user-prefs', () => ({ theme: 'system' }));"));
+    assert!(!staged.contains("$__scopedStore"));
+    assert!(!staged.contains("from '@neuralfog/elemix/runtime'"));
+    // The full SSR pipeline splices the import from `/ssr-runtime`.
+    let (code, _) = elemix_compiler::compile_ssr(src, false);
+    assert!(code.contains("import { $__store } from '@neuralfog/elemix/ssr-runtime';"));
+}
+
+#[test]
+fn store_without_a_name_errors() {
+    assert_eq!(
+        expand("// #store\nconst prefs = { theme: 'system' };"),
+        Err(ExpandError::Locate(LocateError::MissingName(
+            "store".to_string()
         )))
     );
 }

@@ -29,7 +29,8 @@
         "rules": {
             "suspicious": {
                 "noExplicitAny": "off",
-                "noImplicitAnyLet": "off"
+                "noImplicitAnyLet": "off",
+                "noDocumentCookie": "off"
             },
             "correctness": {
                 "noUnusedImports": "error"

@@ -32,6 +32,7 @@ pub fn add_ssr_runtime_import(code: &str) -> String {
         "$__ssrChoose",
         "$__ssrMatch",
         "$__scopedStore",
+        "$__store",
     ]
     .into_iter()
     .filter(|id| code.contains(id))

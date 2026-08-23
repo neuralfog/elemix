@@ -103,6 +103,7 @@ pub fn is_known_directive(name: &str) -> bool {
             | "document"
             | "styles"
             | "state"
+            | "store"
             | "effect"
             | "before-mount"
             | "mount"

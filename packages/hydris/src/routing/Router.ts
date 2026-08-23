@@ -166,6 +166,7 @@ export class Router {
                         this.container,
                         req,
                     ),
+                    req,
                 );
             } catch (error) {
                 return this.failure(error, req, matched.route, this.container);
@@ -200,6 +201,7 @@ export class Router {
                 async () =>
                     toResponse(
                         await invokeHandler(matchedDef.handler, scope, req),
+                        req,
                     ),
                 onError,
             );
@@ -246,7 +248,10 @@ export class Router {
         const renderer = this.resolveRenderer(req, def);
         let res: Response;
         try {
-            res = toResponse(await this.render(renderer, error, req, scope));
+            res = toResponse(
+                await this.render(renderer, error, req, scope),
+                req,
+            );
         } catch {
             res = new Response('Internal Server Error', { status: 500 });
         }

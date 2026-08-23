@@ -22,7 +22,10 @@ impl std::fmt::Display for ExpandError {
                 write!(f, "compiler hint has no declaration on the next line")
             }
             ExpandError::Locate(LocateError::OnConst(n)) => {
-                write!(f, "`#{n}` can't tag a const; only #state may")
+                write!(f, "`#{n}` can't tag a const; only #state/#store may")
+            }
+            ExpandError::Locate(LocateError::MissingName(n)) => {
+                write!(f, "`#{n}` needs a name, e.g. `#store user-prefs`")
             }
             ExpandError::Locate(LocateError::OnField(n)) => {
                 write!(f, "`#{n}` can't tag a field; only #styles/#state may")
@@ -132,14 +135,22 @@ pub fn expand_mode(source: &str, ssr: bool, minify: bool) -> Result<String, Expa
     // the SSR runtime (added by `add_ssr_runtime_import`), so it is never imported
     // here; component `#state` stays `$__state` from /runtime.
     for st in &located.states {
-        let repl = if ssr && st.module {
+        // `#store` already lowers to `$__store(…)` (per-request-scoped internally),
+        // so it needs no SSR `$__scopedStore` rewrite — only module `#state` does.
+        let repl = if ssr && st.module && st.store_name.is_none() {
             scoped_store(&st.repl)
         } else {
             st.repl.clone()
         };
         edits.push((st.start, st.end, repl));
     }
-    let needs_state = located.states.iter().any(|st| !(ssr && st.module));
+    let needs_state = located
+        .states
+        .iter()
+        .any(|st| st.store_name.is_none() && !(ssr && st.module));
+    // `#store` pulls `$__store` from `/runtime` in the CSR build; the SSR build
+    // gets it from `/ssr-runtime` via `add_ssr_runtime_import` (scans the output).
+    let needs_store = !ssr && located.states.iter().any(|st| st.store_name.is_some());
     // Accessor-form #state (bare primitives) also needs the reactive primitives
     // `dep`/`track`/`trigger` to back the generated get/set pair.
     let needs_reactive = located.states.iter().any(|st| st.accessor);
@@ -361,6 +372,9 @@ pub fn expand_mode(source: &str, ssr: bool, minify: bool) -> Result<String, Expa
     }
     if needs_state {
         names.push("$__state");
+    }
+    if needs_store {
+        names.push("$__store");
     }
     if needs_reactive {
         names.push("$__dep");

@@ -3,6 +3,10 @@
     "version": "0.9.5",
     "private": true,
     "type": "module",
+    "bin": {
+        "ea": "bin/elemix-analyzer.mjs",
+        "elemix-analyzer": "bin/elemix-analyzer.mjs"
+    },
     "scripts": {
         "build": "ELEMIX_VERSION=$npm_package_version cargo build --release",
         "lint": "cargo clippy --all-targets -- -D warnings && cargo fmt --check",

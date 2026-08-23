@@ -281,3 +281,151 @@ test.describe('head merging (advanced)', () => {
         expect(await snapshot()).toBe(home);
     });
 });
+
+const prefsCookie = (value: object): string =>
+    `store.prefs=${encodeURIComponent(JSON.stringify(value))}`;
+
+test.describe('client store SSR round-trip', () => {
+    test('server seeds the store from the store cookie', async ({
+        request,
+    }) => {
+        const res = await request.get('/nav-store-b', {
+            headers: { cookie: prefsCookie({ count: 42 }) },
+        });
+        const html = await res.text();
+        expect(html).toContain('data-count="42"');
+        expect(html).toContain('window.__hydris_stores={"prefs":{"count":42}}');
+    });
+
+    test('no cookie renders the store default', async ({ request }) => {
+        const res = await request.get('/nav-store-b');
+        const html = await res.text();
+        expect(html).toContain('data-count="0"');
+    });
+
+    test('a malformed store cookie falls back to the default', async ({
+        request,
+    }) => {
+        const res = await request.get('/nav-store-b', {
+            headers: { cookie: 'store.prefs=not%20json' },
+        });
+        const html = await res.text();
+        expect(html).toContain('data-count="0"');
+    });
+
+    test('client mutation reaches SSR on soft-nav', async ({ page }) => {
+        await page.goto('/nav-store-a');
+        await ready(page);
+        test.skip(!(await softNavSupported(page)), 'setHTMLUnsafe unsupported');
+
+        await page.click('#inc');
+        await page.click('#inc');
+        await page.click('#inc');
+        await expect(page.locator('#count-a')).toHaveText('3');
+
+        await page.click('#to-store-b');
+        await expect(page.locator('#count-b')).toHaveText('3');
+
+        const seeded = await page.evaluate(
+            () =>
+                (
+                    window as unknown as {
+                        __hydris_stores?: { prefs?: { count?: number } };
+                    }
+                ).__hydris_stores?.prefs?.count,
+        );
+        expect(seeded).toBe(3);
+    });
+
+    test('concurrent requests never bleed the store seed across each other', async ({
+        request,
+    }) => {
+        const results = await Promise.all(
+            Array.from({ length: 40 }, (_, i) => {
+                const seeded = i % 2 === 0;
+                const expected = seeded ? String(i + 1) : '0';
+                return request
+                    .get('/nav-store-b', {
+                        headers: seeded
+                            ? { cookie: prefsCookie({ count: i + 1 }) }
+                            : {},
+                    })
+                    .then((r) => r.text())
+                    .then((html) => ({
+                        expected,
+                        counts: [...html.matchAll(/data-count="(\d+)"/g)].map(
+                            (m) => m[1],
+                        ),
+                    }));
+            }),
+        );
+        for (const { expected, counts } of results) {
+            expect(counts).toEqual([expected]);
+        }
+    });
+});
+
+const readPrefsCookie = (
+    page: import('@playwright/test').Page,
+): Promise<string | null> =>
+    page.evaluate(() => {
+        const m = document.cookie.match(/(?:^|;\s*)store\.prefs=([^;]*)/);
+        return m ? decodeURIComponent(m[1]) : null;
+    });
+
+test.describe('cookie store persistence', () => {
+    test('the seed is not re-written; only mutations write the cookie', async ({
+        page,
+    }) => {
+        await page.goto('/nav-store-a');
+        await ready(page);
+        await page.waitForTimeout(250);
+        expect(await readPrefsCookie(page)).toBeNull();
+
+        await page.click('#inc');
+        await expect
+            .poll(() => readPrefsCookie(page), { timeout: 5000 })
+            .toContain('"count":1');
+    });
+
+    test('a store mutation writes the cookie', async ({ page }) => {
+        await page.goto('/nav-store-a');
+        await ready(page);
+        await page.click('#inc');
+        await page.click('#inc');
+        await expect
+            .poll(() => readPrefsCookie(page), { timeout: 5000 })
+            .toContain('"count":2');
+    });
+
+    test('reload restores the store from its cookie via SSR', async ({
+        page,
+    }) => {
+        await page.goto('/nav-store-a');
+        await ready(page);
+
+        await page.click('#inc');
+        await page.click('#inc');
+        await page.click('#inc');
+        await expect(page.locator('#count-a')).toHaveText('3');
+        await expect
+            .poll(() => readPrefsCookie(page), { timeout: 5000 })
+            .toContain('"count":3');
+
+        const res = await page.reload();
+        const html = (await res?.text()) ?? '';
+        expect(html).toContain('data-count="3"');
+        await expect(page.locator('#count-a')).toHaveText('3');
+    });
+
+    test('writing past the 4KB cookie limit throws', async ({ page }) => {
+        await page.goto('/nav-store-a');
+        await ready(page);
+        const errors: string[] = [];
+        page.on('pageerror', (e) => errors.push(e.message));
+        await page.click('#bloat');
+        await expect
+            .poll(() => errors.join('\n'), { timeout: 5000 })
+            .toContain('cookie limit');
+    });
+});

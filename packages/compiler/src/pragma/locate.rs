@@ -61,6 +61,11 @@ pub struct StateEdit {
     /// reset) instead of `$__state`, so one request's writes don't bleed into the
     /// next through the server-process singleton.
     pub module: bool,
+    /// `#store <name>` (not `#state`): the persisted-store name. When set, the
+    /// initializer lowers to `$__store('<name>', () => (INIT))` (already
+    /// per-request-scoped internally, so no SSR `$__scopedStore` rewrite) in both
+    /// builds; `$__store` resolves from `/runtime` (CSR) or `/ssr-runtime` (SSR).
+    pub store_name: Option<String>,
 }
 
 /// A top-level class with whatever pragma directives + styles fields tag it.
@@ -145,6 +150,8 @@ pub enum LocateError {
     /// distinct from [`OnConst`]/[`OnField`] so the message says "unknown" rather
     /// than misleadingly implying the hint would be valid elsewhere.
     Unknown(String),
+    /// `#store` with no name arg (`#store` instead of `#store user-prefs`).
+    MissingName(String),
 }
 
 /// A [`LocateError`] paired with the source span to caret it at (where one
@@ -450,23 +457,39 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                 name_end,
                 type_span,
                 value,
-            } => match directive_name(&directives).map_err(|err| LocatedError {
-                err,
-                span: Some((*name_start, *name_end)),
-                component: None,
-            })? {
-                "state" => {
-                    states.push(state_edit(source, *name_end, *type_span, *value));
-                    strips.push((line, cend));
+            } => {
+                let name = directive_name(&directives).map_err(|err| LocatedError {
+                    err,
+                    span: Some((*name_start, *name_end)),
+                    component: None,
+                })?;
+                match name {
+                    "state" => {
+                        states.push(state_edit(source, *name_end, *type_span, *value));
+                        strips.push((line, cend));
+                    }
+                    "store" => match directives[0].args.first() {
+                        Some(store) => {
+                            states.push(store_edit(source, *name_end, *type_span, *value, store));
+                            strips.push((line, cend));
+                        }
+                        None => {
+                            return Err(LocatedError {
+                                err: LocateError::MissingName("store".to_string()),
+                                span: Some((*name_start, *name_end)),
+                                component: None,
+                            })
+                        }
+                    },
+                    other => {
+                        return Err(LocatedError {
+                            err: const_error(other),
+                            span: Some((*name_start, *name_end)),
+                            component: None,
+                        })
+                    }
                 }
-                other => {
-                    return Err(LocatedError {
-                        err: const_error(other),
-                        span: Some((*name_start, *name_end)),
-                        component: None,
-                    })
-                }
-            },
+            }
         }
     }
 
@@ -528,6 +551,34 @@ fn state_edit(source: &str, name_end: usize, type_span: Option<Span>, value: Spa
         accessor: false,
         module_primitive,
         module: true,
+        store_name: None,
+    }
+}
+
+/// `#store <name>` on a module const: `[name_end, value_end)` →
+/// ` = $__store<Type>('<name>', () => (value))`. The thunk keeps the initializer
+/// lazy (each request's render scope builds its own instance); `$__store` seeds
+/// from the cookie and persists on mutation. A bare-primitive initializer is
+/// flagged `module_primitive` for `diagnose` to reject (a store must be an object).
+fn store_edit(
+    source: &str,
+    name_end: usize,
+    type_span: Option<Span>,
+    value: Span,
+    name: &str,
+) -> StateEdit {
+    let init = slice(source, value);
+    let generic = type_span.map_or(String::new(), |t| format!("<{}>", slice(source, t)));
+    let trimmed = init.trim_start();
+    let module_primitive = !(trimmed.starts_with('{') || trimmed.starts_with('['));
+    StateEdit {
+        start: name_end,
+        end: value.end as usize,
+        repl: format!(" = $__store{generic}('{name}', () => ({init}))"),
+        accessor: false,
+        module_primitive,
+        module: true,
+        store_name: Some(name.to_string()),
     }
 }
 
@@ -555,6 +606,7 @@ fn field_state_edit(
             accessor: false,
             module_primitive: false,
             module: false,
+            store_name: None,
         };
     }
 
@@ -590,6 +642,7 @@ fn field_state_edit(
         accessor: true,
         module_primitive: false,
         module: false,
+        store_name: None,
     }
 }
 

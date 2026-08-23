@@ -1,5 +1,6 @@
 import { basename } from 'node:path';
 import type { Component } from '@neuralfog/elemix';
+import { $__setStores } from '@neuralfog/elemix/ssr-runtime';
 import { devReloadScript } from '../render/dev';
 import {
     applyResetToSsr,
@@ -12,7 +13,7 @@ import {
     type ViewClass,
 } from '../render/render';
 import { getAssetVersion } from '../render/version';
-import { type CookieOptions, serializeCookie } from './Cookie';
+import { type CookieOptions, parseCookies, serializeCookie } from './Cookie';
 
 type ViewData<V> = V extends new () => Component<unknown, infer D> ? D : never;
 
@@ -20,6 +21,32 @@ const viewDataScript = (data: unknown): string =>
     data === undefined
         ? ''
         : `<script>window.__elemix_vd=${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
+
+type HeaderSource = { headers: Headers };
+
+const STORE_PREFIX = 'store.';
+
+const parseStores = (req?: HeaderSource): Record<string, unknown> => {
+    const jar = parseCookies(req?.headers.get('cookie') ?? null);
+    const seed: Record<string, unknown> = {};
+    for (const [name, value] of jar) {
+        if (!name.startsWith(STORE_PREFIX)) continue;
+        try {
+            const parsed = JSON.parse(value);
+            if (
+                parsed !== null &&
+                typeof parsed === 'object' &&
+                !Array.isArray(parsed)
+            ) {
+                seed[name.slice(STORE_PREFIX.length)] = parsed;
+            }
+        } catch {}
+    }
+    return seed;
+};
+
+const storesScript = (seed: Record<string, unknown>): string =>
+    `<script>window.__hydris_stores=${JSON.stringify(seed).replace(/</g, '\\u003c')}</script>`;
 
 const assetQuery = (): string => {
     const version = getAssetVersion();
@@ -139,20 +166,23 @@ export class Reply {
         return this;
     }
 
-    toResponse(): Response {
-        const body = this.pending ? this.renderPending() : this.body;
+    toResponse(req?: HeaderSource): Response {
+        const body = this.pending ? this.renderPending(req) : this.body;
         const headers = new Headers(this.headers);
         for (const cookie of this.cookies) headers.append('Set-Cookie', cookie);
         return new Response(body, { status: this.code, headers });
     }
 
-    private renderPending(): string {
+    private renderPending(req?: HeaderSource): string {
         const SHIP_CLIENT = true;
         const { View, data, name } = this.pending as Pending;
+        const seed = parseStores(req);
+        $__setStores(seed);
         const dev = devReloadScript();
         const resetCfg = resetConfigScript() + resetDocumentStyle();
         const client = SHIP_CLIENT ? clientScript(name) : '';
-        const page = viewDataScript(data) + renderView(View, data);
+        const page =
+            viewDataScript(data) + storesScript(seed) + renderView(View, data);
         const document =
             this.documentOverride ??
             (View as { $$__document?: ViewClass }).$$__document ??
@@ -188,5 +218,7 @@ export class Reply {
     }
 }
 
-export const toResponse = (result: HandlerResult): Response =>
-    result instanceof Reply ? result.toResponse() : result;
+export const toResponse = (
+    result: HandlerResult,
+    req?: HeaderSource,
+): Response => (result instanceof Reply ? result.toResponse(req) : result);
