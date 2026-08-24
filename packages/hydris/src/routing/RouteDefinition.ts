@@ -19,12 +19,12 @@ export type RouteDefinition = {
     renderer?: ErrorRenderer;
 };
 
+export const segmentsOf = (path: string): string[] =>
+    path.split('/').filter(Boolean);
+
 export const compile = (path: string): Segment[] =>
-    path
-        .split('/')
-        .filter(Boolean)
-        .map((seg) => {
-            if (seg === '*') return { wildcard: true };
-            if (seg.startsWith(':')) return { param: true, name: seg.slice(1) };
-            return { param: false, value: seg };
-        });
+    segmentsOf(path).map((seg) => {
+        if (seg === '*') return { wildcard: true };
+        if (seg.startsWith(':')) return { param: true, name: seg.slice(1) };
+        return { param: false, value: seg };
+    });

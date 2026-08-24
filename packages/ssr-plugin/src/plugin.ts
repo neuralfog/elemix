@@ -1,27 +1,6 @@
 import { basename } from 'node:path';
-import { resolveCompiler } from './compiler';
+import { needsCompile, runCompiler } from './compiler';
 import { injectMetadata, stampModule, stampRouteFile } from './inject';
-
-const COMPILER = resolveCompiler();
-
-const needsCompile = (source: string): boolean =>
-    source.includes('#component') ||
-    source.includes('tpl`') ||
-    source.includes('#state') ||
-    source.includes('#store');
-
-const compileSsr = async (source: string): Promise<string> => {
-    const args = ['--stdin', '--ssr'];
-    if (process.env.ELEMIX_SSR_MINIFY === '1') args.push('--minify');
-    const proc = Bun.spawn([COMPILER, ...args], {
-        stdin: Buffer.from(source),
-        stdout: 'pipe',
-        stderr: 'inherit',
-    });
-    const code = await new Response(proc.stdout).text();
-    await proc.exited;
-    return code;
-};
 
 export const ssrPlugin: Bun.BunPlugin = {
     name: 'elemix-ssr',
@@ -33,7 +12,7 @@ export const ssrPlugin: Bun.BunPlugin = {
             }
 
             const lowered = needsCompile(source)
-                ? await compileSsr(source)
+                ? await runCompiler(source, '--ssr')
                 : source;
             const injected = injectMetadata(lowered)?.code ?? lowered;
             const name = basename(args.path).replace(/\.[tj]s$/, '');

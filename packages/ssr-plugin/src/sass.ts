@@ -5,7 +5,7 @@ import { compileString, type Importer } from 'sass';
 
 const NS = 'elemix-scss';
 
-export const isRelative = (spec: string): boolean =>
+const isRelative = (spec: string): boolean =>
     spec.startsWith('.') || spec.startsWith('/');
 
 const findImports = (

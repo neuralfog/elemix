@@ -172,6 +172,36 @@ const writeSibling = async (
     } catch {}
 };
 
+const cacheKey = (absPath: string, mtime: number, encoding: Encoding): string =>
+    `${absPath}\0${mtime}\0${encoding}`;
+
+const encodedBytes = async (
+    absPath: string,
+    encoding: Encoding,
+    lastModified: number,
+    readSource: () => Promise<Uint8Array>,
+    writeToDisk: boolean,
+): Promise<Uint8Array> => {
+    const key = cacheKey(absPath, Math.floor(lastModified), encoding);
+    const cached = assetCache.get(key);
+    if (cached) return cached;
+    const disk = await siblingBytes(absPath, encoding, lastModified);
+    let bytes: Uint8Array;
+    if (disk) {
+        bytes = disk;
+    } else {
+        bytes = compress(
+            await readSource(),
+            encoding,
+            BROTLI_STATIC_QUALITY,
+            GZIP_STATIC_LEVEL,
+        );
+        if (writeToDisk) await writeSibling(absPath, encoding, bytes);
+    }
+    assetCache.set(key, bytes);
+    return bytes;
+};
+
 const bytesResponse = (
     bytes: Uint8Array,
     encoding: Encoding,
@@ -211,20 +241,13 @@ export const compressAsset = async (
         return identity();
     }
 
-    const key = `${absPath}\0${Math.floor(file.lastModified)}\0${encoding}`;
-    const cached = assetCache.get(key);
-    if (cached) return bytesResponse(cached, encoding, contentType, headers);
-
-    const disk = await siblingBytes(absPath, encoding, file.lastModified);
-    const bytes =
-        disk ??
-        compress(
-            await readBytes(file),
-            encoding,
-            BROTLI_STATIC_QUALITY,
-            GZIP_STATIC_LEVEL,
-        );
-    assetCache.set(key, bytes);
+    const bytes = await encodedBytes(
+        absPath,
+        encoding,
+        file.lastModified,
+        () => readBytes(file),
+        false,
+    );
     return bytesResponse(bytes, encoding, contentType, headers);
 };
 
@@ -242,44 +265,39 @@ export const warmAsset = async (
     const contentType = contentTypeHint ?? file.type;
     if (!isCompressible(contentType) || file.size < cfg.threshold) return null;
 
-    const mtime = Math.floor(file.lastModified);
     const encodings: Encoding[] = [];
     if (cfg.brotli) encodings.push('br');
     if (cfg.gzip) encodings.push('gzip');
     if (encodings.length === 0) return null;
 
     let source: Uint8Array | null = null;
+    const readSource = async (): Promise<Uint8Array> => {
+        if (source === null) source = await readBytes(file);
+        return source;
+    };
     let best = file.size;
     for (const encoding of encodings) {
-        const key = `${absPath}\0${mtime}\0${encoding}`;
-        let bytes = assetCache.get(key);
-        if (bytes === undefined) {
-            const disk = await siblingBytes(
-                absPath,
-                encoding,
-                file.lastModified,
-            );
-            if (disk) {
-                bytes = disk;
-            } else {
-                if (source === null) source = await readBytes(file);
-                bytes = compress(
-                    source,
-                    encoding,
-                    BROTLI_STATIC_QUALITY,
-                    GZIP_STATIC_LEVEL,
-                );
-                if (writeToDisk) await writeSibling(absPath, encoding, bytes);
-            }
-            assetCache.set(key, bytes);
-        }
+        const bytes = await encodedBytes(
+            absPath,
+            encoding,
+            file.lastModified,
+            readSource,
+            writeToDisk,
+        );
         if (bytes.length < best) best = bytes.length;
     }
     return { raw: file.size, best };
 };
 
-const COMPRESSIBLE_STATUS = (status: number): boolean =>
+const isCompressibleStatus = (status: number): boolean =>
     status >= 200 && status < 300 && status !== 204;
+
+const rebuild = (res: Response, body: Uint8Array): Response =>
+    new Response(asBody(body), {
+        status: res.status,
+        statusText: res.statusText,
+        headers: res.headers,
+    });
 
 export const compressDynamic = async (
     res: Response,
@@ -289,7 +307,7 @@ export const compressDynamic = async (
     if (cfg === null) return res;
     if (req.method === 'HEAD') return res;
     if (res.headers.has('content-encoding')) return res;
-    if (!COMPRESSIBLE_STATUS(res.status)) return res;
+    if (!isCompressibleStatus(res.status)) return res;
     if (!isCompressible(res.headers.get('content-type'))) return res;
 
     const encoding = negotiate(req.headers.get('accept-encoding'), cfg);
@@ -302,11 +320,7 @@ export const compressDynamic = async (
     if (body.length < cfg.threshold) {
         res.headers.set('content-length', String(body.length));
         addVary(res.headers);
-        return new Response(asBody(body), {
-            status: res.status,
-            statusText: res.statusText,
-            headers: res.headers,
-        });
+        return rebuild(res, body);
     }
 
     const compressed = compress(
@@ -318,9 +332,5 @@ export const compressDynamic = async (
     res.headers.set('content-encoding', encoding);
     res.headers.set('content-length', String(compressed.length));
     addVary(res.headers);
-    return new Response(asBody(compressed), {
-        status: res.status,
-        statusText: res.statusText,
-        headers: res.headers,
-    });
+    return rebuild(res, compressed);
 };

@@ -29,3 +29,27 @@ export const resolveCompiler = (): string =>
     devBinary() ??
     platformPackage() ??
     `${import.meta.dir}/../../compiler/target/release/elemix-compiler`;
+
+const COMPILER = resolveCompiler();
+
+export const needsCompile = (source: string): boolean =>
+    source.includes('#component') ||
+    source.includes('tpl`') ||
+    source.includes('#state') ||
+    source.includes('#store');
+
+export const runCompiler = async (
+    source: string,
+    mode: '--ssr' | '--hydrate',
+): Promise<string> => {
+    const args = ['--stdin', mode];
+    if (process.env.ELEMIX_SSR_MINIFY === '1') args.push('--minify');
+    const proc = Bun.spawn([COMPILER, ...args], {
+        stdin: Buffer.from(source),
+        stdout: 'pipe',
+        stderr: 'inherit',
+    });
+    const code = await new Response(proc.stdout).text();
+    await proc.exited;
+    return code;
+};

@@ -89,19 +89,18 @@ const buildServer = (opts: AppBuildOptions): Promise<Bun.BuildOutput> =>
     });
 
 export const build = async (opts: AppBuildOptions = {}): Promise<void> => {
-    if (opts.minify ?? true) process.env.ELEMIX_SSR_MINIFY = '1';
-    rmSync(opts.serverOut ?? SERVER_OUT, { recursive: true, force: true });
-    rmSync(opts.clientOut ?? CLIENT_OUT, { recursive: true, force: true });
-    if (!report(await buildServer(opts))) process.exit(1);
-    const client = await buildClient(
-        { ...opts, minify: opts.minify ?? true },
-        true,
-    );
-    if (client === 'failed') process.exit(1);
+    const minify = opts.minify ?? true;
     const serverOut = opts.serverOut ?? SERVER_OUT;
+    const clientOut = opts.clientOut ?? CLIENT_OUT;
+    if (minify) process.env.ELEMIX_SSR_MINIFY = '1';
+    rmSync(serverOut, { recursive: true, force: true });
+    rmSync(clientOut, { recursive: true, force: true });
+    if (!report(await buildServer(opts))) process.exit(1);
+    const client = await buildClient({ ...opts, minify }, true);
+    if (client === 'failed') process.exit(1);
     log(
         client === 'built'
-            ? `built ${serverOut} + ${opts.clientOut ?? CLIENT_OUT}`
+            ? `built ${serverOut} + ${clientOut}`
             : `built ${serverOut} (no views)`,
     );
 };

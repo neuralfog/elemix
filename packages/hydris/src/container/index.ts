@@ -19,7 +19,6 @@ export type {
     Disposable,
     Factory,
     FactoryService,
-    Lifetime,
     Provider,
     Service,
     ServiceClass,

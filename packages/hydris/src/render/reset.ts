@@ -1,3 +1,5 @@
+import { jsonIsland } from './island';
+
 let resetStyles: string | undefined;
 
 export const setResetStyles = (css: string): void => {
@@ -13,8 +15,4 @@ export const resetDocumentStyle = (): string =>
     resetStyles === undefined ? '' : `<style data-reset>${resetStyles}</style>`;
 
 export const resetConfigScript = (): string =>
-    resetStyles === undefined
-        ? ''
-        : `<script type="application/json" id="__elemix_reset">${JSON.stringify(
-              resetStyles,
-          ).replace(/</g, '\\u003c')}</script>`;
+    resetStyles === undefined ? '' : jsonIsland('__elemix_reset', resetStyles);

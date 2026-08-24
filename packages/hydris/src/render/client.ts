@@ -9,6 +9,8 @@ const HASHED = /-[a-z0-9]{8,}\.js$/;
 
 export const DEFAULT_ASSET_MAX_AGE = 31_536_000;
 
+const CLIENT_CONTENT_TYPE = 'text/javascript; charset=utf-8';
+
 let manifest: Record<string, string> | null | undefined;
 
 const loadManifest = (): Record<string, string> | null => {
@@ -44,7 +46,7 @@ const resolveClientAsset = (
     return {
         absPath: join(ASSETS, file),
         headers: {
-            'content-type': 'text/javascript; charset=utf-8',
+            'content-type': CLIENT_CONTENT_TYPE,
             'cache-control': cacheControl,
         },
     };
@@ -70,8 +72,6 @@ export const clientAssetResponse = (
     if (resolved === null) return null;
     return compressAsset(resolved.absPath, resolved.headers, req);
 };
-
-const CLIENT_CONTENT_TYPE = 'text/javascript; charset=utf-8';
 
 export type PrecompressStats = { count: number; raw: number; best: number };
 

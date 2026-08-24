@@ -2,6 +2,7 @@ import { basename } from 'node:path';
 import type { Component } from '@neuralfog/elemix';
 import { $__setStores } from '@neuralfog/elemix/ssr-runtime';
 import { devReloadScript } from '../render/dev';
+import { jsonIsland } from '../render/island';
 import {
     applyResetToSsr,
     resetConfigScript,
@@ -18,9 +19,7 @@ import { type CookieOptions, parseCookies, serializeCookie } from './Cookie';
 type ViewData<V> = V extends new () => Component<unknown, infer D> ? D : never;
 
 const viewDataScript = (data: unknown): string =>
-    data === undefined
-        ? ''
-        : `<script type="application/json" id="__elemix_vd">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
+    data === undefined ? '' : jsonIsland('__elemix_vd', data);
 
 type HeaderSource = { headers: Headers };
 
@@ -46,7 +45,7 @@ const parseStores = (req?: HeaderSource): Record<string, unknown> => {
 };
 
 const storesScript = (seed: Record<string, unknown>): string =>
-    `<script type="application/json" id="__hydris_stores">${JSON.stringify(seed).replace(/</g, '\\u003c')}</script>`;
+    jsonIsland('__hydris_stores', seed);
 
 const clientScript = (name: string | undefined): string =>
     name === undefined
@@ -82,6 +81,42 @@ const outletIndex = (html: string): number => {
     return -1;
 };
 
+const htmlHeaders = (): Record<string, string> => ({
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'no-cache',
+});
+
+const composeDocument = (
+    frame: string,
+    inner: string,
+    dev: string,
+    client: string,
+): string => {
+    let html: string;
+    const outlet = outletIndex(frame);
+    if (outlet >= 0) {
+        html =
+            frame.slice(0, outlet) +
+            inner +
+            frame.slice(outlet + OUTLET.length);
+    } else if (frame.includes('</body>')) {
+        html = frame.replace('</body>', `${inner}</body>`);
+    } else {
+        html = frame + inner;
+    }
+    if (dev) {
+        html = html.includes('</head>')
+            ? html.replace('</head>', `${dev}</head>`)
+            : dev + html;
+    }
+    if (client) {
+        html = html.includes('</body>')
+            ? html.replace('</body>', `${client}</body>`)
+            : html + client;
+    }
+    return html;
+};
+
 type Pending = {
     View: ViewClass;
     data: unknown;
@@ -102,22 +137,15 @@ export class Reply {
     ) {}
 
     static html(body: string): Reply {
-        return new Reply(body, 200, {
-            'content-type': 'text/html; charset=utf-8',
-            'cache-control': 'no-cache',
-        });
+        return new Reply(body, 200, htmlHeaders());
     }
 
     static view<V extends ViewClass>(View: V, data?: ViewData<V>): Reply {
-        return new Reply(
-            null,
-            200,
-            {
-                'content-type': 'text/html; charset=utf-8',
-                'cache-control': 'no-cache',
-            },
-            { View, data, name: bundleName(View) },
-        );
+        return new Reply(null, 200, htmlHeaders(), {
+            View,
+            data,
+            name: bundleName(View),
+        });
     }
 
     static text(body: string): Reply {
@@ -169,13 +197,12 @@ export class Reply {
     }
 
     private renderPending(req?: HeaderSource): string {
-        const SHIP_CLIENT = true;
         const { View, data, name } = this.pending as Pending;
         const seed = parseStores(req);
         $__setStores(seed);
         const dev = devReloadScript();
         const resetCfg = resetConfigScript() + resetDocumentStyle();
-        const client = SHIP_CLIENT ? clientScript(name) : '';
+        const client = clientScript(name);
         const page =
             viewDataScript(data) + storesScript(seed) + renderView(View, data);
         const document =
@@ -187,29 +214,7 @@ export class Reply {
         }
         const frame = renderView(document, data);
         const inner = resetCfg + page;
-        let html: string;
-        const outlet = outletIndex(frame);
-        if (outlet >= 0) {
-            html =
-                frame.slice(0, outlet) +
-                inner +
-                frame.slice(outlet + OUTLET.length);
-        } else if (frame.includes('</body>')) {
-            html = frame.replace('</body>', `${inner}</body>`);
-        } else {
-            html = frame + inner;
-        }
-        if (dev) {
-            html = html.includes('</head>')
-                ? html.replace('</head>', `${dev}</head>`)
-                : dev + html;
-        }
-        if (client) {
-            html = html.includes('</body>')
-                ? html.replace('</body>', `${client}</body>`)
-                : html + client;
-        }
-        return applyResetToSsr(html);
+        return applyResetToSsr(composeDocument(frame, inner, dev, client));
     }
 }
 

@@ -21,6 +21,9 @@ const SERVICE_LIFETIME: Record<DiServiceType, BuildableLifetime> = {
     [DiServiceType.Transient]: 'transient',
 };
 
+const lifetimeOf = (declared?: DiServiceType): BuildableLifetime =>
+    SERVICE_LIFETIME[declared ?? DiServiceType.Singleton];
+
 type Registration = {
     lifetime: BuildableLifetime;
     factory: Factory<unknown>;
@@ -97,13 +100,10 @@ export class DiContainer {
 
     private registerService(service: Service): void {
         if (typeof service === 'function') {
-            const lifetime =
-                SERVICE_LIFETIME[service.service ?? DiServiceType.Singleton];
-            this.registerWith(
-                service as object,
-                autoFactory(service),
-                lifetime,
-            );
+            this.register(service as object, {
+                lifetime: lifetimeOf(service.service),
+                factory: autoFactory(service),
+            });
             return;
         }
         if ('value' in service) {
@@ -115,16 +115,10 @@ export class DiContainer {
             typeof provide === 'function'
                 ? (provide as ServiceClass).service
                 : undefined;
-        const lifetime = SERVICE_LIFETIME[declared ?? DiServiceType.Singleton];
-        this.registerWith(provide as object, service.factory, lifetime);
-    }
-
-    private registerWith(
-        key: object,
-        factory: Factory<unknown>,
-        lifetime: BuildableLifetime,
-    ): void {
-        this.register(key, { lifetime, factory });
+        this.register(provide as object, {
+            lifetime: lifetimeOf(declared),
+            factory: service.factory,
+        });
     }
 
     scope(): DiContainer {

@@ -33,8 +33,6 @@ const bold = (s: string): string => paint('1', s);
 const BAR = violet('▐▌');
 const ARROW = violet('➜');
 
-export const brand = (message: string): string => `  ${BAR}  ${message}`;
-
 export const brandDim = (message: string): string =>
     `  ${BAR}  ${dim(message)}`;
 

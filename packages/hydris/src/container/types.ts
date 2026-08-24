@@ -5,8 +5,6 @@ export type Factory<T> = (c: DiContainer) => T;
 
 export type Provider<T> = () => T;
 
-export type Lifetime = 'singleton' | 'scoped' | 'transient' | 'value';
-
 export type Disposable = {
     dispose(): void | Promise<void>;
 };

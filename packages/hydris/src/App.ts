@@ -27,6 +27,7 @@ import {
 import { brandDim, serveBanner } from './render/banner';
 import { setResetStyles } from './render/reset';
 import { container, router } from './routing/Route';
+import { segmentsOf } from './routing/RouteDefinition';
 import {
     handleUnhandled,
     setUnhandledHandler,
@@ -44,6 +45,67 @@ export type ServeOptions = {
     tls?: Bun.TLSOptions | Bun.TLSOptions[];
     trustProxy?: boolean;
     elemixAssets?: { maxAge?: number };
+};
+
+const registerRuntimeRoutes = (maxAge?: number): void => {
+    router.registerStatic('/_elemix/*', (req: Request) => {
+        const bundle = clientAssetResponse(
+            `/_elemix/${req.param('*')}`,
+            req,
+            maxAge,
+        );
+        return bundle ?? new Response('Not Found', { status: 404 });
+    });
+    if (isLiveReload()) {
+        router.registerStatic(LIVERELOAD_PATH, () => liveReloadResponse());
+    }
+};
+
+const logStartup = (server: Bun.Server, options: ServeOptions): void => {
+    console.log(
+        serveBanner({
+            host: server.hostname ?? 'localhost',
+            port: server.port ?? 0,
+            protocol: server.url.protocol,
+            dev: options.development ?? process.env.NODE_ENV !== 'production',
+            ms: Math.round(performance.now()),
+        }),
+    );
+    if (isLiveReload()) console.log(brandDim('live reload enabled'));
+    if (isDevMode()) process.send?.({ __hydris_dev__: { ready: true } });
+
+    if (getCompression() !== null) {
+        void precompressClientAssets().then((stats) => {
+            if (stats.count === 0) return;
+            const kb = (bytes: number): string =>
+                `${(bytes / 1024).toFixed(1)}KB`;
+            console.log(
+                brandDim(
+                    `precompressed ${stats.count} bundles ${kb(stats.raw)} -> ${kb(stats.best)}`,
+                ),
+            );
+        });
+    }
+};
+
+const installProcessHandlers = (server: Bun.Server): void => {
+    let closing = false;
+    const shutdown = async (signal: string): Promise<void> => {
+        if (closing) return;
+        closing = true;
+        console.log(brandDim(`${signal} - draining connections`));
+        await server.stop();
+        await container.dispose();
+        process.exit(0);
+    };
+    process.on('SIGTERM', () => void shutdown('SIGTERM'));
+    process.on('SIGINT', () => void shutdown('SIGINT'));
+    process.on('unhandledRejection', (reason) => {
+        handleUnhandled(reason);
+    });
+    process.on('uncaughtException', (error) => {
+        handleUnhandled(error);
+    });
 };
 
 export class App {
@@ -67,7 +129,7 @@ export class App {
     }
 
     static assets(prefix: string, config: AssetConfig): void {
-        const base = `/${prefix.split('/').filter(Boolean).join('/')}`;
+        const base = `/${segmentsOf(prefix).join('/')}`;
         router.registerStatic(`${base}/*`, assetHandler(config));
     }
 
@@ -112,18 +174,7 @@ export class App {
         lockCompression();
         const { trustProxy = false, elemixAssets, ...serveOptions } = options;
 
-        router.registerStatic('/_elemix/*', (req: Request) => {
-            const bundle = clientAssetResponse(
-                `/_elemix/${req.param('*')}`,
-                req,
-                elemixAssets?.maxAge,
-            );
-            return bundle ?? new Response('Not Found', { status: 404 });
-        });
-
-        if (isLiveReload()) {
-            router.registerStatic(LIVERELOAD_PATH, () => liveReloadResponse());
-        }
+        registerRuntimeRoutes(elemixAssets?.maxAge);
 
         const server = Bun.serve({
             port: 3000,
@@ -136,50 +187,8 @@ export class App {
                     trustProxy,
                 ),
         } as Parameters<typeof Bun.serve>[0]);
-        console.log(
-            serveBanner({
-                host: server.hostname ?? 'localhost',
-                port: server.port ?? 0,
-                protocol: server.url.protocol,
-                dev:
-                    options.development ??
-                    process.env.NODE_ENV !== 'production',
-                ms: Math.round(performance.now()),
-            }),
-        );
-        if (isLiveReload()) console.log(brandDim('live reload enabled'));
-        if (isDevMode()) process.send?.({ __hydris_dev__: { ready: true } });
 
-        if (getCompression() !== null) {
-            void precompressClientAssets().then((stats) => {
-                if (stats.count === 0) return;
-                const kb = (bytes: number): string =>
-                    `${(bytes / 1024).toFixed(1)}KB`;
-                console.log(
-                    brandDim(
-                        `precompressed ${stats.count} bundles ${kb(stats.raw)} -> ${kb(stats.best)}`,
-                    ),
-                );
-            });
-        }
-
-        let closing = false;
-        const shutdown = async (signal: string): Promise<void> => {
-            if (closing) return;
-            closing = true;
-            console.log(brandDim(`${signal} - draining connections`));
-            await server.stop();
-            await container.dispose();
-            process.exit(0);
-        };
-        process.on('SIGTERM', () => void shutdown('SIGTERM'));
-        process.on('SIGINT', () => void shutdown('SIGINT'));
-
-        process.on('unhandledRejection', (reason) => {
-            handleUnhandled(reason);
-        });
-        process.on('uncaughtException', (error) => {
-            handleUnhandled(error);
-        });
+        logStartup(server, options);
+        installProcessHandlers(server);
     }
 }

@@ -40,10 +40,11 @@ export class Csrf extends BaseMiddleware {
         const token = cookieToken ?? this.generate();
         req.csrf = token;
 
-        if (!this.options.safeMethods.includes(req.method)) {
-            if (!(await this.verify(req, cookieToken))) {
-                throw new ForbiddenException('Invalid CSRF token');
-            }
+        if (
+            !this.options.safeMethods.includes(req.method) &&
+            !(await this.verify(req, cookieToken))
+        ) {
+            throw new ForbiddenException('Invalid CSRF token');
         }
 
         const res = await next();

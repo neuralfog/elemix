@@ -1,8 +1,6 @@
 import { dirname } from 'node:path';
 import { Glob } from 'bun';
-import { resolveCompiler } from './compiler';
-
-const COMPILER = resolveCompiler();
+import { needsCompile, runCompiler } from './compiler';
 
 const VIEW_CALL = /Reply\s*\.\s*view\s*\(\s*([A-Za-z_$][\w$]*)/g;
 const DOCUMENT_REF = /\bdocument\s*[=(]\s*([A-Za-z_$][\w$]*)/g;
@@ -51,25 +49,6 @@ export const findViews = async (root = process.cwd()): Promise<Views> => {
     return { pages: [...pages], documents: [...documents] };
 };
 
-const needsCompile = (source: string): boolean =>
-    source.includes('#component') ||
-    source.includes('tpl`') ||
-    source.includes('#state') ||
-    source.includes('#store');
-
-const compileHydrate = async (source: string): Promise<string> => {
-    const args = ['--stdin', '--hydrate'];
-    if (process.env.ELEMIX_SSR_MINIFY === '1') args.push('--minify');
-    const proc = Bun.spawn([COMPILER, ...args], {
-        stdin: Buffer.from(source),
-        stdout: 'pipe',
-        stderr: 'inherit',
-    });
-    const code = await new Response(proc.stdout).text();
-    await proc.exited;
-    return code;
-};
-
 const HYDRIS_CLIENT_SHIM = 'export const asset = (p) => p;\n';
 
 export const clientPlugin = (views: Views): Bun.BunPlugin => {
@@ -94,7 +73,7 @@ export const clientPlugin = (views: Views): Bun.BunPlugin => {
                     args.path.includes('/node_modules/') ||
                     !needsCompile(source)
                         ? source
-                        : await compileHydrate(source);
+                        : await runCompiler(source, '--hydrate');
                 const contents =
                     pages.has(args.path) && docImports
                         ? `${compiled}\n${docImports}`

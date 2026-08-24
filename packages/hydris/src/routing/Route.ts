@@ -2,14 +2,14 @@ import type { ErrorRenderer } from '../error/render';
 import type { Middleware } from '../middleware/Middleware';
 import type { HandlerFn, HandlerRef } from './HandlerDispatcher';
 import type { Method } from './Method';
-import type { RouteDefinition } from './RouteDefinition';
+import { segmentsOf, type RouteDefinition } from './RouteDefinition';
 import { Router } from './Router';
 
 export const router = new Router();
 export const container = router.container;
 
 const join = (base: string, path: string): string => {
-    const segments = `${base}/${path}`.split('/').filter(Boolean);
+    const segments = segmentsOf(`${base}/${path}`);
     return `/${segments.join('/')}`;
 };
 

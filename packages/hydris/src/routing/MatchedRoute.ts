@@ -1,5 +1,3 @@
-import type { Middleware } from '../middleware/Middleware';
-import type { Handler } from './HandlerDispatcher';
 import type { Method } from './Method';
 import type { RouteDefinition } from './RouteDefinition';
 
@@ -19,13 +17,5 @@ export class MatchedRoute {
 
     get path(): string {
         return this.definition.path;
-    }
-
-    get handler(): Handler {
-        return this.definition.handler;
-    }
-
-    get middlewares(): Middleware[] {
-        return this.definition.middlewares;
     }
 }

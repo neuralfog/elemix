@@ -142,7 +142,7 @@ export const navigate = (to: string): void => {
     if (typeof window === 'undefined') return;
     const url = new URL(to, location.href);
     if (!supported() || url.origin !== location.origin) {
-        window.location.href = url.href;
+        hard(url.href);
         return;
     }
     void run(url.href, url.href !== location.href);

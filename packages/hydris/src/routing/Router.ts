@@ -20,7 +20,7 @@ import { type Handler, invokeHandler } from './HandlerDispatcher';
 import { MatchedRoute } from './MatchedRoute';
 import type { Method } from './Method';
 import { RouteCollection } from './RouteCollection';
-import type { RouteDefinition } from './RouteDefinition';
+import { segmentsOf, type RouteDefinition } from './RouteDefinition';
 
 const pathnameOf = (url: string): string => {
     const start = url.indexOf('/', url.indexOf('://') + 3);
@@ -152,7 +152,7 @@ export class Router {
         socketIp = '',
         trustProxy = false,
     ): Promise<Response> {
-        const parts = pathnameOf(req.url).split('/').filter(Boolean);
+        const parts = segmentsOf(pathnameOf(req.url));
         const matched = this.routes.match(req.method as Method, parts);
         req.route = matched
             ? new MatchedRoute(matched.route, matched.params)
