@@ -26,4 +26,3 @@ export class SignalValue extends Component {
 
     template = (): Template => tpl`<div class="value">${counter.count}</div>`;
 }
-

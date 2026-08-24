@@ -43,9 +43,6 @@ const css = `
     }
 `;
 
-// An explicit `#tag` that overrides the derived one (`StepperWidget` would
-// otherwise become `stepper-widget`). The pragma is a plain `//` comment bound
-// to the class on the next line.
 // #component #tag ui-stepper
 export class StepperWidget extends Component {
     // #styles

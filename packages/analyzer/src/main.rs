@@ -1,9 +1,3 @@
-//! `ec-analyzer` (`ea`) — elemix's template prop typechecker. Scans a project's
-//! `tpl` templates, resolves each `<tag>` back to its `#component` class, and
-//! type-checks every `:prop=${expr}` against that class's prop type by deferring
-//! the one un-native step — type judgment — to the project's `tsc`. See
-//! ANALYZER.md for the design.
-
 mod analyze;
 mod imports;
 mod lsp;
@@ -15,7 +9,6 @@ use clap::Parser;
 use oracle::TscOracle;
 use project::Skipped;
 use report::Palette;
-use std::collections::HashMap;
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -26,26 +19,18 @@ use std::process::ExitCode;
     about = "Template prop typechecker for Elemix."
 )]
 struct Cli {
-    /// Directories or globs to scan for `.ts` sources (recursive for a dir).
     #[arg(long = "dirs", value_name = "DIR|GLOB", num_args = 1.., required_unless_present = "lsp")]
     dirs: Vec<String>,
 
-    /// Project root holding `node_modules` + `tsconfig.json` (where `tsc` resolves).
     #[arg(long, default_value = ".")]
     root: String,
 
-    /// Run as a persistent LSP server on stdio (warm state, push diagnostics)
-    /// instead of the one-shot CLI report. Same binary, same checks.
     #[arg(long)]
     lsp: bool,
 
-    /// Accepted for LSP-client compatibility - `vscode-languageclient` appends
-    /// `--stdio` when it launches the server. The server always talks stdio, so
-    /// this is simply tolerated and ignored.
     #[arg(long, hide = true)]
     stdio: bool,
 
-    /// Emit findings as a JSON array (one-shot, for CI) instead of the human report.
     #[arg(long)]
     json: bool,
 }
@@ -53,8 +38,6 @@ struct Cli {
 fn main() -> ExitCode {
     let cli = Cli::parse();
 
-    // The persistent LSP server owns its own file set (the editor pushes edits),
-    // so it takes over before any --dirs scan.
     if cli.lsp || cli.stdio {
         return lsp::serve(&cli.root);
     }
@@ -67,8 +50,6 @@ fn main() -> ExitCode {
         }
     };
 
-    // Read every source once, keyed by its canonical path (so registry lookups
-    // and the tsc overlay paths agree).
     let mut files: Vec<(PathBuf, String)> = Vec::new();
     for path in collect_files(&cli.dirs) {
         let Ok(canon) = std::fs::canonicalize(&path) else {
@@ -91,15 +72,10 @@ fn main() -> ExitCode {
         }
     };
 
-    // Colour the human report when stdout is a real terminal (and NO_COLOR unset).
     let palette =
         Palette::new(std::io::stdout().is_terminal() && std::env::var_os("NO_COLOR").is_none());
 
-    // Source lookup for rendering carets against the ORIGINAL files.
-    let sources: HashMap<String, String> = files
-        .iter()
-        .map(|(p, s)| (p.to_string_lossy().into_owned(), s.clone()))
-        .collect();
+    let sources = report::source_map(&files);
     let source_of = |f: &str| sources.get(f).cloned();
 
     if cli.json {
@@ -118,8 +94,7 @@ fn main() -> ExitCode {
     );
     report_skipped(&analysis.skipped);
 
-    // Errors fail the build; warnings (e.g. an invalid tag) do not.
-    if analysis.findings.iter().any(|f| f.category != "warning") {
+    if analysis.findings.iter().any(|f| !report::is_warning(f)) {
         ExitCode::FAILURE
     } else {
         ExitCode::SUCCESS
@@ -132,7 +107,6 @@ fn report_skipped(skipped: &[Skipped]) {
     }
 }
 
-/// Expand directories/globs into a sorted, de-duplicated list of `.ts` files.
 fn collect_files(patterns: &[String]) -> Vec<PathBuf> {
     let mut files = Vec::new();
     for pattern in patterns {

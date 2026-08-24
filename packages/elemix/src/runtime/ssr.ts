@@ -38,7 +38,7 @@ export const $__runStores = <T>(fn: () => T): T => {
     }
 };
 
-export const $__scopedStore = <T extends object>(factory: () => T): T => {
+export const $__moduleState = <T extends object>(factory: () => T): T => {
     const id = {};
     const resolve = (): Record<PropertyKey, unknown> => {
         const bag = current ?? fallback;

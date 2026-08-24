@@ -10,8 +10,6 @@ type ConfigWindow = {
 
 export const Default = {
     render: () => {
-        // CSR path: the reset lives in the elemix config; adoptStyles prepends
-        // it into every component shadow on upgrade.
         const w = window as unknown as ConfigWindow;
         w.__elemix__ = {
             config: {

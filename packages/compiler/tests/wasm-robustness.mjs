@@ -1,7 +1,3 @@
-// Robustness: the playground feeds half-typed source on every keystroke. Each
-// malformed input must either return a string or throw a CATCHABLE JS error —
-// never hard-crash — and the module must stay usable afterward (a known-good
-// compile still works). Run: node tests/wasm-robustness.mjs
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,7 +45,6 @@ for (const [name, src] of MALFORMED) {
     try {
         ok = compile(GOOD).includes('view()');
     } catch {
-        /* module poisoned */
     }
     if (ok) survived++;
     console.log(`  ${ok ? '✓' : '✗'} ${name.padEnd(22)} ${outcome}`);

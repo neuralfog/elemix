@@ -1,5 +1,3 @@
-//! Stage 1 — locate `tpl` tagged templates and discover source files.
-
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{Expression, TaggedTemplateExpression};
 use oxc_ast_visit::{walk, Visit};
@@ -25,8 +23,6 @@ impl Finder<'_> {
     }
 }
 
-/// Find every `` tpl`...` `` tagged template in `source` and return its static
-/// strings + hole expressions (verbatim source slices).
 pub fn find_html_templates(source: &str) -> Vec<FoundTemplate> {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -50,8 +46,6 @@ impl<'a> Visit<'a> for Finder<'_> {
                     .map(|e| self.slice(e.span()))
                     .collect();
                 self.out.push(FoundTemplate { statics, holes });
-                // Outermost-only: nested `tpl` templates live inside this one's
-                // hole expressions and are lowered by the codegen from there.
                 return;
             }
         }
@@ -59,7 +53,6 @@ impl<'a> Visit<'a> for Finder<'_> {
     }
 }
 
-/// Expand directories/globs into a sorted, de-duplicated list of `.ts` files.
 #[cfg(feature = "cli")]
 pub fn collect_ts_files(patterns: &[String]) -> Vec<PathBuf> {
     let mut files = Vec::new();

@@ -6,9 +6,7 @@ test.describe('SsrStoreApp', () => {
     }) => {
         const response = await page.goto('/ssr-store-app');
         const served = (await response?.text()) ?? '';
-        // parent readout is server-rendered
         expect(served).toContain('<strong>0</strong>');
-        // the #client child is a bare tag - none of its content rendered server-side
         expect(served).toContain('<ssr-store-controls');
         expect(served).not.toContain('Child controls');
         expect(served).not.toContain('class="value"');
@@ -26,14 +24,12 @@ test.describe('SsrStoreApp', () => {
         const dec = page.locator('ssr-store-app ssr-store-controls .dec');
         const inc = page.locator('ssr-store-app ssr-store-controls .inc');
 
-        // child mounted fresh client-side (label now present); both read 0
         await expect(
             page.locator('ssr-store-app ssr-store-controls .label'),
         ).toHaveText('Child controls');
         await expect(readout).toHaveText('0');
         await expect(childValue).toHaveText('0');
 
-        // child mutates the LIVE shared object -> parent readout follows
         await inc.click();
         await expect(childValue).toHaveText('1');
         await expect(readout).toHaveText('1');

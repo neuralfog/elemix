@@ -1,7 +1,3 @@
-//! Source-map tests — the line-level map must never lie: every mapped output
-//! line resolves to an original line with identical content (verbatim user code
-//! survives the splice-based compile), and real user code is actually mapped.
-
 use elemix_compiler::compile_with_map;
 
 const SOURCE: &str = r#"import { Component, defineComponent, state, tpl } from '@neuralfog/elemix';
@@ -13,7 +9,6 @@ export class CounterApp extends Component {
 defineComponent('counter-app', CounterApp);
 "#;
 
-/// Decode the `mappings` VLQ string into `(generated_line, original_line)` pairs.
 fn decoded_pairs(mappings: &str) -> Vec<(usize, usize)> {
     let mut pairs = Vec::new();
     let mut src_line: i64 = 0;
@@ -22,7 +17,6 @@ fn decoded_pairs(mappings: &str) -> Vec<(usize, usize)> {
             continue;
         }
         let vals = decode_segment(seg);
-        // [genCol, sourceIdx, srcLineDelta, srcCol]
         src_line += vals[2];
         pairs.push((gen_line, src_line as usize));
     }
@@ -69,7 +63,6 @@ fn map_is_a_v3_object_with_embedded_source() {
     let (_code, map) = compile_with_map(SOURCE, "CounterApp.ts");
     assert!(map.contains("\"version\":3"));
     assert!(map.contains("\"sources\":[\"CounterApp.ts\"]"));
-    // self-contained: the original is embedded so devtools shows the tpl source
     assert!(map.contains("\"sourcesContent\":["));
 }
 
@@ -96,7 +89,6 @@ fn verbatim_user_code_is_mapped_back() {
     let out_lines: Vec<&str> = code.lines().collect();
     let pairs = decoded_pairs(&mappings_of(&map));
 
-    // the untouched method survives and resolves — the whole point of the map
     let mapped: Vec<&str> = pairs.iter().map(|(gen, _)| out_lines[*gen]).collect();
     assert!(
         mapped.iter().any(|l| l.contains("increment = () =>")),
@@ -112,8 +104,6 @@ fn verbatim_user_code_is_mapped_back() {
 
 #[test]
 fn generated_lines_map_to_nothing() {
-    // The view() body / hoisted consts are generated — they must NOT claim an
-    // origin (no mapped output line may contain a runtime primitive call).
     let (code, map) = compile_with_map(SOURCE, "CounterApp.ts");
     let out_lines: Vec<&str> = code.lines().collect();
     let pairs = decoded_pairs(&mappings_of(&map));

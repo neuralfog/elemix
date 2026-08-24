@@ -20,58 +20,47 @@ export const Default = {
             clickEl(btn);
         };
 
-        // ----- initial deep reads -----
-        expect(read('.city')).toBe('London'); // profile.address.city  (depth 3)
-        expect(read('.lat')).toBe('51'); // profile.address.geo.lat (depth 4)
+        expect(read('.city')).toBe('London');
+        expect(read('.lat')).toBe('51');
         expect(read('.lng')).toBe('0');
-        expect(read('.tags')).toBe('a,b'); // object -> array
-        expect(read('.grid')).toBe('1|2 3|4'); // array of arrays
-        expect(read('.cell')).toBe('2'); // grid[0][1]
-        expect(read('.groups-str')).toBe('g0(write)'); // arr -> obj -> arr -> obj
+        expect(read('.tags')).toBe('a,b');
+        expect(read('.grid')).toBe('1|2 3|4');
+        expect(read('.cell')).toBe('2');
+        expect(read('.groups-str')).toBe('g0(write)');
         expect(col('gid')).toEqual(['g0']);
         expect(col('tcount')).toEqual(['1']);
 
-        // ----- depth-3 object leaf write -----
         await click('.rename-city');
         expect(read('.city')).toBe('Paris');
 
-        // ----- depth-4 leaf increment -----
         await click('.move-lat');
         expect(read('.lat')).toBe('52');
 
-        // ----- replace a nested subtree (address.geo = {...}) -----
         await click('.replace-geo');
         expect(read('.lat')).toBe('99');
         expect(read('.lng')).toBe('99');
 
-        // ----- nested array (object -> array) push -----
         await click('.add-tag');
         expect(read('.tags')).toBe('a,b,c');
 
-        // ----- 2D array: inner element set (the newly-tracked path) -----
         await click('.set-cell');
         expect(read('.cell')).toBe('9');
         expect(read('.grid')).toBe('1|9 3|4');
 
-        // ----- 2D array: inner push -----
         await click('.push-col');
         expect(read('.grid')).toBe('1|9|5 3|4');
-        expect(read('.cell')).toBe('9'); // grid[0][1] unchanged by the append
+        expect(read('.cell')).toBe('9');
 
-        // ----- 2D array: outer push -----
         await click('.add-row');
         expect(read('.grid')).toBe('1|9|5 3|4 7|8');
 
-        // ----- deep array-of-objects: toggle a leaf at arr->obj->arr->obj -----
         await click('.toggle-task');
         expect(read('.groups-str')).toBe('g0(write!)');
 
-        // ----- deep nested array push (groups[0].tasks.push) -----
         await click('.add-task');
         expect(read('.groups-str')).toBe('g0(write!,review)');
-        expect(col('tcount')).toEqual(['2']); // group.tasks.length inside a repeat row
+        expect(col('tcount')).toEqual(['2']);
 
-        // ----- outer array-of-objects push -----
         await click('.add-group');
         expect(read('.groups-str')).toBe('g0(write!,review) g1()');
         expect(col('gid')).toEqual(['g0', 'g1']);

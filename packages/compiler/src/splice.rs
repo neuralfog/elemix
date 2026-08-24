@@ -1,17 +1,7 @@
-//! Splice pre-pass — inline helper templates so the component becomes a single
-//! self-contained template.
-//!
-//! A `${header}` (local `const header = tpl`...``) or `${this.headerTemplate()}`
-//! (class member `headerTemplate = () => tpl`...``) embeds a template by
-//! reference. Inlining the referenced `tpl`...`` into the hole turns it into a
-//! normal nested template, which lowers to a `_child` whose getter reads nothing
-//! reactive — so it builds once (a one-time splice) while the built fragment
-//! stays internally reactive. After this pass the component has one outermost
-//! template and `rewrite` compiles it the usual way.
-
 use crate::locate::find_html_templates;
 use crate::lower::{
-    is_ident_char, skip_string, skip_to_close, split_commas, split_template_literal, tl_end,
+    apply_edits, is_ident_char, skip_string, skip_to_close, split_commas, split_template_literal,
+    tl_end, trailing_newline,
 };
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
@@ -22,16 +12,11 @@ use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType};
 use std::collections::HashMap;
 
-/// A helper template: the `tpl`…`` source plus the parameter names of its arrow
-/// (empty for a bare `const x = tpl`…``). A parameterized helper is inlined by
-/// substituting each param for the call's argument in the template's holes.
 struct Helper {
     params: Vec<String>,
     source: String,
 }
 
-/// The simple identifier parameter names of an arrow (`(item, i) => …` → `[item, i]`).
-/// Non-identifier params (destructuring) are skipped — they don't substitute.
 fn arrow_params(arrow: &ArrowFunctionExpression) -> Vec<String> {
     arrow
         .params
@@ -41,8 +26,6 @@ fn arrow_params(arrow: &ArrowFunctionExpression) -> Vec<String> {
         .collect()
 }
 
-/// Inline helper templates for EVERY component in the file (helpers are
-/// per-class). Identity for components without helpers.
 pub fn inline_helpers(source: &str) -> String {
     if find_html_templates(source).len() <= 1 {
         return source.to_string();
@@ -58,21 +41,10 @@ pub fn inline_helpers(source: &str) -> String {
         return source.to_string();
     }
 
-    // Apply back-to-front. Each class's spans are disjoint, so the order across
-    // classes is fine to interleave.
-    edits.sort_by_key(|e| std::cmp::Reverse(e.0));
-    let mut out = source.to_string();
-    for (start, end, repl) in edits {
-        out.replace_range(start..end, &repl);
-    }
-    out
+    apply_edits(source, edits)
 }
 
-/// Inline one class's helper templates into its main template, pushing the edits
-/// (the rewritten main body + the helper-member removals). No-op for a class
-/// without a `template` member.
 fn class_edits(source: &str, class: &Class, edits: &mut Vec<(usize, usize, String)>) {
-    // Helper name -> its template, and class-member helpers to remove.
     let mut helpers: HashMap<String, Helper> = HashMap::new();
     let mut member_removals: Vec<(usize, usize)> = Vec::new();
     let mut main: Option<MainTemplate> = None;
@@ -99,9 +71,6 @@ fn class_edits(source: &str, class: &Class, edits: &mut Vec<(usize, usize, Strin
                     member_removals.push((prop.span.start as usize, prop.span.end as usize));
                 }
             }
-            // Method-form `template() { …; return tpl`…`; }` — inline helpers the
-            // same way, but replace only the returned template so the method's
-            // prelude + braces survive; drop any local `const X = tpl`…`` helpers.
             ClassElement::MethodDefinition(m)
                 if m.kind == MethodDefinitionKind::Method
                     && matches!(&m.key, PropertyKey::StaticIdentifier(k) if k.name == "template") =>
@@ -147,10 +116,7 @@ struct MainTemplate {
     local_helpers: HashMap<String, Helper>,
 }
 
-/// Pull the main template's statics/holes, the body span to replace, and any
-/// local `const X = tpl`...`` helpers from the `template` arrow.
 fn analyze_main(arrow: &ArrowFunctionExpression, source: &str) -> Option<MainTemplate> {
-    // Expression body: `() => tpl`...``
     if let Some(html) = expression_html(arrow) {
         let (statics, holes) = extract(html, source);
         return Some(MainTemplate {
@@ -161,7 +127,6 @@ fn analyze_main(arrow: &ArrowFunctionExpression, source: &str) -> Option<MainTem
         });
     }
 
-    // Block body: `() => { const X = tpl`...`; ...; return tpl`...`; }`
     let mut local_helpers = HashMap::new();
     let mut main = None;
     for stmt in &arrow.body.statements {
@@ -198,23 +163,17 @@ fn analyze_main(arrow: &ArrowFunctionExpression, source: &str) -> Option<MainTem
     Some(MainTemplate {
         statics,
         holes,
-        // replace the whole `{ ... }` block with the inlined expression html
         body: (arrow.body.span.start as usize, arrow.body.span.end as usize),
         local_helpers,
     })
 }
 
-/// A block body's local `const X = tpl`…`` helpers, the spans of those `const`
-/// declarations (to delete), and the returned `tpl`…``.
 type BlockParts<'a> = (
     HashMap<String, Helper>,
     Vec<(usize, usize)>,
     Option<&'a TaggedTemplateExpression<'a>>,
 );
 
-/// Collect a block body's local `const X = tpl`…`` helpers (with their statement
-/// spans, for removal) and the returned `tpl`…``. Used by the method-form
-/// `template()` path, which keeps the method block and replaces only the return.
 fn collect_block<'a>(statements: &'a [Statement<'a>], source: &str) -> BlockParts<'a> {
     let mut local_helpers = HashMap::new();
     let mut const_removals = Vec::new();
@@ -256,7 +215,6 @@ fn collect_block<'a>(statements: &'a [Statement<'a>], source: &str) -> BlockPart
     (local_helpers, const_removals, ret)
 }
 
-/// The `tpl`...`` of an expression-bodied arrow `() => tpl`...``.
 fn expression_html<'a>(
     arrow: &'a ArrowFunctionExpression<'a>,
 ) -> Option<&'a TaggedTemplateExpression<'a>> {
@@ -276,7 +234,6 @@ fn is_html(html: &TaggedTemplateExpression, source: &str) -> bool {
     matches!(&html.tag, Expression::Identifier(id) if slice(source, id.span) == "tpl")
 }
 
-/// Statics + hole expressions of a template, sliced from source.
 fn extract(html: &TaggedTemplateExpression, source: &str) -> (Vec<String>, Vec<String>) {
     let statics = html
         .quasi
@@ -293,7 +250,6 @@ fn extract(html: &TaggedTemplateExpression, source: &str) -> (Vec<String>, Vec<S
     (statics, holes)
 }
 
-/// Rebuild a `tpl`...`` literal, inlining helper references in each hole.
 fn reconstruct(statics: &[String], holes: &[String], helpers: &HashMap<String, Helper>) -> String {
     let mut out = String::from("tpl`");
     for (i, s) in statics.iter().enumerate() {
@@ -308,9 +264,6 @@ fn reconstruct(statics: &[String], holes: &[String], helpers: &HashMap<String, H
     out
 }
 
-/// Inline helper references in one hole: a bare `${header}` whole-hole reference
-/// to a zero-arg helper, or any `[this.]row(args)` helper CALL nested inside the
-/// expression (e.g. a `repeat` render). Everything else is left untouched.
 fn inline_hole(hole: &str, helpers: &HashMap<String, Helper>) -> String {
     if let Some(h) = helpers.get(hole.trim()) {
         if h.params.is_empty() {
@@ -320,9 +273,6 @@ fn inline_hole(hole: &str, helpers: &HashMap<String, Helper>) -> String {
     inline_calls(hole, helpers)
 }
 
-/// Replace every `[this.]NAME(args)` helper call in `expr` with the inlined helper
-/// template (its params substituted for the args). String/template contents pass
-/// through verbatim, so a `#` or `(` inside them is never mistaken for a call.
 fn inline_calls(expr: &str, helpers: &HashMap<String, Helper>) -> String {
     let c: Vec<char> = expr.chars().collect();
     let mut out = String::new();
@@ -334,9 +284,6 @@ fn inline_calls(expr: &str, helpers: &HashMap<String, Helper>) -> String {
             out.extend(c[i..j].iter());
             i = j;
         } else if ch == '`' {
-            // A nested template literal (e.g. a ternary branch `cond ? tpl`…` :
-            // tpl```): keep its static text verbatim, but recurse into its holes
-            // so a `${this.row(x)}` helper call inside still inlines.
             let j = tl_end(&c, i) + 1;
             let lit: String = c[i..j].iter().collect();
             out.push_str(&inline_template_literal(&lit, helpers));
@@ -357,9 +304,6 @@ fn inline_calls(expr: &str, helpers: &HashMap<String, Helper>) -> String {
     out
 }
 
-/// Inline helper calls inside the holes of a nested template literal, leaving its
-/// static text untouched. Rebuilds the `` `…` `` so a helper call buried in a
-/// conditional/nested template (a hole within a hole) still gets inlined.
 fn inline_template_literal(lit: &str, helpers: &HashMap<String, Helper>) -> String {
     let (statics, holes) = split_template_literal(lit);
     let mut out = String::from("`");
@@ -375,8 +319,6 @@ fn inline_template_literal(lit: &str, helpers: &HashMap<String, Helper>) -> Stri
     out
 }
 
-/// If a helper call (`row(...)` or `this.row(...)`) begins at `i`, return the
-/// index just past its `)` and the inlined template.
 fn try_call(c: &[char], i: usize, helpers: &HashMap<String, Helper>) -> Option<(usize, String)> {
     let id_end = read_ident(c, i);
     let first: String = c[i..id_end].iter().collect();
@@ -395,13 +337,11 @@ fn try_call(c: &[char], i: usize, helpers: &HashMap<String, Helper>) -> Option<(
     if c.get(k) != Some(&'(') {
         return None;
     }
-    let close = skip_to_close(c, k + 1, ')'); // index just past `)`
+    let close = skip_to_close(c, k + 1, ')');
     let args = split_commas(&c[k + 1..close - 1].iter().collect::<String>());
     Some((close, inline_helper(helper, &args)))
 }
 
-/// Build the helper's `tpl`…`` with each param substituted for the matching arg
-/// (identifier-aware) in its holes.
 fn inline_helper(helper: &Helper, args: &[String]) -> String {
     let (statics, holes) = split_template_literal(&helper.source);
     let mut out = String::from("tpl`");
@@ -421,11 +361,6 @@ fn inline_helper(helper: &Helper, args: &[String]) -> String {
     out
 }
 
-/// Rename whole-identifier `from` to `to` in an expression, skipping string +
-/// template contents and property names after `.` (so `item.id` → `r.id`, but
-/// `x.item` and `'item'` are left alone). NOTE: a name that shadows the param
-/// inside its own body (`item => …item…`) would also be renamed — a rare,
-/// pathological case we accept rather than do full scope analysis.
 fn rename_ident(expr: &str, from: &str, to: &str) -> String {
     let c: Vec<char> = expr.chars().collect();
     let mut out = String::new();
@@ -488,8 +423,4 @@ fn all_classes<'a>(program: &'a oxc_ast::ast::Program<'a>) -> Vec<&'a Class<'a>>
         }
     }
     classes
-}
-
-fn trailing_newline(source: &str, at: usize) -> usize {
-    usize::from(source[at..].starts_with('\n'))
 }

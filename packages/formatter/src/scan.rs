@@ -1,16 +1,16 @@
-//! Find ``tpl`...` `` tagged template literals in a `.ts`/`.js` source, byte-exact.
-//! A small JS-lexical scanner: it skips `//`/`/* */` comments and `'`/`"` strings,
-//! tracks template literals and their balanced `${ ... }` holes, and recurses into
-//! holes so a nested ``tpl`` `` (e.g. inside `repeat`) is found too. Standalone -
-//! no elemix-compiler dependency (see spec.md).
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub struct ByteOffset(pub usize);
 
-/// One located ``tpl`` `` literal: the byte span of the content between the
-/// backticks, the indentation of the line it sits on, and the split into static
-/// chunks + raw hole expressions (`statics.len() == holes.len() + 1`).
+impl ByteOffset {
+    pub fn get(self) -> usize {
+        self.0
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct Tpl {
-    pub open: usize,
-    pub close: usize,
+    pub open: ByteOffset,
+    pub close: ByteOffset,
     pub base_indent: usize,
     pub statics: Vec<String>,
     pub holes: Vec<String>,
@@ -28,24 +28,28 @@ fn is_ident(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'$'
 }
 
-/// Walk a code region, dispatching over comments/strings/templates. Every
-/// backtick starts a template literal; only those tagged `tpl` are recorded, but
-/// all of them have their holes recursed for nested tagged templates.
+fn skip_trivia(b: &[u8], i: usize, end: usize) -> Option<usize> {
+    match b[i] {
+        b'/' if i + 1 < end && b[i + 1] == b'/' => Some(skip_line_comment(b, i, end)),
+        b'/' if i + 1 < end && b[i + 1] == b'*' => Some(skip_block_comment(b, i, end)),
+        b'\'' | b'"' => Some(skip_string(b, i, end)),
+        _ => None,
+    }
+}
+
 fn scan_region(b: &[u8], start: usize, end: usize, out: &mut Vec<Tpl>) {
     let mut i = start;
     while i < end {
-        match b[i] {
-            b'/' if i + 1 < end && b[i + 1] == b'/' => i = skip_line_comment(b, i, end),
-            b'/' if i + 1 < end && b[i + 1] == b'*' => i = skip_block_comment(b, i, end),
-            b'\'' | b'"' => i = skip_string(b, i, end),
-            b'`' => i = parse_template(b, i, end, out),
-            _ => i += 1,
+        if let Some(ni) = skip_trivia(b, i, end) {
+            i = ni;
+        } else if b[i] == b'`' {
+            i = parse_template(b, i, end, out);
+        } else {
+            i += 1;
         }
     }
 }
 
-/// Parse a template literal that opens at `backtick`. Records a [`Tpl`] when the
-/// literal is tagged `tpl`. Returns the index just past the closing backtick.
 fn parse_template(b: &[u8], backtick: usize, end: usize, out: &mut Vec<Tpl>) -> usize {
     let tagged = tagged_tpl(b, backtick);
     let base_indent = line_indent(b, backtick);
@@ -63,8 +67,8 @@ fn parse_template(b: &[u8], backtick: usize, end: usize, out: &mut Vec<Tpl>) -> 
                 statics.push(slice(b, chunk_start, i));
                 if tagged {
                     out.push(Tpl {
-                        open,
-                        close: i,
+                        open: ByteOffset(open),
+                        close: ByteOffset(i),
                         base_indent,
                         statics,
                         holes,
@@ -77,7 +81,6 @@ fn parse_template(b: &[u8], backtick: usize, end: usize, out: &mut Vec<Tpl>) -> 
                 let hole_start = i + 2;
                 let hole_end = find_hole_end(b, hole_start, end);
                 holes.push(slice(b, hole_start, hole_end));
-                // A nested tagged tpl can live inside a hole (e.g. a repeat render).
                 scan_region(b, hole_start, hole_end, out);
                 i = hole_end + 1;
                 chunk_start = i;
@@ -88,7 +91,6 @@ fn parse_template(b: &[u8], backtick: usize, end: usize, out: &mut Vec<Tpl>) -> 
     end
 }
 
-/// True when the backtick is tagged by a bare `tpl` identifier (not `mytpl`).
 fn tagged_tpl(b: &[u8], backtick: usize) -> bool {
     if backtick < 3 {
         return false;
@@ -99,8 +101,6 @@ fn tagged_tpl(b: &[u8], backtick: usize) -> bool {
     backtick < 4 || !is_ident(b[backtick - 4])
 }
 
-/// The `}` byte index closing a `${` that opened at `start`, balancing nested
-/// braces and skipping strings/templates/comments inside the hole.
 fn find_hole_end(b: &[u8], start: usize, end: usize) -> usize {
     let mut i = start;
     let mut depth = 1usize;
@@ -117,18 +117,19 @@ fn find_hole_end(b: &[u8], start: usize, end: usize) -> usize {
                 }
                 i += 1;
             }
-            b'\'' | b'"' => i = skip_string(b, i, end),
             b'`' => i = skip_template_raw(b, i, end),
-            b'/' if i + 1 < end && b[i + 1] == b'/' => i = skip_line_comment(b, i, end),
-            b'/' if i + 1 < end && b[i + 1] == b'*' => i = skip_block_comment(b, i, end),
-            _ => i += 1,
+            _ => {
+                if let Some(ni) = skip_trivia(b, i, end) {
+                    i = ni;
+                } else {
+                    i += 1;
+                }
+            }
         }
     }
     end
 }
 
-/// Skip a template literal (its `${…}` holes too) for brace-matching purposes.
-/// Returns the index just past the closing backtick.
 fn skip_template_raw(b: &[u8], backtick: usize, end: usize) -> usize {
     let mut i = backtick + 1;
     while i < end {
@@ -173,7 +174,6 @@ fn skip_block_comment(b: &[u8], start: usize, end: usize) -> usize {
     (i + 2).min(end)
 }
 
-/// Leading space/tab count of the line containing `pos`.
 fn line_indent(b: &[u8], pos: usize) -> usize {
     let mut line_start = pos;
     while line_start > 0 && b[line_start - 1] != b'\n' {
@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(ts[0].statics, vec!["<div></div>"]);
         assert!(ts[0].holes.is_empty());
         assert_eq!(
-            &"const x = tpl`<div></div>`;"[ts[0].open..ts[0].close],
+            &"const x = tpl`<div></div>`;"[ts[0].open.get()..ts[0].close.get()],
             "<div></div>"
         );
     }
@@ -254,7 +254,6 @@ mod tests {
 
     #[test]
     fn handles_an_escaped_backtick_in_a_hole_string() {
-        // the string in the hole contains a backtick; it must not end the template.
         let ts = scan("tpl`<a>${'`'}</a>`");
         assert_eq!(ts.len(), 1);
         assert_eq!(ts[0].statics, vec!["<a>", "</a>"]);

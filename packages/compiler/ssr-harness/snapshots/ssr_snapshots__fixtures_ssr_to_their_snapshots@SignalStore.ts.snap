@@ -1,9 +1,8 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SignalStore.ts
 ---
-import { $__scopedStore } from '@neuralfog/elemix/ssr-runtime';
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime';
 
-export const counter = $__scopedStore(() => ({ count: 0 }));
+export const counter = $__moduleState(() => ({ count: 0 }));

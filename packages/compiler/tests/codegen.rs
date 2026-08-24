@@ -1,19 +1,14 @@
-//! Stage 4 codegen tests — drive the public `codegen(statics, holes, emitter)`
-//! pipeline and assert the emitted TypeScript, including nested-template lowering
-//! (repeat → _list, when/choose/ternary → _child).
-
 use elemix_compiler::codegen::codegen;
 use elemix_compiler::emit::TsEmitter;
 
 fn gen(statics: &[&str], holes: &[&str]) -> String {
-    let st: Vec<String> = statics.iter().map(|s| s.to_string()).collect();
-    let ho: Vec<String> = holes.iter().map(|s| s.to_string()).collect();
+    let st: Vec<String> = statics
+        .iter()
+        .map(std::string::ToString::to_string)
+        .collect();
+    let ho: Vec<String> = holes.iter().map(std::string::ToString::to_string).collect();
     codegen(&st, &ho, &TsEmitter::new())
 }
-
-// ---------------------------------------------------------------------------
-// scaffolding
-// ---------------------------------------------------------------------------
 
 #[test]
 fn declares_template_clones_and_returns_root() {
@@ -32,18 +27,12 @@ fn markup_is_escaped_as_a_js_string() {
 #[test]
 fn nested_path_renders_member_accessors() {
     let out = gen(&["<div><span><b>", "</b></span></div>"], &["x"]);
-    // div > span > b > baked text node, via node-indexed firstChild pointers
     assert!(out.contains(".firstChild!.firstChild!.firstChild!.firstChild!;"));
 }
-
-// ---------------------------------------------------------------------------
-// value bindings — wrapped in a reactive `() => (...)` thunk
-// ---------------------------------------------------------------------------
 
 #[test]
 fn text_bakes_a_node_for_a_sole_content_hole() {
     let out = gen(&["<div>", "</div>"], &["this.state.count"]);
-    // a lone text hole bakes a real text node into the markup — no anchor swap
     assert!(out.contains("$__template('<div> </div>')"));
     assert!(!out.contains("document.createTextNode('');"));
     assert!(!out.contains(".replaceWith("));
@@ -53,8 +42,6 @@ fn text_bakes_a_node_for_a_sole_content_hole() {
 
 #[test]
 fn text_swaps_anchor_when_not_a_sole_hole() {
-    // a hole sharing its element with static text cannot bake (it would merge),
-    // so it keeps the comment anchor + createTextNode/replaceWith swap
     let out = gen(&["<div>n: ", "</div>"], &["this.state.count"]);
     assert!(out.contains("<!---->"));
     assert!(out.contains("document.createTextNode('');"));
@@ -93,10 +80,6 @@ fn model_casts_and_thunks() {
     assert!(out.contains("$__model(_n1 as HTMLInputElement, () => (this.r));"));
 }
 
-// ---------------------------------------------------------------------------
-// function / ref bindings — passed raw, no thunk
-// ---------------------------------------------------------------------------
-
 #[test]
 fn event_handler_is_raw() {
     let out = gen(&["<button @click=", ">go</button>"], &["this.go"]);
@@ -119,10 +102,6 @@ fn ref_is_raw() {
     assert!(out.contains("$__ref(_n1, this.input);"));
 }
 
-// ---------------------------------------------------------------------------
-// node grabbing
-// ---------------------------------------------------------------------------
-
 #[test]
 fn bindings_on_one_element_grab_it_once() {
     let out = gen(&["<a href=", " @click=", ">x</a>"], &["u", "this.go"]);
@@ -131,21 +110,14 @@ fn bindings_on_one_element_grab_it_once() {
     assert!(out.contains("$__event(_n1, 'click', this.go);"));
 }
 
-// ---------------------------------------------------------------------------
-// nested templates — repeat → _list
-// ---------------------------------------------------------------------------
-
 #[test]
 fn repeat_lowers_to_list_with_an_iife_builder() {
     let out = gen(
         &["<ul>", "</ul>"],
         &["repeat(this.rows, (r) => tpl`<li>${r.t}</li>`, (r) => r.id)"],
     );
-    // single-root row → element-clone master (templateEl), lone text hole baked
     assert!(out.contains("const _t1 = $__templateEl('<li> </li>');"));
-    // args reordered: $__list(anchor, () => (items), key, render)
     assert!(out.contains("$__list(_n1, () => (this.rows), (r) => r.id, (r) => (() => {"));
-    // the builder clones the row ELEMENT directly and returns it (no fragment)
     assert!(out.contains("$__cloneEl(_t1)"));
     assert!(out.contains("$__setText("));
     assert!(out.contains("(r.t));"));
@@ -157,18 +129,13 @@ fn nested_repeat_recurses() {
         &["<ul>", "</ul>"],
         &["repeat(cats, (c) => tpl`<li>${repeat(c.items, (i) => tpl`<b>${i.n}</b>`, (i) => i.id)}</li>`, (c) => c.id)"],
     );
-    assert!(out.contains("const _t0 = $__template(")); // the <ul> view (fragment)
-    assert!(out.contains("const _t1 = $__templateEl(")); // single-root <li> row
-    assert!(out.contains("const _t2 = $__templateEl(")); // single-root <b> row
-                                                         // two list calls, one nested inside the other's builder
+    assert!(out.contains("const _t0 = $__template("));
+    assert!(out.contains("const _t1 = $__templateEl("));
+    assert!(out.contains("const _t2 = $__templateEl("));
     assert_eq!(out.matches("$__list(").count(), 2);
     assert!(out.contains("() => (cats)"));
     assert!(out.contains("() => (c.items)"));
 }
-
-// ---------------------------------------------------------------------------
-// nested templates — when / choose / ternary → _child
-// ---------------------------------------------------------------------------
 
 #[test]
 fn template_ternary_lowers_to_child() {
@@ -181,8 +148,6 @@ fn template_ternary_lowers_to_child() {
 
 #[test]
 fn multi_root_child_branch_returns_the_whole_fragment() {
-    // a conditional value can mount many roots; `_child` ranges over the fragment,
-    // so the builder returns the fragment, not just its first node
     let out = gen(&["<div>", "</div>"], &["c ? tpl`<a></a><b></b>` : ''"]);
     assert!(out.contains("$__clone(_t1)"));
     assert!(out.contains("return _r2;"));
@@ -191,8 +156,6 @@ fn multi_root_child_branch_returns_the_whole_fragment() {
 
 #[test]
 fn multi_root_list_row_returns_the_whole_fragment() {
-    // `_list` tracks a first..last range per key, so a multi-root row returns the
-    // whole cloned fragment rather than collapsing to its first node
     let out = gen(
         &["<div>", "</div>"],
         &["repeat(items, (e) => tpl`<a></a><b></b>`, (e) => e.id)"],
@@ -226,16 +189,12 @@ fn repeat_in_a_ternary_becomes_list_plus_child() {
         &["<div>", "</div>"],
         &["log.len ? repeat(items, (e) => tpl`<li>${e.t}</li>`, (e) => e.id) : tpl`<p>empty</p>`"],
     );
-    // a second anchor for the list, next to the child anchor
     assert!(out.contains("document.createComment('')"));
     assert!(out.contains(".before("));
-    // keyed list, guarded by the condition
     assert!(out.contains("$__list("));
     assert!(out.contains("log.len ? items : []"));
-    // child for the else branch
     assert!(out.contains("$__child("));
     assert!(out.contains("log.len ? '' : "));
-    // the repeat call itself is erased
     assert!(!out.contains("repeat("));
 }
 
@@ -257,7 +216,6 @@ fn match_form1_lowers_to_an_equality_chain() {
         &["<div>", "</div>"],
         &["match(this.s, { idle: () => tpl`<x></x>`, busy: () => tpl`<y></y>` })"],
     );
-    // value === 'key' ? build : … : '' — identifier keys quoted into strings.
     assert!(out.contains("$__child(_n1, () => (this.s === 'idle' ? (() => {"));
     assert!(out.contains("this.s === 'busy' ? (() => {"));
     assert!(out.contains(": ''));"));
@@ -269,7 +227,6 @@ fn match_form1_quotes_computed_and_passes_string_keys() {
         &["<div>", "</div>"],
         &["match(this.c, { [Color.Red]: () => tpl`<x></x>`, 'lit': () => tpl`<y></y>` })"],
     );
-    // computed [Expr] → (Expr); an already-quoted key passes through.
     assert!(out.contains("this.c === (Color.Red) ?"));
     assert!(out.contains("this.c === 'lit' ?"));
 }
@@ -280,8 +237,6 @@ fn match_form2_dispatches_on_key_and_binds_the_member() {
         &["<div>", "</div>"],
         &["match(this.load, 'k', { idle: () => tpl`<x></x>`, busy: (m) => tpl`<y>${m.pct}</y>` })"],
     );
-    // (value)[key] === caseKey, and each arm is CALLED with the value so the
-    // narrowed member param stays bound.
     assert!(out.contains("(this.load)['k'] === 'idle' ?"));
     assert!(out.contains("(this.load)['k'] === 'busy' ?"));
     assert!(out.contains(")(this.load)"));

@@ -15,8 +15,6 @@ export default defineConfig({
             formats: ['es', 'cjs'],
         },
         rollupOptions: {
-            // @neuralfog/elemix is a peer dependency — consumers provide it,
-            // so it must not be bundled into elemix-testing-library's dist.
             external: [/^@neuralfog\/elemix($|\/)/],
         },
     },

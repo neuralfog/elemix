@@ -1,8 +1,3 @@
-//! Stage 4 — walk the parsed template + classified bindings, driving the
-//! emitter. Content node-holes recurse: a nested `` tpl`...` `` is lowered to an
-//! inline IIFE builder spliced into the directive's argument, so `repeat`
-//! becomes `_list` and `when`/`choose`/ternaries become `_child`.
-
 use crate::emit::Emitter;
 use crate::grammar::{classify, BindingKind};
 use crate::lower::{
@@ -13,13 +8,6 @@ use crate::template::node::NodePath;
 use crate::template::parse::{parse, structural_holes, StructHole};
 use std::collections::HashMap;
 
-/// Per-run state: globally-unique counters, the accumulated module-scope
-/// `template(...)` declarations, and a markup→id cache so identical templates
-/// (e.g. a helper embedded twice) share one `template()` const.
-/// A reactive root in scope: the `repeat` render's item param and (if the key
-/// is a plain `item.field` member) the key field, which is immutable per row in
-/// a keyed list — so a binding reading exactly `item.field` is static (set once,
-/// no effect, no subscription).
 #[derive(Clone)]
 struct Reactive {
     item: String,
@@ -57,14 +45,11 @@ impl Ctx {
     }
 }
 
-/// Generated source for one template: hoistable module-scope `template(...)`
-/// declarations and the `view()` body.
 pub struct Generated {
     pub decls: String,
     pub body: String,
 }
 
-/// Generate the `decls` + `view()` body for one top-level template.
 pub fn generate(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> Generated {
     let mut ctx = Ctx::new("t");
     let body = gen_template(statics, holes, &mut ctx, emitter, false, false);
@@ -74,10 +59,6 @@ pub fn generate(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> 
     }
 }
 
-/// Generate `view()` bodies for several templates sharing ONE module scope:
-/// the hoisted `template(...)` consts are numbered uniquely + deduped across all
-/// of them, returned once, alongside each template's body. This is what lets a
-/// file hold multiple components without their `_tN` consts colliding.
 pub fn generate_all(
     templates: &[(Vec<String>, Vec<String>)],
     emitter: &dyn Emitter,
@@ -90,11 +71,6 @@ pub fn generate_all(
     (ctx.decls, bodies)
 }
 
-/// Like [`generate_all`], but for free-standing (non-component) `tpl` templates.
-/// The hoisted `template(...)` consts use a `_ft` prefix so they never collide
-/// with a component's `_t` consts already emitted into the same module. Each body
-/// returns the whole cloned `DocumentFragment`, so the caller can wrap it in an
-/// IIFE and mount the result directly.
 pub fn generate_free(
     templates: &[(Vec<String>, Vec<String>)],
     emitter: &dyn Emitter,
@@ -107,19 +83,6 @@ pub fn generate_free(
     (ctx.decls, bodies)
 }
 
-/// Generate the `$$__hydrate(root)` body for one component template: bind events
-/// and reactive value writes onto the EXISTING server-rendered nodes reached from
-/// `root`, creating no DOM. Non-baked text holes are recovered from the markerless
-/// SSR run: the parent element's `data-t` attribute holds each dynamic value's
-/// rendered length, and `$__splitRun` slices the merged text node (using the
-/// compiled static prefixes) to isolate the bound nodes.
-///
-/// Structural holes (`repeat`/`when`/`choose`/`match`) are hydrated by [`hydrate_bind`]:
-/// a component-bearing conditional RESUMES (adopt the server subtree on the first
-/// run so a self-hydrating child mounts once, clone fresh after), everything else
-/// TAKES OVER (`$__reanchor` + the CSR builder, rebuilt fresh under `$__fresh`).
-/// Returns hoistable template `decls` (the builders' `$__template` consts) alongside
-/// the method body.
 pub fn generate_hydrate(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> Generated {
     let mut ctx = Ctx::new("h");
     let lines = hydrate_bind(statics, holes, "root", false, &mut ctx, emitter);
@@ -131,23 +94,6 @@ pub fn generate_hydrate(statics: &[String], holes: &[String], emitter: &dyn Emit
     }
 }
 
-/// Bind one template's holes onto EXISTING server DOM reached from `root`, with no
-/// DOM creation. Reused for the top-level `$$__hydrate` method (`root` = the shadow
-/// root) AND for a structural hole's per-branch/row hydrate builder (`root` = the
-/// branch's server root element, `el` = true so paths drop their leading step).
-///
-/// Structural holes split two ways. A conditional that renders a COMPONENT (a
-/// custom element, which self-hydrates from its own DSD) is RESUMED: `$__seat`
-/// keeps the server nodes and drops an anchor after them, and `$__resume` adopts
-/// that server root on the first run (single mount) then clones fresh on later
-/// reactive changes. Everything else keeps the fresh-rebuild takeover (`$__reanchor`
-/// plus the CSR builder), correct for plain content and wrapped in `$__fresh` so
-/// its writes land.
-/// For each structural hole, decide whether its parent holds MULTIPLE regions and,
-/// if so, its `(ordinal, lead)` among the parent's `<!---->` delimiters: `ordinal`
-/// is its position among the parent's regions, `lead` the static nodes between the
-/// previous delimiter (or parent start) and this region. Single-region parents get
-/// `(false, 0, 0)` and keep the static-index `bounds` path.
 fn region_meta(holes: &[StructHole]) -> Vec<(bool, usize, usize)> {
     let mut groups: Vec<(NodePath, Vec<usize>)> = Vec::new();
     for (i, h) in holes.iter().enumerate() {
@@ -184,8 +130,6 @@ fn hydrate_bind(
     let mut lines: Vec<String> = Vec::new();
     let mut grabbed: Vec<(NodePath, String)> = Vec::new();
 
-    // A single-root branch's clone IS its root element, so every hole path drops
-    // its leading step (the element itself) to navigate from `root`.
     let adj = |p: &NodePath| -> NodePath {
         if el && !p.is_empty() {
             p[1..].to_vec()
@@ -280,8 +224,6 @@ fn hydrate_bind(
         lines.push(emitter.bind_group(&group));
     }
 
-    // Phase 1 (pristine reads): grab every structural parent and capture its region
-    // as node-ref bounds, before any seat/reanchor mutates sibling positions.
     let all_holes = structural_holes(statics, holes);
     let region_meta = region_meta(&all_holes);
     let mut prepared: Vec<(String, String, StructHole, bool)> = Vec::new();
@@ -308,9 +250,6 @@ fn hydrate_bind(
         prepared.push((parent, bounds, sh, resumable));
     }
 
-    // Phase 2: resume component conditionals in place (outside `$__fresh`, so the
-    // first-run adopt binds under hydrating=true and skips writing correct server
-    // DOM); rebuild everything else fresh inside `$__fresh`.
     let mut resume: Vec<String> = Vec::new();
     let mut fresh: Vec<String> = Vec::new();
     for (parent, bounds, sh, resumable) in prepared {
@@ -347,10 +286,6 @@ fn hydrate_bind(
     lines
 }
 
-/// A structural branch renders a component if any of its `tpl` spans contains a
-/// custom-element open tag (a lowercase name with a hyphen). Only such branches
-/// need the resume path - a self-hydrating server component must not be discarded
-/// and rebuilt (double mount).
 fn branch_has_component(expr: &str) -> bool {
     for (start, end) in find_html_spans(expr) {
         let (statics, _) = split_template_literal(&slice(expr, start, end));
@@ -387,9 +322,6 @@ fn has_custom_tag(markup: &str) -> bool {
     false
 }
 
-/// Every `tpl` span in a structural branch is a single-root element (so the resume
-/// path can adopt one server node per branch). Non-single-root branches keep the
-/// fresh-rebuild takeover.
 fn branches_single_root(expr: &str) -> bool {
     for (start, end) in find_html_spans(expr) {
         let (statics, holes) = split_template_literal(&slice(expr, start, end));
@@ -400,18 +332,11 @@ fn branches_single_root(expr: &str) -> bool {
     true
 }
 
-/// Generate the source for one top-level template: the module-scope
-/// `template(...)` consts followed by the `view()` body.
 pub fn codegen(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> String {
     let g = generate(statics, holes, emitter);
     format!("{}{}", g.decls, g.body)
 }
 
-/// Generate one template body. `builder` switches the return between the whole
-/// fragment (a view) and an embedded builder. `multi_root` keeps the whole
-/// fragment for a builder that can mount many roots - both a `_child` value and a
-/// `_list` row (the reconciler tracks a first..last range per key, so a multi-root
-/// row returns its fragment rather than collapsing to its first node).
 fn gen_template(
     statics: &[String],
     holes: &[String],
@@ -423,8 +348,6 @@ fn gen_template(
     let parsed = parse(statics, holes);
     let bindings: Vec<_> = parsed.holes.iter().map(classify).collect();
 
-    // A single-root nested builder (every list row) clones the root ELEMENT
-    // directly — the clone IS the root, so all paths drop their leading Child(0).
     let el = builder && parsed.single_root;
 
     let seen_key = if el {
@@ -456,9 +379,6 @@ fn gen_template(
     }];
     let mut grabbed: Vec<(NodePath, String)> = Vec::new();
 
-    // Phase 1: grab every binding's node WHILE THE CLONE IS PRISTINE. Bindings
-    // that insert nodes (_child/_list/splice) shift sibling indices, so all
-    // node references must be captured before any binding runs.
     let nodes: Vec<String> = bindings
         .iter()
         .map(|b| {
@@ -471,18 +391,6 @@ fn gen_template(
         })
         .collect();
 
-    // Phase 2: emit the bindings against the pre-grabbed vars. Value writes
-    // (text/attr/class/style/prop) are collected into `group` and wrapped in ONE
-    // effect per template instance, so a row costs a single Scope/Set rather than
-    // one per binding. Their one-time setup (text anchors, class-initial capture)
-    // stays inline; structural (list/child) and wiring (event/model/…) emit as-is.
-    // Phase 2a — CSE: a pure member read (`a.b`, `this.x.y`) appearing in more
-    // than one grouped value binding is otherwise read — and thus tracked — once
-    // per occurrence. Hoist it to a single const at the top of the effect so the
-    // row subscribes to that signal once. Only side-effect-free member chains
-    // qualify; structural/event bindings are excluded and keep their raw expr.
-    // Static reads (a `repeat` key field) hoist OUTSIDE the effect (set once);
-    // dynamic reads keep the in-effect CSE.
     let mut cse: HashMap<String, String> = HashMap::new();
     let mut hoists: Vec<String> = Vec::new();
     let mut static_hoists: Vec<String> = Vec::new();
@@ -501,7 +409,6 @@ fn gen_template(
             if counts.get(e).copied().unwrap_or(0) >= 2 && !cse.contains_key(e) {
                 let v = ctx.var("v");
                 if is_static_key(e, ctx) {
-                    // set-once key read — go through raw, no Proxy trap / dep lookup
                     static_hoists.push(emitter.local(&v, &static_raw(e)));
                 } else {
                     hoists.push(emitter.local(&v, e));
@@ -511,19 +418,12 @@ fn gen_template(
         }
     }
 
-    // `group` becomes the per-row effect (dynamic bindings). `statics` are written
-    // once at mount: a `repeat` key field never changes within a row, so it needs
-    // no effect, no dep, no subscription.
-    // With no shared (CSE) read, each dynamic binding can own its effect, so a
-    // change to one field re-runs only that binding — surgical updates.
     let split = hoists.is_empty();
     let mut group: Vec<String> = hoists;
     let mut statics: Vec<String> = static_hoists;
     for (b, node) in bindings.iter().zip(&nodes) {
         let name = b.name.as_deref().unwrap_or("");
         let stat = is_grouped(&b.kind) && is_static_key(b.expr.trim(), ctx);
-        // grouped value writes use the hoisted var when their read was CSE'd; a
-        // non-CSE'd static key reads through raw (no trap/dep lookup).
         let read: String = match cse.get(b.expr.trim()) {
             Some(v) => v.clone(),
             None if stat => static_raw(b.expr.trim()),
@@ -532,58 +432,55 @@ fn gen_template(
         let g = read.as_str();
         match b.kind {
             BindingKind::Splice => {
-                lines.push(emitter.pending("Splice content binding - symbol resolution pending"))
+                lines.push(emitter.pending("Splice content binding - symbol resolution pending"));
             }
             BindingKind::List => lines.push(lower_list(&b.expr, node, ctx, emitter)),
             BindingKind::Child => lines.extend(lower_child(&b.expr, node, ctx, emitter)),
             BindingKind::Text if b.baked => {
                 if stat {
-                    statics.push(emitter.set_text_direct(node, g))
+                    statics.push(emitter.set_text_direct(node, g));
                 } else {
-                    group.push(emitter.set_text(node, g))
+                    group.push(emitter.set_text(node, g));
                 }
             }
             BindingKind::Text => {
                 let tnode = ctx.var("x");
                 lines.push(emitter.text_anchor(&tnode, node));
                 if stat {
-                    statics.push(emitter.set_text_direct(&tnode, g))
+                    statics.push(emitter.set_text_direct(&tnode, g));
                 } else {
-                    group.push(emitter.set_text(&tnode, g))
+                    group.push(emitter.set_text(&tnode, g));
                 }
             }
             BindingKind::Attr => {
                 if stat {
-                    statics.push(emitter.set_attr_direct(node, name, g))
+                    statics.push(emitter.set_attr_direct(node, name, g));
                 } else {
-                    group.push(emitter.set_attr(node, name, g))
+                    group.push(emitter.set_attr(node, name, g));
                 }
             }
-            // A class binding fully absorbs any static class into its expression
-            // (`class="a ${x}"` → one dynamic value), so the initial base is always
-            // empty — no need to read it back off the DOM.
             BindingKind::Class => {
                 let w = emitter.set_class(node, "''", g);
                 if stat {
-                    statics.push(w)
+                    statics.push(w);
                 } else {
-                    group.push(w)
+                    group.push(w);
                 }
             }
             BindingKind::Style => {
                 let w = emitter.set_style(node, g);
                 if stat {
-                    statics.push(w)
+                    statics.push(w);
                 } else {
-                    group.push(w)
+                    group.push(w);
                 }
             }
             BindingKind::Prop => {
                 let w = emitter.set_prop(node, name, g);
                 if stat {
-                    statics.push(w)
+                    statics.push(w);
                 } else {
-                    group.push(w)
+                    group.push(w);
                 }
             }
             BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
@@ -610,10 +507,6 @@ fn gen_template(
     body
 }
 
-/// Grab the node at `path` once, reusing the var if already grabbed. To avoid
-/// re-walking from the root on every grab, walk from the longest already-grabbed
-/// node that is a prefix of `path` (common-subexpression elimination) — this is
-/// per-row hot code, so the saved `.children[i]` hops add up.
 fn grab(
     ctx: &mut Ctx,
     emitter: &dyn Emitter,
@@ -622,7 +515,6 @@ fn grab(
     grabbed: &mut Vec<(NodePath, String)>,
     lines: &mut Vec<String>,
 ) -> String {
-    // An empty path is the cloned root itself (element-clone root binding).
     if path.is_empty() {
         return root.to_string();
     }
@@ -646,8 +538,6 @@ fn grab(
     var
 }
 
-/// `repeat(items, render, key)` → `_list(anchor, () => (items), key, render)`,
-/// with nested `tpl` in `render` lowered to an IIFE builder.
 fn lower_list(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
     let args = split_call_args(expr);
     if args.len() < 2 {
@@ -672,9 +562,6 @@ fn lower_list(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) ->
     emitter.list(anchor, &args[0], &key, &render)
 }
 
-/// `when`/`choose`/ternary → `_child(anchor, () => (getter))`. The directive
-/// call is erased; nested `tpl` becomes an IIFE builder. A ternary with a
-/// `repeat(...)` branch is special-cased into a `_list` + `_child` pair.
 fn lower_child(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> Vec<String> {
     if let Some((cond, then, els)) = split_ternary(expr) {
         if is_repeat(&then) || is_repeat(&els) {
@@ -686,11 +573,6 @@ fn lower_child(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -
     vec![emitter.child(anchor, &getter)]
 }
 
-/// The `_child` getter for a `when`/`choose`/`match`/ternary hole. `hy` selects
-/// the builder each nested `tpl` lowers to: `None` clones fresh (CSR / later
-/// reactive updates), `Some(root)` binds onto an existing server subtree rooted at
-/// `root` (the resume path's first-run hydrate). The `cond`/dispatch structure is
-/// identical either way.
 fn child_getter(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&str>) -> String {
     let trimmed = expr.trim_start();
     if trimmed.starts_with("when(") {
@@ -704,13 +586,10 @@ fn child_getter(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&st
     } else if trimmed.starts_with("match(") {
         lower_match(expr, ctx, emitter, hy)
     } else {
-        // a ternary or direct template
         sub(expr, ctx, emitter, true, hy)
     }
 }
 
-/// Lower nested `tpl` in `expr` to fresh CSR builders (`hy = None`) or hydrate
-/// binders rooted at `hy` (`Some(root)`).
 fn sub(
     expr: &str,
     ctx: &mut Ctx,
@@ -724,9 +603,6 @@ fn sub(
     }
 }
 
-/// Mirror of [`substitute_html`] for the resume path: each nested `tpl` becomes an
-/// IIFE that binds its holes onto the passed server `root` (via [`hydrate_bind`])
-/// and returns `root` - no clone, no DOM creation.
 fn substitute_html_hydrate(expr: &str, root: &str, ctx: &mut Ctx, emitter: &dyn Emitter) -> String {
     let spans = find_html_spans(expr);
     if spans.is_empty() {
@@ -754,9 +630,6 @@ fn is_repeat(branch: &str) -> bool {
     branch.trim_start().starts_with("repeat(")
 }
 
-/// `cond ? repeat(...) : else` (or the mirror) → a `_list` whose items are
-/// guarded by `cond` plus a `_child` for the other branch, sharing the spot via
-/// a second runtime-created anchor. Keeps the list's keyed reconcile.
 fn lower_repeat_ternary(
     cond: &str,
     then: &str,
@@ -813,8 +686,6 @@ fn lower_repeat_ternary(
     ]
 }
 
-/// `choose([[c1, f1], ..., [true, fd]])` → a right-folded ternary chain
-/// `c1 ? (f1)() : ... : (fd)()`.
 fn lower_choose(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&str>) -> String {
     let args = split_call_args(expr);
     let Some(arr) = args.first() else {
@@ -831,12 +702,6 @@ fn lower_choose(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&st
     chain
 }
 
-/// `match(value, { k: () => tpl.. })` (form 1, literal/enum value) or
-/// `match(value, key, { k: (m) => tpl.. })` (form 2, discriminated object union)
-/// → a right-folded equality-ternary chain. Form 1 compares `value === key`;
-/// form 2 compares `value[key] === caseKey` and passes the (narrowed) value into
-/// each arm so member reads stay bound. Exhaustiveness is a type-level guarantee
-/// (see the `match` overloads), so the fallthrough seed is `''`.
 fn lower_match(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&str>) -> String {
     let args = split_call_args(expr);
     let Some(value) = args.first().cloned() else {
@@ -866,9 +731,6 @@ fn lower_match(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&str
     chain
 }
 
-/// The right-hand side of a `value === …` comparison for an object case key:
-/// a computed `[Expr]` unwraps to `(Expr)`, string/numeric literals pass through,
-/// and a bare identifier is quoted into a string literal.
 fn key_compare_rhs(key: &str) -> String {
     let k = key.trim();
     let quoted = k.starts_with('\'') || k.starts_with('"') || k.starts_with('`');
@@ -882,8 +744,6 @@ fn key_compare_rhs(key: &str) -> String {
     }
 }
 
-/// The body of a zero-arg factory `() => EXPR`. Falls back to calling a
-/// non-arrow factory `(f)()`.
 fn arrow_body(factory: Option<&String>) -> String {
     let Some(f) = factory else {
         return "''".into();
@@ -895,9 +755,6 @@ fn arrow_body(factory: Option<&String>) -> String {
     }
 }
 
-/// Replace each top-level `tpl` template in `expr` with an inline IIFE builder.
-/// `multi_root` is true when the builder feeds a `_child` value (a conditional
-/// branch can mount many roots) and false when it feeds a `_list` row.
 fn substitute_html(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, multi_root: bool) -> String {
     let spans = find_html_spans(expr);
     if spans.is_empty() {
@@ -926,9 +783,6 @@ fn strip_brackets(s: &str) -> String {
         .to_string()
 }
 
-/// Grouped value bindings share one effect, so a read duplicated across them is
-/// the CSE candidate; structural (list/child) and wiring (event/model/…)
-/// bindings evaluate elsewhere and are excluded.
 fn is_grouped(k: &BindingKind) -> bool {
     matches!(
         k,
@@ -949,23 +803,17 @@ fn is_js_ident(p: &str) -> bool {
     chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '$')
 }
 
-/// A pure member chain (`a.b`, `this.x.y`) — safe to read once and reuse. Rejects
-/// anything with a call, index, operator or whitespace (potential side effects or
-/// a differing value), and bare identifiers (no signal read, nothing to save).
 fn is_simple_read(e: &str) -> bool {
     let parts: Vec<&str> = e.split('.').collect();
     parts.len() >= 2 && parts.iter().all(|p| is_js_ident(p))
 }
 
-/// First parameter name of an arrow (`(item) => …`, `(item: Row) => …`,
-/// `(item, i) => …`). The reactive item bound by a `repeat` render/key arrow.
 fn arrow_first_param(arrow: &str) -> Option<String> {
     let (params, _) = arrow.split_once("=>")?;
     let params = params.trim();
     let params = params
         .strip_prefix('(')
-        .map(|p| p.trim_end_matches(')'))
-        .unwrap_or(params);
+        .map_or(params, |p| p.trim_end_matches(')'));
     let name = params.split(',').next()?.split(':').next()?.trim();
     if is_js_ident(name) {
         Some(name.to_string())
@@ -974,8 +822,6 @@ fn arrow_first_param(arrow: &str) -> Option<String> {
     }
 }
 
-/// The key field of a `repeat` key arrow IFF it is a plain `param.field` member
-/// (e.g. `(item) => item.id` → `id`). Computed/complex keys yield `None`.
 fn key_field(key_arrow: &str) -> Option<String> {
     let param = arrow_first_param(key_arrow)?;
     let (_, body) = key_arrow.split_once("=>")?;
@@ -987,8 +833,6 @@ fn key_field(key_arrow: &str) -> Option<String> {
     }
 }
 
-/// True when `expr` reads exactly the current reactive root's key field
-/// (`item.id`) — immutable per row in a keyed list, so the binding is static.
 fn is_static_key(expr: &str, ctx: &Ctx) -> bool {
     match ctx.reactive.last() {
         Some(Reactive {
@@ -999,8 +843,6 @@ fn is_static_key(expr: &str, ctx: &Ctx) -> bool {
     }
 }
 
-/// Wrap the root of a set-once key read in `toRaw()` so it skips the Proxy get-trap
-/// and dep lookup: `item.id` → `toRaw(item).id`.
 fn static_raw(expr: &str) -> String {
     match expr.split_once('.') {
         Some((root, rest)) => format!("$__toRaw({root}).{rest}"),

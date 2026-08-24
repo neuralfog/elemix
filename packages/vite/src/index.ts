@@ -21,11 +21,6 @@ export const PRAGMAS = [
 
 const PRAGMA = new RegExp(`^\\s*//\\s*#(${PRAGMAS.join('|')})\\b`, 'm');
 
-/**
- * Whether a module needs the elemix compiler run on it: it has a `tpl` template,
- * or any pragma comment (including a template-less `// #state` store / pragma
- * component). Exported so the gate stays under test for every pragma.
- */
 export const needsCompile = (code: string): boolean =>
     code.includes('tpl`') || PRAGMA.test(code);
 
@@ -78,15 +73,9 @@ const compile = (bin: string, source: string): Promise<Compiled> =>
     });
 
 export interface ElemixPluginOptions {
-    /** Path to the `elemix-compiler` binary. Defaults to the installed one. */
     bin?: string;
 }
 
-/**
- * Vite plugin — lower elemix `tpl` templates to compiled `view()` on the fly,
- * via the native `elemix-compiler` binary. Runs `pre`, before Vite transpiles
- * TS to JS, so authoring stays `tpl`...`` and the compile step is invisible.
- */
 export const elemix = (options: ElemixPluginOptions = {}): Plugin => {
     let bin = options.bin;
     return {

@@ -1,14 +1,3 @@
-//! String surgery for nested-template lowering.
-//!
-//! A nested `` tpl`...` `` is a verbatim substring of its hole's expression, so
-//! lowering works on the expr string directly — no source spans needed. These
-//! scanners do balanced matching over parens/brackets/braces, string literals,
-//! and template literals (including `${...}` nesting), which is what makes
-//! splitting directive args and finding nested templates robust.
-
-/// Split a `` tpl`...` `` literal into its static strings + hole expressions —
-/// the same `(statics, holes)` shape `locate` produces, but for a nested
-/// template found inside an expression.
 pub fn split_template_literal(src: &str) -> (Vec<String>, Vec<String>) {
     let c: Vec<char> = src.chars().collect();
     let Some(open) = c.iter().position(|&x| x == '`') else {
@@ -32,7 +21,7 @@ pub fn split_template_literal(src: &str) -> (Vec<String>, Vec<String>) {
         }
         if body[i] == '$' && i + 1 < body.len() && body[i + 1] == '{' {
             statics.push(std::mem::take(&mut cur));
-            let end = skip_to_close(body, i + 2, '}'); // index after `}`
+            let end = skip_to_close(body, i + 2, '}');
             holes.push(take(body, i + 2, end - 1).trim().to_string());
             i = end;
             continue;
@@ -44,47 +33,36 @@ pub fn split_template_literal(src: &str) -> (Vec<String>, Vec<String>) {
     (statics, holes)
 }
 
-/// Split a call expression `name(a, b, c)` into its top-level argument strings.
 pub fn split_call_args(src: &str) -> Vec<String> {
     let c: Vec<char> = src.chars().collect();
     let Some(open) = c.iter().position(|&x| x == '(') else {
         return Vec::new();
     };
-    let end = skip_to_close(&c, open + 1, ')'); // index after `)`
+    let end = skip_to_close(&c, open + 1, ')');
     split_commas(&take(&c, open + 1, end - 1))
 }
 
-/// Split a string by top-level commas, respecting nested brackets, strings, and
-/// template literals. Empty pieces (from a trailing comma) are dropped.
 pub fn split_commas(src: &str) -> Vec<String> {
     let c: Vec<char> = src.chars().collect();
     let mut parts = Vec::new();
     let mut start = 0;
     let mut i = 0;
     while i < c.len() {
-        match c[i] {
-            '\'' | '"' => i = skip_string(&c, i, c[i]),
-            '`' => i = tl_end(&c, i) + 1,
-            '(' => i = skip_to_close(&c, i + 1, ')'),
-            '[' => i = skip_to_close(&c, i + 1, ']'),
-            '{' => i = skip_to_close(&c, i + 1, '}'),
-            ',' => {
-                parts.push(take(&c, start, i).trim().to_string());
-                start = i + 1;
-                i += 1;
-            }
-            _ => i += 1,
+        if let Some(ni) = skip_span(&c, i) {
+            i = ni;
+            continue;
         }
+        if c[i] == ',' {
+            parts.push(take(&c, start, i).trim().to_string());
+            start = i + 1;
+        }
+        i += 1;
     }
     parts.push(take(&c, start, c.len()).trim().to_string());
     parts.retain(|p| !p.is_empty());
     parts
 }
 
-/// Split an object literal `{ k1: v1, k2: v2 }` into its `(key, value)` pairs,
-/// both verbatim. Respects nesting (strings, templates, `()`/`[]`/`{}`), so arrow
-/// bodies, nested `tpl` templates and computed `[Expr]` keys stay intact. Entries
-/// without a top-level `:` (spreads, shorthand) are dropped.
 pub fn split_object_entries(src: &str) -> Vec<(String, String)> {
     let t = src.trim();
     let inner = t
@@ -97,33 +75,24 @@ pub fn split_object_entries(src: &str) -> Vec<(String, String)> {
         .collect()
 }
 
-/// Split one object entry at its first top-level `:` into `(key, value)`,
-/// skipping colons inside strings, templates, `()`, `[]` and `{}` (so `[E.A]:`
-/// computed keys and `(m: T) =>` param annotations don't fool it).
 fn split_at_top_colon(entry: &str) -> Option<(String, String)> {
     let c: Vec<char> = entry.chars().collect();
     let mut i = 0;
     while i < c.len() {
-        match c[i] {
-            '\'' | '"' => i = skip_string(&c, i, c[i]),
-            '`' => i = tl_end(&c, i) + 1,
-            '(' => i = skip_to_close(&c, i + 1, ')'),
-            '[' => i = skip_to_close(&c, i + 1, ']'),
-            '{' => i = skip_to_close(&c, i + 1, '}'),
-            ':' => {
-                let key: String = c[..i].iter().collect();
-                let val: String = c[i + 1..].iter().collect();
-                return Some((key.trim().to_string(), val.trim().to_string()));
-            }
-            _ => i += 1,
+        if let Some(ni) = skip_span(&c, i) {
+            i = ni;
+            continue;
         }
+        if c[i] == ':' {
+            let key: String = c[..i].iter().collect();
+            let val: String = c[i + 1..].iter().collect();
+            return Some((key.trim().to_string(), val.trim().to_string()));
+        }
+        i += 1;
     }
     None
 }
 
-/// Split a conditional expression `cond ? then : else` at its top-level `?`/`:`,
-/// skipping optional-chaining `?.`, nullish `??`, and nested ternaries/brackets.
-/// Returns `None` if `src` is not a ternary.
 pub fn split_ternary(src: &str) -> Option<(String, String, String)> {
     let c: Vec<char> = src.chars().collect();
 
@@ -135,14 +104,13 @@ pub fn split_ternary(src: &str) -> Option<(String, String, String)> {
         if j >= c.len() {
             return None;
         }
+        if let Some(nj) = skip_span(&c, j) {
+            j = nj;
+            continue;
+        }
         match c[j] {
-            '\'' | '"' => j = skip_string(&c, j, c[j]),
-            '`' => j = tl_end(&c, j) + 1,
-            '(' => j = skip_to_close(&c, j + 1, ')'),
-            '[' => j = skip_to_close(&c, j + 1, ']'),
-            '{' => j = skip_to_close(&c, j + 1, '}'),
             '?' => {
-                if matches!(c.get(j + 1), Some('?') | Some('.')) {
+                if matches!(c.get(j + 1), Some('?' | '.')) {
                     j += if c.get(j + 1) == Some(&'?') { 2 } else { 1 };
                 } else {
                     depth += 1;
@@ -165,16 +133,14 @@ pub fn split_ternary(src: &str) -> Option<(String, String, String)> {
     ))
 }
 
-/// Index of the first top-level ternary `?` (not `?.` / `??`).
 fn find_ternary_question(c: &[char], from: usize) -> Option<usize> {
     let mut i = from;
     while i < c.len() {
+        if let Some(ni) = skip_span(c, i) {
+            i = ni;
+            continue;
+        }
         match c[i] {
-            '\'' | '"' => i = skip_string(c, i, c[i]),
-            '`' => i = tl_end(c, i) + 1,
-            '(' => i = skip_to_close(c, i + 1, ')'),
-            '[' => i = skip_to_close(c, i + 1, ']'),
-            '{' => i = skip_to_close(c, i + 1, '}'),
             '?' => match c.get(i + 1) {
                 Some('?') => i += 2,
                 Some('.') => i += 1,
@@ -186,9 +152,6 @@ fn find_ternary_question(c: &[char], from: usize) -> Option<usize> {
     None
 }
 
-/// Find every top-level `` tpl`...` `` in an expression, as char-index ranges.
-/// Templates nested inside another template's `${...}` are skipped — they are
-/// reached by recursing into that template's holes.
 pub fn find_html_spans(src: &str) -> Vec<(usize, usize)> {
     let c: Vec<char> = src.chars().collect();
     let mut spans = Vec::new();
@@ -196,9 +159,9 @@ pub fn find_html_spans(src: &str) -> Vec<(usize, usize)> {
     while i < c.len() {
         match c[i] {
             '\'' | '"' => i = skip_string(&c, i, c[i]),
-            '`' => i = tl_end(&c, i) + 1, // a bare template literal, not tpl-tagged
+            '`' => i = tl_end(&c, i) + 1,
             _ if is_tpl_tag(&c, i) => {
-                let end = tl_end(&c, i + 3); // backtick is at i+3
+                let end = tl_end(&c, i + 3);
                 spans.push((i, end + 1));
                 i = end + 1;
             }
@@ -208,12 +171,9 @@ pub fn find_html_spans(src: &str) -> Vec<(usize, usize)> {
     spans
 }
 
-/// Slice a char range out of `src` as a `String`.
 pub fn slice(src: &str, start: usize, end: usize) -> String {
     src.chars().skip(start).take(end - start).collect()
 }
-
-// --- balanced scanners --------------------------------------------------------
 
 fn is_tpl_tag(c: &[char], i: usize) -> bool {
     if i + 3 >= c.len() || c[i + 3] != '`' {
@@ -229,7 +189,6 @@ pub(crate) fn is_ident_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_' || c == '$'
 }
 
-/// `c[open]` is a backtick; return the index of the matching closing backtick.
 pub(crate) fn tl_end(c: &[char], open: usize) -> usize {
     let mut i = open + 1;
     while i < c.len() {
@@ -245,28 +204,32 @@ pub(crate) fn tl_end(c: &[char], open: usize) -> usize {
     i
 }
 
-/// `from` is just past an opener; return the index just past the matching
-/// `close`, descending through nested brackets/strings/templates.
 pub(crate) fn skip_to_close(c: &[char], from: usize, close: char) -> usize {
     let mut i = from;
     while i < c.len() {
-        let ch = c[i];
-        if ch == close {
+        if c[i] == close {
             return i + 1;
         }
-        match ch {
-            '\'' | '"' => i = skip_string(c, i, ch),
-            '`' => i = tl_end(c, i) + 1,
-            '(' => i = skip_to_close(c, i + 1, ')'),
-            '[' => i = skip_to_close(c, i + 1, ']'),
-            '{' => i = skip_to_close(c, i + 1, '}'),
-            _ => i += 1,
+        if let Some(ni) = skip_span(c, i) {
+            i = ni;
+            continue;
         }
+        i += 1;
     }
     i
 }
 
-/// `c[i]` is the opening quote; return the index just past the closing quote.
+fn skip_span(c: &[char], i: usize) -> Option<usize> {
+    match c[i] {
+        '\'' | '"' => Some(skip_string(c, i, c[i])),
+        '`' => Some(tl_end(c, i) + 1),
+        '(' => Some(skip_to_close(c, i + 1, ')')),
+        '[' => Some(skip_to_close(c, i + 1, ']')),
+        '{' => Some(skip_to_close(c, i + 1, '}')),
+        _ => None,
+    }
+}
+
 pub(crate) fn skip_string(c: &[char], i: usize, quote: char) -> usize {
     let mut j = i + 1;
     while j < c.len() {
@@ -284,4 +247,17 @@ pub(crate) fn skip_string(c: &[char], i: usize, quote: char) -> usize {
 
 fn take(c: &[char], a: usize, b: usize) -> String {
     c[a..b].iter().collect()
+}
+
+pub(crate) fn trailing_newline(source: &str, at: usize) -> usize {
+    usize::from(source[at..].starts_with('\n'))
+}
+
+pub(crate) fn apply_edits(source: &str, mut edits: Vec<(usize, usize, String)>) -> String {
+    edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
+    let mut out = source.to_string();
+    for (start, end, repl) in edits {
+        out.replace_range(start..end, &repl);
+    }
+    out
 }

@@ -45,4 +45,3 @@ export class AppCard extends Component {
         }
     </div>`;
 }
-

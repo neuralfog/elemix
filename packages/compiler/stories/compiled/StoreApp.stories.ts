@@ -12,7 +12,6 @@ export const Default = {
         const controls = find('store-controls', canvasElement);
         if (!readout || !controls) throw new Error('store-app missing readout or child shadow root');
 
-        // child renders the shared counter object in .value; buttons order: − then +
         const childValue = find('.value', controls);
         const childButtons = query('button', controls);
         const dec = childButtons[0];
@@ -21,33 +20,26 @@ export const Default = {
             throw new Error('store-controls missing value or buttons');
         }
 
-        // button labels (− then +); − is the U+2212 minus sign
         expect(dec.textContent?.trim()).toBe('−');
         expect(inc.textContent?.trim()).toBe('+');
-        // child renders its static label
         expect(find('.label', controls)?.textContent).toBe('Child controls');
 
-        // shared object starts at 0 in both parent readout and child value
         expect(readout.textContent).toBe('0');
         expect(childValue.textContent).toBe('0');
 
-        // child mutates the shared-by-reference object — both parent + child re-render
         click(inc);
         expect(childValue.textContent).toBe('1');
         expect(readout.textContent).toBe('1');
 
-        // repeated increments keep both views in sync
         click(inc);
         click(inc);
         expect(childValue.textContent).toBe('3');
         expect(readout.textContent).toBe('3');
 
-        // − decrements the same shared object; parent readout follows
         click(dec);
         expect(childValue.textContent).toBe('2');
         expect(readout.textContent).toBe('2');
 
-        // can go negative through the shared reference
         click(dec);
         click(dec);
         click(dec);

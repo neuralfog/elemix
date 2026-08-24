@@ -1,22 +1,3 @@
-//! Stage: locate `//` pragma comments and bind each to the declaration on the
-//! next line.
-//!
-//! Walks `program.comments`, keeps the line comments whose content is a pragma
-//! (`#…`), and binds each to the nearest following declaration that sits on the
-//! *immediately* next line (no blank line between):
-//! - on a class → `#component`/`#tag`/`#form`/`#no-shadow` directives;
-//! - on a class **field** → `#styles` (the field value is the stylesheet,
-//!   inlined into `sheet(...)` and the field stripped);
-//! - on a class field **or** module `const` → `#state` (wrap the initializer in
-//!   `state<T>(…)`, lifting the type annotation into the generic);
-//! - on a class **method** (or arrow field) → `#effect` (register a reactive
-//!   effect) and the lifecycle markers `#before-mount`/`#mount`/`#dispose`,
-//!   which synthesize the `beforeMount`/`onMount`/`onDispose` hook the base
-//!   already calls — many tagged methods fold into one hook, in source order.
-//!
-//! The values stay real, type-checked expressions on the declaration — never
-//! text in the comment.
-
 use crate::pragma::is_known_directive;
 use crate::pragma::parse::{is_pragma, split_directives, split_directives_spanned};
 use crate::pragma::Directive;
@@ -29,10 +10,6 @@ use oxc_ast::ast::{
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
 
-/// A `#styles`-tagged class field: its initializer text (the value passed to
-/// `sheet`), the full range to strip (marker comment + field line, for the
-/// normal shadow case), and the comment-only range (for `#no-shadow`, where the
-/// styles are skipped but the field stays so its value remains referenced).
 #[derive(Debug, PartialEq)]
 pub struct StyleField {
     pub value: String,
@@ -40,15 +17,6 @@ pub struct StyleField {
     pub comment: (usize, usize),
 }
 
-/// A `#state` rewrite: replace `[start, end)` with `repl`. For an object/array
-/// initializer (or a module const) this wraps the value in `state<T>(…)`. For a
-/// bare primitive class field it instead emits a get/set accessor backed by a
-/// per-instance `dep()` (`accessor = true`), so `this.foo` itself is reactive.
-///
-/// `module_primitive` flags a module-level `#state` const with a bare primitive
-/// initializer — illegal, because a module export has no `this` to hang an
-/// accessor on and can't be reactive single-file. `diagnose` turns it into an
-/// error steering to an object store.
 #[derive(Debug, PartialEq)]
 pub struct StateEdit {
     pub start: usize,
@@ -56,65 +24,46 @@ pub struct StateEdit {
     pub repl: String,
     pub accessor: bool,
     pub module_primitive: bool,
-    /// A module-level `#state` const (a shared store), not a per-instance class
-    /// field. The SSR build lowers these to `$__store` (registered for per-request
-    /// reset) instead of `$__state`, so one request's writes don't bleed into the
-    /// next through the server-process singleton.
     pub module: bool,
-    /// `#store <name>` (not `#state`): the persisted-store name. When set, the
-    /// initializer lowers to `$__store('<name>', () => (INIT))` (already
-    /// per-request-scoped internally, so no SSR `$__scopedStore` rewrite) in both
-    /// builds; `$__store` resolves from `/runtime` (CSR) or `/ssr-runtime` (SSR).
     pub store_name: Option<String>,
 }
 
-/// A top-level class with whatever pragma directives + styles fields tag it.
 #[derive(Debug, PartialEq)]
 pub struct ClassInfo {
     pub name: String,
-    /// Start of the class statement (`export`-inclusive) — hoist consts here.
     pub start: usize,
-    /// End of the class statement — append `$__defineComponent(...)` after here.
     pub end: usize,
-    /// Offset just inside the class body `{` — inject `#form`'s member here.
     pub body_open: usize,
     pub directives: Vec<Directive>,
-    /// Class-level directives WITH source spans (for precise hint carets). Parallel
-    /// to `directives` but kept separate so the transform path stays span-free.
     pub directive_spans: Vec<SpannedDirective>,
     pub styles: Vec<StyleField>,
-    /// A field-level `#document` (`document = SomeDoc`): the referenced document
-    /// class + the range to strip. Stamped as `Class.$$__document` by `lower`.
     pub document_field: Option<StyleField>,
     pub effects: Vec<String>,
-    /// `#before-mount`-tagged methods, in source order.
     pub before_mounts: Vec<String>,
-    /// `#mount`-tagged methods, in source order.
     pub mounts: Vec<String>,
-    /// `#dispose`-tagged methods, in source order.
     pub disposes: Vec<String>,
-    /// The superclass identifier (`extends X`). `None`, or `Some("Component")`,
-    /// means a base component; anything else is a component extending another
-    /// component, so lifecycle hooks + `__sheets` must chain through `super`.
     pub super_class: Option<String>,
 }
 
-/// A directive tagging the wrong kind of member — what each can tag is fixed:
-/// the lifecycle/effect hooks need a method or arrow field; `#state` needs a data
-/// field (never a function or method). Non-fatal: the transform skips the binding
-/// and `diagnose`/the analyzer report it (with a caret on the member).
+impl ClassInfo {
+    pub fn has_pragmas(&self) -> bool {
+        !self.directives.is_empty()
+            || !self.styles.is_empty()
+            || self.document_field.is_some()
+            || !self.effects.is_empty()
+            || !self.before_mounts.is_empty()
+            || !self.mounts.is_empty()
+            || !self.disposes.is_empty()
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum BindingProblem {
-    /// `#effect`/`#before-mount`/`#mount`/`#dispose` on a non-function field.
     HookOnNonFunction,
-    /// `#state` on an arrow/function-valued field.
     StateOnFunction,
-    /// `#state` on a method.
     StateOnMethod,
 }
 
-/// A member directive bound to the wrong target (see [`BindingProblem`]), with
-/// the member-name span so a diagnostic can caret it.
 #[derive(Debug, PartialEq)]
 pub struct BindingIssue {
     pub directive: String,
@@ -125,40 +74,23 @@ pub struct BindingIssue {
     pub end: usize,
 }
 
-/// Everything the lowering needs. `#state` declarations resolve `state` from
-/// `@neuralfog/elemix/runtime` (a compile target), so no public-import surgery.
 #[derive(Debug, PartialEq)]
 pub struct Located {
     pub classes: Vec<ClassInfo>,
     pub states: Vec<StateEdit>,
     pub strips: Vec<(usize, usize)>,
-    /// Member directives bound to the wrong target (see [`BindingIssue`]).
     pub binding_issues: Vec<BindingIssue>,
 }
 
 #[derive(Debug, PartialEq)]
 pub enum LocateError {
-    /// A pragma comment with no declaration on the immediately-following line.
     Orphan,
-    /// A KNOWN member/class hint tagging a top-level `const` where only `#state`
-    /// is allowed.
     OnConst(String),
-    /// A KNOWN class/method hint tagging a class field where only
-    /// `#styles`/`#state` is allowed.
     OnField(String),
-    /// A hint name no handler claims — almost always a typo (`#statesdf`). Kept
-    /// distinct from [`OnConst`]/[`OnField`] so the message says "unknown" rather
-    /// than misleadingly implying the hint would be valid elsewhere.
     Unknown(String),
-    /// `#store` with no name arg (`#store` instead of `#store user-prefs`).
     MissingName(String),
 }
 
-/// A [`LocateError`] paired with the source span to caret it at (where one
-/// exists) and the component it happened in (where known). `span == None` is
-/// file-level (no declaration to point at, e.g. an orphan pragma); `Some((start,
-/// end))` frames the offending member name. `component` names the class so the
-/// runtime message reads `<Class>: …`, matching the class-level hint errors.
 #[derive(Debug, PartialEq)]
 pub struct LocatedError {
     pub err: LocateError,
@@ -176,7 +108,6 @@ impl From<LocateError> for LocatedError {
     }
 }
 
-/// What a pragma comment binds to.
 enum Kind {
     Class(usize),
     Field {
@@ -187,8 +118,6 @@ enum Kind {
         type_span: Option<Span>,
         value: Span,
         prop_end: usize,
-        /// Whether the field's value is a function (arrow or function expression)
-        /// — the gate for the lifecycle/effect hooks.
         value_is_fn: bool,
     },
     Method {
@@ -205,7 +134,6 @@ enum Kind {
     },
 }
 
-/// Find every pragma comment and bind it to the next-line declaration.
 pub fn locate(source: &str) -> Result<Located, LocatedError> {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -347,11 +275,8 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                         value: slice(source, *value),
                         strip: (line, field_block_end(source, *prop_end)),
                         comment: (line, cend + usize::from(source[cend..].starts_with('\n'))),
-                    })
+                    });
                 }
-                // `#state` tags reactive DATA — never a function. An arrow/function
-                // field can't be wrapped in `state()` meaningfully; skip it and
-                // record a precise issue.
                 "state" => {
                     if *value_is_fn {
                         binding_issues.push(BindingIssue {
@@ -374,9 +299,6 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                     }
                     strips.push((line, cend));
                 }
-                // Lifecycle/effect hooks: a field carries one only if its value is a
-                // function (arrow); otherwise the runtime has nothing to call — skip
-                // the binding and record a precise issue for diagnostics.
                 d @ ("effect" | "before-mount" | "mount" | "dispose") => {
                     if *value_is_fn {
                         match d {
@@ -432,7 +354,6 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                     classes[*class_idx].disposes.push(name.clone());
                     strips.push((line, cend));
                 }
-                // `#state` tags reactive data, not behaviour — never a method.
                 "state" => {
                     binding_issues.push(BindingIssue {
                         directive: "state".to_string(),
@@ -501,7 +422,6 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
     })
 }
 
-/// The identifier name of a member key (empty for computed keys).
 fn key_name(key: &PropertyKey) -> String {
     match key {
         PropertyKey::StaticIdentifier(id) => id.name.to_string(),
@@ -509,7 +429,6 @@ fn key_name(key: &PropertyKey) -> String {
     }
 }
 
-/// The single directive name a field/const pragma carries (they take exactly one).
 fn directive_name(directives: &[Directive]) -> Result<&str, LocateError> {
     match directives {
         [d] => Ok(d.name.as_str()),
@@ -517,8 +436,6 @@ fn directive_name(directives: &[Directive]) -> Result<&str, LocateError> {
     }
 }
 
-/// Classify a hint that a class field can't carry: an UNKNOWN name is a typo
-/// (`#statesdf`), a KNOWN one is just in the wrong place (`#component` on a field).
 fn field_error(name: &str) -> LocateError {
     if is_known_directive(name) {
         LocateError::OnField(name.to_string())
@@ -527,7 +444,6 @@ fn field_error(name: &str) -> LocateError {
     }
 }
 
-/// As [`field_error`], for a top-level `const` (only `#state` is allowed there).
 fn const_error(name: &str) -> LocateError {
     if is_known_directive(name) {
         LocateError::OnConst(name.to_string())
@@ -536,9 +452,6 @@ fn const_error(name: &str) -> LocateError {
     }
 }
 
-/// `[name_end, value_end)` → ` = state<Type>(value)` (generic omitted if untyped).
-/// A module const with a bare-primitive initializer is flagged `module_primitive`
-/// for `diagnose` to reject — it would compile to a dead, non-reactive value.
 fn state_edit(source: &str, name_end: usize, type_span: Option<Span>, value: Span) -> StateEdit {
     let init = slice(source, value);
     let generic = type_span.map_or(String::new(), |t| format!("<{}>", slice(source, t)));
@@ -555,11 +468,6 @@ fn state_edit(source: &str, name_end: usize, type_span: Option<Span>, value: Spa
     }
 }
 
-/// `#store <name>` on a module const: `[name_end, value_end)` →
-/// ` = $__store<Type>('<name>', () => (value))`. The thunk keeps the initializer
-/// lazy (each request's render scope builds its own instance); `$__store` seeds
-/// from the cookie and persists on mutation. A bare-primitive initializer is
-/// flagged `module_primitive` for `diagnose` to reject (a store must be an object).
 fn store_edit(
     source: &str,
     name_end: usize,
@@ -582,10 +490,6 @@ fn store_edit(
     }
 }
 
-/// A `#state` class field. An object/array initializer keeps the cheap field
-/// form (`= state<T>(…)`). A bare primitive (or any non-literal) initializer is
-/// lowered to a get/set accessor over a private backing field + per-instance
-/// `dep()`, making `this.<name>` itself reactive without a `.value` box.
 fn field_state_edit(
     source: &str,
     name: &str,
@@ -610,8 +514,6 @@ fn field_state_edit(
         };
     }
 
-    // Swallow the field's own trailing `;` so the generated accessor block
-    // doesn't leave a stray empty statement after the `set` method.
     let bytes = source.as_bytes();
     let mut end = value.end as usize;
     let mut j = end;
@@ -646,8 +548,6 @@ fn field_state_edit(
     }
 }
 
-/// The class and its statement start (`export`-inclusive) for a (possibly
-/// exported) class declaration.
 fn as_class<'a, 'b>(stmt: &'a Statement<'b>) -> Option<(&'a Class<'b>, usize)> {
     match stmt {
         Statement::ClassDeclaration(c) => {
@@ -665,9 +565,6 @@ fn as_class<'a, 'b>(stmt: &'a Statement<'b>) -> Option<(&'a Class<'b>, usize)> {
     }
 }
 
-/// A simple top-level `const NAME: T = init` (or `export const …`) as a `#state`
-/// target. The statement start keys the next-line binding; the binding-name end,
-/// type, and initializer drive the rewrite.
 fn as_const(stmt: &Statement) -> Option<(usize, Kind)> {
     let (decl, stmt_start) = match stmt {
         Statement::VariableDeclaration(v) => (v.as_ref(), v.span.start as usize),
@@ -696,20 +593,15 @@ fn as_const(stmt: &Statement) -> Option<(usize, Kind)> {
     ))
 }
 
-/// Whether `to` sits on the line immediately after the comment ending at `from`
-/// — the gap is whitespace with exactly one newline.
 fn immediately_next_line(source: &str, from: usize, to: usize) -> bool {
     let gap = &source[from..to];
     gap.chars().all(char::is_whitespace) && gap.matches('\n').count() == 1
 }
 
-/// Start of the line containing `at`.
 fn line_start(source: &str, at: usize) -> usize {
     source[..at].rfind('\n').map_or(0, |i| i + 1)
 }
 
-/// End of a field statement starting after its value at `prop_end`: past the
-/// trailing whitespace, an optional `;`, and the line's newline.
 fn field_block_end(source: &str, prop_end: usize) -> usize {
     let bytes = source.as_bytes();
     let mut i = prop_end;

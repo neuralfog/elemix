@@ -1,25 +1,7 @@
-//! Project configuration: `elemix.toml` at (or above) the project root - the
-//! single source of truth (the editors carry no formatter config, they only tell
-//! `etf` where the root is). The formatter reads its `[formatter]` table; a
-//! missing file, missing keys, or a malformed file all fall back to the built-in
-//! defaults - so config never breaks formatting.
-//!
-//! ```toml
-//! [formatter]
-//! enabled = true          # false disables formatting + diagnostics entirely
-//! indent_style = "space"  # "space" (default) or "tab"
-//! indent_width = 4        # columns per indent level
-//! line_width = 80         # max line width
-//! ```
-//!
-//! Format-on-save is deliberately NOT here - it is an editor concern (a VS Code
-//! setting / command, an nvim option), not project config.
-
 use crate::doc::{IndentStyle, Options};
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 
-/// The resolved formatter settings: whether it runs at all, plus how it prints.
 pub struct Settings {
     pub enabled: bool,
     pub options: Options,
@@ -47,8 +29,6 @@ struct FormatterConfig {
     line_width: Option<usize>,
 }
 
-/// Load formatter `Settings` for a project rooted at `root`, from the nearest
-/// `elemix.toml` at `root` or an ancestor. Defaults when absent/unparseable.
 pub fn load(root: &str) -> Settings {
     let start = std::fs::canonicalize(root).unwrap_or_else(|_| PathBuf::from(root));
     let Some(text) = find(&start).and_then(|p| std::fs::read_to_string(p).ok()) else {
@@ -57,8 +37,6 @@ pub fn load(root: &str) -> Settings {
     from_toml(&text)
 }
 
-/// Parse `[formatter]` from an `elemix.toml` string into `Settings`, filling any
-/// missing key from the defaults.
 fn from_toml(text: &str) -> Settings {
     let cfg: ElemixConfig = toml::from_str(text).unwrap_or_default();
     let f = cfg.formatter.unwrap_or_default();
@@ -76,7 +54,6 @@ fn from_toml(text: &str) -> Settings {
     }
 }
 
-/// The nearest `elemix.toml` at `start` or an ancestor directory.
 fn find(start: &Path) -> Option<PathBuf> {
     let mut dir = Some(start);
     while let Some(d) = dir {
@@ -115,7 +92,6 @@ mod tests {
     #[test]
     fn enabled_false_disables_the_formatter() {
         assert!(!from_toml("[formatter]\nenabled = false\n").enabled);
-        // Absent key defaults to enabled.
         assert!(from_toml("[formatter]\nindent_width = 2\n").enabled);
     }
 

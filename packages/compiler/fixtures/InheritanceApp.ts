@@ -1,13 +1,7 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
-// Component inheritance: `InheritDerived extends InheritBase`. State, the
-// template and methods come for free via the prototype; the compiler chains
-// `super` so the base's lifecycle hooks still fire and both stylesheets get
-// adopted (merged off the prototype), not replaced.
 
-// base styles the button red; the derived sheet adds bold on top — both target
-// `.btn` directly (a <button> resets inherited color/font, so :host wouldn't show)
 const baseCss =
     ':host { display: block; } .btn { background: rgb(220, 38, 38); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; }';
 const derivedCss = '.btn { font-weight: 700; }';

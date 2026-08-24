@@ -1,15 +1,7 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
-// Deep component inheritance across FOUR levels: `DeepLeaf extends DeepLeg
-// extends DeepMiddle extends DeepBase`. State, the template and methods come for
-// free via the prototype; the compiler chains `super` at EVERY level so each
-// ancestor's lifecycle hooks still fire and every stylesheet up the chain gets
-// adopted (merged off the prototype), not replaced.
 
-// each level adds one sheet, all targeting `.btn` directly (a <button> resets
-// inherited color/font, so :host wouldn't show): base paints it red, the middle
-// sheet adds bold, the leg italicises, the leaf underlines — all four must stack.
 const baseCss =
     ':host { display: block; } .btn { background: rgb(220, 38, 38); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; }';
 const middleCss = '.btn { font-weight: 700; }';

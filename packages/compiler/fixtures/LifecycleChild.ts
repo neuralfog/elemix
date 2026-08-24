@@ -71,4 +71,3 @@ export class LifecycleChild extends Component<ChildProps> {
     template = (): Template =>
         tpl`<div class="child">Child · tick ${this.props.tick}</div>`;
 }
-

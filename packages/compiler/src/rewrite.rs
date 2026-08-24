@@ -1,14 +1,6 @@
-//! Stage 5 — splice generated code back into the source file.
-//!
-//! For EVERY component class in the module, replaces its `template = () => tpl`…``
-//! member with a compiled `view()`. The hoisted `template(...)` consts are shared
-//! across all components (uniquely numbered, deduped) and placed above the first
-//! class; the runtime import is wired once, the erased `/directives` import is
-//! dropped, and the compile-time `tpl` tag is stripped from the main import. A
-//! file may hold any number of components; one with none passes through.
-
 use crate::codegen::generate_all;
 use crate::emit::TsEmitter;
+use crate::lower::{apply_edits, trailing_newline};
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
     ArrowFunctionExpression, Class, ClassElement, Declaration, Expression,
@@ -38,9 +30,6 @@ const PRIMITIVES: &[&str] = &[
     "$__setProp",
 ];
 
-/// One component to rewrite: where its class begins, its `template` member span,
-/// the block-body prelude (statements before `return tpl`, e.g. a destructure),
-/// and its template's statics + holes.
 struct Comp {
     class_start: usize,
     member: (usize, usize),
@@ -49,25 +38,19 @@ struct Comp {
     holes: Vec<String>,
 }
 
-/// Where the edits land in the source.
 struct Plan {
     comps: Vec<Comp>,
     directives_import: Option<(usize, usize)>,
-    /// The `/types` import span + the names left after dropping `Template`.
     types_import: Option<(usize, usize, Vec<String>)>,
-    /// The main `@neuralfog/elemix` import span + the names left after dropping `tpl`.
     main_import: Option<(usize, usize, Vec<String>)>,
 }
 
-/// Compile one source file: rewrite every `template` member into a `view()`.
 pub fn rewrite(source: &str) -> String {
     let plan = plan(source);
     if plan.comps.is_empty() {
         return source.to_string();
     }
 
-    // Generate all views against ONE shared codegen context so the hoisted
-    // `template(...)` consts never collide between components.
     let emitter = TsEmitter::new();
     let templates: Vec<(Vec<String>, Vec<String>)> = plan
         .comps
@@ -79,7 +62,6 @@ pub fn rewrite(source: &str) -> String {
 
     let mut edits: Vec<(usize, usize, String)> = Vec::new();
 
-    // Each component's `template` member → its compiled `view()`.
     for (c, body) in plan.comps.iter().zip(&bodies) {
         let view = if c.prelude.is_empty() {
             format!("$$__view(): DocumentFragment {{\n{body}}}")
@@ -89,7 +71,6 @@ pub fn rewrite(source: &str) -> String {
         edits.push((c.member.0, c.member.1, view));
     }
 
-    // The shared module-scope `template(...)` consts go above the first class.
     let first_class = plan.comps.iter().map(|c| c.class_start).min().unwrap();
     edits.push((first_class, first_class, format!("{decls}\n")));
     edits.push((0, 0, format!("{runtime_import}\n")));
@@ -129,20 +110,9 @@ pub fn rewrite(source: &str) -> String {
         }
     }
 
-    // Back-to-front by start; on a tie (the main-import replace at 0 vs. the
-    // runtime-import insert at 0) the wider replace applies first.
-    edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
-    let mut out = source.to_string();
-    for (start, end, repl) in edits {
-        out.replace_range(start..end, &repl);
-    }
-    out
+    apply_edits(source, edits)
 }
 
-/// A component's SSR inputs — the class name, its template block-body prelude,
-/// the template's statics + holes, and the byte offset just inside the class body
-/// `{` where the `$$__ssr` method is injected. Same extraction [`component`] does
-/// for the CSR `view()`, plus the name + insert point the SSR path needs.
 pub struct SsrComp {
     pub class_name: String,
     pub prelude: String,
@@ -151,9 +121,6 @@ pub struct SsrComp {
     pub body_open: usize,
 }
 
-/// Collect the SSR inputs for every component class in `source` (a class with a
-/// `template` member returning a `` tpl`…` ``). Reuses [`component`] for the
-/// statics/holes/prelude so the SSR emit tracks the CSR extraction exactly.
 pub fn plan_components(source: &str) -> Vec<SsrComp> {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -187,7 +154,6 @@ pub fn plan_components(source: &str) -> Vec<SsrComp> {
     out
 }
 
-/// Collect every component + the erasable imports.
 fn plan(source: &str) -> Plan {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -244,9 +210,6 @@ fn plan(source: &str) -> Plan {
     }
 }
 
-/// A `Comp` for a class IFF it has a `template` member returning a `tpl`…`` —
-/// either the arrow field `template = () => tpl`…`` or the method
-/// `template() { return tpl`…`; }`. Both lower to the same `view()`.
 fn component(source: &str, class_start: usize, class: &Class) -> Option<Comp> {
     for element in &class.body.body {
         let (member, prelude, tt) = match element {
@@ -299,8 +262,6 @@ fn is_template_key(key: &PropertyKey) -> bool {
     matches!(key, PropertyKey::StaticIdentifier(id) if id.name.as_str() == "template")
 }
 
-/// The `tpl`…`` an arrow `template` returns — directly (expression body) or via
-/// the `return` (block body).
 fn template_tag<'a>(
     arrow: &'a ArrowFunctionExpression,
 ) -> Option<&'a TaggedTemplateExpression<'a>> {
@@ -317,8 +278,6 @@ fn template_tag<'a>(
     }
 }
 
-/// The `tpl`…`` returned by the last `return` in a block of statements (the
-/// shared block-body case for arrows and methods).
 fn return_tag<'a>(stmts: &'a [Statement<'a>]) -> Option<&'a TaggedTemplateExpression<'a>> {
     let ret = stmts.iter().rev().find_map(|s| match s {
         Statement::ReturnStatement(r) => Some(r),
@@ -334,9 +293,6 @@ fn is_tpl(source: &str, tt: &TaggedTemplateExpression) -> bool {
     matches!(&tt.tag, Expression::Identifier(id) if slice(source, id.span) == "tpl")
 }
 
-/// For a block body `{ …prelude…; return tpl`…`; }` (arrow or method), the
-/// source of the statements before the `return` — they must survive into
-/// `view()` (e.g. a `const { inc } = this` destructure the holes reference).
 fn block_prelude(source: &str, stmts: &[Statement]) -> String {
     if stmts.len() <= 1 {
         return String::new();
@@ -357,7 +313,6 @@ fn slice(source: &str, span: Span) -> String {
     source[span.start as usize..span.end as usize].to_string()
 }
 
-/// The imported names of a named import declaration.
 fn import_names(import: &oxc_ast::ast::ImportDeclaration) -> Vec<String> {
     let Some(specifiers) = &import.specifiers else {
         return Vec::new();
@@ -375,7 +330,6 @@ fn import_names(import: &oxc_ast::ast::ImportDeclaration) -> Vec<String> {
         .collect()
 }
 
-/// Build the runtime import for exactly the primitives the generated code uses.
 pub(crate) fn runtime_import(decls: &str, body: &str) -> String {
     let used: Vec<&str> = PRIMITIVES
         .iter()
@@ -386,8 +340,4 @@ pub(crate) fn runtime_import(decls: &str, body: &str) -> String {
         "import {{ {} }} from '@neuralfog/elemix/runtime';",
         used.join(", ")
     )
-}
-
-fn trailing_newline(source: &str, at: usize) -> usize {
-    usize::from(source[at..].starts_with('\n'))
 }

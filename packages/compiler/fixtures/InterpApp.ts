@@ -70,4 +70,3 @@ export class InterpApp extends Component {
         <button @click=${this.inc}>inc</button>
     `;
 }
-

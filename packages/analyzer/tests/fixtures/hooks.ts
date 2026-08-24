@@ -3,7 +3,6 @@ import type { Template } from '@neuralfog/elemix/types';
 
 // #component #tag hooks-app
 export class HooksApp extends Component {
-    // A lifecycle/effect hint can only tag a method or an arrow-function field.
 
     // #effect — tagging a non-function field → ERROR.
     bad = 42;

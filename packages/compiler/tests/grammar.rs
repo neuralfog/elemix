@@ -1,6 +1,3 @@
-//! Stage 3 grammar tests — classify holes into bindings. Attribute holes are
-//! exact (sigil/reserved-name); content holes classify by value-shape.
-
 use elemix_compiler::grammar::{classify, BindingKind};
 use elemix_compiler::template::node::{Hole, Slot, Step};
 use oxc_span::Span;
@@ -28,10 +25,6 @@ fn content(expr: &str) -> Hole {
         run_index: 0,
     }
 }
-
-// ---------------------------------------------------------------------------
-// attribute sigils
-// ---------------------------------------------------------------------------
 
 #[test]
 fn event_strips_at_and_keeps_name() {
@@ -95,10 +88,6 @@ fn path_and_expr_pass_through() {
     assert_eq!(b.expr, "`/u/${id}`");
 }
 
-// ---------------------------------------------------------------------------
-// content value-shape
-// ---------------------------------------------------------------------------
-
 #[test]
 fn plain_value_is_text() {
     assert_eq!(
@@ -111,7 +100,6 @@ fn plain_value_is_text() {
 
 #[test]
 fn value_ternary_is_text() {
-    // branches are strings, not templates → still text
     let b = classify(&content("this.user.online ? 'online' : 'offline'"));
     assert_eq!(b.kind, BindingKind::Text);
 }
@@ -151,16 +139,12 @@ fn single_branch_template_ternary_is_child() {
 
 #[test]
 fn html_substring_in_an_identifier_is_not_a_template() {
-    // a member access that merely contains the letters "html" must stay Text
     assert_eq!(classify(&content("this.htmlLabel")).kind, BindingKind::Text);
     assert_eq!(classify(&content("getHtml(x)")).kind, BindingKind::Text);
 }
 
 #[test]
 fn bare_identifier_is_text_pending_splice_resolution() {
-    // KNOWN GAP: `${header}` where `const header = tpl`...`` should be Splice,
-    // but that is indistinguishable from a text value without symbol
-    // resolution. Until the sub-template wiring pass lands it falls to Text.
     assert_eq!(classify(&content("header")).kind, BindingKind::Text);
     assert_eq!(
         classify(&content("this.headerTemplate()")).kind,

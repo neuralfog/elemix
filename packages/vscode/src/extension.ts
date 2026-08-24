@@ -9,8 +9,6 @@ import {
     TransportKind,
 } from 'vscode-languageclient/node';
 
-// ── template formatter (`etf`) integration ─────────────────────────────────
-
 type EtfDiagnostic = {
     range: {
         start: { line: number; character: number };
@@ -21,8 +19,6 @@ type EtfDiagnostic = {
     edit: string;
 };
 
-// Resolve the `etf` binary: an explicit setting, else the project's installed
-// launcher, else `etf` on PATH.
 const resolveBin = (scope?: vscode.Uri): string => {
     const cfg = vscode.workspace.getConfiguration('elemix', scope);
     const custom = cfg.get<string>('formatter.path')?.trim();
@@ -43,15 +39,11 @@ const resolveBin = (scope?: vscode.Uri): string => {
     return 'etf';
 };
 
-// The project root `etf` reads `elemix.toml` from - width and indent live there,
-// not in editor settings. Passed as `--root`; empty when there's no folder.
 const rootArgs = (document: vscode.TextDocument): string[] => {
     const folder = vscode.workspace.getWorkspaceFolder(document.uri);
     return folder ? ['--root', folder.uri.fsPath] : [];
 };
 
-// Pipe `input` through `etf` and hand back stdout, or null if the binary is
-// missing or fails.
 const runEtf = (
     bin: string,
     args: string[],
@@ -70,13 +62,9 @@ const runEtf = (
     });
 
 const diagnostics = vscode.languages.createDiagnosticCollection('elemix');
-// Per-document fix edits, keyed by URI - used by the quick-fix code action.
 const fixes = new Map<string, Array<{ range: vscode.Range; edit: string }>>();
-// Whether an `etf` binary is reachable. Gates every formatting feature - the
-// commands, diagnostics, quick-fix, and format-on-save - and their palette entries.
 let etfAvailable = false;
 
-// Run `etf --lsp` and turn its JSON into ranges + fix edits.
 const templateEdits = async (
     document: vscode.TextDocument,
 ): Promise<Array<{ range: vscode.Range; message: string; edit: string }>> => {
@@ -146,15 +134,11 @@ const codeActionProvider: vscode.CodeActionProvider = {
     },
 };
 
-// Whether format-on-save is enabled, from the persisted `elemix.formatter.
-// formatOnSave` setting (scoped to the saved document). Toggled from the palette.
 const formatOnSaveEnabled = (uri?: vscode.Uri): boolean =>
     vscode.workspace
         .getConfiguration('elemix', uri)
         .get<boolean>('formatter.formatOnSave', false);
 
-// Persist the format-on-save flag (workspace-scoped when there's a folder, else
-// global) and refresh the `when`-clause context key so the palette entry flips.
 const setFormatOnSave = async (value: boolean): Promise<void> => {
     const target = vscode.workspace.workspaceFolders?.length
         ? vscode.ConfigurationTarget.Workspace
@@ -168,8 +152,6 @@ const setFormatOnSave = async (value: boolean): Promise<void> => {
     );
 };
 
-// Publish the current format-on-save state as a `when`-clause context key so the
-// palette shows exactly one of the "(on)"/"(off)" entries.
 const syncFormatOnSaveContext = (): void => {
     void vscode.commands.executeCommand(
         'setContext',
@@ -178,7 +160,6 @@ const syncFormatOnSaveContext = (): void => {
     );
 };
 
-// On save, run the formatter over the buffer. Gated by `formatOnSaveEnabled`.
 const saveEdits = async (
     document: vscode.TextDocument,
 ): Promise<vscode.TextEdit[]> => {
@@ -220,9 +201,6 @@ const formatTemplates = async (): Promise<void> => {
     await editor.edit((builder) => builder.replace(full, out));
 };
 
-// Probe whether `etf` can run, publish it as a `when`-clause context key, and
-// (dis)engage diagnostics accordingly. Re-run when the active file, workspace
-// folders, or the configured path changes.
 const refreshEtfAvailability = async (): Promise<void> => {
     const scope =
         vscode.window.activeTextEditor?.document.uri ??
@@ -246,15 +224,8 @@ const refreshEtfAvailability = async (): Promise<void> => {
     }
 };
 
-// ── analyzer LSP (`ea --lsp`) integration ──────────────────────────────────
-
-// One persistent analyzer server per workspace folder, each rooted at its folder.
 const analyzerClients = new Map<string, LanguageClient>();
 
-// Resolve the `ea` binary for a folder: an explicit setting, else the project's
-// installed launcher. Returns null when neither is present - the analyzer is a
-// project tool, so (unlike a global formatter) we never guess a PATH binary, and
-// the server simply stays off.
 const resolveAnalyzerBin = (folder: vscode.WorkspaceFolder): string | null => {
     const cfg = vscode.workspace.getConfiguration('elemix', folder.uri);
     const custom = cfg.get<string>('analyzer.path')?.trim();
@@ -282,8 +253,6 @@ const startAnalyzer = async (folder: vscode.WorkspaceFolder): Promise<void> => {
         options: { cwd: folder.uri.fsPath },
     };
     const clientOptions: LanguageClientOptions = {
-        // Only the folder's own TypeScript files - keeps multi-root folders on
-        // their own server.
         documentSelector: [
             {
                 scheme: 'file',
@@ -301,8 +270,6 @@ const startAnalyzer = async (folder: vscode.WorkspaceFolder): Promise<void> => {
         serverOptions,
         clientOptions,
     );
-    // Register eagerly so a concurrent start() call is a no-op, then roll back if
-    // the server can't be launched (missing tsc, bad binary) - staying silent.
     analyzerClients.set(key, client);
     try {
         await client.start();
@@ -342,8 +309,6 @@ const stopAllAnalyzers = async (): Promise<void> => {
     await Promise.all(clients.map((c) => c.stop().catch(() => {})));
 };
 
-// Command: tear down every analyzer server and start fresh - picks up a rebuilt
-// binary or a changed config without reloading the window.
 const restartAnalyzer = async (): Promise<void> => {
     await stopAllAnalyzers();
     startAllAnalyzers();

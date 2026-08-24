@@ -1,14 +1,13 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ViewDataStore.ts
 ---
-import { $__scopedStore } from '@neuralfog/elemix/ssr-runtime';
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime';
 import { viewData } from '@neuralfog/elemix';
 
 export type Seed = {
     start: number;
 };
 
-export const counter = $__scopedStore(() => ({ count: viewData<Seed>().start }));
+export const counter = $__moduleState(() => ({ count: viewData<Seed>().start }));

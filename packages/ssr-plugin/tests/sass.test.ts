@@ -27,9 +27,7 @@ describe('scss aliasing', () => {
 
     it('compiles a stylesheet that uses aliases, including nested aliases', () => {
         const css = compileScssFile(join(dir, 'comp.scss'));
-        // alias resolved (theme mixin)
         expect(css).toContain('color: rgb(1, 2, 3)');
-        // nested alias resolved (base @use'd theme via alias too)
         expect(css).toContain('.base');
         expect(css).toContain('.comp');
     });

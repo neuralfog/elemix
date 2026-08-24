@@ -71,4 +71,3 @@ export class SvgApp extends Component {
         <button @click=${this.recolor}>recolor</button>
     `;
 }
-

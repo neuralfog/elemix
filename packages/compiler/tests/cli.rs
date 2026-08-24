@@ -1,6 +1,3 @@
-//! CLI integration tests — drive the real `elemix-compiler` binary against the
-//! fixtures. Cargo builds the bin and hands us its path via `CARGO_BIN_EXE_*`.
-
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -8,7 +5,6 @@ fn bin() -> &'static str {
     env!("CARGO_BIN_EXE_elemix-compiler")
 }
 
-/// A fresh, empty output directory under the system temp dir.
 fn out_dir(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("ec-cli-{name}"));
     let _ = std::fs::remove_dir_all(&dir);
@@ -46,7 +42,6 @@ fn compiles_a_single_file_to_the_out_dir() {
     assert!(compiled.contains("$$__view(): DocumentFragment"));
     assert!(compiled.contains("from '@neuralfog/elemix/runtime'"));
     assert!(compiled.contains("const _t0 = $__template("));
-    // the html intrinsic and the directive are fully lowered/erased
     assert!(!compiled.contains("tpl`"));
     assert!(!compiled.contains("repeat("));
 }
@@ -80,7 +75,6 @@ fn stdin_mode_pipes_compiled_source_to_stdout() {
 
 #[test]
 fn banner_shows_the_package_json_version_on_stderr() {
-    // the version baked into the banner must match package.json (not Cargo.toml)
     let pkg = std::fs::read_to_string("package.json").unwrap();
     let key = "\"version\"";
     let after = &pkg[pkg.find(key).unwrap() + key.len()..];
@@ -144,7 +138,6 @@ fn stdin_sourcemap_emits_a_code_map_envelope() {
     let out = child.wait_with_output().unwrap();
     assert!(out.status.success());
 
-    // stdout is a JSON envelope, not raw code: it carries both code and a v3 map
     let envelope = String::from_utf8(out.stdout).unwrap();
     assert!(envelope.starts_with("{\"code\":"));
     assert!(envelope.contains("\"map\":{\"version\":3"));
@@ -182,7 +175,6 @@ fn compiles_a_directory_of_fixtures() {
         .filter_map(Result::ok)
         .collect();
 
-    // no compiled file in the whole corpus leaks the html intrinsic or a directive
     for entry in files {
         let src = std::fs::read_to_string(entry.path()).unwrap();
         let name = entry.file_name();
@@ -199,11 +191,9 @@ fn tolerant_by_default_emits_an_errored_component_with_an_inlined_throw() {
         .arg(&dir)
         .output()
         .unwrap();
-    // best-effort: succeeds and writes the file with the error inlined as a throw
     assert!(out.status.success());
     let compiled = std::fs::read_to_string(dir.join("ErrorApp.ts")).unwrap();
     assert!(compiled.starts_with("throw new Error('[elemix] ErrorApp:"));
-    // the diagnostic is still reported on stderr
     assert!(String::from_utf8_lossy(&out.stderr).contains("unknown compiler hint"));
 }
 
@@ -227,7 +217,6 @@ fn a_warning_is_inlined_and_still_emitted() {
         .arg(&dir)
         .output()
         .unwrap();
-    // a warning never blocks emit: the file is written and the run exits clean
     assert!(out.status.success());
     let compiled = std::fs::read_to_string(dir.join("WarnApp.ts")).unwrap();
     assert!(compiled.contains("console.warn('[elemix] WarnApp:"));

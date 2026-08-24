@@ -106,8 +106,6 @@ export class ChatApp extends Component {
         if (!text) return;
         this.state.messages.push({ id: this.nextId(), text, me: true });
         this.state.draft.value = '';
-        // Renders are synchronous, so the new message is already in the DOM here —
-        // scroll the log to the bottom right after sending, no lifecycle hook needed.
         const log = this.root?.querySelector('.log');
         if (log) log.scrollTop = log.scrollHeight;
     };
@@ -133,4 +131,3 @@ export class ChatApp extends Component {
         </div>
     `;
 }
-

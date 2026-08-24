@@ -13,7 +13,6 @@ test.describe('SlotCard', () => {
                 !!customElements.get('slot-chip'),
         );
 
-        // The light-DOM projection chain: card -> 2 items -> a panel each -> 3 chips.
         await expect(page.locator('slot-card slot-item')).toHaveCount(2);
         await expect(
             page.locator('slot-card slot-item slot-panel'),
@@ -22,13 +21,11 @@ test.describe('SlotCard', () => {
             page.locator('slot-card slot-item slot-panel slot-chip'),
         ).toHaveCount(6);
 
-        // Item titles render inside each slot-item's shadow (via the :title prop).
         await expect(page.locator('slot-item .item h3')).toHaveText([
             'Group One',
             'Group Two',
         ]);
 
-        // Chip labels render inside each slot-chip's shadow (via the :label prop).
         await expect(page.locator('slot-chip .chip')).toHaveText([
             'Alpha',
             'Beta',

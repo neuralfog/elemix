@@ -1,11 +1,3 @@
-//! Raw-TypeScript emitter — formats `Emitter` calls into source targeting
-//! `@neuralfog/elemix/runtime`. Validated against the golden `view()`s.
-//!
-//! The `() => (...)` thunk that makes a value reactive is added here, in one
-//! place, for every value binding (text/attr/class/style/prop/model/child/list).
-//! Function/ref bindings (event/onmodel/ref) take their expression raw. The
-//! parens also guard against the object-literal arrow-body gotcha.
-
 use super::Emitter;
 use crate::template::node::{NodePath, Step};
 
@@ -50,7 +42,7 @@ impl Emitter for TsEmitter {
     fn split_run(&self, var: &str, el: &str, run: usize, statics: &[usize], lens: &str) -> String {
         let arr = statics
             .iter()
-            .map(|n| n.to_string())
+            .map(std::string::ToString::to_string)
             .collect::<Vec<_>>()
             .join(", ");
         let mut node = format!("{el}.firstChild");
@@ -170,11 +162,6 @@ impl Emitter for TsEmitter {
     }
 }
 
-/// Render a path as TS member accesses using direct-pointer navigation. Every
-/// step is node-indexed, so `firstChild`/`nextSibling` (raw pointer slots) reach
-/// the target — cheaper than `firstElementChild`/`nextElementSibling`, whose
-/// element-filtering is wasted work on the compiler's whitespace-tight markup.
-/// `!` asserts the node exists (the path is derived from the known template shape).
 fn accessor(path: &NodePath) -> String {
     let mut s = String::new();
     for step in path {
@@ -185,13 +172,11 @@ fn accessor(path: &NodePath) -> String {
                     s.push_str(".nextSibling!");
                 }
             }
-            Step::FirstChild => s.push_str(".firstChild!"),
         }
     }
     s
 }
 
-/// Quote a string as a single-quoted TS string literal.
 fn js_string(s: &str) -> String {
     let mut out = String::from("'");
     for c in s.chars() {

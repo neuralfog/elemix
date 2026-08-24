@@ -1,16 +1,9 @@
-//! End-to-end: drive the built `elemix-template-formatter` binary. The real
-//! formatting pipeline is not wired yet (identity stub), so these lock the CLI
-//! shell - banner, summary, file discovery, and exit codes - which the packaging
-//! and release wiring depend on staying stable.
-
 use std::process::Command;
 
 fn bin() -> &'static str {
     env!("CARGO_BIN_EXE_elemix-template-formatter")
 }
 
-/// A fixture with no template, so it is always a fixed point - the shell test can
-/// assert a clean run. (The other fixtures are messy inputs for the snapshots.)
 fn clean_fixture() -> String {
     format!(
         "{}/tests/fixtures/no-template.ts",
@@ -62,7 +55,6 @@ fn stdin_formats_silently() {
     let out = child.wait_with_output().unwrap();
     let stdout = String::from_utf8_lossy(&out.stdout);
 
-    // Silent: no banner, no summary - just the formatted source.
     assert!(!stdout.contains("elemix ·"), "no banner: {stdout}");
     assert!(!stdout.contains("formatted"), "no summary: {stdout}");
     assert!(
@@ -92,7 +84,6 @@ fn lsp_emits_diagnostics_json() {
     let out = child.wait_with_output().unwrap();
     let stdout = String::from_utf8_lossy(&out.stdout);
 
-    // Pure JSON on stdout: no banner, and it parses as a diagnostic array.
     assert!(!stdout.contains("elemix ·"), "no banner: {stdout}");
     let json: serde_json::Value = serde_json::from_str(stdout.trim()).expect("valid JSON");
     let diags = json.as_array().expect("array");
@@ -120,7 +111,6 @@ fn lsp_is_empty_for_a_formatted_file() {
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
-    // Already formatted (no template at all) -> no diagnostics.
     child
         .stdin
         .take()
@@ -137,8 +127,6 @@ fn lsp_is_empty_for_a_formatted_file() {
 fn demo_reports_success_without_writing() {
     use std::fs;
 
-    // A messy fixture that WOULD reformat. `--demo` must show the fix-mode success
-    // view and exit 0, yet leave the file byte-for-byte untouched.
     let fixture = format!("{}/tests/fixtures/basic.ts", env!("CARGO_MANIFEST_DIR"));
     let before = fs::read(&fixture).unwrap();
 
@@ -161,16 +149,13 @@ fn demo_reports_success_without_writing() {
 fn prints_the_shared_shell() {
     let (stdout, code) = run(&["--dirs", &clean_fixture()]);
 
-    // banner
     assert!(stdout.contains("elemix"), "banner wordmark: {stdout}");
     assert!(
         stdout.contains("template-formatter"),
         "banner tool word: {stdout}"
     );
-    // summary dashboard
     assert!(stdout.contains("all formatted"), "verdict: {stdout}");
     assert!(stdout.contains("template"), "◆ chip: {stdout}");
     assert!(stdout.contains("file"), "▣ chip: {stdout}");
-    // an already-formatted fixture is a fixed point -> clean exit
     assert_eq!(code, Some(0));
 }

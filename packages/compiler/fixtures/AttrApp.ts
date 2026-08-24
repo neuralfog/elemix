@@ -98,4 +98,3 @@ export class AttrApp extends Component {
         <button @click=${this.toggle}>toggle secret</button>
     `;
 }
-

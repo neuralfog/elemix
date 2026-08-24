@@ -3,7 +3,6 @@ import type { Template } from '@neuralfog/elemix/types';
 
 // #component #tag state-targets-app
 export class StateTargetsApp extends Component {
-    // `#state` tags reactive DATA — never a function or a method.
 
     // #state — a data field is fine.
     count = 0;

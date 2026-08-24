@@ -1,13 +1,3 @@
-//! Analyzer frontend — surface what `ec-analyzer` needs that the compile path
-//! discards: the project's `#component` declarations (tag → class), every bound
-//! prop SITE in a `tpl` template with its ABSOLUTE source span, and malformed
-//! compiler hints WITH a span (the runtime-injection pass keeps the message but
-//! drops the location).
-//!
-//! Pure oxc, no IO, no `cli`/`wasm` deps — the analyzer pulls the compiler in as
-//! a library with `default-features = false` and reuses this. Returns owned,
-//! oxc-free types so the analyzer never sees an oxc handle.
-
 use crate::grammar::{classify, BindingKind};
 use crate::pragma::diagnose::{
     binding_issue_message, invalid_tag_message, MODULE_STATE_PRIMITIVE_MSG,
@@ -22,19 +12,13 @@ use oxc_ast_visit::{walk, Visit};
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
 
-/// A `#component` class and the custom-element tag it registers (explicit `#tag`
-/// or the [`kebab`]-derived class name — the SAME rule the compiler emits).
 #[derive(Debug, PartialEq)]
 pub struct ComponentDecl {
     pub tag: String,
     pub class: String,
-    /// Whether the class is `export`ed — the analyzer can only `import` it into a
-    /// synthetic assert file when it is (otherwise the site is reported skipped).
     pub exported: bool,
 }
 
-/// One bound `:prop=${expr}` site: the tag bearing it, the prop name, the
-/// verbatim hole expression, and its absolute byte span in the original source.
 #[derive(Debug, PartialEq)]
 pub struct PropSite {
     pub tag: String,
@@ -44,31 +28,20 @@ pub struct PropSite {
     pub end: u32,
 }
 
-/// One element usage of a tag in a template, with the props it provides — the
-/// unit for REQUIRED-prop checking (does the provided set cover the component's
-/// required props?). EVERY usage is surfaced, including ones that bind no props
-/// (the "forgot everything" case), so the check is exhaustive.
 #[derive(Debug, PartialEq)]
 pub struct ElementUse {
     pub tag: String,
-    /// Absolute span of the tag NAME in `<tag …>` — the caret for a missing prop.
     pub tag_start: u32,
     pub tag_end: u32,
-    /// The prop names this usage provides (in source order).
     pub provided: Vec<String>,
 }
 
-/// A module dependency of a file: an `import`/`export … from` specifier plus the
-/// names it pulls in. Loading the module runs its `defineComponent` side effects,
-/// so this is what tells the analyzer whether a used component is reachable.
 #[derive(Debug, PartialEq)]
 pub struct Import {
     pub specifier: String,
     pub names: Vec<String>,
 }
 
-/// Every module specifier `source` depends on — `import … from`, `export … from`,
-/// and `export * from`. Side-effect imports (`import './x'`) carry no names.
 pub fn scan_imports(source: &str) -> Vec<Import> {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -119,7 +92,6 @@ pub fn scan_imports(source: &str) -> Vec<Import> {
     out
 }
 
-/// Every `#component` declaration in `source`, mapped to its registered tag.
 pub fn scan_components(source: &str) -> Vec<ComponentDecl> {
     let Ok(located) = locate(source) else {
         return Vec::new();
@@ -143,20 +115,12 @@ pub fn scan_components(source: &str) -> Vec<ComponentDecl> {
         .collect()
 }
 
-/// Every `:prop` binding site in every `tpl` template in `source`, with absolute
-/// spans — recursing into nested templates (list rows, `when`/`choose` arms).
-///
-/// Only `Prop` bindings are returned: they are always a single bare hole, so the
-/// expr is a verbatim source slice and the span is exact. Attrs/events/refs are
-/// not type-checked against a prop, so they're dropped here.
 pub fn scan_props(source: &str) -> Vec<PropSite> {
     let mut out = Vec::new();
     scan_into(source, 0, &mut out);
     out
 }
 
-/// `base` is the absolute file offset at which `snippet` begins, so every span
-/// inside it maps to the original source as `base + span`.
 fn scan_into(snippet: &str, base: u32, out: &mut Vec<PropSite>) {
     for tpl in outermost_templates(snippet) {
         let parsed = parse_spanned(&tpl.statics, &tpl.holes);
@@ -172,10 +136,6 @@ fn scan_into(snippet: &str, base: u32, out: &mut Vec<PropSite>) {
                     });
                 }
             }
-            // A content hole can carry nested templates (`repeat`, `when`, a
-            // ternary of `tpl`). Recurse with the hole's absolute offset as base
-            // so nested carets land in the original file. Bare prop holes never
-            // contain `tpl`, so this skips them.
             if binding.expr.contains("tpl`") {
                 scan_into(&binding.expr, base + binding.span.start, out);
             }
@@ -183,18 +143,14 @@ fn scan_into(snippet: &str, base: u32, out: &mut Vec<PropSite>) {
     }
 }
 
-/// A non-prop binding whose value has a FIXED expected type (independent of any
-/// component): an event handler, a ref, or a two-way model / its transform.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum SpecialKind {
-    Event,   // `@evt=${h}`     → h: EventListener
-    Ref,     // `:ref=${r}`     → r: { value: unknown }
-    Model,   // `~model=${m}`   → m: { value: string }
-    OnModel, // `~onmodel=${t}` → t: (value: string) => string
+    Event,
+    Ref,
+    Model,
+    OnModel,
 }
 
-/// One event/ref/model/onmodel binding site: its kind, the element bearing it,
-/// the event name (events only), the verbatim expr, and its absolute span.
 #[derive(Debug, PartialEq)]
 pub struct SpecialBinding {
     pub kind: SpecialKind,
@@ -205,9 +161,6 @@ pub struct SpecialBinding {
     pub end: u32,
 }
 
-/// Every `@event`/`:ref`/`~model`/`~onmodel` binding site in every template, with
-/// absolute spans — recursing into nested templates like [`scan_props`]. Checked
-/// on ANY element (the expected type doesn't depend on the component).
 pub fn scan_special_bindings(source: &str) -> Vec<SpecialBinding> {
     let mut out = Vec::new();
     special_into(source, 0, &mut out);
@@ -242,10 +195,6 @@ fn special_into(snippet: &str, base: u32, out: &mut Vec<SpecialBinding>) {
     }
 }
 
-/// One `match(...)` content hole: the verbatim call expression and its absolute
-/// span. The exhaustiveness / narrowing / typed-value checks all ride on the
-/// `match` overload types, so the analyzer only needs the site's coordinates to
-/// attribute tsc's diagnostic back to the hole.
 #[derive(Debug, PartialEq)]
 pub struct MatchSite {
     pub expr: String,
@@ -253,8 +202,6 @@ pub struct MatchSite {
     pub end: u32,
 }
 
-/// Every `match(...)` content hole in every template, with absolute spans —
-/// recursing into nested templates like [`scan_props`].
 pub fn scan_match_sites(source: &str) -> Vec<MatchSite> {
     let mut out = Vec::new();
     match_into(source, 0, &mut out);
@@ -280,17 +227,11 @@ fn match_into(snippet: &str, base: u32, out: &mut Vec<MatchSite>) {
     }
 }
 
-/// Every element usage in every template, with the prop set it provides — the
-/// input to REQUIRED-prop checking. Found by enumerating every `<tag` open across
-/// all templates (so zero-prop usages count too) and assigning each `:prop` hole
-/// to the element it sits in. Recurses into nested templates like [`scan_props`].
 pub fn scan_element_uses(source: &str) -> Vec<ElementUse> {
-    let mut tags = scan_open_tags(source); // every `<tag` open, absolute spans
+    let mut tags = scan_open_tags(source);
     tags.sort_by_key(|t| t.1);
     let props = scan_props(source);
 
-    // A `:prop` hole always sits in the open tag of the most recent `<tag` before
-    // it — no other open tag can intervene between a tag and its own attributes.
     let mut provided: Vec<Vec<String>> = vec![Vec::new(); tags.len()];
     for p in &props {
         if let Some(idx) = tags.iter().rposition(|t| t.1 < p.start) {
@@ -309,9 +250,6 @@ pub fn scan_element_uses(source: &str) -> Vec<ElementUse> {
         .collect()
 }
 
-/// Every `<tag` open in every `tpl` template (including nested), as `(tag, name
-/// start, name end)` with absolute spans. Tag names live in the static segments,
-/// so this scans each quasi's text — `<` inside a `${…}` hole is never a tag.
 fn scan_open_tags(source: &str) -> Vec<(String, u32, u32)> {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -337,13 +275,10 @@ impl<'a> Visit<'a> for TagFinder<'_> {
                 }
             }
         }
-        // No early return — recurse so NESTED templates' tags are found too.
         walk::walk_tagged_template_expression(self, it);
     }
 }
 
-/// Scan one static segment for `<tag` opens. A tag is `<` then an ASCII letter,
-/// then `[A-Za-z0-9-]*`; `</close>` and `<` not starting a name are skipped.
 fn scan_quasi_tags(source: &str, span: Span, out: &mut Vec<(String, u32, u32)>) {
     let bytes = source.as_bytes();
     let (lo, hi) = (span.start as usize, (span.end as usize).min(source.len()));
@@ -371,7 +306,6 @@ fn is_tag_char(b: u8) -> bool {
     b.is_ascii_alphanumeric() || b == b'-'
 }
 
-/// A located `tpl` template: its static segments + spanned hole expressions.
 struct Tpl {
     statics: Vec<String>,
     holes: Vec<SpannedHole>,
@@ -388,9 +322,6 @@ impl Finder<'_> {
     }
 }
 
-/// Outermost-only `tpl` templates in `source`, each keeping its holes' spans
-/// (relative to `source`). Nested templates live inside hole exprs and are
-/// reached by recursion, not here. Parse errors yield no templates (panic-free).
 fn outermost_templates(source: &str) -> Vec<Tpl> {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -427,28 +358,18 @@ impl<'a> Visit<'a> for Finder<'_> {
     }
 }
 
-/// Severity of a compiler-hint diagnostic — a malformed hint is an `Error`, a
-/// registered-but-invalid tag is a `Warning` (matches the compiler).
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum HintSeverity {
     Error,
     Warning,
 }
 
-/// What a hint diagnostic is about — lets the analyzer word it correctly.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum HintKind {
-    /// A `// #...` compiler hint (unknown directive, wrong target, …).
     Directive,
-    /// An invalid custom-element tag (checked against the class name / `#tag`).
     Tag,
 }
 
-/// A malformed `// #...` compiler-hint problem WITH a span to caret it. Mirrors
-/// the compiler's own pragma diagnostics (same `locate`+`resolve` path and the
-/// shared message text), keeping the location the runtime-injection pass drops.
-/// A zero-width span (`start == end`) means file-level (no declaration to point
-/// at, e.g. an orphan pragma).
 #[derive(Debug, PartialEq)]
 pub struct HintDiagnostic {
     pub severity: HintSeverity,
@@ -459,16 +380,11 @@ pub struct HintDiagnostic {
     pub end: u32,
 }
 
-/// Every malformed-compiler-hint problem in `source`, each with a span. This is
-/// the analyzer's view of [`crate::pragma::diagnose::collect`] — same checks,
-/// same messages, but located so the analyzer can frame the offending hint.
 pub fn scan_hints(source: &str) -> Vec<HintDiagnostic> {
     let mut out = Vec::new();
 
     let located = match locate(source) {
         Ok(l) => l,
-        // A located failure carets the offending member; a spanless one (an orphan
-        // pragma, a structural parse error) stays file-level.
         Err(e) => {
             let (start, end) = e.span.map_or((0, 0), |(s, en)| (s as u32, en as u32));
             out.push(HintDiagnostic {
@@ -483,7 +399,6 @@ pub fn scan_hints(source: &str) -> Vec<HintDiagnostic> {
         }
     };
 
-    // A member directive on the wrong target — caret the member name.
     for b in &located.binding_issues {
         out.push(HintDiagnostic {
             severity: HintSeverity::Error,
@@ -495,8 +410,6 @@ pub fn scan_hints(source: &str) -> Vec<HintDiagnostic> {
         });
     }
 
-    // A module-level `#state` const can't be a bare primitive — point at the
-    // offending initializer.
     for st in &located.states {
         if st.module_primitive {
             out.push(HintDiagnostic {
@@ -514,8 +427,6 @@ pub fn scan_hints(source: &str) -> Vec<HintDiagnostic> {
         if class.directives.is_empty() {
             continue;
         }
-        // The class name is the FALLBACK anchor; the precise caret is the offending
-        // hint TOKEN in the comment (a bad directive name, or a `#tag` value).
         let fallback = class_name_span(source, &class.name, class.start, class.end);
         match resolve(&class.directives) {
             Ok(meta) => {
@@ -523,15 +434,12 @@ pub fn scan_hints(source: &str) -> Vec<HintDiagnostic> {
                     let explicit = meta.tag.is_some();
                     let tag = meta.tag.unwrap_or_else(|| kebab(&class.name));
                     if let Some(reason) = tag_problem(&tag) {
-                        // Explicit `#tag <value>` → caret the value; a tag DERIVED
-                        // from the class name → caret the class name (its source).
                         let (start, end) = if explicit {
                             tag_arg_span(class).unwrap_or(fallback)
                         } else {
                             fallback
                         };
                         out.push(HintDiagnostic {
-                            // An invalid tag is broken, not advisory — fail on it.
                             severity: HintSeverity::Error,
                             kind: HintKind::Tag,
                             message: invalid_tag_message(&tag, &reason, !explicit),
@@ -559,7 +467,6 @@ pub fn scan_hints(source: &str) -> Vec<HintDiagnostic> {
     out
 }
 
-/// Absolute span of the `#tag` directive's first arg (the explicit tag value).
 fn tag_arg_span(class: &ClassInfo) -> Option<(u32, u32)> {
     class
         .directive_spans
@@ -569,8 +476,6 @@ fn tag_arg_span(class: &ClassInfo) -> Option<(u32, u32)> {
         .map(|(_, (s, e))| (*s as u32, *e as u32))
 }
 
-/// Where to caret a resolve error: the offending directive's name token in the
-/// comment (the unknown/misplaced directive, or `#tag` for an arity/dup error).
 fn error_span(e: &PragmaError, class: &ClassInfo) -> Option<(u32, u32)> {
     let name = match e {
         PragmaError::Unknown(n) | PragmaError::OnClass(n) => n.as_str(),
@@ -584,9 +489,6 @@ fn error_span(e: &PragmaError, class: &ClassInfo) -> Option<(u32, u32)> {
         .map(|d| (d.name_span.0 as u32, d.name_span.1 as u32))
 }
 
-/// Locate the class NAME within its declaration so the fallback caret lands on
-/// the component, not the `export`/`class` keywords. Falls back to the statement
-/// start if the name can't be found.
 fn class_name_span(source: &str, name: &str, stmt_start: usize, stmt_end: usize) -> (u32, u32) {
     let end = stmt_end.min(source.len());
     if let Some(rel) = source[stmt_start..end].find(name) {

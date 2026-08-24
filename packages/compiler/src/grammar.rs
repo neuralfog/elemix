@@ -1,49 +1,32 @@
-//! Stage 3 — the grammar: classify a hole into a binding.
-//!
-//! Two axes decide the kind: WHERE the hole sits (`Slot`) and, for attributes,
-//! the name's sigil; for content holes, the value-shape of the expression.
-//! Adding a binding later = one `BindingKind` variant + one `classify` arm +
-//! one `Emitter` method.
-
 use crate::template::node::{Hole, NodePath, Slot};
 
-/// The closed set of bindings — mirrors the runtime primitives 1:1.
 #[derive(Debug, Clone, PartialEq)]
 pub enum BindingKind {
-    Text,    // `${x}` text          → _text
-    Attr,    // `name=${x}` (bare)   → _attr   (attributes-only rule)
-    Class,   // `class=${x}`         → _class
-    Style,   // `style=${x}`         → _style
-    Event,   // `@evt=${x}`          → _event
-    Prop,    // `:prop=${x}`         → _prop
-    Model,   // `~model=${x}`        → _model
-    OnModel, // `~onmodel=${x}`      → _onmodel
-    Ref,     // `:ref=${x}`          → _ref
-    List,    // `${repeat(...)}`     → _list
-    Child,   // `${cond ? a : b}`    → _child
-    Splice,  // `${nestedTemplate}`  → anchor.replaceWith(builder())
+    Text,
+    Attr,
+    Class,
+    Style,
+    Event,
+    Prop,
+    Model,
+    OnModel,
+    Ref,
+    List,
+    Child,
+    Splice,
 }
 
-/// A classified hole: where, what, the binding name (attr/event/prop), the
-/// verbatim expression, and whether its text node is pre-baked into the markup.
 #[derive(Debug)]
 pub struct Binding {
     pub path: NodePath,
     pub kind: BindingKind,
     pub name: Option<String>,
     pub expr: String,
-    /// Text binding whose node is baked into the markup (`Slot::Text`): grab and
-    /// write directly, skipping the `createTextNode`/`replaceWith` anchor swap.
     pub baked: bool,
-    /// Absolute byte span of the `${...}` expression (analyzer carets); empty on
-    /// the compile path. Carried verbatim from the [`Hole`].
     pub span: oxc_span::Span,
-    /// Owning element tag for an attribute binding (prop/attr resolution); `None`
-    /// for content/text bindings. Carried verbatim from the [`Hole`].
     pub tag: Option<String>,
 }
 
-/// Classify a parsed hole into a binding via (Slot × sigil × value-shape).
 pub fn classify(hole: &Hole) -> Binding {
     let (kind, name, baked) = match &hole.slot {
         Slot::Attr(name) => {
@@ -64,17 +47,10 @@ pub fn classify(hole: &Hole) -> Binding {
     }
 }
 
-/// Whether a content hole is a plain text value (not `repeat`/`when`/`choose` or
-/// a nested template) — i.e. it can be backed by a baked text node instead of a
-/// comment anchor. The parser uses this to pick the placeholder for a sole-child
-/// content hole.
 pub(crate) fn is_text_content(expr: &str) -> bool {
     matches!(classify_content(expr), BindingKind::Text)
 }
 
-/// Attribute holes classify by the name's sigil (`@`/`:`/`~`) and reserved
-/// names (`class`/`style`). The carried `name` is what the emitter passes to the
-/// runtime primitive (event/prop/attr name); sigil-less kinds carry `None`.
 fn classify_attr(name: &str) -> (BindingKind, Option<String>) {
     if let Some(event) = name.strip_prefix('@') {
         (BindingKind::Event, Some(event.to_string()))
@@ -95,20 +71,10 @@ fn classify_attr(name: &str) -> (BindingKind, Option<String>) {
     }
 }
 
-/// Content holes classify by the expression's value-shape:
-///   * `repeat(...)`            → List
-///   * `when(...)` / `choose(...)` or any `tpl`...`` subtemplate → Child
-///   * anything else            → Text
-///
-/// `Splice` (a bare `tpl`` value reached through a variable or method, e.g.
-/// `${header}` / `${this.headerTemplate()}`) is NOT detectable here — it is
-/// syntactically identical to a text value and needs symbol resolution to know
-/// the referent is a template. That wiring is deferred; such holes fall to Text
-/// for now.
 fn classify_content(expr: &str) -> BindingKind {
     match leading_call(expr) {
         Some("repeat") => return BindingKind::List,
-        Some("when") | Some("choose") | Some("match") => return BindingKind::Child,
+        Some("when" | "choose" | "match") => return BindingKind::Child,
         _ => {}
     }
     if contains_html_template(expr) {
@@ -118,8 +84,6 @@ fn classify_content(expr: &str) -> BindingKind {
     }
 }
 
-/// If `expr` is a call `ident(...)`, return the callee identifier. A bare
-/// identifier (no call), a member expression, or a ternary returns `None`.
 fn leading_call(expr: &str) -> Option<&str> {
     let t = expr.trim_start();
     let end = t.find(|c: char| !is_ident_char(c))?;
@@ -130,17 +94,11 @@ fn leading_call(expr: &str) -> Option<&str> {
     rest.starts_with('(').then(|| &t[..end])
 }
 
-/// Does `expr` contain a `` tpl`...` `` tagged template — i.e. `tpl` followed
-/// by a backtick, not as the tail of a longer identifier (`mytpl``)?
 fn contains_html_template(expr: &str) -> bool {
     let mut start = 0;
     while let Some(rel) = expr[start..].find("tpl`") {
         let at = start + rel;
-        let prev_is_ident = expr[..at]
-            .chars()
-            .next_back()
-            .map(is_ident_char)
-            .unwrap_or(false);
+        let prev_is_ident = expr[..at].chars().next_back().is_some_and(is_ident_char);
         if !prev_is_ident {
             return true;
         }

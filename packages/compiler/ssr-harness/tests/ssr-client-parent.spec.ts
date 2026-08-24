@@ -6,13 +6,10 @@ test.describe('SsrClientParent', () => {
     }) => {
         const response = await page.goto('/ssr-client-parent');
         const served = (await response?.text()) ?? '';
-        // the #client parent emits a bare custom element: no shadow content, so
-        // NOTHING in its subtree reaches the server response
         expect(served).toContain('<ssr-client-parent>');
         expect(served).not.toContain('shadowrootmode');
         expect(served).not.toContain('class="parent"');
         expect(served).not.toContain('class="child"');
-        // the child is never even emitted server-side
         expect(served).not.toContain('<ssr-client-parent-child');
 
         await page.waitForFunction(
@@ -25,12 +22,10 @@ test.describe('SsrClientParent', () => {
         const fromParent = page.locator('ssr-client-parent .from-parent');
         const local = page.locator('ssr-client-parent .local');
 
-        // both mounted fresh on the client
         await expect(pn).toHaveText('0');
         await expect(fromParent).toHaveText('0');
         await expect(local).toHaveText('0');
 
-        // parent state is reactive and flows into the client-mounted child prop
         await page.locator('ssr-client-parent .parent .inc').click();
         await expect(pn).toHaveText('1');
         await expect(fromParent).toHaveText('1');
@@ -38,7 +33,6 @@ test.describe('SsrClientParent', () => {
         await expect(pn).toHaveText('2');
         await expect(fromParent).toHaveText('2');
 
-        // the child's own #state is independently reactive
         await page.locator('ssr-client-parent .child .tick').click();
         await expect(local).toHaveText('1');
         await expect(fromParent).toHaveText('2');

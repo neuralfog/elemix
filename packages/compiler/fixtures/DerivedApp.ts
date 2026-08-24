@@ -30,11 +30,6 @@ const css = `
     .total { color: #6366f1; }
 `;
 
-// Proof that elemix needs no `computed()`: a derived value is just a getter.
-// Reading `subtotal`/`total` inside the template effect transitively reads the
-// tracked `state`, so the effect subscribes and the getters re-evaluate on any
-// change — no memo primitive, no `.value`, nothing. `total` even derives from
-// another getter (`subtotal`), proving chained derivation works the same way.
 // #component
 export class DerivedApp extends Component {
     // #styles

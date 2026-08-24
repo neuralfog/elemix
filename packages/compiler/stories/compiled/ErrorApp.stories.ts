@@ -1,9 +1,6 @@
 import { expect } from '@neuralfog/elemix-testing-library';
 import { find } from '@neuralfog/elemix-testing-library/query';
 
-// A compile-time ERROR (unknown pragma) is inlined as a module-scope `throw`.
-// We import the compiled module INSIDE the play function so the throw is
-// catchable — a top-level import would crash the whole story module instead.
 export default { title: 'Compiled/ErrorApp' };
 
 export const InlinedError = {
@@ -12,7 +9,6 @@ export const InlinedError = {
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
         let caught: Error | null = null;
         try {
-            // Evaluating ErrorApp.ts runs its inlined `throw new Error(...)`.
             await import('./.emited/ErrorApp');
         } catch (e) {
             caught = e as Error;

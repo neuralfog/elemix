@@ -72,4 +72,3 @@ export class RenderApp extends Component {
         </div>
     `;
 }
-

@@ -1,35 +1,21 @@
-//! Parse the HTML inside a ``tpl`` `` template (holes swapped for opaque markers)
-//! into a small tree, then translate that tree to the Doc IR. Fault-tolerant: a
-//! template it can't make sense of returns `None` and is left untouched by the
-//! caller. Standalone - the printing rules are ported from prettier (the oracle),
-//! sitting on the generic Doc engine in `doc.rs`.
-
 use crate::doc::{
-    self, concat, fill, group, hardline, indent, line, literalline, nil, softline, text, Doc,
+    self, concat, fill, group, hardline, indent, join, line, literalline, nil, softline, text, Doc,
     Options,
 };
 
-// Holes become a private-use marker `\u{fffc}<n>\u{fffc}` so the HTML parser sees
-// them as opaque atoms; the real `${expr}` is restored when building the Doc, so
-// widths stay honest.
 const MARK: char = '\u{fffc}';
 
 fn marker(i: usize) -> String {
     format!("{MARK}{i}{MARK}")
 }
 
-/// HTML void elements - never have children or a closing tag.
 const VOID: &[&str] = &[
     "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
     "track", "wbr",
 ];
 
-/// Raw-text / pre-like elements - content is verbatim, never reflowed.
 const RAW: &[&str] = &["pre", "textarea", "script", "style"];
 
-/// Block-display tags. Their leading/trailing whitespace collapses, so their
-/// content can be broken/reindented freely. Everything else (spans, buttons, and
-/// custom `<x-y>` tags) defaults to inline, where content is space-sensitive.
 const BLOCK: &[&str] = &[
     "html",
     "head",
@@ -84,8 +70,6 @@ fn is_block(tag: &str) -> bool {
     BLOCK.contains(&tag)
 }
 
-/// A custom element (`<todo-app>`, `<icon-sun>`) - any tag with a hyphen. Treated
-/// as block for layout: an elemix component sits on its own line.
 fn is_custom(tag: &str) -> bool {
     tag.contains('-')
 }
@@ -109,25 +93,15 @@ struct Element {
 #[derive(Debug)]
 struct Attr {
     name: String,
-    /// `Some((quote, value))` - quote is `"`/`'`/`\0` (unquoted); `None` is a
-    /// bare boolean attribute.
     value: Option<(char, String)>,
 }
 
-// -- public entry -----------------------------------------------------------
-
-/// Format one template's inner HTML. `statics`/`holes` come from the scanner.
-/// Returns the formatted HTML (starting at column 0), or `None` to bail (the
-/// caller then leaves the original template untouched).
 pub fn format_template(
     statics: &[String],
     holes: &[String],
     opts: &Options,
     base_indent: usize,
 ) -> Option<String> {
-    // A hole may itself hold nested tpl`` (e.g. a `repeat` render). Run the
-    // formatter over each hole's code so nested templates - at any depth - are
-    // formatted too; the non-template JS around them is left byte-for-byte.
     let holes: Vec<String> = holes
         .iter()
         .map(|h| crate::format::format_source(h, opts).output)
@@ -146,8 +120,6 @@ pub fn format_template(
     let doc = roots_to_doc(&nodes, holes);
     Some(doc::print_at(doc, opts, base_indent))
 }
-
-// -- parser -----------------------------------------------------------------
 
 struct Parser<'a> {
     b: &'a [u8],
@@ -172,20 +144,17 @@ impl Parser<'_> {
         self.src[a..z].to_string()
     }
 
-    /// Parse a run of sibling nodes until EOF or the close tag `</parent>`.
-    /// Returns the nodes and whether it stopped on its own close tag.
     fn parse_nodes(&mut self, parent: Option<&str>) -> (Vec<Node>, bool) {
         let mut nodes = Vec::new();
         while self.i < self.b.len() {
             if self.b[self.i] == b'<' {
-                // A closing tag for our parent?
                 if self.starts_with("</") {
                     let save = self.i;
                     if let Some(name) = self.try_close_tag() {
                         if parent.map(|p| p.eq_ignore_ascii_case(&name)) == Some(true) {
                             return (nodes, true);
                         }
-                        // A stray/mismatched close tag: drop it and continue.
+                        nodes.push(Node::Text(self.slice(save, self.i)));
                         continue;
                     }
                     self.i = save;
@@ -204,13 +173,11 @@ impl Parser<'_> {
                         continue;
                     }
                 }
-                // A lone `<` that isn't a tag: treat as text.
                 let start = self.i;
                 self.i += 1;
                 nodes.push(Node::Text(self.slice(start, self.i)));
                 continue;
             }
-            // Text run up to the next `<`.
             let start = self.i;
             while self.i < self.b.len() && self.b[self.i] != b'<' {
                 self.i += 1;
@@ -250,7 +217,6 @@ impl Parser<'_> {
     }
 
     fn try_close_tag(&mut self) -> Option<String> {
-        // self.i at `<`, we've checked "</".
         let mut j = self.i + 2;
         let name_start = j;
         while j < self.b.len() && (self.b[j].is_ascii_alphanumeric() || matches!(self.b[j], b'-')) {
@@ -282,7 +248,6 @@ impl Parser<'_> {
         self.i = j;
 
         let attrs = self.parse_attrs();
-        // self.i now at `>` or `/>` end (parse_attrs consumes to just past `>`).
         let self_closed = self.last_was_self_close;
 
         if is_void(&tag) || self_closed {
@@ -313,14 +278,14 @@ impl Parser<'_> {
         let start = self.i;
         let close = format!("</{tag}");
         while self.i < self.b.len()
-            && !self.b[self.i..]
-                .to_ascii_lowercase()
-                .starts_with(close.as_bytes())
+            && !self
+                .b
+                .get(self.i..self.i + close.len())
+                .is_some_and(|s| s.eq_ignore_ascii_case(close.as_bytes()))
         {
             self.i += 1;
         }
         let text = self.slice(start, self.i);
-        // consume the close tag
         while self.i < self.b.len() && self.b[self.i] != b'>' {
             self.i += 1;
         }
@@ -360,7 +325,6 @@ impl Parser<'_> {
                     if let Some(a) = self.parse_attr() {
                         attrs.push(a);
                     } else {
-                        // couldn't advance - consume one byte to avoid a loop.
                         self.i += 1;
                     }
                 }
@@ -419,9 +383,6 @@ impl Parser<'_> {
     }
 }
 
-// -- tree -> Doc ------------------------------------------------------------
-
-/// Replace hole markers in `s` with the real `${expr}` text.
 fn restore(s: &str, holes: &[String]) -> String {
     let mut out = String::new();
     let mut chars = s.chars().peekable();
@@ -448,11 +409,6 @@ fn restore(s: &str, holes: &[String]) -> String {
     out
 }
 
-/// Render a hole as a Doc. A single-line hole is one atom; a multi-line hole is
-/// dedented (its continuation lines rebased to relative-zero) and rejoined with
-/// hardlines, so the printer re-indents it to the new context while its internal
-/// relative structure - and its bytes - are preserved. Its hardlines also force
-/// the containing tag/element to break (spec).
 fn hole_doc(hole: &str) -> Doc {
     if !hole.contains('\n') {
         return text(format!("${{{hole}}}"));
@@ -460,9 +416,6 @@ fn hole_doc(hole: &str) -> Doc {
     let lines: Vec<&str> = hole.split('\n').collect();
     let last = lines.len() - 1;
     let indent_of = |l: &str| l.len() - l.trim_start().len();
-    // Dedent base: when the hole's closing line is on its own (whitespace only),
-    // its indent is where `${`/`}` align, so use it. Otherwise fall back to the
-    // shallowest continuation line. This keeps the content's relative structure.
     let min_indent = if lines[last].trim().is_empty() {
         indent_of(lines[last])
     } else {
@@ -490,8 +443,6 @@ fn hole_doc(hole: &str) -> Doc {
     concat(parts)
 }
 
-/// Emit text exactly as-is, its newlines becoming `literalline` (a break with no
-/// re-indent) - for raw/pre-like content that must stay byte-for-byte.
 fn verbatim_doc(raw: &str) -> Doc {
     let lines: Vec<&str> = raw.split('\n').collect();
     let mut parts = vec![text(lines[0].to_string())];
@@ -502,8 +453,6 @@ fn verbatim_doc(raw: &str) -> Doc {
     concat(parts)
 }
 
-/// If `tok` is exactly one hole marker, return its verbatim (multi-line-aware)
-/// Doc; otherwise `None`. Keeps a hole atomic even when it wraps a `?:`/lambda.
 fn as_single_hole(tok: &str, holes: &[String]) -> Option<Doc> {
     let mut chars = tok.chars();
     if chars.next() != Some(MARK) {
@@ -520,7 +469,7 @@ fn as_single_hole(tok: &str, holes: &[String]) -> Option<Doc> {
         num.push(c);
     }
     if chars.next().is_some() {
-        return None; // trailing chars after the marker
+        return None;
     }
     let idx: usize = num.parse().ok()?;
     Some(hole_doc(holes.get(idx)?))
@@ -531,24 +480,25 @@ fn roots_to_doc(nodes: &[Node], holes: &[String]) -> Doc {
     if kids.is_empty() {
         return nil();
     }
-    // A template body is a block context: one root per line, blank lines removed.
-    let mut parts = Vec::new();
-    for (i, kid) in kids.into_iter().enumerate() {
-        if i > 0 {
-            parts.push(hardline());
-        }
-        parts.push(kid);
-    }
-    concat(parts)
+    join(hardline(), kids)
 }
 
-/// Is a text node only whitespace (or empty)?
 fn blank_text(n: &Node) -> bool {
     matches!(n, Node::Text(t) if t.trim().is_empty())
 }
 
-/// Build the Doc list for a node's children, dropping all structural whitespace
-/// (including blank lines between siblings).
+fn atom_doc(tok: &str, holes: &[String]) -> Doc {
+    as_single_hole(tok, holes).unwrap_or_else(|| text(restore(tok, holes)))
+}
+
+fn comment_doc(c: &str, holes: &[String]) -> Doc {
+    text(format!("<!-- {} -->", restore(c, holes)))
+}
+
+fn is_self_closing(e: &Element) -> bool {
+    e.self_closed || is_void(&e.tag)
+}
+
 fn children_docs(nodes: &[Node], holes: &[String]) -> Vec<Doc> {
     let mut out: Vec<Doc> = Vec::new();
     for n in nodes {
@@ -557,7 +507,7 @@ fn children_docs(nodes: &[Node], holes: &[String]) -> Vec<Doc> {
         }
         let doc = match n {
             Node::Text(t) => text_doc(t, holes),
-            Node::Comment(c) => text(format!("<!-- {} -->", restore(c, holes))),
+            Node::Comment(c) => comment_doc(c, holes),
             Node::Doctype(d) => text(restore(d, holes)),
             Node::Element(e) => element_doc(e, holes),
         };
@@ -566,89 +516,53 @@ fn children_docs(nodes: &[Node], holes: &[String]) -> Vec<Doc> {
     out
 }
 
-/// Collapse whitespace in a text run and reflow its words with `fill`. Crucially,
-/// we tokenise the MARKER text first (a hole is a single spaceless marker token)
-/// and only then restore each token - so a hole is always ONE atom and is never
-/// word-split, whatever `${expr}` it holds (hole-preservation is a hard guarantee).
 fn text_doc(t: &str, holes: &[String]) -> Doc {
-    let tokens: Vec<&str> = t.split_whitespace().collect();
-    if tokens.is_empty() {
-        return nil();
-    }
-    let atom = |tok: &str| as_single_hole(tok, holes).unwrap_or_else(|| text(restore(tok, holes)));
-    if tokens.len() == 1 {
-        return atom(tokens[0]);
-    }
-    let mut parts = Vec::new();
-    for (i, tok) in tokens.iter().enumerate() {
-        if i > 0 {
-            parts.push(line());
+    let atoms: Vec<Doc> = t
+        .split_whitespace()
+        .map(|tok| atom_doc(tok, holes))
+        .collect();
+    fill_lines(atoms)
+}
+
+fn fill_lines(items: Vec<Doc>) -> Doc {
+    match items.len() {
+        0 => nil(),
+        1 => items.into_iter().next().unwrap(),
+        _ => {
+            let mut parts = Vec::new();
+            for (i, item) in items.into_iter().enumerate() {
+                if i > 0 {
+                    parts.push(line());
+                }
+                parts.push(item);
+            }
+            fill(parts)
         }
-        parts.push(atom(tok));
     }
-    fill(parts)
 }
 
 fn element_doc(e: &Element, holes: &[String]) -> Doc {
     let open = open_tag_doc(e, holes);
 
-    if e.self_closed || is_void(&e.tag) {
+    if is_self_closing(e) {
         return open;
     }
 
     let close = text(format!("</{}>", e.tag));
 
-    // Raw-text / pre-like (`pre`, `textarea`, ...): content is whitespace
-    // sensitive, emitted verbatim - never collapsed, reflowed, or re-indented.
     if is_raw(&e.tag) {
-        let raw: String = e
-            .children
-            .iter()
-            .filter_map(|n| match n {
-                Node::Text(t) => Some(restore(t, holes)),
-                _ => None,
-            })
-            .collect();
-        if raw.is_empty() {
-            return concat(vec![open, close]);
-        }
-        return concat(vec![open, verbatim_doc(&raw), close]);
+        return raw_element_doc(e, holes, open, close);
     }
 
-    // No meaningful children -> `<tag></tag>`.
     let kids = children_docs(&e.children, holes);
     if kids.is_empty() {
         return concat(vec![open, close]);
     }
 
-    // Block layout when the element wraps structure rather than prose: a block or
-    // custom child, a comment, or ELEMENT-ONLY content (e.g. a `<div>` around a
-    // `<span>` - the child goes on its own line). Text mixed with inline elements
-    // (`<code>`, `<b>`, holes) is prose and stays in the inline flow (one `fill`).
-    let has_element = e.children.iter().any(|n| matches!(n, Node::Element(_)));
-    let has_text = e
-        .children
-        .iter()
-        .any(|n| matches!(n, Node::Text(t) if !t.trim().is_empty()));
-    let force_block = e.children.iter().any(|n| match n {
-        Node::Element(c) => is_block(&c.tag) || is_custom(&c.tag),
-        Node::Comment(_) => true,
-        _ => false,
-    }) || (has_element && !has_text);
-
-    if force_block {
-        let mut inner = Vec::new();
-        for kid in kids {
-            inner.push(hardline());
-            inner.push(kid);
-        }
-        return group(concat(vec![open, indent(concat(inner)), hardline(), close]));
+    if force_block(&e.children) {
+        return block_element_doc(open, kids, close);
     }
 
-    // Inline flow (text + inline elements). If the content touches the tags (no
-    // surrounding whitespace in the source) and the element is itself inline, it
-    // is space-sensitive: a line break there would change the rendered DOM, so
-    // keep it flush. Block parents collapse boundary whitespace, so they may break.
     let content = inline_content(&e.children, holes);
     let sensitive = !is_block(&e.tag) && edge_sensitive(&e.children);
 
@@ -664,27 +578,53 @@ fn element_doc(e: &Element, holes: &[String]) -> Doc {
     }
 }
 
-/// True when the content touches both tags (no whitespace at either edge) - so
-/// inserting a break there would change what the browser renders.
-fn edge_sensitive(children: &[Node]) -> bool {
-    let leading = match children.first() {
-        Some(Node::Text(t)) => !t.starts_with(char::is_whitespace),
-        Some(Node::Element(_)) => true,
-        _ => false,
-    };
-    let trailing = match children.last() {
-        Some(Node::Text(t)) => !t.ends_with(char::is_whitespace),
-        Some(Node::Element(_)) => true,
-        _ => false,
-    };
-    leading && trailing
+fn raw_element_doc(e: &Element, holes: &[String], open: Doc, close: Doc) -> Doc {
+    let raw: String = e
+        .children
+        .iter()
+        .filter_map(|n| match n {
+            Node::Text(t) => Some(restore(t, holes)),
+            _ => None,
+        })
+        .collect();
+    if raw.is_empty() {
+        concat(vec![open, close])
+    } else {
+        concat(vec![open, verbatim_doc(&raw), close])
+    }
 }
 
-/// Reflow a run of text + inline elements as one `fill`. Atoms that TOUCH in the
-/// source (no whitespace between them, e.g. `(<code>x</code>)`) are merged into a
-/// single unbreakable unit, so a break can never be inserted mid-unit (that would
-/// change the render); the only wrap points are the `line`s where the source had
-/// whitespace. That also lets `fill` move a whole unit to the next line.
+fn force_block(children: &[Node]) -> bool {
+    let has_element = children.iter().any(|n| matches!(n, Node::Element(_)));
+    let has_text = children
+        .iter()
+        .any(|n| matches!(n, Node::Text(t) if !t.trim().is_empty()));
+    children.iter().any(|n| match n {
+        Node::Element(c) => is_block(&c.tag) || is_custom(&c.tag),
+        Node::Comment(_) => true,
+        _ => false,
+    }) || (has_element && !has_text)
+}
+
+fn block_element_doc(open: Doc, kids: Vec<Doc>, close: Doc) -> Doc {
+    let mut inner = Vec::new();
+    for kid in kids {
+        inner.push(hardline());
+        inner.push(kid);
+    }
+    group(concat(vec![open, indent(concat(inner)), hardline(), close]))
+}
+
+fn edge_sensitive(children: &[Node]) -> bool {
+    let edge = |node: Option<&Node>, ws: fn(&str) -> bool| match node {
+        Some(Node::Text(t)) => !ws(t),
+        Some(Node::Element(_)) => true,
+        _ => false,
+    };
+    edge(children.first(), |t| t.starts_with(char::is_whitespace))
+        && edge(children.last(), |t| t.ends_with(char::is_whitespace))
+}
+
 fn inline_content(children: &[Node], holes: &[String]) -> Doc {
     let mut units: Vec<Doc> = Vec::new();
     let mut cur: Vec<Doc> = Vec::new();
@@ -704,8 +644,7 @@ fn inline_content(children: &[Node], holes: &[String]) -> Doc {
                 let trailing = t.ends_with(char::is_whitespace);
                 let toks: Vec<&str> = t.split_whitespace().collect();
                 for (wi, tok) in toks.iter().enumerate() {
-                    let atom =
-                        as_single_hole(tok, holes).unwrap_or_else(|| text(restore(tok, holes)));
+                    let atom = atom_doc(tok, holes);
                     let ws_before = if wi == 0 { pending_ws || leading } else { true };
                     add(atom, ws_before, &mut units, &mut cur);
                 }
@@ -720,7 +659,7 @@ fn inline_content(children: &[Node], holes: &[String]) -> Doc {
                 pending_ws = false;
             }
             Node::Comment(c) => {
-                let atom = text(format!("<!-- {} -->", restore(c, holes)));
+                let atom = comment_doc(c, holes);
                 add(atom, pending_ws, &mut units, &mut cur);
                 pending_ws = false;
             }
@@ -731,23 +670,9 @@ fn inline_content(children: &[Node], holes: &[String]) -> Doc {
         units.push(collapse(cur));
     }
 
-    match units.len() {
-        0 => nil(),
-        1 => units.into_iter().next().unwrap(),
-        _ => {
-            let mut parts = Vec::new();
-            for (i, u) in units.into_iter().enumerate() {
-                if i > 0 {
-                    parts.push(line());
-                }
-                parts.push(u);
-            }
-            fill(parts)
-        }
-    }
+    fill_lines(units)
 }
 
-/// One doc when the run has a single atom, else a concat (an unbreakable unit).
 fn collapse(mut v: Vec<Doc>) -> Doc {
     if v.len() == 1 {
         v.pop().unwrap()
@@ -757,7 +682,7 @@ fn collapse(mut v: Vec<Doc>) -> Doc {
 }
 
 fn open_tag_doc(e: &Element, holes: &[String]) -> Doc {
-    let self_close = e.self_closed || is_void(&e.tag);
+    let self_close = is_self_closing(e);
 
     if e.attrs.is_empty() {
         return if self_close {
@@ -790,8 +715,6 @@ fn attr_doc(a: &Attr, holes: &[String]) -> Doc {
     let name = restore(&a.name, holes);
     match &a.value {
         None => text(name),
-        // Unquoted value - typically a hole (`@click=${x}`, `:prop=${x}`). Keep it
-        // atomic and multi-line-aware (e.g. an inline arrow handler).
         Some(('\0', val)) => match as_single_hole(val, holes) {
             Some(hd) => concat(vec![text(format!("{name}=")), hd]),
             None => text(format!("{name}={}", restore(val, holes))),
@@ -813,8 +736,11 @@ mod tests {
     use super::*;
 
     fn fmt(statics: &[&str], holes: &[&str]) -> String {
-        let s: Vec<String> = statics.iter().map(|x| x.to_string()).collect();
-        let h: Vec<String> = holes.iter().map(|x| x.to_string()).collect();
+        let s: Vec<String> = statics
+            .iter()
+            .map(std::string::ToString::to_string)
+            .collect();
+        let h: Vec<String> = holes.iter().map(std::string::ToString::to_string).collect();
         format_template(
             &s,
             &h,
@@ -840,8 +766,6 @@ mod tests {
     fn void_elements_have_no_close() {
         assert_eq!(fmt(&["<hr>"], &[]), "<hr />");
         assert_eq!(fmt(&["<img src=\"a.png\">"], &[]), "<img src=\"a.png\" />");
-        // A void element among siblings self-closes and doesn't swallow what
-        // follows. Element-only content -> block layout, one per line.
         assert_eq!(
             fmt(&["<div><br><span>x</span></div>"], &[]),
             "<div>\n    <br />\n    <span>x</span>\n</div>"
@@ -871,15 +795,12 @@ mod tests {
 
     #[test]
     fn pre_content_is_verbatim() {
-        // Whitespace inside <pre> must not be collapsed or reflowed.
         let out = fmt(&["<pre>  a\n  b  </pre>"], &[]);
         assert!(out.contains("  a\n  b  "), "pre kept verbatim: {out:?}");
     }
 
     #[test]
     fn mixed_inline_content_stays_in_flow() {
-        // Text with inline elements reflows as one run (fill), not one-per-line -
-        // it fits, so it stays on a single line, render unchanged.
         assert_eq!(
             fmt(&["<p>hi <b>there</b> friend</p>"], &[]),
             "<p>hi <b>there</b> friend</p>"
@@ -888,8 +809,6 @@ mod tests {
 
     #[test]
     fn touching_inline_content_is_not_split() {
-        // `(` touches `<code>` (no whitespace): a break would insert a space and
-        // change the render, so they must stay together.
         let out = fmt(
             &["<p>see (<code>x.ts</code>) for the store and how it is wired up here</p>"],
             &[],

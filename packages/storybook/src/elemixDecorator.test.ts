@@ -3,8 +3,6 @@ import { elemixDecorator } from './elemixDecorator';
 
 let idCounter = 0;
 
-// The decorator mounts a story result that is a string or a Node. Build real
-// DOM nodes directly — elemix is compile-only, there is no tpl`` interpreter.
 const node = (markup: string): Node => {
     const t = document.createElement('template');
     t.innerHTML = markup;
@@ -54,8 +52,6 @@ describe('elemixDecorator', () => {
 
         run(() => node('<b>fresh</b>'));
 
-        // the canvas is left untouched - Storybook mounts the returned host
-        // itself, so the decorator must not disturb any existing tree.
         expect(root.querySelector('span')?.textContent).toBe('stale');
         expect(root.querySelector('[data-elemix-root]')).toBeNull();
     });

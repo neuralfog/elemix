@@ -63,4 +63,3 @@ export class StoreControls extends Component<Props> {
         </div>
     </div>`;
 }
-

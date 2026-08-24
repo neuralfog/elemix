@@ -40,4 +40,3 @@ export class ProfileCard extends Component<Props> {
         <div class="likes">❤️ ${this.props.likes}</div>
     </div>`;
 }
-

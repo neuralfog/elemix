@@ -1,10 +1,3 @@
-//! Snapshot the compiled output of every fixture — a regression lock on the
-//! emitted code (what lands in `.emited` and ships to consumers). Runs in
-//! `cargo test`, before the Storybook conformance tests.
-//!
-//! When a codegen change is intentional, re-bless the snapshots with
-//! `INSTA_UPDATE=always cargo test --test snapshots` (or `cargo insta review`).
-
 use elemix_compiler::compile;
 
 #[test]

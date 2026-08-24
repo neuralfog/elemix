@@ -88,4 +88,3 @@ export class NestedTemplateApp extends Component {
         `;
     };
 }
-

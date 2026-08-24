@@ -11,10 +11,8 @@ export const Default = {
         const button = find<HTMLButtonElement>('button', canvasElement);
         if (!button) throw new Error('counter-app did not render a button');
 
-        // starts at zero
         expect(button.textContent).toBe('count is 0');
 
-        // every click increments by one — assert each step of the reactive _text binding
         click(button);
         expect(button.textContent).toBe('count is 1');
         click(button);

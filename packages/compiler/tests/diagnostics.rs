@@ -1,6 +1,3 @@
-//! Compile-time diagnostics: errors inline a module-scope `throw`, warnings a
-//! `console.warn`, and a clean source is left untouched.
-
 use elemix_compiler::diagnostics::{has_errors, inline, js_str, Diagnostic, Severity};
 use elemix_compiler::{compile, compile_diagnostics};
 
@@ -36,7 +33,6 @@ fn unknown_pragma_inlines_a_throw_naming_the_component() {
     let out = compile(UNKNOWN_PRAGMA);
     assert!(out.starts_with("throw new Error('[elemix] WidgetApp:"));
     assert!(out.contains("unknown compiler hint `#frobnicate`"));
-    // the throw aborts at module scope before the (un-upgradable) component
     let (_, diags) = compile_diagnostics(UNKNOWN_PRAGMA);
     assert_eq!(diags.len(), 1);
     assert_eq!(diags[0].severity, Severity::Error);
@@ -45,8 +41,6 @@ fn unknown_pragma_inlines_a_throw_naming_the_component() {
 
 #[test]
 fn unknown_hint_on_a_field_reads_as_unknown_and_names_the_component() {
-    // A typo'd hint on a class field must say "unknown compiler hint", NOT
-    // "can't tag a field" - and name the component like the class-level case.
     let src = "import { Component } from '@neuralfog/elemix';
 export class MatchApp extends Component {
     // #statesdf
@@ -66,10 +60,8 @@ export class MatchApp extends Component {
 fn hyphenless_tag_warns_but_still_compiles() {
     let out = compile(HYPHENLESS);
     assert!(out.contains("console.warn('[elemix] Widget:"));
-    // derived tag → the message explains the derivation + how to fix it.
     assert!(out.contains("derives the tag `widget`"));
     assert!(out.contains("must contain a hyphen"));
-    // a warning never blocks: the component is still registered + has a view
     assert!(!out.contains("throw new Error("));
     assert!(out.contains("$__defineComponent('widget', Widget)"));
     assert!(out.contains("$$__view(): DocumentFragment"));
@@ -82,7 +74,7 @@ fn hyphenless_tag_warns_but_still_compiles() {
 
 #[test]
 fn multiword_class_has_no_tag_warning() {
-    let (_, diags) = compile_diagnostics(CLEAN); // CounterApp -> counter-app
+    let (_, diags) = compile_diagnostics(CLEAN);
     assert!(diags.is_empty());
 }
 
@@ -113,20 +105,16 @@ export class OtherApp extends Component {
     let (out, diags) = compile_diagnostics(src);
     assert_eq!(diags.len(), 2);
     assert!(has_errors(&diags));
-    // warning logs before the throw aborts
     let warn = out.find("console.warn(").expect("a warn");
     let thrown = out.find("throw new Error(").expect("a throw");
     assert!(warn < thrown);
 }
-
-// --- unit: the emission primitives ---
 
 #[test]
 fn js_str_escapes_quotes_and_newlines() {
     assert_eq!(js_str("a'b"), "'a\\'b'");
     assert_eq!(js_str("a\nb"), "'a\\nb'");
     assert_eq!(js_str("a\\b"), "'a\\\\b'");
-    // backticks and double quotes are safe inside single quotes
     assert_eq!(js_str("a`b\"c"), "'a`b\"c'");
 }
 
@@ -159,8 +147,6 @@ fn module_level_object_state_is_clean() {
 
 #[test]
 fn class_field_primitive_state_is_clean() {
-    // bare primitives ARE allowed as class fields (they lower to an accessor),
-    // so they must never trip the module-state error.
     let src = "import { Component } from '@neuralfog/elemix';\nexport class Foo extends Component {\n    // #state\n    count = 0;\n}";
     let (_, diags) = compile_diagnostics(src);
     assert!(diags.is_empty());

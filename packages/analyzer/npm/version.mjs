@@ -1,6 +1,3 @@
-// Stamp one version across the launcher and every platform package, and pin the
-// launcher's optionalDependencies to it so a published set is internally locked.
-// usage: node version.mjs <version>
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

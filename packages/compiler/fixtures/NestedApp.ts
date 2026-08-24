@@ -117,4 +117,3 @@ export class NestedApp extends Component {
         </div>
     `;
 }
-

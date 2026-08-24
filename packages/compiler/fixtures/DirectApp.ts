@@ -128,4 +128,3 @@ export class DirectApp extends Component {
         <button class="action" disabled=${this.state.disabled}>Action</button>
     `;
 }
-

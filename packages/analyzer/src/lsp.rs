@@ -1,9 +1,3 @@
-//! The persistent LSP server behind `--lsp`. Same binary, same checks as the CLI;
-//! it just keeps warm state (the loaded project file set, the editor's dirty
-//! buffers) and pushes diagnostics on a debounce instead of running once and
-//! exiting. The one slow step, type judgment, is delegated to the project's tsc
-//! via the same oracle the CLI uses.
-
 use crate::analyze;
 use crate::imports;
 use crate::oracle::TscOracle;
@@ -26,8 +20,6 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::Duration;
 
-/// How long the server waits for edits to settle before re-analyzing. Keystrokes
-/// coalesce into one tsc run.
 const DEBOUNCE: Duration = Duration::from_millis(300);
 
 pub fn serve(root_arg: &str) -> ExitCode {
@@ -46,7 +38,6 @@ fn run(root_arg: &str) -> Result<(), Box<dyn Error + Sync + Send>> {
     let capabilities = ServerCapabilities {
         text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
         completion_provider: Some(CompletionOptions {
-            // `<` opens a tag, `#` a compiler hint, the binding sigils `:`/`@`/`~`.
             trigger_characters: Some(vec![
                 "<".to_string(),
                 "#".to_string(),
@@ -56,34 +47,23 @@ fn run(root_arg: &str) -> Result<(), Box<dyn Error + Sync + Send>> {
             ]),
             ..Default::default()
         }),
-        // The auto-import quick-fix for an unimported component.
         code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
-        // Hover docs for `// #…` compiler hints.
         hover_provider: Some(HoverProviderCapability::Simple(true)),
         ..Default::default()
     };
     let init_value = connection.initialize(serde_json::to_value(capabilities)?)?;
     let init: InitializeParams = serde_json::from_value(init_value)?;
 
-    // Prefer the editor's workspace folder as the project root; fall back to the
-    // --root flag the extension passes.
     let root = workspace_root(&init).unwrap_or_else(|| resolve_root(root_arg));
 
-    // Clear any temp sidecars/tsconfig/buildinfo a previously-killed server left
-    // behind, so they neither linger nor get read back in as project sources.
     sweep_temp(&root);
 
-    // Keep the message loop in an inner scope so `state` drops before we join the
-    // IO threads (which can block until the client closes the pipe).
     {
         let mut state = State::new(root);
         state.load_project();
         state.analyze_and_publish(&connection);
 
         loop {
-            // When there are pending edits, block only for the debounce window so a
-            // lull triggers a re-analysis; otherwise block indefinitely for the
-            // next message.
             let msg = if state.dirty {
                 match connection.receiver.recv_timeout(DEBOUNCE) {
                     Ok(m) => m,
@@ -137,18 +117,11 @@ fn run(root_arg: &str) -> Result<(), Box<dyn Error + Sync + Send>> {
 
 struct State {
     root: PathBuf,
-    /// Every project `.ts` file's on-disk content, loaded once.
     base: HashMap<PathBuf, String>,
-    /// The editor's live buffers - these shadow `base` while a file is open.
     open: HashMap<PathBuf, String>,
-    /// File paths we last published non-empty diagnostics for, so we can clear the
-    /// ones that go clean. Keyed by path string (not `Uri`, which caches state).
     published: HashSet<String>,
-    /// tag → props, refreshed each analysis; the source for `:prop` completion.
     props: HashMap<String, Vec<PropInfo>>,
-    /// tag → declaring file, refreshed each analysis; for the auto-import quick-fix.
     components: HashMap<String, PathBuf>,
-    /// tag → class name, refreshed each analysis; for the hover props-type lookup.
     component_classes: HashMap<String, String>,
     dirty: bool,
 }
@@ -167,8 +140,6 @@ impl State {
         }
     }
 
-    /// Read every project `.ts` file from disk into `base` (skipping the usual
-    /// output/dependency dirs).
     fn load_project(&mut self) {
         let pattern = format!("{}/**/*.ts", self.root.to_string_lossy());
         let Ok(entries) = glob::glob(&pattern) else {
@@ -201,7 +172,6 @@ impl State {
                 if let Ok(p) =
                     serde_json::from_value::<lsp_types::DidChangeTextDocumentParams>(not.params)
                 {
-                    // FULL sync: the last change carries the whole document.
                     if let (Some(path), Some(change)) = (
                         uri_to_path(&p.text_document.uri),
                         p.content_changes.into_iter().last(),
@@ -220,7 +190,6 @@ impl State {
                 {
                     if let Some(path) = uri_to_path(&p.text_document.uri) {
                         self.open.remove(&path);
-                        // The buffer is gone; re-read disk so `base` is current.
                         if let Ok(src) = std::fs::read_to_string(&path) {
                             self.base.insert(path, src);
                         }
@@ -232,7 +201,6 @@ impl State {
         }
     }
 
-    /// Merge disk `base` with the editor's `open` buffers and run the analysis.
     fn snapshot(&self) -> Vec<(PathBuf, String)> {
         let mut merged: HashMap<&PathBuf, &String> = HashMap::new();
         for (p, s) in &self.base {
@@ -247,48 +215,42 @@ impl State {
             .collect()
     }
 
-    /// Answer a completion from the cached tag → props: when the cursor sits in a
-    /// `<tag …>` open tag inside a `tpl` template, offer the component's
-    /// not-yet-bound props as `:name` items. Pure + synchronous - no tsc.
+    fn text_of(&self, key: &Path) -> Option<&String> {
+        self.open.get(key).or_else(|| self.base.get(key))
+    }
+
     fn complete(&self, params: &CompletionParams) -> Vec<CompletionItem> {
         let uri = &params.text_document_position.text_document.uri;
         let Some(path) = uri_to_path(uri) else {
             return Vec::new();
         };
-        let Some(text) = self.open.get(&path).or_else(|| self.base.get(&path)) else {
+        let Some(text) = self.text_of(&path) else {
             return Vec::new();
         };
         let pos = params.text_document_position.position;
         let offset = offset_of(text, pos.line, pos.character);
 
-        // Compiler-hint completion on a `// #…` comment line.
-        if let Some(token) = pragma_token(line_before_cursor(text, offset)) {
-            let back: u32 = token.chars().map(|c| c.len_utf16() as u32).sum();
-            let range = Range {
-                start: Position {
-                    line: pos.line,
-                    character: pos.character.saturating_sub(back),
-                },
-                end: pos,
-            };
-            return HINTS.iter().map(|h| hint_item(h, range)).collect();
+        if let Some(items) = complete_pragma(text, offset, pos) {
+            return items;
         }
+        if let Some(items) = self.complete_tag_name(text, offset, pos) {
+            return items;
+        }
+        self.complete_bindings(text, offset, pos)
+    }
 
-        // Typing the TAG NAME just after `<` → complete registered component tags
-        // to a self-closed element (with required-prop holes).
-        if let Some(partial) = tag_name_context(text, offset) {
-            let back: u32 = partial.chars().map(|c| c.len_utf16() as u32).sum();
-            let range = Range {
-                start: Position {
-                    line: pos.line,
-                    character: pos.character.saturating_sub(back),
-                },
-                end: pos,
-            };
-            let mut tags: Vec<&String> = self.props.keys().collect();
-            tags.sort();
-            return tags
-                .into_iter()
+    fn complete_tag_name(
+        &self,
+        text: &str,
+        offset: usize,
+        pos: Position,
+    ) -> Option<Vec<CompletionItem>> {
+        let partial = tag_name_context(text, offset)?;
+        let range = range_back(pos, &partial);
+        let mut tags: Vec<&String> = self.props.keys().collect();
+        tags.sort();
+        Some(
+            tags.into_iter()
                 .map(|tag| {
                     let required: Vec<&str> = self.props[tag]
                         .iter()
@@ -297,14 +259,14 @@ impl State {
                         .collect();
                     tag_item(tag, &required, range)
                 })
-                .collect();
-        }
+                .collect(),
+        )
+    }
 
+    fn complete_bindings(&self, text: &str, offset: usize, pos: Position) -> Vec<CompletionItem> {
         let Some((tag, provided)) = tag_context(text, offset) else {
             return Vec::new();
         };
-        // Replace the sigil-prefixed token being typed (so accepting after typing
-        // `:`/`@`/`~` doesn't leave a stray leading sigil → `::name`).
         let start_char = token_start_char(text, offset, pos.character);
         let range = Range {
             start: Position {
@@ -315,7 +277,6 @@ impl State {
         };
 
         let mut items = Vec::new();
-        // Bindings valid on ANY element inside a tag: two-way model + DOM events.
         items.push(binding_item("~model", "two-way bound value", range));
         items.push(binding_item("~onmodel", "model write transform", range));
         for e in EVENT_NAMES {
@@ -325,8 +286,6 @@ impl State {
                 range,
             ));
         }
-        // Props are component-specific: only for a registered component tag, and
-        // only those not already bound.
         if let Some(props) = self.props.get(&tag) {
             items.extend(
                 props
@@ -338,13 +297,11 @@ impl State {
         items
     }
 
-    /// Hover: a `// #…` compiler hint's doc, or a component tag's props type.
     fn hover(&self, params: &HoverParams) -> Option<Hover> {
         let tdp = &params.text_document_position_params;
         let path = uri_to_path(&tdp.text_document.uri)?;
-        let text = self.open.get(&path).or_else(|| self.base.get(&path))?;
+        let text = self.text_of(&path)?;
 
-        // 1) Compiler-hint hover on a `// #…` line.
         if let Some(line) = line_text(text, tdp.position.line) {
             if let Some((name, start, end)) = hint_at(line, tdp.position.character as usize) {
                 if let Some(hint) = HINTS.iter().find(|h| h.name == name) {
@@ -371,8 +328,6 @@ impl State {
             }
         }
 
-        // 2) Component-tag hover: the props type for `<todo-item …>`, `<todo-item/>`
-        // or `</todo-item>`. Only for a registered component tag.
         let offset = offset_of(text, tdp.position.line, tdp.position.character);
         let (tag, name_start, name_end) = component_tag_at(text, offset)?;
         if !self.component_classes.contains_key(&tag) && !self.props.contains_key(&tag) {
@@ -390,16 +345,13 @@ impl State {
         })
     }
 
-    /// The hover markdown for a component `tag`: its props type as a TS code block,
-    /// or a "no props" note. Reads the declaring file to extract the actual type;
-    /// falls back to the known prop names when the type can't be located/parsed.
     fn props_markdown(&self, tag: &str) -> String {
         let header = format!("**`<{tag}>`** - elemix component\n\n");
 
         if let (Some(class), Some(file)) =
             (self.component_classes.get(tag), self.components.get(tag))
         {
-            if let Some(src) = self.open.get(file).or_else(|| self.base.get(file)) {
+            if let Some(src) = self.text_of(file) {
                 match component_props_type(class, src) {
                     PropsExtract::NoProps => return format!("{header}*No props.*"),
                     PropsExtract::Type(ty) => {
@@ -410,7 +362,6 @@ impl State {
             }
         }
 
-        // Fallback: the prop names we enumerated (no per-prop types available).
         match self.props.get(tag) {
             Some(props) if !props.is_empty() => {
                 let body = props
@@ -430,17 +381,13 @@ impl State {
         }
     }
 
-    /// Offer an "Import '<tag>'" quick-fix for each unimported-component warning
-    /// (badge `import`) in range - inserting a side-effect import at the top.
-    // `WorkspaceEdit.changes` is keyed by `Uri` (lsp-types' choice); its interior
-    // mutability is a parse cache that doesn't affect Hash/Eq.
     #[allow(clippy::mutable_key_type)]
     fn code_actions(&self, params: &CodeActionParams) -> Vec<CodeActionOrCommand> {
         let uri = &params.text_document.uri;
         let Some(path) = uri_to_path(uri) else {
             return Vec::new();
         };
-        let Some(text) = self.open.get(&path).or_else(|| self.base.get(&path)) else {
+        let Some(text) = self.text_of(&path) else {
             return Vec::new();
         };
         let mut actions = Vec::new();
@@ -448,7 +395,6 @@ impl State {
             if !matches!(&diag.code, Some(NumberOrString::String(s)) if s == "import") {
                 continue;
             }
-            // The tag is the text the warning carets.
             let start = offset_of(text, diag.range.start.line, diag.range.start.character);
             let end = offset_of(text, diag.range.end.line, diag.range.end.character);
             let Some(tag) = text.get(start..end) else {
@@ -496,17 +442,13 @@ impl State {
                 return;
             }
         };
-        self.props = analysis.props.clone();
-        self.components = analysis.components.clone();
-        self.component_classes = analysis.component_classes.clone();
+        self.props = analysis.props;
+        self.components = analysis.components;
+        self.component_classes = analysis.component_classes;
 
-        let sources: HashMap<String, String> = files
-            .iter()
-            .map(|(p, s)| (p.to_string_lossy().into_owned(), s.clone()))
-            .collect();
+        let sources = report::source_map(&files);
         let located = report::lsp_findings(&analysis.findings, |f| sources.get(f).cloned());
 
-        // Bucket diagnostics by file path.
         let mut by_path: HashMap<String, Vec<Diagnostic>> = HashMap::new();
         for f in located {
             by_path
@@ -515,8 +457,6 @@ impl State {
                 .push(to_diagnostic(&f));
         }
 
-        // Publish current findings, then clear any file that was flagged before and
-        // is now clean.
         let now: HashSet<String> = by_path.keys().cloned().collect();
         for (path, diagnostics) in by_path {
             if let Some(uri) = path_to_uri(&path) {
@@ -580,12 +520,9 @@ fn resolve_root(root_arg: &str) -> PathBuf {
     std::fs::canonicalize(root_arg).unwrap_or_else(|_| PathBuf::from(root_arg))
 }
 
-/// Decode a `file://` URI's path back to an OS path. `lsp_types::Uri` derefs to
-/// `fluent_uri::Uri`, so we take its percent-decoded path component.
 fn uri_to_path(uri: &Uri) -> Option<PathBuf> {
     let decoded = uri.path().as_estr().decode().into_string_lossy();
     let s: &str = decoded.as_ref();
-    // A Windows file URI path looks like "/C:/...": drop the leading slash.
     let cleaned = if cfg!(windows)
         && s.as_bytes().first() == Some(&b'/')
         && s.as_bytes().get(2) == Some(&b':')
@@ -598,8 +535,6 @@ fn uri_to_path(uri: &Uri) -> Option<PathBuf> {
     Some(std::fs::canonicalize(&path).unwrap_or(path))
 }
 
-/// Build a `file://` URI from an absolute OS path, percent-encoding everything
-/// outside the URI unreserved set (RFC 3986) while keeping path separators.
 fn path_to_uri(path: &str) -> Option<Uri> {
     let mut s = String::from("file://");
     if !path.starts_with('/') {
@@ -627,46 +562,31 @@ fn hex(nibble: u8) -> char {
     })
 }
 
-/// Skip dependency and build-output trees so we don't parse the world.
 fn is_ignored(path: &Path) -> bool {
     path.components().any(|c| {
         matches!(
             c.as_os_str().to_str(),
-            Some("node_modules") | Some("dist") | Some(".git") | Some("target")
+            Some("node_modules" | "dist" | ".git" | "target")
         )
     })
 }
 
-/// Drop this process's throwaway overlay dir wholesale, in case a prior server
-/// with the same pid was killed before its own cleanup ran. The oracle also
-/// clears it at the start of every run, so this is just belt-and-suspenders.
 fn sweep_temp(root: &Path) {
     let _ = std::fs::remove_dir_all(crate::oracle::cache_dir(root));
 }
 
-/// The component tag whose open `<tag …>` contains `offset` (inside a `tpl`
-/// template), plus the prop names already bound there. Works ANYWHERE in the open
-/// tag: it scans the tag body skipping over `${…}` interpolations (whose `=>`
-/// arrows and `>`s must NOT be mistaken for the tag close) and quoted attribute
-/// values. `None` when the cursor isn't in a bindable tag position.
 fn tag_context(text: &str, offset: usize) -> Option<(String, Vec<String>)> {
     let before = text.get(..offset)?;
     let lt = before.rfind('<')?;
     if !in_tpl_template(before, lt) {
         return None;
     }
-    // Scan the WHOLE open tag - not just the text up to the cursor - so a prop
-    // counts as bound no matter where in the tag it sits relative to the caret.
-    // Listing only *unused* props must not depend on caret position.
     let s = &text[lt + 1..];
     let bytes = s.as_bytes();
     let cursor = offset - (lt + 1);
 
-    // Tag name: the leading identifier after `<`.
     let mut i = 0;
-    while i < bytes.len()
-        && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'-' || bytes[i] == b'_')
-    {
+    while i < bytes.len() && is_name_byte(bytes[i]) {
         i += 1;
     }
     let tag = s[..i].to_string();
@@ -674,9 +594,6 @@ fn tag_context(text: &str, offset: usize) -> Option<(String, Vec<String>)> {
         return None;
     }
 
-    // Walk the tag body: the first real `>` (outside `${…}` / quotes) closes the
-    // tag - if it precedes the cursor the caret is past the tag; otherwise collect
-    // every `:prop=` bound anywhere in the tag.
     let mut provided = Vec::new();
     let mut brace_depth = 0u32;
     let mut quote: Option<u8> = None;
@@ -707,7 +624,6 @@ fn tag_context(text: &str, offset: usize) -> Option<(String, Vec<String>)> {
                 quote = Some(c);
                 i += 1;
             }
-            // Tag close: the caret must sit at or before it to be inside the tag.
             b'>' => {
                 if i < cursor {
                     return None;
@@ -715,14 +631,9 @@ fn tag_context(text: &str, offset: usize) -> Option<(String, Vec<String>)> {
                 break;
             }
             b':' => {
-                // A `:prop=` attribute (with a value) counts as already bound. The
-                // bare token being typed at the caret has no `=` yet, so it is not
-                // collected and stays offerable.
                 let start = i + 1;
                 let mut j = start;
-                while j < bytes.len()
-                    && (bytes[j].is_ascii_alphanumeric() || bytes[j] == b'-' || bytes[j] == b'_')
-                {
+                while j < bytes.len() && is_name_byte(bytes[j]) {
                     j += 1;
                 }
                 if j > start {
@@ -742,9 +653,6 @@ fn tag_context(text: &str, offset: usize) -> Option<(String, Vec<String>)> {
     Some((tag, provided))
 }
 
-/// When the cursor is typing a tag NAME just after `<` inside a `tpl` template,
-/// returns the partial name typed so far. `None` once a space/`>`/`/` follows the
-/// name (that's the attribute zone, handled by [`tag_context`]) or outside a tpl.
 fn tag_name_context(text: &str, offset: usize) -> Option<String> {
     let before = text.get(..offset)?;
     let lt = before.rfind('<')?;
@@ -752,20 +660,13 @@ fn tag_name_context(text: &str, offset: usize) -> Option<String> {
         return None;
     }
     let after = &before[lt + 1..];
-    // Only a bare identifier so far means we're still in the tag name.
-    if after
-        .chars()
-        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-    {
+    if after.chars().all(is_name_char) {
         Some(after.to_string())
     } else {
         None
     }
 }
 
-/// A component tag completion: inserts a self-closed `<tag />`, or, when the
-/// component has REQUIRED props, `<tag :a=${1} :b=${2} />` with the caret in the
-/// first prop hole. Optional props are left for the user to add.
 fn tag_item(tag: &str, required: &[&str], range: Range) -> CompletionItem {
     let new_text = if required.is_empty() {
         format!("{tag} />")
@@ -789,8 +690,6 @@ fn tag_item(tag: &str, required: &[&str], range: Range) -> CompletionItem {
     }
 }
 
-/// The 0-based line to insert a new import on: just after the last top-level
-/// `import` statement, or the top of the file if there are none.
 fn import_insert_line(text: &str) -> u32 {
     let mut after = 0u32;
     for (i, line) in text.lines().enumerate() {
@@ -802,7 +701,6 @@ fn import_insert_line(text: &str) -> u32 {
     after
 }
 
-/// True when `lt` (a `<`) sits inside an unclosed `tpl\`` template literal.
 fn in_tpl_template(before: &str, lt: usize) -> bool {
     let head = &before[..lt];
     match head.rfind("tpl`") {
@@ -811,10 +709,6 @@ fn in_tpl_template(before: &str, lt: usize) -> bool {
     }
 }
 
-/// The component tag whose NAME the cursor sits on, inside a `tpl` template: for
-/// `<todo-item …>`, `<todo-item/>` or `</todo-item>`. Returns the tag plus the
-/// byte span of its name (for the hover range). `None` when the cursor isn't on a
-/// tag name (e.g. it's past the name, in the attribute zone) or outside a tpl.
 fn component_tag_at(text: &str, offset: usize) -> Option<(String, usize, usize)> {
     let before = text.get(..offset)?;
     let lt = before.rfind('<')?;
@@ -822,27 +716,21 @@ fn component_tag_at(text: &str, offset: usize) -> Option<(String, usize, usize)>
         return None;
     }
     let bytes = text.as_bytes();
-    // The name starts after `<` (skipping a `/` for a closing tag).
     let name_start = if bytes.get(lt + 1) == Some(&b'/') {
         lt + 2
     } else {
         lt + 1
     };
     let mut j = name_start;
-    while j < bytes.len()
-        && (bytes[j].is_ascii_alphanumeric() || bytes[j] == b'-' || bytes[j] == b'_')
-    {
+    while j < bytes.len() && is_name_byte(bytes[j]) {
         j += 1;
     }
-    // Empty name, or the cursor is past the name (attribute zone / text): not a
-    // tag-name hover.
     if j == name_start || offset > j {
         return None;
     }
     Some((text[name_start..j].to_string(), name_start, j))
 }
 
-/// UTF-8 byte offset in `text` → LSP position (0-based line, UTF-16 character).
 fn position_of(text: &str, offset: usize) -> Position {
     let mut line = 0u32;
     let mut character = 0u32;
@@ -862,27 +750,17 @@ fn position_of(text: &str, offset: usize) -> Position {
     Position { line, character }
 }
 
-/// The outcome of reading a component's props type from its declaring source.
 enum PropsExtract {
-    /// `extends Component` with no type argument → the component has no props.
     NoProps,
-    /// The props type text to show (a resolved `type`/`interface` def, or the
-    /// inline object type).
     Type(String),
-    /// The class/extends clause couldn't be located or parsed - fall back to the
-    /// enumerated prop names.
     Unknown,
 }
 
-/// Read a component class's props type from `src`: the type argument of
-/// `extends Component<…>`, resolved to its `type`/`interface` definition when it's
-/// a named type declared in the same file, or the inline object type verbatim.
 fn component_props_type(class: &str, src: &str) -> PropsExtract {
     let Some(after) = phrase_end("class", class, src) else {
         return PropsExtract::Unknown;
     };
     let header = &src[after..];
-    // `extends` … `Component` … then the generic argument (if any).
     let Some(ext) = header.find("extends") else {
         return PropsExtract::Unknown;
     };
@@ -892,7 +770,7 @@ fn component_props_type(class: &str, src: &str) -> PropsExtract {
     };
     let after_comp = post[comp + "Component".len()..].trim_start();
     let Some(rest) = after_comp.strip_prefix('<') else {
-        return PropsExtract::NoProps; // `extends Component` with no props
+        return PropsExtract::NoProps;
     };
     let Some(arg) = balanced_angle_content(rest) else {
         return PropsExtract::Unknown;
@@ -902,10 +780,8 @@ fn component_props_type(class: &str, src: &str) -> PropsExtract {
         return PropsExtract::NoProps;
     }
     if arg.starts_with('{') {
-        // An inline object type - show it as-is.
         return PropsExtract::Type(format!("props: {arg}"));
     }
-    // A named type: resolve its declaration in the same file; else name it.
     let base = arg
         .split(|c: char| c == '<' || c == '|' || c == '&' || c.is_whitespace())
         .next()
@@ -917,27 +793,25 @@ fn component_props_type(class: &str, src: &str) -> PropsExtract {
     }
 }
 
-/// Content between a `<` (already consumed) and its matching `>`.
-fn balanced_angle_content(after_lt: &str) -> Option<&str> {
-    let mut depth = 1i32;
-    for (i, &b) in after_lt.as_bytes().iter().enumerate() {
-        match b {
-            b'<' => depth += 1,
-            b'>' => {
-                depth -= 1;
-                if depth == 0 {
-                    return Some(&after_lt[..i]);
-                }
+fn scan_balanced(s: &str, open: u8, close: u8, start_depth: i32, inclusive: bool) -> Option<&str> {
+    let mut depth = start_depth;
+    for (i, &b) in s.as_bytes().iter().enumerate() {
+        if b == open {
+            depth += 1;
+        } else if b == close {
+            depth -= 1;
+            if depth == 0 {
+                return Some(if inclusive { &s[..=i] } else { &s[..i] });
             }
-            _ => {}
         }
     }
     None
 }
 
-/// Resolve a named type to its source definition: a `type X = …;` alias or an
-/// `interface X { … }`, declared in `src`. `None` when neither is found (e.g. the
-/// type is imported).
+fn balanced_angle_content(after_lt: &str) -> Option<&str> {
+    scan_balanced(after_lt, b'<', b'>', 1, false)
+}
+
 fn resolve_type_def(name: &str, src: &str) -> Option<String> {
     if let Some(after) = phrase_end("type", name, src) {
         let rest = src[after..].trim_start();
@@ -957,8 +831,6 @@ fn resolve_type_def(name: &str, src: &str) -> Option<String> {
     None
 }
 
-/// The byte index just past `"{prefix} {name}"` in `src`, matched on identifier
-/// boundaries. `None` if absent.
 fn phrase_end(prefix: &str, name: &str, src: &str) -> Option<usize> {
     let needle = format!("{prefix} {name}");
     let bytes = src.as_bytes();
@@ -977,9 +849,6 @@ fn phrase_end(prefix: &str, name: &str, src: &str) -> Option<usize> {
     None
 }
 
-/// Read from the start of `s` up to the first `;` at brace/paren/bracket depth 0
-/// (so `;` separators inside an object type don't end it early). Returns all of
-/// `s` when there's no such terminator.
 fn read_to_semicolon(s: &str) -> &str {
     let (mut curly, mut paren, mut square) = (0i32, 0i32, 0i32);
     for (i, &b) in s.as_bytes().iter().enumerate() {
@@ -997,33 +866,16 @@ fn read_to_semicolon(s: &str) -> &str {
     s
 }
 
-/// The balanced `{ … }` block starting at `s[0] == '{'`, braces included.
 fn balanced_braces(s: &str) -> Option<&str> {
-    let mut depth = 0i32;
-    for (i, &b) in s.as_bytes().iter().enumerate() {
-        match b {
-            b'{' => depth += 1,
-            b'}' => {
-                depth -= 1;
-                if depth == 0 {
-                    return Some(&s[..=i]);
-                }
-            }
-            _ => {}
-        }
-    }
-    None
+    scan_balanced(s, b'{', b'}', 0, true)
 }
 
-/// The completion replace-range start (as a 0-based UTF-16 character on the
-/// cursor's line): the `:`-prefixed token being typed just before the cursor.
 fn token_start_char(text: &str, offset: usize, cursor_char: u32) -> u32 {
     let before = &text[..offset];
     let bytes = before.as_bytes();
     let mut start = offset;
     while start > 0 {
-        let c = bytes[start - 1];
-        if c.is_ascii_alphanumeric() || c == b'-' || c == b'_' {
+        if is_name_byte(bytes[start - 1]) {
             start -= 1;
         } else {
             break;
@@ -1039,7 +891,6 @@ fn token_start_char(text: &str, offset: usize, cursor_char: u32) -> u32 {
     cursor_char.saturating_sub(back)
 }
 
-/// LSP position (0-based line, UTF-16 char) → UTF-8 byte offset in `text`.
 fn offset_of(text: &str, line: u32, character: u32) -> usize {
     let mut off = 0usize;
     for (i, l) in text.split_inclusive('\n').enumerate() {
@@ -1059,8 +910,6 @@ fn offset_of(text: &str, line: u32, character: u32) -> usize {
     off
 }
 
-/// A `:prop` completion item: inserts `:name=${$1}` with the caret in the hole.
-/// An elemix compiler hint (`// #…` macro) for completion + hover.
 struct Hint {
     name: &'static str,
     detail: &'static str,
@@ -1137,7 +986,6 @@ const HINTS: &[Hint] = &[
     },
 ];
 
-/// A compiler-hint completion item (keyword-kind, with detail + markdown doc).
 fn hint_item(h: &Hint, range: Range) -> CompletionItem {
     let (new_text, fmt) = match h.snippet {
         Some(s) => (s.to_string(), InsertTextFormat::SNIPPET),
@@ -1158,34 +1006,54 @@ fn hint_item(h: &Hint, range: Range) -> CompletionItem {
     }
 }
 
-/// The text from the start of the cursor's line up to the cursor.
 fn line_before_cursor(text: &str, offset: usize) -> &str {
-    let start = text[..offset].rfind('\n').map(|i| i + 1).unwrap_or(0);
+    let start = text[..offset].rfind('\n').map_or(0, |i| i + 1);
     &text[start..offset]
 }
 
-/// The Nth (0-based) line of `text`, without its newline.
 fn line_text(text: &str, line: u32) -> Option<&str> {
     text.lines().nth(line as usize)
 }
 
-/// On a `// #…` hint comment, the trailing `#?word` token being typed - the cue to
-/// offer hint completions. `None` on a non-hint comment or outside one. Only the
-/// text after `//` is validated: whitespace + already-typed `#word`s, then the token.
+#[inline]
+fn is_name_byte(b: u8) -> bool {
+    b.is_ascii_alphanumeric() || b == b'-' || b == b'_'
+}
+
+#[inline]
+fn is_name_char(c: char) -> bool {
+    c.is_ascii_alphanumeric() || c == '-' || c == '_'
+}
+
+fn range_back(pos: Position, token: &str) -> Range {
+    let back: u32 = token.chars().map(|c| c.len_utf16() as u32).sum();
+    Range {
+        start: Position {
+            line: pos.line,
+            character: pos.character.saturating_sub(back),
+        },
+        end: pos,
+    }
+}
+
+fn complete_pragma(text: &str, offset: usize, pos: Position) -> Option<Vec<CompletionItem>> {
+    let token = pragma_token(line_before_cursor(text, offset))?;
+    let range = range_back(pos, token);
+    Some(HINTS.iter().map(|h| hint_item(h, range)).collect())
+}
+
 fn pragma_token(before: &str) -> Option<&str> {
     let bytes = before.as_bytes();
-    // The trailing `[#\w-]*` run is the token being typed.
     let mut ts = before.len();
     while ts > 0 {
         let c = bytes[ts - 1];
-        if c.is_ascii_alphanumeric() || c == b'-' || c == b'_' || c == b'#' {
+        if is_name_byte(c) || c == b'#' {
             ts -= 1;
         } else {
             break;
         }
     }
     let token = &before[ts..];
-    // Everything before the token must be `\s*//\s*(#word\s+)*`.
     let prefix = before[..ts].trim_start();
     let rest = prefix.strip_prefix("//")?;
     let mut r = rest.trim_start();
@@ -1194,15 +1062,13 @@ fn pragma_token(before: &str) -> Option<&str> {
             return None;
         }
         let end = r[1..]
-            .find(|c: char| !(c.is_ascii_alphanumeric() || c == '-' || c == '_'))
+            .find(|c: char| !is_name_char(c))
             .map_or(r.len(), |i| i + 1);
         r = r[end..].trim_start();
     }
     Some(token)
 }
 
-/// The `#…` hint token under `character` (a UTF-16 column) on a `// #…` line, with
-/// its column span. `None` off a token or on a non-hint comment.
 fn hint_at(line: &str, character: usize) -> Option<(&str, usize, usize)> {
     let t = line.trim_start();
     if !(t.starts_with("//") && t[2..].trim_start().starts_with('#')) {
@@ -1214,9 +1080,7 @@ fn hint_at(line: &str, character: usize) -> Option<(&str, usize, usize)> {
         if bytes[i] == b'#' {
             let start = i;
             let mut j = i + 1;
-            while j < bytes.len()
-                && (bytes[j].is_ascii_alphanumeric() || bytes[j] == b'-' || bytes[j] == b'_')
-            {
+            while j < bytes.len() && is_name_byte(bytes[j]) {
                 j += 1;
             }
             if j > start + 1 && character >= start && character <= j {
@@ -1230,7 +1094,6 @@ fn hint_at(line: &str, character: usize) -> Option<(&str, usize, usize)> {
     None
 }
 
-/// Every DOM event an `@event` binding can wire up.
 const EVENT_NAMES: &[&str] = &[
     "click",
     "dblclick",
@@ -1329,8 +1192,6 @@ const EVENT_NAMES: &[&str] = &[
     "slotchange",
 ];
 
-/// A `~model`/`~onmodel`/`@event` binding item - valid on any element inside a
-/// tag. Inserts `label=${$1}` (caret in the hole), replacing the typed sigil.
 fn binding_item(label: &str, detail: &str, range: Range) -> CompletionItem {
     let kind = if label.starts_with('@') {
         CompletionItemKind::EVENT
@@ -1364,7 +1225,6 @@ fn prop_item(p: &PropInfo, range: Range) -> CompletionItem {
             }
             .to_string(),
         ),
-        // A textEdit over the typed token replaces the trigger `:` in place.
         text_edit: Some(CompletionTextEdit::Edit(TextEdit { range, new_text })),
         insert_text_format: Some(InsertTextFormat::SNIPPET),
         filter_text: Some(label.clone()),
@@ -1382,47 +1242,42 @@ mod tests {
     fn pragma_token_detects_the_hint_context() {
         assert_eq!(pragma_token("    // #comp"), Some("#comp"));
         assert_eq!(pragma_token("// #component #ta"), Some("#ta"));
-        assert_eq!(pragma_token("  // "), Some("")); // right after //
-        assert_eq!(pragma_token("const x = 5"), None); // not a comment
-        assert_eq!(pragma_token("// see the #foo"), None); // prose before the #
+        assert_eq!(pragma_token("  // "), Some(""));
+        assert_eq!(pragma_token("const x = 5"), None);
+        assert_eq!(pragma_token("// see the #foo"), None);
     }
 
     #[test]
     fn hint_at_finds_the_hint_token() {
         let line = "    // #component #tag";
         assert_eq!(hint_at(line, 10).map(|(n, ..)| n), Some("#component"));
-        assert_eq!(hint_at(line, 6), None); // off any token
-        assert_eq!(hint_at("// plain comment", 5), None); // not a hint comment
+        assert_eq!(hint_at(line, 6), None);
+        assert_eq!(hint_at("// plain comment", 5), None);
     }
 
     #[test]
     fn component_tag_at_finds_open_close_and_selfclose() {
-        // open tag, cursor on the name
         let t = "x = tpl`<todo-item :a=${1}>`";
         let off = t.find("todo").unwrap() + 2;
         assert_eq!(
             component_tag_at(t, off).map(|(tag, ..)| tag),
             Some("todo-item".to_string())
         );
-        // closing tag
         let t = "x = tpl`</todo-item>`";
         let off = t.find("todo").unwrap() + 1;
         assert_eq!(
             component_tag_at(t, off).map(|(tag, ..)| tag),
             Some("todo-item".to_string())
         );
-        // self-closing
         let t = "x = tpl`<todo-item />`";
         let off = t.find("item").unwrap();
         assert_eq!(
             component_tag_at(t, off).map(|(tag, ..)| tag),
             Some("todo-item".to_string())
         );
-        // cursor past the name (attribute zone) → no tag-name hover
         let t = "x = tpl`<todo-item  :a=${1}>`";
         let off = t.find(":a").unwrap();
         assert_eq!(component_tag_at(t, off), None);
-        // not inside a tpl
         assert_eq!(component_tag_at("<todo-item>", 4), None);
     }
 
@@ -1443,17 +1298,14 @@ mod tests {
 
     #[test]
     fn component_props_type_handles_inline_and_none() {
-        // inline object type
         match component_props_type("Card", "class Card extends Component<{ x: number }> {}") {
             PropsExtract::Type(t) => assert_eq!(t, "props: { x: number }"),
             _ => panic!("expected inline type"),
         }
-        // no generic → no props
         assert!(matches!(
             component_props_type("Bare", "class Bare extends Component {}"),
             PropsExtract::NoProps
         ));
-        // class not found
         assert!(matches!(
             component_props_type("Missing", "const x = 1;"),
             PropsExtract::Unknown
@@ -1479,9 +1331,7 @@ mod tests {
             tag_name_context("x = tpl`<todo", 13),
             Some("todo".to_string())
         );
-        // A space after the name = attribute zone, not tag-name completion.
         assert_eq!(tag_name_context("x = tpl`<div ", 13), None);
-        // Not inside a tpl.
         assert_eq!(tag_name_context("plain text", 5), None);
     }
 
@@ -1505,8 +1355,6 @@ mod tests {
 
     #[test]
     fn uri_encodes_then_decodes_spaces_and_unicode() {
-        // These paths don't exist, so uri_to_path returns the decoded path as-is
-        // (canonicalize falls back), which is exactly what we want to assert on.
         let uri = path_to_uri("/home/u ser/naïve.ts").unwrap();
         let s = uri.as_str();
         assert!(s.contains("%20"), "space is percent-encoded: {s}");
@@ -1556,5 +1404,37 @@ mod tests {
     fn to_diagnostic_maps_warning_severity() {
         let d = to_diagnostic(&finding(2));
         assert_eq!(d.severity, Some(DiagnosticSeverity::WARNING));
+    }
+}
+
+#[cfg(test)]
+mod prop {
+    use super::*;
+
+    proptest::proptest! {
+        #![proptest_config(proptest::prelude::ProptestConfig { cases: 2048, ..proptest::prelude::ProptestConfig::default() })]
+
+        #[test]
+        fn text_scanners_never_panic(
+            text in "\\PC{0,300}",
+            idx in 0usize..2048,
+            line in 0u32..40,
+            ch in 0u32..200,
+        ) {
+            let boundaries: Vec<usize> =
+                (0..=text.len()).filter(|&i| text.is_char_boundary(i)).collect();
+            let offset = boundaries[idx % boundaries.len()];
+            let _ = offset_of(&text, line, ch);
+            let _ = tag_context(&text, offset);
+            let _ = tag_name_context(&text, offset);
+            let _ = component_tag_at(&text, offset);
+            let _ = token_start_char(&text, offset, ch);
+            let _ = pragma_token(&text);
+            let _ = line_before_cursor(&text, offset);
+            if let Some(l) = line_text(&text, line) {
+                let _ = hint_at(l, ch as usize);
+                let _ = pragma_token(l);
+            }
+        }
     }
 }

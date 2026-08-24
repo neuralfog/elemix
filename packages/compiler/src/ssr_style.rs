@@ -1,15 +1,3 @@
-//! Precompiled `#styles` minification for the SSR `<style data-ssr>` block.
-//!
-//! Behind `--minify` the SSR pass resolves a component's stylesheet to its
-//! literal CSS text — an inline `` `…` `` on the field, or a module-scope
-//! `const css = `…`` the field names — and shrinks it at COMPILE time, so the
-//! served HTML carries no authoring whitespace and no per-request cost. When the
-//! CSS can't be seen as a static literal (imported, interpolated, or computed),
-//! the caller keeps the dynamic `${expr}` emit: never wrong, just unminified.
-
-/// The raw CSS a `#styles` initializer resolves to, or `None` when it isn't a
-/// static literal this pass can see through. `expr` is the initializer source
-/// (`` `…` `` or an identifier like `css`); `source` is the whole module.
 pub fn resolve_css(expr: &str, source: &str) -> Option<String> {
     let expr = expr.trim();
     if let Some(inner) = backtick_inner(expr) {
@@ -27,8 +15,6 @@ fn is_ident(s: &str) -> bool {
         && chars.all(|c| c == '_' || c == '$' || c.is_ascii_alphanumeric())
 }
 
-/// Inner text of a leading no-interpolation template literal, else `None`. An
-/// escaped `` \` `` continues the literal; a `${` bails (dynamic, unresolvable).
 fn backtick_inner(s: &str) -> Option<String> {
     let mut chars = s.char_indices();
     if chars.next()?.1 != '`' {
@@ -49,9 +35,6 @@ fn backtick_inner(s: &str) -> Option<String> {
     None
 }
 
-/// First module-scope `const|let|var <id> = `…`` whose literal has no
-/// interpolation, returning its inner text. `None` if absent or interpolated
-/// (imported/computed styles fall through to the dynamic emit).
 fn const_template(id: &str, source: &str) -> Option<String> {
     for kw in ["const", "let", "var"] {
         let needle = format!("{kw} {id}");
@@ -79,10 +62,6 @@ fn const_template(id: &str, source: &str) -> Option<String> {
 const TIGHT_BEFORE: &[char] = &['{', '}', ';', ',', ':', '>'];
 const TIGHT_AFTER: &[char] = &['{', '}', ';', ','];
 
-/// Minify a CSS string: drop `/* … */` comments and authoring whitespace,
-/// collapsing runs to a single space and eliding it entirely next to a
-/// structural character. String literals (`"…"` / `'…'`) pass through verbatim,
-/// so significant whitespace and delimiters inside them survive.
 pub fn minify_css(css: &str) -> String {
     let chars: Vec<char> = css.chars().collect();
     let n = chars.len();

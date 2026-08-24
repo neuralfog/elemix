@@ -1,18 +1,12 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/PrimitiveStateApp.ts
 ---
 import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state, $__dep, $__track, $__trigger } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
-// Proof that a BARE primitive is reactive state — no object wrapper, no
-// `.value` box. `// #state count = 0` makes `this.count` itself reactive: the
-// compiler lowers each primitive field to a get/set accessor over a private
-// backing field + a per-instance `dep()`. Number, boolean and string each get
-// their own slice and re-render only their own binding.
 
 const css = `
     :host {

@@ -10,8 +10,6 @@ type ConfigWindow = {
 
 export const Default = {
     render: () => {
-        // CSR: adoptStyles adopts the reset into document.adoptedStyleSheets so
-        // a #no-shadow component's light DOM is covered too.
         const w = window as unknown as ConfigWindow;
         w.__elemix__ = {
             config: {

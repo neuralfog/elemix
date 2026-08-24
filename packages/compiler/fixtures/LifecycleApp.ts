@@ -99,4 +99,3 @@ export class LifecycleApp extends Component {
         <log-view />
     `;
 }
-

@@ -1,9 +1,4 @@
-//! Post-pass: fold the compiler's own `@neuralfog/elemix/runtime` imports into
-//! one. The pragma and rewrite stages each prepend a `from '.../runtime'` import
-//! for the primitives they emit; rather than couple the two passes, this merges
-//! whatever they produced. Only the compiler-owned runtime module is collapsed —
-//! user imports (which never target `/runtime`) are left untouched.
-
+use crate::lower::{apply_edits, trailing_newline};
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{ImportDeclarationSpecifier, ModuleExportName, Statement};
 use oxc_parser::Parser;
@@ -13,78 +8,58 @@ const RUNTIME: &str = "@neuralfog/elemix/runtime";
 const SSR_RUNTIME: &str = "@neuralfog/elemix/ssr-runtime";
 const SSR_RUNTIME_CLIENT: &str = "@neuralfog/elemix/ssr-runtime/client";
 
-/// Prepend the `@neuralfog/elemix/ssr-runtime` import for the SSR string helpers
-/// (`$__ssrText` / `$__ssrAttr` / `$__ssrChild` / `$__ssrLen` and the directive
-/// builders `$__ssrRepeat` / `$__ssrWhen` / `$__ssrChoose` / `$__ssrMatch`) that a
-/// `$$__ssr()` method references — only the ones actually present, in a stable
-/// order. Identity when none are used (not an `--ssr` compile, or no such holes).
+fn add_runtime_import(code: &str, ids: &[&str], module: &str) -> String {
+    let used: Vec<&str> = ids.iter().copied().filter(|id| code.contains(id)).collect();
+    if used.is_empty() {
+        return code.to_string();
+    }
+    format!("import {{ {} }} from '{module}';\n{code}", used.join(", "))
+}
+
 pub fn add_ssr_runtime_import(code: &str) -> String {
-    let used: Vec<&str> = [
-        "$__ssrText",
-        "$__ssrAttr",
-        "$__ssrClass",
-        "$__ssrStyle",
-        "$__ssrChild",
-        "$__ssrLen",
-        "$__ssrTpl",
-        "$__ssrRepeat",
-        "$__ssrWhen",
-        "$__ssrChoose",
-        "$__ssrMatch",
-        "$__scopedStore",
-        "$__store",
-    ]
-    .into_iter()
-    .filter(|id| code.contains(id))
-    .collect();
-    if used.is_empty() {
-        return code.to_string();
-    }
-    format!(
-        "import {{ {} }} from '{SSR_RUNTIME}';\n{code}",
-        used.join(", ")
+    add_runtime_import(
+        code,
+        &[
+            "$__ssrText",
+            "$__ssrAttr",
+            "$__ssrClass",
+            "$__ssrStyle",
+            "$__ssrChild",
+            "$__ssrLen",
+            "$__ssrTpl",
+            "$__ssrRepeat",
+            "$__ssrWhen",
+            "$__ssrChoose",
+            "$__ssrMatch",
+            "$__moduleState",
+            "$__store",
+        ],
+        SSR_RUNTIME,
     )
 }
 
-/// Prepend the `@neuralfog/elemix/ssr-runtime/client` import for the hydrate-only
-/// helpers (`$__dynLens` / `$__splitRun`) a `$$__hydrate()` method uses. They are
-/// client DOM helpers (so not the DOM-free server `ssr-runtime`) but
-/// hydrate-exclusive, so they live OUTSIDE the CSR `runtime` a client-only build
-/// ships - keeping that bundle free of hydration code. Every other runtime
-/// function the hydrate path emits (`$__event`, `$__setText`, …) is already pulled
-/// from `runtime` by the CSR `view()`.
 pub fn add_hydrate_runtime_import(code: &str) -> String {
-    let used: Vec<&str> = [
-        "$__dynLens",
-        "$__splitRun",
-        "$__bounds",
-        "$__span",
-        "$__reanchor",
-        "$__seat",
-        "$__resume",
-        "$__fresh",
-        "$__text",
-    ]
-    .into_iter()
-    .filter(|id| code.contains(id))
-    .collect();
-    if used.is_empty() {
-        return code.to_string();
-    }
-    format!(
-        "import {{ {} }} from '{SSR_RUNTIME_CLIENT}';\n{code}",
-        used.join(", ")
+    add_runtime_import(
+        code,
+        &[
+            "$__dynLens",
+            "$__splitRun",
+            "$__bounds",
+            "$__span",
+            "$__reanchor",
+            "$__seat",
+            "$__resume",
+            "$__fresh",
+            "$__text",
+        ],
+        SSR_RUNTIME_CLIENT,
     )
 }
 
-/// Merge multiple `import { … } from '@neuralfog/elemix/runtime'` statements
-/// into the first, preserving first-seen specifier order. Identity for zero or
-/// one such import.
 pub fn merge_runtime_imports(source: &str) -> String {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
 
-    // Each runtime import: (span start, span end, named specifiers).
     let mut imports: Vec<(usize, usize, Vec<String>)> = Vec::new();
     for stmt in &ret.program.body {
         let Statement::ImportDeclaration(import) = stmt else {
@@ -105,7 +80,6 @@ pub fn merge_runtime_imports(source: &str) -> String {
                     ModuleExportName::IdentifierReference(id) => id.name.to_string(),
                     ModuleExportName::StringLiteral(s) => s.value.to_string(),
                 }),
-                // a default or namespace import — leave the statement alone
                 _ => {
                     pure = false;
                     break;
@@ -121,7 +95,6 @@ pub fn merge_runtime_imports(source: &str) -> String {
         return source.to_string();
     }
 
-    // Union of names, first-seen order.
     let mut seen = std::collections::HashSet::new();
     let mut merged = Vec::new();
     for (_, _, names) in &imports {
@@ -142,14 +115,5 @@ pub fn merge_runtime_imports(source: &str) -> String {
         edits.push((*start, end, String::new()));
     }
 
-    edits.sort_by_key(|e| std::cmp::Reverse(e.0));
-    let mut out = source.to_string();
-    for (start, end, repl) in edits {
-        out.replace_range(start..end, &repl);
-    }
-    out
-}
-
-fn trailing_newline(source: &str, at: usize) -> usize {
-    usize::from(source[at..].starts_with('\n'))
+    apply_edits(source, edits)
 }

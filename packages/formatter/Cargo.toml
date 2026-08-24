@@ -30,4 +30,18 @@ similar = "2"
 toml = { version = "1.1.2", default-features = false, features = ["parse", "serde"] }
 
 [dev-dependencies]
+criterion = { version = "0.8.2", features = ["html_reports"] }
 insta = { version = "1", features = ["glob"] }
+proptest = "1.11.0"
+
+[[bench]]
+name = "format"
+harness = false
+
+[lints.clippy]
+uninlined_format_args = "warn"
+semicolon_if_nothing_returned = "warn"
+redundant_closure_for_method_calls = "warn"
+explicit_iter_loop = "warn"
+map_unwrap_or = "warn"
+unnested_or_patterns = "warn"

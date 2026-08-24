@@ -1,7 +1,3 @@
-//! Tests for the comment-based pragma layer — directive splitting from a `//`
-//! pragma's text, next-line binding (class vs styles field), the resolve
-//! extension point, tag derivation, and the full lowering.
-
 use elemix_compiler::pragma::locate::{locate, LocateError};
 use elemix_compiler::pragma::lower::{expand, expand_mode, ExpandError};
 use elemix_compiler::pragma::parse::{is_pragma, split_directives};
@@ -10,11 +6,9 @@ use elemix_compiler::pragma::{kebab, resolve, ComponentMeta, Directive, PragmaEr
 fn dir(name: &str, args: &[&str]) -> Directive {
     Directive {
         name: name.to_string(),
-        args: args.iter().map(|s| s.to_string()).collect(),
+        args: args.iter().map(std::string::ToString::to_string).collect(),
     }
 }
-
-// --- parse --------------------------------------------------------------------
 
 #[test]
 fn splits_a_flag_directive() {
@@ -46,11 +40,9 @@ fn is_pragma_detects_leading_hash() {
     assert!(is_pragma(" #component"));
     assert!(is_pragma("#styles"));
     assert!(!is_pragma(" hello"));
-    assert!(!is_pragma(" a #b")); // `#` not the first non-ws char
+    assert!(!is_pragma(" a #b"));
     assert!(!is_pragma(""));
 }
-
-// --- resolve (the extension point) -------------------------------------------
 
 #[test]
 fn resolves_component_and_tag() {
@@ -117,15 +109,14 @@ fn no_shadow_skips_styles_emission() {
     let src = "const css = `x`;\n// #component #no-shadow\nclass Foo extends Component {\n    // #styles\n    styles = css;\n}";
     let out = expand(src).unwrap();
     assert!(out.contains("static $$__noShadow = true;"));
-    assert!(!out.contains("$__sheet(")); // no stylesheet emitted
+    assert!(!out.contains("$__sheet("));
     assert!(!out.contains("$$__sheets"));
-    assert!(out.contains("styles = css;")); // field kept → `css` stays referenced
-    assert!(!out.contains("// #styles")); // marker stripped
+    assert!(out.contains("styles = css;"));
+    assert!(!out.contains("// #styles"));
 }
 
 #[test]
 fn styles_on_a_class_is_an_error() {
-    // `#styles` belongs on a class field, not on the class itself.
     assert_eq!(
         resolve(&[dir("styles", &[])]),
         Err(PragmaError::OnClass("styles".to_string()))
@@ -167,8 +158,6 @@ fn tag_needs_exactly_one_word() {
     );
 }
 
-// --- kebab derivation --------------------------------------------------------
-
 #[test]
 fn kebab_pascal_case() {
     assert_eq!(kebab("PfBuilder"), "pf-builder");
@@ -185,8 +174,6 @@ fn kebab_handles_acronyms() {
 fn kebab_single_word_has_no_hyphen() {
     assert_eq!(kebab("Button"), "button");
 }
-
-// --- locate (comment detection + next-line binding) --------------------------
 
 #[test]
 fn binds_a_component_comment_to_its_class() {
@@ -214,17 +201,13 @@ fn a_non_styles_directive_on_a_field_errors() {
     let src = "class Foo extends Component {\n    // #tag x\n    y = 1;\n}";
     let e = locate(src).unwrap_err();
     assert_eq!(e.err, LocateError::OnField("tag".to_string()));
-    // The error carets the offending member, not the file head.
     let (s, en) = e.span.expect("a member span");
     assert_eq!(&src[s..en], "y");
-    // A KNOWN hint in the wrong place still names the component.
     assert_eq!(e.component.as_deref(), Some("Foo"));
 }
 
 #[test]
 fn an_unknown_hint_on_a_field_is_unknown_not_wrong_placement() {
-    // `#statesdf` is a typo, not a misplaced known hint - it must report
-    // "unknown", never "can't tag a field" (which implies it'd be valid elsewhere).
     let src = "class Foo extends Component {\n    // #statesdf\n    y = 1;\n}";
     let e = locate(src).unwrap_err();
     assert_eq!(e.err, LocateError::Unknown("statesdf".to_string()));
@@ -238,7 +221,6 @@ fn an_unknown_hint_on_a_const_is_unknown_not_wrong_placement() {
     let src = "// #statesdf\nconst x = 1;";
     let e = locate(src).unwrap_err();
     assert_eq!(e.err, LocateError::Unknown("statesdf".to_string()));
-    // A const has no owning class to name.
     assert_eq!(e.component, None);
 }
 
@@ -283,7 +265,6 @@ fn non_pragma_comments_are_ignored() {
 fn a_blank_line_breaks_the_binding() {
     let e = locate("// #component\n\nclass Foo extends Component {}").unwrap_err();
     assert_eq!(e.err, LocateError::Orphan);
-    // An orphan pragma has no declaration to point at - file-level.
     assert_eq!(e.span, None);
 }
 
@@ -313,8 +294,6 @@ fn imports_before_a_pragma_are_fine() {
     assert_eq!(loc.classes[0].directives, vec![dir("component", &[])]);
 }
 
-// --- expand (lowering) -------------------------------------------------------
-
 #[test]
 fn lowers_a_full_component() {
     let src = "const css = `c`;\n// #component\nclass Foo extends Component {\n    // #styles\n    styles = css;\n}";
@@ -322,11 +301,11 @@ fn lowers_a_full_component() {
     assert!(
         out.contains("import { $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';")
     );
-    assert!(out.contains("const css = `c`;")); // the referenced const stays in place
-    assert!(out.contains("const _s0 = $__sheet(css);")); // field value inlined by name
+    assert!(out.contains("const css = `c`;"));
+    assert!(out.contains("const _s0 = $__sheet(css);"));
     assert!(out.contains("Foo.$$__sheets = [..._s0];"));
     assert!(out.contains("$__defineComponent('foo', Foo);"));
-    assert!(!out.contains("styles = css")); // the styles field is stripped
+    assert!(!out.contains("styles = css"));
     assert!(!out.contains("// #styles"));
     assert!(!out.contains("// #component"));
 }
@@ -399,13 +378,11 @@ fn form_injects_form_associated_into_the_class_body() {
     assert!(out.contains("value = '';"));
 }
 
-// --- #state ------------------------------------------------------------------
-
 #[test]
 fn state_field_wraps_the_initializer_and_lifts_the_annotation() {
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s: AppState = { n: 0 };\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("s = $__state<AppState>({ n: 0 });")); // annotation → generic
+    assert!(out.contains("s = $__state<AppState>({ n: 0 });"));
     assert!(!out.contains("// #state"));
     assert!(!out.contains("s: AppState"));
 }
@@ -414,13 +391,11 @@ fn state_field_wraps_the_initializer_and_lifts_the_annotation() {
 fn state_without_an_annotation_infers() {
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
     let out = expand(src).unwrap();
-    assert!(out.contains("s = $__state({ n: 0 });")); // no generic
+    assert!(out.contains("s = $__state({ n: 0 });"));
 }
 
 #[test]
 fn module_state_stays_a_plain_state_singleton_in_plain_csr() {
-    // Plain CSR has no soft-nav boundary, so a module `#state` keeps a plain
-    // `$__state` singleton — no reset machinery, and never pulls `/ssr-runtime/client`.
     let src = "import { Component } from '@neuralfog/elemix';\n// #state\nexport const cart: CartState = { items: [] };\nclass Foo extends Component {}";
     let out = expand(src).unwrap();
     assert!(out.contains("export const cart = $__state<CartState>({ items: [] });"));
@@ -430,8 +405,6 @@ fn module_state_stays_a_plain_state_singleton_in_plain_csr() {
 
 #[test]
 fn module_state_lowers_to_module_state_in_the_hydrate_build() {
-    // The hydrate build makes module `#state` reset-capable: `$__moduleState` from
-    // `/ssr-runtime/client`, so hydris `navigate()` can rebuild it fresh per soft-nav.
     let src = "// #state\nexport const cart = { items: [] };";
     let (code, _) = elemix_compiler::compile_hydrate(src, false);
     assert!(code.contains("$__moduleState(() => ({ items: [] }))"));
@@ -440,22 +413,19 @@ fn module_state_lowers_to_module_state_in_the_hydrate_build() {
 }
 
 #[test]
-fn module_state_lowers_to_scoped_store_in_ssr() {
-    // The SSR build keeps its per-request scope proxy — reset would poison concurrent
-    // requests. Only the client (single-threaded) rebuilds via `$__moduleState`.
+fn module_state_lowers_to_module_state_in_ssr() {
     let src = "// #state\nexport const cart: CartState = { items: [] };";
     let staged = expand_mode(src, true, false, false).unwrap();
     assert!(
-        staged.contains("export const cart = $__scopedStore<CartState>(() => ({ items: [] }));")
+        staged.contains("export const cart = $__moduleState<CartState>(() => ({ items: [] }));")
     );
-    assert!(!staged.contains("$__moduleState"));
+    assert!(!staged.contains("$__scopedStore"));
     let (code, _) = elemix_compiler::compile_ssr(src, false);
-    assert!(code.contains("import { $__scopedStore } from '@neuralfog/elemix/ssr-runtime';"));
+    assert!(code.contains("import { $__moduleState } from '@neuralfog/elemix/ssr-runtime';"));
 }
 
 #[test]
 fn state_is_imported_from_runtime_not_the_public_barrel() {
-    // `state` is a compile target now — never spliced into the public import.
     let src = "import { Component, tpl } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
     let out = expand(src).unwrap();
     assert!(out.contains("import { $__state } from '@neuralfog/elemix/runtime';"));
@@ -465,7 +435,6 @@ fn state_is_imported_from_runtime_not_the_public_barrel() {
 
 #[test]
 fn state_runtime_import_merges_with_define_component() {
-    // a registered component with #state pulls both from /runtime, one import.
     let src = "// #component\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
     let out = expand(src).unwrap();
     assert!(out.contains("$__defineComponent"));
@@ -475,8 +444,6 @@ fn state_runtime_import_merges_with_define_component() {
 
 #[test]
 fn state_bare_primitive_lowers_to_a_reactive_accessor() {
-    // a bare primitive can't be proxied — it becomes a get/set accessor over a
-    // private backing field + per-instance dep, so `this.count` itself reacts.
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    count = 0;\n}";
     let out = expand(src).unwrap();
     assert!(out.contains("#__count = $__state(0);"));
@@ -487,7 +454,6 @@ fn state_bare_primitive_lowers_to_a_reactive_accessor() {
     assert!(out.contains("set count(value) {"));
     assert!(out.contains("if (this.#__count === next) return;"));
     assert!(out.contains("$__trigger(this.#__count_dep);"));
-    // no stray field assignment and no leftover empty statement
     assert!(!out.contains("count = $__state(0)\n"));
     assert!(!out.contains("// #state"));
 }
@@ -504,8 +470,6 @@ fn state_bare_primitive_carries_the_type_annotation() {
 
 #[test]
 fn state_object_literal_keeps_the_cheap_field_form() {
-    // object/array initializers stay on the plain `= $__state(...)` field form —
-    // no accessor, so the deep-proxy hot path is untouched.
     let src = "import { Component } from '@neuralfog/elemix';\nclass Foo extends Component {\n    // #state\n    s = { n: 0 };\n}";
     let out = expand(src).unwrap();
     assert!(out.contains("s = $__state({ n: 0 });"));
@@ -543,8 +507,6 @@ fn a_non_state_directive_on_a_const_errors() {
     );
 }
 
-// --- #store ------------------------------------------------------------------
-
 #[test]
 fn store_on_a_module_const_lowers_to_a_named_store_with_a_thunk() {
     let src = "// #store user-prefs\nexport const prefs = { theme: 'system' };";
@@ -574,15 +536,12 @@ fn store_is_imported_from_runtime_in_the_csr_build() {
 
 #[test]
 fn store_is_imported_from_ssr_runtime_in_the_ssr_build() {
-    // `$__store` is isomorphic (it scopes per-request itself), so the repl is the
-    // same in SSR — only the import source differs (no `$__scopedStore` rewrite).
     let src = "// #store user-prefs\nexport const prefs = { theme: 'system' };";
     let staged = expand_mode(src, true, false, false).unwrap();
     assert!(staged
         .contains("export const prefs = $__store('user-prefs', () => ({ theme: 'system' }));"));
-    assert!(!staged.contains("$__scopedStore"));
+    assert!(!staged.contains("$__moduleState"));
     assert!(!staged.contains("from '@neuralfog/elemix/runtime'"));
-    // The full SSR pipeline splices the import from `/ssr-runtime`.
     let (code, _) = elemix_compiler::compile_ssr(src, false);
     assert!(code.contains("import { $__store } from '@neuralfog/elemix/ssr-runtime';"));
 }
@@ -597,8 +556,6 @@ fn store_without_a_name_errors() {
     );
 }
 
-// --- #effect -----------------------------------------------------------------
-
 #[test]
 fn effect_on_a_method_generates_an_effects_hook() {
     let src =
@@ -606,7 +563,7 @@ fn effect_on_a_method_generates_an_effects_hook() {
     let out = expand(src).unwrap();
     assert!(out.contains("$$__effects(): void {"));
     assert!(out.contains("$__effect(() => this.sync());"));
-    assert!(out.contains("sync(): void {}")); // the method itself stays
+    assert!(out.contains("sync(): void {}"));
     assert!(!out.contains("// #effect"));
     assert!(out.contains("from '@neuralfog/elemix/runtime'"));
 }
@@ -637,8 +594,6 @@ fn effect_on_a_class_is_an_error() {
     );
 }
 
-// --- #before-mount / #mount / #dispose ---------------------------------------
-
 #[test]
 fn lifecycle_pragmas_synthesize_the_matching_hooks() {
     let src = "// #component\nclass Foo extends Component {\n    // #before-mount\n    setup(): void {}\n    // #mount\n    ready(): void {}\n    // #dispose\n    teardown(): void {}\n}";
@@ -649,7 +604,6 @@ fn lifecycle_pragmas_synthesize_the_matching_hooks() {
     assert!(out.contains("this.ready();"));
     assert!(out.contains("$$__onDispose(): void {"));
     assert!(out.contains("this.teardown();"));
-    // the tagged methods stay; the markers are stripped.
     assert!(out.contains("setup(): void {}"));
     assert!(!out.contains("// #before-mount"));
     assert!(!out.contains("// #mount"));
@@ -658,8 +612,6 @@ fn lifecycle_pragmas_synthesize_the_matching_hooks() {
 
 #[test]
 fn lifecycle_wiring_pulls_in_no_runtime_import() {
-    // The base already calls these hooks by name, so lifecycle on its own (no
-    // #component/#state/#effect) needs no `/runtime` import.
     let src = "class Foo extends Component {\n    // #mount\n    ready(): void {}\n}";
     let out = expand(src).unwrap();
     assert!(out.contains("$$__onMount(): void {"));
@@ -683,14 +635,11 @@ fn lifecycle_works_on_arrow_fields() {
     assert!(out.contains("this.ready();"));
 }
 
-// --- component inheritance ---------------------------------------------------
-
 #[test]
 fn inheriting_component_chains_super_before_own_in_setup_hooks() {
     let src = "// #component\nclass Derived extends Base {\n    // #mount\n    ready(): void {}\n}";
     let out = expand(src).unwrap();
     let hook = &out[out.find("$$__onMount(): void {").unwrap()..];
-    // setup runs base-first: super before own
     assert!(hook.find("super.$$__onMount?.();").unwrap() < hook.find("this.ready();").unwrap());
 }
 
@@ -700,7 +649,6 @@ fn inheriting_component_disposes_own_before_super() {
         "// #component\nclass Derived extends Base {\n    // #dispose\n    teardown(): void {}\n}";
     let out = expand(src).unwrap();
     let hook = &out[out.find("$$__onDispose(): void {").unwrap()..];
-    // teardown reverses: own before super
     assert!(
         hook.find("this.teardown();").unwrap() < hook.find("super.$$__onDispose?.();").unwrap()
     );
@@ -728,7 +676,6 @@ fn inheriting_component_merges_super_sheets() {
 
 #[test]
 fn base_component_extending_component_does_not_chain_super() {
-    // a plain component (extends the base `Component`) must be untouched.
     let src = "// #component\nclass Foo extends Component {\n    // #mount\n    ready(): void {}\n    // #styles\n    s = `x`;\n}";
     let out = expand(src).unwrap();
     assert!(!out.contains("super.$$__onMount"));

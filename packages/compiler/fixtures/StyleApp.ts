@@ -78,4 +78,3 @@ export class StyleApp extends Component {
         <button @click=${this.shade}>background</button>
     `;
 }
-

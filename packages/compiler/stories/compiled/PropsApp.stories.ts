@@ -28,8 +28,6 @@ export const Default = {
         expect(pcount.textContent).toBe('0');
         expect(ptags.textContent).toBe('a');
 
-        // function prop: child invokes onBump() -> parent count++ -> reactive
-        // :count prop flows back into the child
         click(find('.bump', child) as HTMLButtonElement);
         expect(pcount.textContent).toBe('1');
         expect(count.textContent).toBe('1');
@@ -37,7 +35,6 @@ export const Default = {
         expect(pcount.textContent).toBe('2');
         expect(count.textContent).toBe('2');
 
-        // function prop with an argument -> parent array grows, shared into child
         click(find('.add', child) as HTMLButtonElement);
         expect(ptags.textContent).toBe('a,x');
         expect(tags.textContent).toBe('a,x');
@@ -45,7 +42,6 @@ export const Default = {
         expect(ptags.textContent).toBe('a,x,x');
         expect(tags.textContent).toBe('a,x,x');
 
-        // child mutates the SHARED array prop directly -> parent sees it
         click(find('.push', child) as HTMLButtonElement);
         expect(tags.textContent).toBe('a,x,x,y');
         expect(ptags.textContent).toBe('a,x,x,y');

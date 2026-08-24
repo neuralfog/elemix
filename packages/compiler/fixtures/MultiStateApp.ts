@@ -100,4 +100,3 @@ export class MultiStateApp extends Component {
         </div>
     `;
 }
-

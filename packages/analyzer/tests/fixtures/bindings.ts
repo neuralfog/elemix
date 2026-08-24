@@ -12,11 +12,6 @@ export class BindCard extends Component {
     box: { value: Element | null } = { value: null };
     field = { value: '' };
 
-    // For each binding the first usage is valid, the second wrong:
-    //   @event    → handler typed per the DOM event (click → PointerEvent, etc.)
-    //   :ref      → { value }
-    //   ~model    → { value: string }
-    //   ~onmodel  → (value: string) => string
     template = (): Template => tpl`
         <div @click=${this.onClick}>ok</div>
         <div @click=${42}>bad</div>

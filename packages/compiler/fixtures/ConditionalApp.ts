@@ -117,4 +117,3 @@ export class ConditionalApp extends Component {
         </div>
     `;
 }
-

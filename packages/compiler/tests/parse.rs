@@ -1,22 +1,12 @@
-//! Stage 2 parser tests — drive the public `parse()` API and assert the static
-//! markup + positioned holes. The parser is the one piece the ARCHITECTURE doc
-//! flags as worth unit-testing directly; the fixture corpus covers it end-to-end.
-
 use elemix_compiler::template::node::{Slot, Step};
 use elemix_compiler::template::parse::parse;
 
 fn s(parts: &[&str]) -> Vec<String> {
-    parts.iter().map(|p| p.to_string()).collect()
+    parts.iter().map(std::string::ToString::to_string).collect()
 }
-
-// ---------------------------------------------------------------------------
-// content holes
-// ---------------------------------------------------------------------------
 
 #[test]
 fn sole_text_hole_bakes_a_node() {
-    // a lone text value bakes a real text node (one space) instead of a `<!---->`
-    // swap; the node index is unchanged, so paths are identical to the anchor form
     let r = parse(&s(&["<div>", "</div>"]), &s(&["count"]));
     assert_eq!(r.markup, "<div> </div>");
     assert_eq!(r.holes.len(), 1);
@@ -27,7 +17,6 @@ fn sole_text_hole_bakes_a_node() {
 
 #[test]
 fn top_level_hole_has_no_element_step() {
-    // a hole with no wrapping element; a plain text value bakes a node
     let r = parse(&s(&["", ""]), &s(&["x"]));
     assert_eq!(r.markup, " ");
     assert_eq!(r.holes[0].slot, Slot::Text);
@@ -36,8 +25,6 @@ fn top_level_hole_has_no_element_step() {
 
 #[test]
 fn top_level_structural_hole_keeps_its_anchor() {
-    // a structural hole (here `when(...)`) is not text, so it keeps the comment
-    // anchor even when it is the sole node
     let r = parse(&s(&["", ""]), &s(&["when(c, () => x)"]));
     assert_eq!(r.markup, "<!---->");
     assert_eq!(r.holes[0].slot, Slot::Content);
@@ -50,7 +37,6 @@ fn adjacent_holes_and_interleaved_static() {
     assert_eq!(r.markup, "<p><!---->-<!----></p>");
     assert_eq!(r.holes.len(), 2);
     assert_eq!(r.holes[0].path, vec![Step::Child(0), Step::ChildNode(0)]);
-    // "-" is childNodes[1]; second anchor is childNodes[2]
     assert_eq!(r.holes[1].path, vec![Step::Child(0), Step::ChildNode(2)]);
 }
 
@@ -62,15 +48,10 @@ fn space_between_two_holes_is_preserved() {
     assert_eq!(r.holes[1].path, vec![Step::Child(0), Step::ChildNode(2)]);
 }
 
-// ---------------------------------------------------------------------------
-// element structure & indexing
-// ---------------------------------------------------------------------------
-
 #[test]
 fn nested_elements_index_correctly() {
     let r = parse(&s(&["<div><a>x</a><b>", "</b></div>"]), &s(&["y"]));
     assert_eq!(r.markup, "<div><a>x</a><b> </b></div>");
-    // div=children[0]; inside div b=children[1]; anchor childNodes[0] of b
     assert_eq!(
         r.holes[0].path,
         vec![Step::Child(0), Step::Child(1), Step::ChildNode(0)]
@@ -86,11 +67,8 @@ fn top_level_siblings_index_correctly() {
 
 #[test]
 fn void_element_counts_as_a_node() {
-    // `<br>` (void, no slash) becomes a self-closed leaf and occupies a node
-    // index, so the following anchor lands at childNodes[2].
     let r = parse(&s(&["<p>a<br>", "</p>"]), &s(&["x"]));
     assert_eq!(r.markup, "<p>a<br/><!----></p>");
-    // "a"=childNodes[0], <br>=1, anchor=2
     assert_eq!(r.holes[0].path, vec![Step::Child(0), Step::ChildNode(2)]);
 }
 
@@ -98,13 +76,8 @@ fn void_element_counts_as_a_node() {
 fn source_comment_is_dropped_without_shifting_indices() {
     let r = parse(&s(&["<div><!-- note -->", "</div>"]), &s(&["x"]));
     assert_eq!(r.markup, "<div> </div>");
-    // comment left no node; baked text node is childNodes[0]
     assert_eq!(r.holes[0].path, vec![Step::Child(0), Step::ChildNode(0)]);
 }
-
-// ---------------------------------------------------------------------------
-// attribute holes
-// ---------------------------------------------------------------------------
 
 #[test]
 fn bare_attr_is_stripped_and_bound() {
@@ -133,8 +106,6 @@ fn quoted_attr_with_prefix_and_suffix_is_template_literal() {
 
 #[test]
 fn quoted_and_unquoted_single_hole_are_equivalent() {
-    // `title=${x}` and `title="${x}"` are the SAME reactive binding to the
-    // value `x` — quotes around a lone hole are not a string coercion.
     let bare = parse(&s(&["<a title=", ">y</a>"]), &s(&["x"]));
     let quoted = parse(&s(&["<a title=\"", "\">y</a>"]), &s(&["x"]));
     assert_eq!(bare.holes[0].slot, Slot::Attr("title".into()));
@@ -193,8 +164,6 @@ fn dynamic_attr_stripped_but_later_static_attr_kept() {
 
 #[test]
 fn self_closing_custom_element_with_prop() {
-    // a non-void self-closed element must expand to an explicit close, or HTML
-    // parses the following sibling as its child
     let r = parse(&s(&["<user-card :name=", " />"]), &s(&["n"]));
     assert_eq!(r.markup, "<user-card></user-card>");
     assert_eq!(r.holes[0].slot, Slot::Attr(":name".into()));
@@ -203,8 +172,6 @@ fn self_closing_custom_element_with_prop() {
 
 #[test]
 fn adjacent_self_closed_customs_stay_siblings() {
-    // the SignalApp bug: `<signal-value/><signal-buttons/>` must serialize as
-    // two siblings, not nested
     let r = parse(&s(&["<signal-value /><signal-buttons />"]), &[]);
     assert_eq!(
         r.markup,
@@ -217,10 +184,6 @@ fn void_self_close_stays_self_closed() {
     let r = parse(&s(&["<br /><img src=\"x\" />"]), &[]);
     assert_eq!(r.markup, "<br/><img src=\"x\"/>");
 }
-
-// ---------------------------------------------------------------------------
-// static attributes
-// ---------------------------------------------------------------------------
 
 #[test]
 fn static_attrs_are_kept_through_a_dynamic_one() {
@@ -256,10 +219,6 @@ fn attr_value_internal_spaces_are_preserved() {
     assert_eq!(r.markup, "<svg viewBox=\"0 0 200 200\"></svg>");
 }
 
-// ---------------------------------------------------------------------------
-// expression opacity — the parser never inspects hole exprs
-// ---------------------------------------------------------------------------
-
 #[test]
 fn object_literal_attr_expr_is_stored_verbatim() {
     let r = parse(
@@ -287,10 +246,6 @@ fn backticks_in_attr_expr_survive() {
     assert_eq!(r.holes[0].expr, expr);
 }
 
-// ---------------------------------------------------------------------------
-// whitespace
-// ---------------------------------------------------------------------------
-
 #[test]
 fn whitespace_between_tags_is_dropped_but_kept_at_holes() {
     let r = parse(
@@ -301,7 +256,6 @@ fn whitespace_between_tags_is_dropped_but_kept_at_holes() {
 
     let r2 = parse(&s(&["<p><b>full:</b> ", "</p>"]), &s(&["name"]));
     assert_eq!(r2.markup, "<p><b>full:</b> <!----></p>");
-    // <b>=childNodes[0], " "=1, anchor=2
     assert_eq!(r2.holes[0].path, vec![Step::Child(0), Step::ChildNode(2)]);
 }
 

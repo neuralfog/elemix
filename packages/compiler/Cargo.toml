@@ -46,4 +46,18 @@ wasm-bindgen = { version = "0.2", optional = true }
 console_error_panic_hook = { version = "0.1", optional = true }
 
 [dev-dependencies]
+criterion = "0.8.2"
 insta = { version = "1", features = ["glob"] }
+proptest = "1.11.0"
+
+[[bench]]
+name = "compile"
+harness = false
+
+[lints.clippy]
+uninlined_format_args = "warn"
+semicolon_if_nothing_returned = "warn"
+redundant_closure_for_method_calls = "warn"
+explicit_iter_loop = "warn"
+map_unwrap_or = "warn"
+unnested_or_patterns = "warn"

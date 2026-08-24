@@ -1,6 +1,3 @@
-//! Tests for the nested-template string scanners — balanced matching is the
-//! error-prone foundation of directive lowering, so it is unit-tested directly.
-
 use elemix_compiler::lower::{
     find_html_spans, slice, split_call_args, split_template_literal, split_ternary,
 };
@@ -132,7 +129,6 @@ fn finds_html_inside_a_repeat_render_arg() {
 
 #[test]
 fn ignores_the_letters_html_inside_an_identifier() {
-    // `getHtml` and a member `.tpl` must not be mistaken for a tagged template
     let spans = find_html_spans("getHtml(x) + this.html");
     assert!(spans.is_empty());
 }

@@ -31,4 +31,3 @@ export class UserCard extends Component<Props> {
         <span class="role">${this.props.role}</span>
     </div>`;
 }
-

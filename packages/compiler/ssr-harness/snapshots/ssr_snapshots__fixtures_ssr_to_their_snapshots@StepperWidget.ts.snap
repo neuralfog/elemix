@@ -49,9 +49,6 @@ const css = `
     }
 `;
 
-// An explicit `#tag` that overrides the derived one (`StepperWidget` would
-// otherwise become `stepper-widget`). The pragma is a plain `//` comment bound
-// to the class on the next line.
 const _s0 = $__sheet(css);
 const _t0 = $__template('<div class="stepper"><button>−</button><span class="count"> </span><button>+</button></div>');
 

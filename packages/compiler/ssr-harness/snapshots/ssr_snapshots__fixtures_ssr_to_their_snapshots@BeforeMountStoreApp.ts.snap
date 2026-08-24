@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/BeforeMountStoreApp.ts
 ---
-import { $__ssrText, $__ssrLen, $__scopedStore } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrLen, $__moduleState } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -11,7 +11,7 @@ type Store = {
     count: number;
 };
 
-export const counter = $__scopedStore<Store>(() => ({ count: 0 }));
+export const counter = $__moduleState<Store>(() => ({ count: 0 }));
 
 const _t0 = $__template('<button>count is <!----></button>');
 

@@ -1,10 +1,6 @@
 import { expect } from '@neuralfog/elemix-testing-library';
 import { find } from '@neuralfog/elemix-testing-library/query';
 
-// A compile-time WARNING (a tag with no hyphen) is inlined as `console.warn`.
-// The component still compiles and tries to register — but the invalid tag makes
-// `customElements.define` throw, which is exactly what the warning predicted. We
-// spy on console.warn and import inside play so both are observable.
 export default { title: 'Compiled/WarnApp' };
 
 export const InlinedWarning = {
@@ -19,8 +15,6 @@ export const InlinedWarning = {
 
         let registrationThrew = false;
         try {
-            // The module logs the warning (top of file), then `define('warnapp')`
-            // throws on the invalid name.
             await import('./.emited/WarnApp');
         } catch {
             registrationThrew = true;
@@ -35,7 +29,6 @@ export const InlinedWarning = {
                 ),
             ),
         ).toBe(true);
-        // the warning was right — the runtime registration really does throw
         expect(registrationThrew).toBe(true);
 
         const pre = find('[data-testid="msg"]', canvasElement);

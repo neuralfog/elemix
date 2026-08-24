@@ -4,7 +4,6 @@ import type { Template } from '@neuralfog/elemix/types';
 
 type Status = 'idle' | 'loading' | 'ready' | 'failed';
 
-// non-exhaustive: the 'failed' case is not handled.
 // #component #tag match-missing
 export class MatchMissing extends Component {
     // #state
@@ -19,7 +18,6 @@ export class MatchMissing extends Component {
     `;
 }
 
-// unknown / misspelled case: 'cancelled' is not a member of Status.
 // #component #tag match-typo
 export class MatchTypo extends Component {
     // #state
@@ -36,7 +34,6 @@ export class MatchTypo extends Component {
     `;
 }
 
-// widened value: a plain `string` has no finite set of cases.
 // #component #tag match-wide
 export class MatchWide extends Component {
     // #state
@@ -51,7 +48,6 @@ export class MatchWide extends Component {
 
 type Load = { kind: 'idle' } | { kind: 'busy'; pct: number };
 
-// discriminated union: a bad member read inside a narrowed arm.
 // #component #tag match-narrow
 export class MatchNarrow extends Component {
     // #state

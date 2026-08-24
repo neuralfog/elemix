@@ -1,24 +1,11 @@
-//! SSR slice-1 emit: the `$$__ssr(): string` method injected behind `--ssr`.
-//!
-//! Locks the server-render emit for a flat shadow component (DSD wrapper +
-//! inline `<style data-ssr>` + text/attr holes) and a flat `#no-shadow` one
-//! (bare markup, no template, no style), plus focused unit tests for the two
-//! building blocks. The CSR snapshots (`snapshots.rs`) prove the default path is
-//! untouched — these only assert the extra method.
-
 use elemix_compiler::ssr::ssr_method;
 use elemix_compiler::template::parse::{fmt_array, ssr_inner, Chunk};
 use elemix_compiler::{compile_hydrate, compile_ssr};
 
-/// A single static chunk - the inner rope for `ssr_method` framing tests that
-/// don't care about hole serialization.
 fn static_inner(html: &str) -> Vec<Chunk> {
     vec![Chunk::Static(html.to_string())]
 }
 
-/// The `$$__hydrate(root: Node) { … }` block from a `--hydrate` compile, or the
-/// empty string if none — the client hydration slice of the output. Brace-balanced
-/// from the method's opening `{` so the nested `$__effect(() => { … })` is kept.
 fn hydrate_method_text(compiled: &str) -> String {
     let Some(start) = compiled.find("$$__hydrate(") else {
         return String::new();
@@ -41,21 +28,15 @@ fn hydrate_method_text(compiled: &str) -> String {
     tail.to_string()
 }
 
-/// The `$$__ssr(): string { … }` block spliced into a compiled component, or the
-/// empty string if none — the SSR-specific slice of the output.
 fn ssr_method_text(compiled: &str) -> String {
     let Some(start) = compiled.find("$$__ssr()") else {
         return String::new();
     };
     let tail = &compiled[start..];
-    // The method is `$$__ssr(): string {\n…\n}`; take through the first
-    // line-leading `}` that closes it.
-    let end = tail.find("\n}").map(|i| i + 2).unwrap_or(tail.len());
+    let end = tail.find("\n}").map_or(tail.len(), |i| i + 2);
     tail[..end].to_string()
 }
 
-/// Compile a fixture with `--ssr` and return its `$$__ssr()` method, asserting a
-/// clean compile.
 fn ssr_fixture_method(path: &str) -> String {
     let source = std::fs::read_to_string(path).expect("read fixture");
     let (compiled, diags) = compile_ssr(&source, false);
@@ -68,25 +49,18 @@ fn ssr_fixture_method(path: &str) -> String {
 
 #[test]
 fn when_directive_lowers_to_ssr_string_builder() {
-    // `when(cond, then, else)` -> `$__ssrWhen`, each branch's `tpl` serialized to
-    // a string literal. Locks slice-3 directive SSR.
     let method = ssr_fixture_method("fixtures/WhenElseApp.ts");
     insta::assert_snapshot!("ssr_when_else", method);
 }
 
 #[test]
 fn match_directive_lowers_both_arities() {
-    // `match(value, key, cases)` (3-arg) and `match(value, cases)` (2-arg) both
-    // -> `$__ssrMatch`; case callbacks return serialized strings.
     let method = ssr_fixture_method("fixtures/MatchApp.ts");
     insta::assert_snapshot!("ssr_match", method);
 }
 
 #[test]
 fn repeat_of_components_lowers_to_ssr_repeat_and_ssr_child() {
-    // `repeat` -> `$__ssrRepeat`; each row is a child COMPONENT, so it lowers
-    // through `$__ssrChild` (props forwarded, `data-h` for self-hydration) inside
-    // the row string. The key fn is passed through and ignored by the builder.
     let method = ssr_fixture_method("fixtures/CardListApp.ts");
     assert!(
         method.contains("$__ssrRepeat("),
@@ -101,8 +75,6 @@ fn repeat_of_components_lowers_to_ssr_repeat_and_ssr_child() {
 
 #[test]
 fn ternary_over_nested_tpl_serializes_both_branches() {
-    // AppCard: `hasSlot('header') ? tpl`…` : ''` - the nested `tpl` (with a
-    // `<slot>`) serializes to a string literal, the empty branch stays `''`.
     let method = ssr_fixture_method("fixtures/AppCard.ts");
     assert!(
         method.contains("<slot name=\"header\">"),
@@ -117,9 +89,6 @@ fn ternary_over_nested_tpl_serializes_both_branches() {
 
 #[test]
 fn minify_bakes_static_minified_css_into_the_style_block() {
-    // `--minify` resolves `styles = css` back to its module-scope `const css` and
-    // bakes the shrunk sheet into `<style data-ssr>` as static text - no dev
-    // whitespace, no per-request `${css}` interpolation.
     let source = std::fs::read_to_string("fixtures/CounterApp.ts").expect("read fixture");
     let (compiled, diags) = compile_ssr(&source, true);
     assert!(diags.is_empty(), "unexpected diagnostics: {diags:?}");
@@ -153,11 +122,6 @@ fn flat_no_shadow_component_emits_bare_markup() {
 
 #[test]
 fn ssr_inner_drops_client_holes_and_keeps_text_attr() {
-    // A button with class/style/attr holes + event/model/onmodel/prop/ref holes,
-    // a text content hole, and a `repeat` list content hole (SSR-lowered to
-    // `$__ssrRepeat`, the row template serialized inline). `~model` keeps its
-    // ref's `.value` as the `value` attribute (no hydrate flash); every other
-    // sigil hole (`@`/`~onmodel`/`:`) is dropped server-side.
     let statics = [
         "<button class=".to_string(),
         " style=".to_string(),
@@ -204,10 +168,6 @@ fn ssr_inner_drops_client_holes_and_keeps_text_attr() {
 
 #[test]
 fn hydrate_binds_events_and_reactive_text_onto_server_nodes() {
-    // The client hydration method for a counter: walk the server nodes by the same
-    // paths the CSR `view()` uses, attach the `@click`, and bind the reactive text
-    // onto the node after the `<!---->` marker via `$__hydrateText` - no clone, no
-    // return, zero DOM created.
     let source = std::fs::read_to_string("fixtures/CounterApp.ts").expect("read fixture");
     let (compiled, diags) = compile_hydrate(&source, false);
     assert!(diags.is_empty(), "unexpected diagnostics: {diags:?}");
@@ -220,10 +180,6 @@ fn hydrate_binds_events_and_reactive_text_onto_server_nodes() {
 
 #[test]
 fn hydrate_takes_over_a_when_via_reanchor_and_child() {
-    // `when` becomes reactive on the client: `$__reanchor` carves the server
-    // content out of the `.stage` parent and drops in an anchor, then the CSR
-    // `$__child` builder drives it. The sibling toggle button's `@click` still
-    // binds by a stable path (it doesn't cross the structural region).
     let source = std::fs::read_to_string("fixtures/WhenElseApp.ts").expect("read fixture");
     let (compiled, diags) = compile_hydrate(&source, false);
     assert!(diags.is_empty(), "unexpected diagnostics: {diags:?}");
@@ -241,8 +197,6 @@ fn hydrate_takes_over_a_when_via_reanchor_and_child() {
 
 #[test]
 fn hydrate_takes_over_a_repeat_via_reanchor_and_list() {
-    // `repeat` of components becomes a reactive keyed list on the client:
-    // `$__reanchor` + `$__list` with the full row builder (props + row `@click`s).
     let source = std::fs::read_to_string("fixtures/CardListApp.ts").expect("read fixture");
     let (compiled, diags) = compile_hydrate(&source, false);
     assert!(diags.is_empty(), "unexpected diagnostics: {diags:?}");
@@ -256,10 +210,6 @@ fn hydrate_takes_over_a_repeat_via_reanchor_and_list() {
 
 #[test]
 fn ssr_inner_renders_nested_component_via_child_helper() {
-    // A parent template embedding a child component. Its `:prop` holes become the
-    // forwarded props object and the element is replaced by an `$__ssrChild` call
-    // (which renders the child's own `$$__ssr()` inline) rather than inert markup.
-    // Client-only holes (`:ref`, `@event`) are dropped.
     let statics = [
         "<div><user-card :name=".to_string(),
         " :role=".to_string(),

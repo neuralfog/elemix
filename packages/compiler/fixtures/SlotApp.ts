@@ -46,4 +46,3 @@ export class SlotApp extends Component {
         </app-card>
     `;
 }
-

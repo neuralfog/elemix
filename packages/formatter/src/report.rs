@@ -1,58 +1,46 @@
-//! The CLI shell: banner, closing summary, and the lint diff. Reimplemented to
-//! match the analyzer/compiler byte-for-byte (same palette, glyphs, layout) -
-//! NOT imported, because the formatter shares no crate with them by design.
-
 use similar::{ChangeTag, TextDiff};
 
-/// An RGB brand colour with a 16-colour ANSI fallback, so the report looks the
-/// part on truecolor terminals and degrades cleanly on basic ones.
 struct Ink {
     rgb: (u8, u8, u8),
     ansi: &'static str,
 }
 
-// elemix's palette - purple->cyan brand (the logo's lightning) + signal colours.
 const BRAND_A: Ink = Ink {
     rgb: (167, 139, 250),
     ansi: "35",
-}; // violet
+};
 const BRAND_B: Ink = Ink {
     rgb: (34, 211, 238),
     ansi: "36",
-}; // cyan
+};
 const ERR: Ink = Ink {
     rgb: (248, 113, 113),
     ansi: "31",
-}; // red
+};
 const OK: Ink = Ink {
     rgb: (74, 222, 128),
     ansi: "32",
-}; // green
+};
 const TAG: Ink = Ink {
     rgb: (244, 114, 182),
     ansi: "35",
-}; // pink
+};
 const MUTED: Ink = Ink {
     rgb: (110, 118, 129),
     ansi: "90",
-}; // grey
+};
 
-/// Version baked in at build time (the npm build injects `package.json`'s version
-/// as `ELEMIX_VERSION`); a bare `cargo build` falls back to the crate version.
 const VERSION: &str = match option_env!("ELEMIX_VERSION") {
     Some(v) => v,
     None => env!("CARGO_PKG_VERSION"),
 };
 
-/// What a run covered, shown in the closing dashboard.
 pub struct Stats {
     pub templates: usize,
     pub changed: usize,
     pub files: usize,
 }
 
-/// Colouring for the report. Off for pipes and `NO_COLOR`; truecolor when the
-/// terminal advertises it (`COLORTERM`), else the ANSI-16 fallback.
 pub struct Palette {
     on: bool,
     truecolor: bool,
@@ -61,8 +49,7 @@ pub struct Palette {
 impl Palette {
     pub fn new(on: bool) -> Self {
         let truecolor = std::env::var("COLORTERM")
-            .map(|v| v.contains("truecolor") || v.contains("24bit"))
-            .unwrap_or(false);
+            .is_ok_and(|v| v.contains("truecolor") || v.contains("24bit"));
         Self { on, truecolor }
     }
 
@@ -80,7 +67,6 @@ impl Palette {
         format!("\x1b[{codes}m{s}\x1b[0m")
     }
 
-    /// Per-character gradient between two inks (truecolor only; else brand-A).
     fn gradient(&self, from: &Ink, to: &Ink, s: &str) -> String {
         if !self.on {
             return s.to_string();
@@ -117,7 +103,6 @@ impl Palette {
     pub fn dim(&self, s: &str) -> String {
         self.fg(&MUTED, false, s)
     }
-    /// Bold, no colour - the banner wordmark (matches the compiler).
     fn bold(&self, s: &str) -> String {
         if self.on {
             format!("\x1b[1m{s}\x1b[0m")
@@ -127,7 +112,6 @@ impl Palette {
     }
 }
 
-/// The two-line brand banner, version baked in. Always shown, even on a clean run.
 pub fn banner(p: &Palette) -> String {
     let bar = p.tag("▐▌");
     format!(
@@ -138,8 +122,6 @@ pub fn banner(p: &Palette) -> String {
     )
 }
 
-/// The closing dashboard: brand-gradient rule, verdict, and the `◆ ◇ ▣` chips.
-/// `write` picks the fix-mode verb ("reformatted") vs the lint-mode one.
 pub fn summary(stats: &Stats, write: bool, p: &Palette) -> String {
     let rule = p.gradient(&BRAND_A, &BRAND_B, &"─".repeat(54));
     let verdict = if stats.changed == 0 {
@@ -175,8 +157,6 @@ pub fn summary(stats: &Stats, write: bool, p: &Palette) -> String {
     )
 }
 
-/// A prettier-style unified diff of one file's before/after: red `-`, green `+`,
-/// dim hunk headers, the short path as a heading.
 pub fn diff(path: &str, before: &str, after: &str, p: &Palette) -> String {
     let td = TextDiff::from_lines(before, after);
     let mut out = format!("  {}\n", p.dim(&short_path(path)));
@@ -212,7 +192,6 @@ fn s(n: usize) -> &'static str {
     }
 }
 
-/// Last two path segments, for a compact locator (`components/Card.ts`).
 fn short_path(path: &str) -> String {
     let parts: Vec<&str> = path.rsplit(['/', '\\']).take(2).collect();
     parts.into_iter().rev().collect::<Vec<_>>().join("/")

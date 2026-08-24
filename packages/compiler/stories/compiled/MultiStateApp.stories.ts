@@ -14,7 +14,6 @@ export const Default = {
         if (!count || !name || !status)
             throw new Error('multi-state-app missing count/name/status');
 
-        // buttons in DOM order: +1, reset, toggle status, rename
         const buttons = query('button', canvasElement);
         const incBtn = buttons[0];
         const resetBtn = buttons[1];
@@ -25,12 +24,10 @@ export const Default = {
         expect(toggleBtn.textContent).toBe('toggle status');
         expect(renameBtn.textContent).toBe('rename');
 
-        // initial slices
         expect(count.textContent).toBe('0');
         expect(name.textContent).toBe('Ada');
         expect(status.textContent).toBe('online');
 
-        // +1 three times bumps the counter slice only; user slice untouched
         click(incBtn);
         click(incBtn);
         click(incBtn);
@@ -38,23 +35,19 @@ export const Default = {
         expect(name.textContent).toBe('Ada');
         expect(status.textContent).toBe('online');
 
-        // reset zeroes the counter; user slice still untouched
         click(resetBtn);
         expect(count.textContent).toBe('0');
         expect(name.textContent).toBe('Ada');
 
-        // counter still works after reset
         click(incBtn);
         expect(count.textContent).toBe('1');
 
-        // toggle status flips online -> offline, then back; counter untouched
         click(toggleBtn);
         expect(status.textContent).toBe('offline');
         expect(count.textContent).toBe('1');
         click(toggleBtn);
         expect(status.textContent).toBe('online');
 
-        // rename flips Ada -> Grace -> Ada; counter + status untouched
         click(renameBtn);
         expect(name.textContent).toBe('Grace');
         expect(count.textContent).toBe('1');

@@ -1,5 +1,5 @@
 import { $__rootEffect } from './reactive';
-import { $__scopedStore } from './ssr';
+import { $__moduleState } from './ssr';
 import { $__reactive, $__toRaw } from './state';
 
 let seed: Record<string, unknown> | undefined;
@@ -73,7 +73,7 @@ export const $__stores = (): Record<string, unknown> => {
 };
 
 export const $__store = <T extends object>(name: string, factory: () => T): T =>
-    $__scopedStore(() => {
+    $__moduleState(() => {
         const base = factory();
         const override = seedFor(name);
         const initial =

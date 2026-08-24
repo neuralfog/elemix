@@ -86,4 +86,3 @@ export class ModelApp extends Component {
         <div class="out">Volume: ${this.state.volume.value}</div>
     `;
 }
-

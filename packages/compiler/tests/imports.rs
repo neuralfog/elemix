@@ -1,5 +1,3 @@
-//! Tests for the runtime-import merge post-pass.
-
 use elemix_compiler::imports::merge_runtime_imports;
 
 const RT: &str = "@neuralfog/elemix/runtime";
@@ -44,7 +42,6 @@ fn no_runtime_imports_is_identity() {
 
 #[test]
 fn leaves_user_imports_alone() {
-    // imports from other modules are never merged, even if duplicated.
     let src = format!(
         "import {{ a }} from '@neuralfog/elemix';\nimport {{ template }} from '{RT}';\nimport {{ b }} from '@neuralfog/elemix';\nimport {{ sheet }} from '{RT}';\n"
     );

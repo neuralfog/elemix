@@ -6,9 +6,6 @@ input_file: fixtures/ScssApp.ts
 import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
-// Vite compiles the `.scss` and `?inline` hands back the CSS as a string, which
-// the instance reassigns to a `#styles` field — so `sheet()` adopts it the same
-// way it would an inline `const css = \`…\``. The compiler never sees the import.
 import css from './ScssApp.scss?inline';
 
 type State = {

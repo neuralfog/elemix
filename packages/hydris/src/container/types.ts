@@ -14,23 +14,8 @@ export type Disposable = {
 export type BuildableLifetime = 'singleton' | 'scoped' | 'transient';
 
 export enum DiServiceType {
-    /**
-     * One shared instance for the whole application. Built once (eagerly on
-     * `container.start()`) and returned for every resolution thereafter. Use
-     * for stateless services and shared resources (config, db pool, caches).
-     */
     Singleton = 'singleton',
-    /**
-     * One instance per request scope. Built the first time it is resolved
-     * within a request and reused for the rest of that request, then disposed
-     * when the request ends. Use for per-request state (the current user,
-     * a unit of work, a request-scoped transaction).
-     */
     Scoped = 'scoped',
-    /**
-     * A brand new instance on every resolution. Never cached. Use for
-     * lightweight, stateful helpers that must not be shared between callers.
-     */
     Transient = 'transient',
 }
 

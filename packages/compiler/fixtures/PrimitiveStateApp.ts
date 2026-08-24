@@ -1,11 +1,6 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
-// Proof that a BARE primitive is reactive state — no object wrapper, no
-// `.value` box. `// #state count = 0` makes `this.count` itself reactive: the
-// compiler lowers each primitive field to a get/set accessor over a private
-// backing field + a per-instance `dep()`. Number, boolean and string each get
-// their own slice and re-render only their own binding.
 
 const css = `
     :host {

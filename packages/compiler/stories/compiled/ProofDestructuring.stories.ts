@@ -13,10 +13,6 @@ export const Default = {
         const dec = find<HTMLButtonElement>('.dec', canvasElement);
         if (!inc || !dec) throw new Error('proof-destructuring did not render');
 
-        // The handlers came from `const { inc, dec } = this` inside the template
-        // body — if the compiler dropped that prelude, these clicks would throw
-        // (inc/dec undefined). They don't, and the count (read reactively as
-        // this.state.count) updates — so destructuring + hoisting both hold.
         expect(count()).toBe('0');
         click(inc);
         click(inc);

@@ -14,7 +14,6 @@ export const Default = {
 
         const input = find<HTMLInputElement>('input', canvasElement);
         const buttons = query('button', canvasElement);
-        // button order: "Focus" then "Measure width" (.ghost)
         const focus = buttons[0];
         const measure = buttons[1];
         if (!input || !focus || !measure)
@@ -25,22 +24,17 @@ export const Default = {
         expect(measure.classList.contains('ghost')).toBe(true);
         expect(input.getAttribute('placeholder')).toBe('Type something…');
 
-        // width starts at 0, so the conditional _child .out is not mounted
         expect(find('.out', canvasElement)).toBeNull();
 
-        // Focus button drives focus to the :ref-bound input
         click(focus);
         expect(root.activeElement).toBe(input);
-        // focusing alone does not mount the readout
         expect(find('.out', canvasElement)).toBeNull();
 
-        // measuring reads the input's offsetWidth via the :ref, mounting the readout
         click(measure);
         const out = find('.out', canvasElement);
         if (!out) throw new Error('ref-app did not mount .out after measuring');
         expect(out.textContent).toContain('Input is');
         expect(out.textContent).toContain('px wide');
-        // the interpolated width is a positive integer pixel value
         const match = out.textContent?.match(/Input is (\d+)px wide/);
         if (!match) throw new Error('width readout did not match expected format');
         expect(Number(match[1])).toBe(input.offsetWidth);

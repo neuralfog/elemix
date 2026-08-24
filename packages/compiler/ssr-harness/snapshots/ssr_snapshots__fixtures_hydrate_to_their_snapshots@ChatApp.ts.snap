@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/ChatApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
@@ -141,8 +140,6 @@ return _r5;
         if (!text) return;
         this.state.messages.push({ id: this.nextId(), text, me: true });
         this.state.draft.value = '';
-        // Renders are synchronous, so the new message is already in the DOM here —
-        // scroll the log to the bottom right after sending, no lifecycle hook needed.
         const log = this.root?.querySelector('.log');
         if (log) log.scrollTop = log.scrollHeight;
     };

@@ -1,7 +1,3 @@
-//! `etf` as a library: the formatting engine, exposed so the binary and the
-//! integration tests (fixtures + snapshots) share one entry point. Standalone -
-//! no `elemix-compiler`/`elemix-analyzer` dependency (see spec.md).
-
 pub mod config;
 pub mod doc;
 pub mod format;

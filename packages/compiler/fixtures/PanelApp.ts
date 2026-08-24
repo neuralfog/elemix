@@ -85,4 +85,3 @@ export class PanelApp extends Component {
         </div>
     `;
 }
-

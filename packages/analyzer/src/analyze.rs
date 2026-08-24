@@ -1,9 +1,5 @@
-//! The shared analysis pipeline - scan -> registry -> overlays -> oracle ->
-//! findings. Both the CLI report and the LSP server drive this, so the two paths
-//! can never diverge on what counts as a problem.
-
 use crate::imports;
-use crate::oracle::{Overlay, TypeOracle};
+use crate::oracle::{OracleError, Overlay, TypeOracle};
 use crate::project::{
     build_metadata_overlay, build_overlay, build_registry, FileOverlay, PropInfo, Skipped,
 };
@@ -16,24 +12,17 @@ pub struct Analysis {
     pub findings: Vec<Finding>,
     pub skipped: Vec<Skipped>,
     pub stats: Stats,
-    /// tag → props, for autocomplete. Empty unless `want_props` was set.
     pub props: HashMap<String, Vec<PropInfo>>,
-    /// tag → the file declaring the component, for the auto-import code action.
     pub components: HashMap<String, PathBuf>,
-    /// tag → the component's class name, for the hover props-type lookup.
     pub component_classes: HashMap<String, String>,
 }
 
-/// Run the full analysis over an in-memory file set. `oracle` supplies the one
-/// non-native step - type judgment - via the project's tsc. Findings come back
-/// sorted by file then position. `want_props` also enumerates every component's
-/// props (an extra probe file for the LSP; the CLI leaves it off).
 pub fn analyze(
     root: &Path,
     files: &[(PathBuf, String)],
     oracle: &dyn TypeOracle,
     want_props: bool,
-) -> Result<Analysis, String> {
+) -> Result<Analysis, OracleError> {
     let registry = build_registry(files);
     let components: HashMap<String, PathBuf> = registry
         .iter()
@@ -60,8 +49,6 @@ pub fn analyze(
 
     let mut findings = Vec::new();
 
-    // Pure-Rust checks (no oracle): compiler-hint problems, duplicate props, and
-    // unimported components.
     for (path, src) in files {
         let file = path.to_string_lossy();
         findings.extend(report::hint_findings(&file, scan_hints(src)));
@@ -69,9 +56,6 @@ pub fn analyze(
     }
     findings.extend(imports::unimported_warnings(files, &registry, root));
 
-    // Prop type judgment (and, for the LSP, prop enumeration) is delegated to the
-    // oracle. Build the request from every file overlay, plus one metadata overlay
-    // that enumerates every component's props.
     let meta = if want_props {
         build_metadata_overlay(&registry, root)
     } else {
@@ -93,8 +77,7 @@ pub fn analyze(
 
     let mut props = HashMap::new();
     if !request.is_empty() {
-        let check: Vec<String> = request.iter().map(|o| o.path.clone()).collect();
-        let raw = oracle.check(&root.to_string_lossy(), &request, &check)?;
+        let raw = oracle.check(&root.to_string_lossy(), &request)?;
         findings.extend(report::attribute(&raw, &overlays));
         if let Some(m) = &meta {
             props = report::attribute_metadata(&raw, m);
@@ -111,4 +94,109 @@ pub fn analyze(
         components,
         component_classes,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::oracle::RawDiagnostic;
+    use std::cell::RefCell;
+
+    struct FakeOracle<F: Fn(&[Overlay]) -> Vec<RawDiagnostic>> {
+        seen: RefCell<Vec<String>>,
+        emit: F,
+    }
+
+    impl<F: Fn(&[Overlay]) -> Vec<RawDiagnostic>> TypeOracle for FakeOracle<F> {
+        fn check(
+            &self,
+            _root: &str,
+            overlays: &[Overlay],
+        ) -> Result<Vec<RawDiagnostic>, OracleError> {
+            self.seen
+                .borrow_mut()
+                .extend(overlays.iter().map(|o| o.content.clone()));
+            Ok((self.emit)(overlays))
+        }
+    }
+
+    fn project() -> Vec<(PathBuf, String)> {
+        vec![
+            (
+                PathBuf::from("/p/foo.ts"),
+                "import { Component, tpl } from '@neuralfog/elemix';\ntype Props = { n: number };\n// #component #tag foo-el\nexport class FooEl extends Component<Props> {\n    template = () => tpl`<div>${this.props.n}</div>`;\n}\n".to_string(),
+            ),
+            (
+                PathBuf::from("/p/app.ts"),
+                "import { Component, tpl } from '@neuralfog/elemix';\nimport './foo';\n// #component #tag foo-app\nexport class FooApp extends Component {\n    template = () => tpl`<foo-el :n=${'bad'}></foo-el>`;\n}\n".to_string(),
+            ),
+        ]
+    }
+
+    #[test]
+    fn analyze_runs_hermetically_and_builds_prop_checks() {
+        let oracle = FakeOracle {
+            seen: RefCell::new(Vec::new()),
+            emit: |_| Vec::new(),
+        };
+        let files = project();
+        analyze(Path::new("/p"), &files, &oracle, false).unwrap();
+        let seen = oracle.seen.borrow();
+        assert!(
+            seen.iter().any(|c| c.contains("__ck<")),
+            "overlay should wrap the :n prop hole: {seen:?}"
+        );
+    }
+
+    #[test]
+    fn a_fake_type_error_maps_back_to_a_prop_finding() {
+        let oracle = FakeOracle {
+            seen: RefCell::new(Vec::new()),
+            emit: |overlays: &[Overlay]| {
+                for o in overlays {
+                    if let Some(pos) = o.content.find("__ck<__ec") {
+                        return vec![RawDiagnostic {
+                            file: o.path.clone(),
+                            start: pos as u32,
+                            code: 2344,
+                            category: "error".to_string(),
+                            message: "type mismatch".to_string(),
+                        }];
+                    }
+                }
+                Vec::new()
+            },
+        };
+        let files = project();
+        let analysis = analyze(Path::new("/p"), &files, &oracle, false).unwrap();
+        assert!(
+            analysis
+                .findings
+                .iter()
+                .any(|f| f.message.contains("has no prop 'n'")),
+            "{:?}",
+            analysis
+                .findings
+                .iter()
+                .map(|f| &f.message)
+                .collect::<Vec<_>>()
+        );
+    }
+
+    proptest::proptest! {
+        #![proptest_config(proptest::prelude::ProptestConfig { cases: 2048, ..proptest::prelude::ProptestConfig::default() })]
+
+        #[test]
+        fn analyze_never_panics_on_arbitrary_sources(a in ".{0,400}", b in ".{0,400}") {
+            let oracle = FakeOracle {
+                seen: RefCell::new(Vec::new()),
+                emit: |_| Vec::new(),
+            };
+            let files = vec![
+                (PathBuf::from("/p/a.ts"), a),
+                (PathBuf::from("/p/b.ts"), b),
+            ];
+            let _ = analyze(Path::new("/p"), &files, &oracle, false);
+        }
+    }
 }

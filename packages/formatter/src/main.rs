@@ -1,9 +1,3 @@
-//! `etf` (`elemix-template-formatter`) - format the HTML inside ``tpl`` `` literals.
-//!
-//! Standalone: no `elemix-compiler` / `elemix-analyzer` dependency. It owns its
-//! scanner/parser/printer. Two modes: lint (default, print a diff, exit 1 if any
-//! file needs formatting) and `--write` (rewrite in place). See spec.md.
-
 use clap::Parser;
 use elemix_template_formatter::report::{Palette, Stats};
 use elemix_template_formatter::{format, report};
@@ -17,37 +11,24 @@ use std::process::ExitCode;
     about = "HTML template formatter for Elemix tpl`` literals."
 )]
 struct Cli {
-    /// Files/dirs/globs to scan for `.ts`/`.js` sources (recursive for a dir).
     #[arg(long = "dirs", value_name = "DIR|GLOB", num_args = 1.., required_unless_present_any = ["stdin", "lsp"])]
     dirs: Vec<String>,
 
-    /// Format source read from stdin and write the result to stdout (no banner or
-    /// summary) - for editor formatting / format-on-save. Ignores `--dirs`/`--write`.
-    /// Formats unless the formatter is disabled in config (then passes through).
     #[arg(long)]
     stdin: bool,
 
-    /// Read source from stdin and emit formatting diagnostics as JSON to stdout
-    /// (LSP-shaped ranges + a fix edit per unformatted template) - for editor
-    /// squiggles. Formatting only; correctness is the analyzer's job.
     #[arg(long)]
     lsp: bool,
 
-    /// Project root (for config discovery).
     #[arg(long, default_value = ".")]
     root: String,
 
-    /// Rewrite files in place (the "fix" mode). Default is lint/check.
     #[arg(long)]
     write: bool,
 
-    /// Lint mode (the default): report only.
     #[arg(long)]
     check: bool,
 
-    /// Internal: show the `✓ formatted` success view (as if `--write` ran) but
-    /// never touch a file - so a demo folder stays unformatted for the before/after
-    /// screenshots. Reports success (exit 0), writes nothing. Not for end users.
     #[arg(long, hide = true)]
     demo: bool,
 }
@@ -55,20 +36,13 @@ struct Cli {
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let write = cli.write && !cli.check;
-    // Everything comes solely from `elemix.toml` at (or above) --root - width,
-    // indent, and whether the formatter runs at all. A missing/malformed file uses
-    // the defaults (enabled, 80/4/space).
     let settings = elemix_template_formatter::config::load(&cli.root);
     let opts = &settings.options;
 
-    // Silent stdin -> stdout, for editors. No banner, no summary; format whatever
-    // comes in and hand it straight back (unparseable templates pass through).
     if cli.stdin {
         let Some(src) = read_stdin() else {
             return ExitCode::from(2);
         };
-        // Format unless the formatter is disabled in config - then echo unchanged.
-        // Whether a save triggers this is the editor's call, not ours.
         let out = if settings.enabled {
             format::format_source(&src, opts).output
         } else {
@@ -78,15 +52,10 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
-    // Diagnostics for editors: a JSON array of unformatted-template ranges (+ fix
-    // edits) on stdout, empty `[]` when the source is already formatted. Nothing
-    // else on stdout so the extension can parse it directly.
     if cli.lsp {
         let Some(src) = read_stdin() else {
             return ExitCode::from(2);
         };
-        // Disabled: report no diagnostics (which also means no "Format template"
-        // code action, since editors derive it from these).
         let diags = if settings.enabled {
             format::diagnose(&src, opts)
         } else {
@@ -96,7 +65,6 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
-    // CLI (--dirs): disabled means format nothing at all.
     if !settings.enabled {
         return ExitCode::SUCCESS;
     }
@@ -129,8 +97,6 @@ fn main() -> ExitCode {
         }
         changed += 1;
         if cli.demo {
-            // Report as a successful fix, but write nothing and print no diff -
-            // the "after" success view, leaving the demo files untouched.
         } else if write {
             if std::fs::write(path, &result.output).is_err() {
                 eprintln!(
@@ -155,8 +121,6 @@ fn main() -> ExitCode {
         files: files.len(),
     };
 
-    // Dry-run borrows the fix-mode summary ("✓ formatted N files") and clean exit,
-    // without having written anything.
     let report_as_fix = write || cli.demo;
 
     print!("{}", report::banner(&palette));
@@ -172,7 +136,6 @@ fn main() -> ExitCode {
     }
 }
 
-/// Read all of stdin, or print an error and return `None` on failure.
 fn read_stdin() -> Option<String> {
     let mut src = String::new();
     if std::io::Read::read_to_string(&mut std::io::stdin(), &mut src).is_err() {
@@ -182,7 +145,6 @@ fn read_stdin() -> Option<String> {
     Some(src)
 }
 
-/// Expand dirs/globs into a sorted, de-duplicated list of `.ts`/`.js` files.
 fn collect_files(patterns: &[String]) -> Vec<PathBuf> {
     let mut files = Vec::new();
     for pattern in patterns {

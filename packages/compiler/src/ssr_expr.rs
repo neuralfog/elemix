@@ -1,22 +1,3 @@
-//! SSR lowering of a directive / nested-template content-hole expression.
-//!
-//! A non-text content hole (`repeat`/`when`/`choose`/`match`, a ternary over
-//! `` tpl`…` ``, or a bare nested `` tpl`…` ``) can't reach the server as-is: the
-//! directives are compile-time markers that throw at runtime, and a nested `tpl`
-//! would otherwise be lowered to the CSR `$__clone` DOM builder (which has no DOM
-//! server-side). This pass rewrites the expression into a STRING-producing one:
-//!
-//!   * each directive callee `repeat`/`when`/`choose`/`match` → its string
-//!     builder `$__ssrRepeat`/`$__ssrWhen`/`$__ssrChoose`/`$__ssrMatch`;
-//!   * each nested `` tpl`…` `` → its SSR string literal (via
-//!     [`crate::template::parse::ssr_nested_tpl`], which recurses back here for
-//!     that template's own content holes).
-//!
-//! Everything else in the expression is preserved verbatim, so the callbacks,
-//! conditions and member accesses run exactly as written - only now producing
-//! strings. A component reached through a directive still lowers to `$__ssrChild`
-//! (the nested-`tpl` serializer emits it), so it SSRs and self-hydrates.
-
 use crate::template::parse::ssr_nested_tpl;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{CallExpression, Expression, TaggedTemplateExpression};
@@ -24,8 +5,6 @@ use oxc_ast_visit::{walk, Visit};
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
 
-/// (`directive`, its SSR string-builder). `match` has two arities; the builder
-/// dispatches on `arguments.length` at runtime, so one name covers both.
 const DIRECTIVES: &[(&str, &str)] = &[
     ("repeat", "$__ssrRepeat"),
     ("when", "$__ssrWhen"),
@@ -70,9 +49,6 @@ impl<'a> Visit<'a> for Rewriter<'_> {
                     end: it.span.end as usize,
                     repl,
                 });
-                // The nested template is fully serialized (its own content holes
-                // recurse through `rewrite_content_expr`), so do NOT walk into it -
-                // that would double-process the same source.
                 return;
             }
         }
@@ -90,14 +66,10 @@ impl<'a> Visit<'a> for Rewriter<'_> {
                 });
             }
         }
-        // Walk the arguments: the callbacks hold the `tpl` templates to serialize.
         walk::walk_call_expression(self, it);
     }
 }
 
-/// Rewrite one content-hole expression to a string-producing expression. Wraps in
-/// parens so the parse always yields a single expression; the parens are harmless
-/// in the `${…}` emit site and keep the result a valid grouped expression.
 pub fn rewrite_content_expr(expr: &str) -> String {
     let wrapped = format!("({expr})");
     let allocator = Allocator::default();

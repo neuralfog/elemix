@@ -43,4 +43,3 @@ export class SignalButtons extends Component {
         <button @click=${this.inc}>+</button>
     </div>`;
 }
-

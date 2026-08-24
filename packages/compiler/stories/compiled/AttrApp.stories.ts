@@ -14,25 +14,19 @@ export const Default = {
         if (!link || !badge || !secret)
             throw new Error('attr-app missing link/badge/secret');
 
-        // buttons in DOM order: next user, rename, toggle secret
         const buttons = query('button', canvasElement);
         const nextBtn = buttons[0];
         const renameBtn = buttons[1];
         const toggleBtn = buttons[2];
 
-        // --- initial: userId 1, label Ada, collapsed false ---
         expect(link.textContent?.trim()).toBe('Open profile #1');
-        // interpolated href attr + title attr (both bound to state)
         expect(link.getAttribute('href')).toBe('/users/1');
         expect(link.getAttribute('title')).toBe('Ada');
-        // badge text + data-* / aria-* attrs
         expect(badge.textContent?.trim()).toBe('Ada');
         expect(badge.getAttribute('data-count')).toBe('1');
         expect(badge.getAttribute('aria-label')).toBe('Ada');
-        // collapsed=false -> hidden boolean attr absent (content visible)
         expect(secret.hasAttribute('hidden')).toBe(false);
 
-        // --- next user: userId 1 -> 2 -> 3, href/data-count/text all track it ---
         click(nextBtn);
         expect(link.textContent?.trim()).toBe('Open profile #2');
         expect(link.getAttribute('href')).toBe('/users/2');
@@ -42,18 +36,15 @@ export const Default = {
         expect(link.getAttribute('href')).toBe('/users/3');
         expect(badge.getAttribute('data-count')).toBe('3');
 
-        // --- rename: Ada -> Grace (title + aria-label + badge text) ---
         click(renameBtn);
         expect(badge.textContent?.trim()).toBe('Grace');
         expect(badge.getAttribute('aria-label')).toBe('Grace');
         expect(link.getAttribute('title')).toBe('Grace');
-        // rename back: Grace -> Ada
         click(renameBtn);
         expect(badge.textContent?.trim()).toBe('Ada');
         expect(badge.getAttribute('aria-label')).toBe('Ada');
         expect(link.getAttribute('title')).toBe('Ada');
 
-        // --- toggle secret: boolean attr presence flips both directions ---
         click(toggleBtn);
         expect(secret.hasAttribute('hidden')).toBe(true);
         click(toggleBtn);

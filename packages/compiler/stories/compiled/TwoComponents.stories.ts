@@ -15,8 +15,6 @@ export const Default = {
         const second = find<HTMLButtonElement>('.second', secondHost ?? canvasElement);
         if (!first || !second) throw new Error('both widgets must render');
 
-        // Two components defined in ONE file — each compiled to its own view(),
-        // registered under its own tag, reacting independently.
         expect(first.textContent).toBe('1');
         click(first);
         expect(first.textContent).toBe('2');
@@ -25,7 +23,6 @@ export const Default = {
         click(second);
         expect(second.textContent).toBe('bye');
 
-        // and the first is untouched by the second's update
         expect(first.textContent).toBe('2');
     },
 };

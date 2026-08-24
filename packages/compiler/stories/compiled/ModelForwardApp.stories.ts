@@ -8,9 +8,6 @@ export default { title: 'Compiled/ModelForwardApp' };
 export const Default = {
     render: () => '<model-forward-app></model-forward-app>',
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-        // The ref lives in the parent (#state) and is forwarded into the child
-        // via a :model prop; the child binds it with ~model. Typing in the child
-        // input must flow back up to the parent's readout.
         const input = query<HTMLInputElement>('input', canvasElement)[0];
         const out = query('.out', canvasElement)[0];
         if (!input || !out)

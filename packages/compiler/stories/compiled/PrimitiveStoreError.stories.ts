@@ -1,9 +1,6 @@
 import { expect } from '@neuralfog/elemix-testing-library';
 import { find } from '@neuralfog/elemix-testing-library/query';
 
-// A module-level primitive `#state` is a compile-time ERROR — inlined as a
-// module-scope `throw`. We import the compiled module INSIDE the play function
-// so the throw is catchable; a top-level import would crash the story module.
 export default { title: 'Compiled/PrimitiveStoreError' };
 
 export const InlinedError = {
@@ -12,7 +9,6 @@ export const InlinedError = {
     play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
         let caught: Error | null = null;
         try {
-            // Evaluating PrimitiveStoreError.ts runs its inlined `throw`.
             await import('./.emited/PrimitiveStoreError');
         } catch (e) {
             caught = e as Error;
@@ -22,7 +18,6 @@ export const InlinedError = {
         expect(caught?.message).toContain(
             '[elemix] module-level `#state` must be an object',
         );
-        // and it points the user at the fix
         expect(caught?.message).toContain('export const store = { count: 0 };');
 
         const pre = find('[data-testid="msg"]', canvasElement);

@@ -34,10 +34,7 @@ describe(`Vendored bundle (elemix-v${pkg.version}.js)`, () => {
         let mod: Record<string, unknown>;
 
         beforeAll(async () => {
-            mod = (await import(/* @vite-ignore */ bundleUrl)) as Record<
-                string,
-                unknown
-            >;
+            mod = (await import(bundleUrl)) as Record<string, unknown>;
         });
 
         const required = [

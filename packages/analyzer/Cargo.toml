@@ -23,3 +23,14 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 lsp-server = "0.7"
 lsp-types = "0.97"
+
+[dev-dependencies]
+proptest = "1.11.0"
+
+[lints.clippy]
+uninlined_format_args = "warn"
+semicolon_if_nothing_returned = "warn"
+redundant_closure_for_method_calls = "warn"
+explicit_iter_loop = "warn"
+map_unwrap_or = "warn"
+unnested_or_patterns = "warn"

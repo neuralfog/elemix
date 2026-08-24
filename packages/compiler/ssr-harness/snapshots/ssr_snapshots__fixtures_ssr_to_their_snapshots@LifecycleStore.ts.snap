@@ -1,14 +1,13 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 15
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/LifecycleStore.ts
 ---
-import { $__scopedStore } from '@neuralfog/elemix/ssr-runtime';
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime';
 
 export type LogEntry = { id: number; event: string };
 
-export const log = $__scopedStore<{ entries: LogEntry[] }>(() => ({ entries: [] }));
+export const log = $__moduleState<{ entries: LogEntry[] }>(() => ({ entries: [] }));
 
 let seq = 0;
 

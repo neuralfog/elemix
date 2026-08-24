@@ -43,4 +43,3 @@ export class CounterApp extends Component {
     template = (): Template =>
         tpl`<button @click=${this.increment}>count is ${this.state.count}</button>`;
 }
-

@@ -53,4 +53,3 @@ export class StoreApp extends Component {
         <store-controls :counter=${this.state.counter} />
     `;
 }
-

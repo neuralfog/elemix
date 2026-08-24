@@ -1,14 +1,3 @@
-/**
- * Render-cost harness (compile-only runtime). Runs in isolation via:
- *   pnpm render-cost
- * Mounts a real compiled-style Component — a hand-written view() using the very
- * primitives the compiler emits (template/clone/_list/_text/_class/_attr) — and
- * drives every mutation through reactive state (cmp.state.data.push/splice/…).
- * It reports, per operation, the work the fine-grained runtime actually does:
- * row builders invoked, text/attr writes, and DOM node ops. The story is that
- * update/select/swap are O(changed) — zero row rebuilds, no hole re-reads — while
- * only create/clear are O(n). There is no interpreter, so nothing re-reads the DOM.
- */
 import { test } from 'vitest';
 import { Component } from './src/component/Component';
 import {

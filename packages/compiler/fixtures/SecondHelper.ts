@@ -1,9 +1,6 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
-// Two components — the SECOND one uses a helper template (`this.heading()`).
-// Splice must inline helpers for every class, not just the first, or the
-// non-first component's `${this.heading()}` never gets inlined.
 
 // #component
 export class PlainNote extends Component {

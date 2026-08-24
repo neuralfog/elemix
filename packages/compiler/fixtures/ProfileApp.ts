@@ -66,4 +66,3 @@ export class ProfileApp extends Component {
         />
     `;
 }
-

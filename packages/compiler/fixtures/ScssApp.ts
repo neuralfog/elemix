@@ -1,8 +1,5 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
-// Vite compiles the `.scss` and `?inline` hands back the CSS as a string, which
-// the instance reassigns to a `#styles` field — so `sheet()` adopts it the same
-// way it would an inline `const css = \`…\``. The compiler never sees the import.
 import css from './ScssApp.scss?inline';
 
 type State = {

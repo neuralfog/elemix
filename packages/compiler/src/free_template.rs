@@ -1,14 +1,6 @@
-//! Lower free-standing `tpl` templates — any `` tpl`...` `` that is not a
-//! component's `template` member — into an inline IIFE returning a
-//! `DocumentFragment`, wiring the same runtime bindings a compiled `view()` gets.
-//! This is what lets a Storybook `render` (or any helper) mount a component with
-//! `:props`/`@event`/`~model` and no wrapper.
-//!
-//! Runs after `rewrite`, so the only `tpl` left in the module are the free ones;
-//! a nested `tpl` inside a hole is lowered by the codegen from its parent.
-
 use crate::codegen::generate_free;
 use crate::emit::TsEmitter;
+use crate::lower::{apply_edits, trailing_newline};
 use crate::rewrite::runtime_import;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
@@ -19,7 +11,6 @@ use oxc_ast_visit::{walk, Visit};
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
 
-/// One free template: its full `tpl`…`` span and the template's statics + holes.
 struct Free {
     span: (usize, usize),
     statics: Vec<String>,
@@ -53,8 +44,6 @@ impl<'a> Visit<'a> for Finder<'_> {
                     statics,
                     holes,
                 });
-                // Outermost-only: a nested `tpl` lives inside this one's holes and
-                // is lowered by the codegen from there.
                 return;
             }
         }
@@ -62,15 +51,6 @@ impl<'a> Visit<'a> for Finder<'_> {
     }
 }
 
-/// Replace every free `tpl`…`` with an inline IIFE, hoist the shared consts +
-/// runtime import to the top, and drop the now-unused `tpl` from the main import.
-/// A module with no free template passes through unchanged.
-///
-/// `ssr = true` (the `--ssr` build): a free template lowers to `$__ssrTpl(`…`)` -
-/// a STRING descriptor - instead of a DOM-cloning IIFE, so a free template used as
-/// data (`{ icon: () => tpl`…` }`) and reached through a content hole renders
-/// server-side. `$__ssrText` unwraps the descriptor to raw HTML. The client build
-/// (`--hydrate`, `ssr = false`) keeps the DOM IIFE so the same free template mounts.
 pub fn lower(source: &str, ssr: bool) -> String {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
@@ -84,8 +64,6 @@ pub fn lower(source: &str, ssr: bool) -> String {
         return source.to_string();
     }
 
-    // The `@neuralfog/elemix` import loses `tpl` once every use is lowered (unless
-    // `rewrite` already dropped it for a component in the same file).
     let mut main_import: Option<(usize, usize, Vec<String>)> = None;
     for stmt in &ret.program.body {
         if let Statement::ImportDeclaration(import) = stmt {
@@ -103,8 +81,6 @@ pub fn lower(source: &str, ssr: bool) -> String {
         }
     }
 
-    // Drop `tpl` from the main import once every use is lowered (shared by both
-    // modes).
     let drop_tpl = |edits: &mut Vec<(usize, usize, String)>| {
         if let Some((s, e, remaining)) = &main_import {
             if remaining.is_empty() {
@@ -123,20 +99,8 @@ pub fn lower(source: &str, ssr: bool) -> String {
         }
     };
 
-    let apply = |edits: Vec<(usize, usize, String)>| {
-        let mut edits = edits;
-        edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
-        let mut out = source.to_string();
-        for (start, end, repl) in edits {
-            out.replace_range(start..end, &repl);
-        }
-        out
-    };
+    let apply = |edits: Vec<(usize, usize, String)>| apply_edits(source, edits);
 
-    // SSR: each free template becomes a `$__ssrTpl(...)` rope descriptor (which
-    // `ssr_nested_tpl` already emits). No DOM consts to hoist; the `$__ssrTpl`
-    // import is added by the SSR-runtime import pass. `view()` in the same
-    // (server) bundle is dead code.
     if ssr {
         let mut edits: Vec<(usize, usize, String)> = Vec::new();
         for f in &finder.out {
@@ -160,8 +124,6 @@ pub fn lower(source: &str, ssr: bool) -> String {
     for (f, body) in finder.out.iter().zip(&bodies) {
         edits.push((f.span.0, f.span.1, format!("(() => {{\n{body}}})()")));
     }
-    // ESM hoists imports, so the runtime import + hoisted consts sit safely at the
-    // top ahead of the user's own imports.
     edits.push((0, 0, format!("{import_line}\n{decls}")));
     drop_tpl(&mut edits);
     apply(edits)
@@ -182,8 +144,4 @@ fn import_names(import: &ImportDeclaration) -> Vec<String> {
             _ => None,
         })
         .collect()
-}
-
-fn trailing_newline(source: &str, at: usize) -> usize {
-    usize::from(source[at..].starts_with('\n'))
 }

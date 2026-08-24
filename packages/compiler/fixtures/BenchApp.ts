@@ -142,4 +142,3 @@ export class BenchApp extends Component {
         </table>
     `;
 }
-

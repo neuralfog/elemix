@@ -1,10 +1,4 @@
-//! Stage: lower pragma-tagged declarations into runtime wiring.
-//!
-//! Strip every pragma comment, then: for each class apply `#component`/`#tag`/
-//! `#form` + its `#styles` fields (inline the value into `sheet(...)`, strip the
-//! field, wire `__sheets`); rewrite every `#state` declaration's initializer to
-//! `state<T>(…)` and splice `state` into the `@neuralfog/elemix` import.
-
+use crate::lower::{apply_edits, trailing_newline};
 use crate::pragma::locate::{locate, LocateError};
 use crate::pragma::{kebab, resolve, PragmaError};
 use std::collections::HashMap;
@@ -52,26 +46,16 @@ impl std::fmt::Display for ExpandError {
     }
 }
 
-/// Expand every pragma in `source`. Identity when there are none.
 pub fn expand(source: &str) -> Result<String, ExpandError> {
     expand_mode(source, false, false, false)
 }
 
-/// True when a component can hydrate WITHOUT its props being present, so
-/// `$__ssrChild` may omit `data-h`. Safe only if EVERY `this.props` in the class
-/// body is a bare terminal read `this.props.<ident>`; a dereference
-/// (`this.props.x.y`, `.x()`, `.x[...]`, `.x?.`) or any non-`.<ident>` use would
-/// throw on `undefined` at hydrate time (before the writer's hydration no-op is
-/// reached) if the parent hasn't bound props yet. Conservative: any ambiguity
-/// returns false (keep `data-h`) - never a false "safe".
 fn props_safe(body: &str) -> bool {
     let key = "this.props";
     let mut base = 0;
     while let Some(rel) = body[base..].find(key) {
         let pos = base + rel;
         base = pos + key.len();
-        // Skip a false match inside a larger identifier / member chain
-        // (`xthis.props`, `foo.this.props`) - not the real `this`.
         if pos > 0 {
             let prev = body[..pos].chars().next_back().unwrap();
             if prev.is_alphanumeric() || prev == '_' || prev == '$' || prev == '.' {
@@ -80,7 +64,7 @@ fn props_safe(body: &str) -> bool {
         }
         let rest = &body[base..];
         if !rest.starts_with('.') {
-            return false; // bare `this.props`, `this.props?.`, `this.props[`
+            return false;
         }
         let ident = &rest[1..];
         let end = ident
@@ -88,11 +72,10 @@ fn props_safe(body: &str) -> bool {
             .find(|(_, c)| !(c.is_alphanumeric() || *c == '_' || *c == '$'))
             .map_or(ident.len(), |(i, _)| i);
         if end == 0 {
-            return false; // `this.props.` with no identifier
+            return false;
         }
-        match ident[end..].chars().next() {
-            Some('.') | Some('(') | Some('[') | Some('?') | Some('`') => return false,
-            _ => {}
+        if let Some('.' | '(' | '[' | '?' | '`') = ident[end..].chars().next() {
+            return false;
         }
     }
     true
@@ -105,16 +88,7 @@ pub fn expand_mode(
     minify: bool,
 ) -> Result<String, ExpandError> {
     let located = locate(source).map_err(|e| ExpandError::Locate(e.err))?;
-    let no_pragmas = located.states.is_empty()
-        && located.classes.iter().all(|c| {
-            c.directives.is_empty()
-                && c.styles.is_empty()
-                && c.document_field.is_none()
-                && c.effects.is_empty()
-                && c.before_mounts.is_empty()
-                && c.mounts.is_empty()
-                && c.disposes.is_empty()
-        });
+    let no_pragmas = located.states.is_empty() && located.classes.iter().all(|c| !c.has_pragmas());
     if no_pragmas {
         return Ok(source.to_string());
     }
@@ -126,85 +100,42 @@ pub fn expand_mode(
     let mut needs_define = false;
     let mut needs_effect = false;
 
-    // Strip every pragma comment (its whole line, incl. indentation + newline).
     for (s, e) in &located.strips {
         let end = e + trailing_newline(source, *e);
         edits.push((*s, end, String::new()));
     }
 
-    // #state → wrap each initializer in `state<T>(…)`. In the SSR build a
-    // MODULE-level `#state` (a shared store) instead lowers to `$__scopedStore(() =>
-    // (…))`: a proxy that resolves to a FRESH per-request instance from the current
-    // render scope (`$__runStores`), so one request's writes never bleed into the
-    // next through the server-process module singleton. `$__scopedStore` comes from
-    // the SSR runtime (added by `add_ssr_runtime_import`), so it is never imported
-    // here; component `#state` stays `$__state` from /runtime.
     for st in &located.states {
-        // `#store` already lowers to `$__store(…)` (per-request-scoped internally),
-        // so it needs no SSR `$__scopedStore` rewrite — only module `#state` does.
-        let repl = if st.module && st.store_name.is_none() {
-            if ssr {
-                scoped_store(&st.repl)
-            } else if hydrate {
-                module_state(&st.repl)
-            } else {
-                st.repl.clone()
-            }
+        let repl = if st.module && st.store_name.is_none() && (ssr || hydrate) {
+            wrap_module(&st.repl)
         } else {
             st.repl.clone()
         };
         edits.push((st.start, st.end, repl));
     }
-    // Component `#state`, plus a PLAIN-CSR (non-hydrate, non-SSR) module `#state`,
-    // keep `$__state` from `/runtime`. A module `#state` only becomes reset-capable
-    // (`$__moduleState`) on the hydrate build, where a soft-nav can call
-    // `$__resetModuleStates()`; a pure-CSR app has no such boundary and stays a
-    // plain singleton (and never pulls `/ssr-runtime/client`).
     let needs_state = located
         .states
         .iter()
         .any(|st| st.store_name.is_none() && (!st.module || (!ssr && !hydrate)));
-    // A HYDRATE module `#state` lowers to `$__moduleState`, pulled from
-    // `/ssr-runtime/client` (the client half of the SSR runtime — request-boundary
-    // machinery, NOT the cookie `#store`). Emitted here in the pragma pass so it
-    // rides the same output whether or not the hydrate post-pass runs.
     let needs_module_state = hydrate
         && located
             .states
             .iter()
             .any(|st| st.store_name.is_none() && st.module);
-    // `#store` pulls `$__store` from `/runtime` in the CSR build; the SSR build
-    // gets it from `/ssr-runtime` via `add_ssr_runtime_import` (scans the output).
     let needs_store = !ssr && located.states.iter().any(|st| st.store_name.is_some());
-    // Accessor-form #state (bare primitives) also needs the reactive primitives
-    // `dep`/`track`/`trigger` to back the generated get/set pair.
     let needs_reactive = located.states.iter().any(|st| st.accessor);
 
     for class in &located.classes {
-        if class.directives.is_empty()
-            && class.styles.is_empty()
-            && class.document_field.is_none()
-            && class.effects.is_empty()
-            && class.before_mounts.is_empty()
-            && class.mounts.is_empty()
-            && class.disposes.is_empty()
-        {
+        if !class.has_pragmas() {
             continue;
         }
         let meta = resolve(&class.directives).map_err(ExpandError::Resolve)?;
 
-        // A component extending ANOTHER component (not the base `Component`) must
-        // chain through `super`: lifecycle hooks/effects would otherwise shadow
-        // the base's, and `__sheets` would replace rather than merge them.
         let inherits = class
             .super_class
             .as_deref()
             .is_some_and(|s| s != "Component");
 
-        // #styles fields → strip each, hoist a `sheet(<value>)` (deduped) + __sheets.
-        // Under #no-shadow there's no shadow root to adopt into, so skip the sheet
-        // entirely — strip only the marker comment, leave the field (keeping its
-        // value referenced) and emit nothing.
         let mut hoist = String::new();
         let mut sheet_vars: Vec<String> = Vec::new();
         for sf in &class.styles {
@@ -219,21 +150,18 @@ pub fn expand_mode(
                     let v = format!("_s{counter}");
                     counter += 1;
                     needs_sheet = true;
-                    // Behind --minify, shrink the sheet at compile time (resolvable
-                    // static literals only) so the client bundle ships collapsed
-                    // CSS - same treatment the SSR `<style data-ssr>` gets. Falls
-                    // back to the dynamic emit when the CSS isn't a static literal.
                     let value = if minify {
-                        crate::ssr_style::resolve_css(&sf.value, source)
-                            .map(|css| {
+                        crate::ssr_style::resolve_css(&sf.value, source).map_or_else(
+                            || sf.value.clone(),
+                            |css| {
                                 format!(
                                     "`{}`",
                                     crate::template::parse::esc_tpl(&crate::ssr_style::minify_css(
                                         &css
                                     ),)
                                 )
-                            })
-                            .unwrap_or_else(|| sf.value.clone())
+                            },
+                        )
                     } else {
                         sf.value.clone()
                     };
@@ -248,7 +176,6 @@ pub fn expand_mode(
             edits.push((class.start, class.start, hoist));
         }
 
-        // #form → static formAssociated inside the class body.
         if meta.form {
             edits.push((
                 class.body_open,
@@ -257,7 +184,6 @@ pub fn expand_mode(
             ));
         }
 
-        // #no-shadow → render to light DOM (the base skips attachShadow).
         if meta.no_shadow {
             edits.push((
                 class.body_open,
@@ -266,7 +192,6 @@ pub fn expand_mode(
             ));
         }
 
-        // #shadow → force a shadow root even when the app default is light DOM.
         if meta.shadow {
             edits.push((
                 class.body_open,
@@ -275,9 +200,6 @@ pub fn expand_mode(
             ));
         }
 
-        // #client → client-only: the server renders a bare host tag and skips this
-        // component's lifecycle; the flag lets the render path (`renderView` /
-        // `$__ssrChild`) short-circuit it server-side.
         if meta.client {
             edits.push((
                 class.body_open,
@@ -286,8 +208,6 @@ pub fn expand_mode(
             ));
         }
 
-        // #effect → a generated `effects()` hook the base runs (owned, disposed
-        // separately from the view) registering one effect per tagged method.
         if !class.effects.is_empty() {
             needs_effect = true;
             let sup = if inherits {
@@ -307,10 +227,6 @@ pub fn expand_mode(
             ));
         }
 
-        // #before-mount / #mount / #dispose → synthesize the lifecycle hook the
-        // base already invokes, calling each tagged method in source order. No
-        // runtime import: the base calls `beforeMount`/`onMount`/`onDispose` by
-        // name. Tagging many methods just adds more calls to the one hook.
         for (hook, methods) in [
             ("$$__beforeMount", &class.before_mounts),
             ("$$__onMount", &class.mounts),
@@ -323,8 +239,6 @@ pub fn expand_mode(
                 .iter()
                 .map(|name| format!("\n        this.{name}();"))
                 .collect();
-            // Chain the base hook when inheriting: setup runs base-first
-            // (super before own); teardown reverses (own before super).
             let body = if !inherits {
                 calls
             } else if hook == "$$__onDispose" {
@@ -339,7 +253,6 @@ pub fn expand_mode(
             ));
         }
 
-        // __sheets + $__defineComponent after the class.
         let mut after = String::new();
         if !sheet_vars.is_empty() {
             let spread = sheet_vars
@@ -348,8 +261,6 @@ pub fn expand_mode(
                 .collect::<Vec<_>>()
                 .join(", ");
             let name = &class.name;
-            // When inheriting, merge the base's sheets (read off the prototype at
-            // runtime) so the derived component adopts both — no cross-file lookup.
             if inherits {
                 after.push_str(&format!(
                     "\n{name}.$$__sheets = [...(Object.getPrototypeOf({name}).$$__sheets ?? []), {spread}];"
@@ -362,23 +273,11 @@ pub fn expand_mode(
             needs_define = true;
             let tag = meta.tag.unwrap_or_else(|| kebab(&class.name));
             after.push_str(&format!("\n$__defineComponent('{tag}', {});", class.name));
-            // Stamp the registered tag on the prototype so a subclass that inherits
-            // its ancestor's `$$__ssr()` (no own template) still server-renders with
-            // its OWN tag, read at runtime as `this.$$__tag`.
             after.push_str(&format!("\n{}.prototype.$$__tag = '{tag}';", class.name));
-            // SSR only: mark a component whose props NEVER get dereferenced at
-            // hydrate time (bare reads only). `$__ssrChild` then skips `data-h` for
-            // it - a hydrating parent re-supplies the props via `$__setProp`, and the
-            // DOM writers no-op during hydration so there is no flash. A component
-            // that dereferences a prop (`this.props.x.y`) would throw on `undefined`
-            // before the parent binds, so it keeps `data-h`. `#client` always keeps
-            // it (mounts fresh). Absence of the flag = keep `data-h` (safe default).
             if ssr && !meta.client && props_safe(&source[class.body_open..class.end]) {
                 after.push_str(&format!("\n{}.$$__propSafe = true;", class.name));
             }
         }
-        // Field-level `#document document = X`: strip the field, stamp the chosen
-        // document class as a static the SSR host reads to wrap this view.
         if let Some(df) = &class.document_field {
             edits.push((df.strip.0, df.strip.1, String::new()));
             after.push_str(&format!("\n{}.$$__document = {};", class.name, df.value));
@@ -427,41 +326,10 @@ pub fn expand_mode(
         ));
     }
 
-    // Apply back-to-front so earlier offsets stay valid; on a tie the wider
-    // replace applies first.
-    edits.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
-    let mut out = source.to_string();
-    for (start, end, repl) in edits {
-        out.replace_range(start..end, &repl);
-    }
-    Ok(out)
+    Ok(apply_edits(source, edits))
 }
 
-fn trailing_newline(source: &str, at: usize) -> usize {
-    usize::from(source[at..].starts_with('\n'))
-}
-
-/// Rewrite a module `#state` repl for the SSR build:
-/// ` = $__state<T>(INIT)` -> ` = $__scopedStore<T>(() => (INIT))`. The arrow keeps
-/// the initializer lazy so each request's render scope builds its own instance.
-fn scoped_store(repl: &str) -> String {
-    let s = repl.replacen("$__state", "$__scopedStore", 1);
-    match (s.find('('), s.rfind(')')) {
-        (Some(open), Some(close)) if open < close => {
-            format!("{}(() => ({}))", &s[..open], &s[open + 1..close])
-        }
-        _ => s,
-    }
-}
-
-/// Rewrite a module `#state` repl for the HYDRATE build:
-/// ` = $__state<T>(INIT)` -> ` = $__moduleState<T>(() => (INIT))`. Module `#state`
-/// is transient GLOBAL state (not a cookie `#store`): `$__moduleState` registers the
-/// factory so `$__resetModuleStates()` (called by hydris `navigate()` at each
-/// soft-nav boundary) rebuilds it fresh, mirroring the server's per-request scope.
-/// Only the hydrate build does this — a plain-CSR app has no nav boundary, so it
-/// keeps a plain `$__state` singleton and never pulls `/ssr-runtime/client`.
-fn module_state(repl: &str) -> String {
+fn wrap_module(repl: &str) -> String {
     let s = repl.replacen("$__state", "$__moduleState", 1);
     match (s.find('('), s.rfind(')')) {
         (Some(open), Some(close)) if open < close => {

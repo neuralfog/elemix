@@ -3,7 +3,6 @@ import { find } from '@neuralfog/elemix-testing-library/query';
 import init, { compile } from '../../pkg/elemix_compiler.js';
 import wasmUrl from '../../pkg/elemix_compiler_bg.wasm?url';
 
-// A real elemix component, compiled in the browser by the wasm build.
 const SOURCE = [
     "import { Component, tpl } from '@neuralfog/elemix';",
     '// #component',
@@ -32,14 +31,11 @@ export const CompilesInBrowser = {
         await ensureWasm();
         const out = compile(SOURCE);
 
-        // Show the compiled output live in the story.
         const pre = find('[data-testid="wasm-out"]', canvasElement);
         if (pre) pre.textContent = out;
 
-        // The wasm compiler ran in-browser and lowered the template:
         expect(out).toContain("from '@neuralfog/elemix/runtime'");
         expect(out).toContain('view()');
-        // ...the `tpl` tag is erased and its import stripped:
         expect(out).not.toContain('tpl`');
         expect(out).not.toContain('/directives');
     },

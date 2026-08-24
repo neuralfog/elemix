@@ -1,5 +1,3 @@
-//! elemix-compiler CLI.
-
 use clap::Parser;
 use elemix_compiler::codegen::codegen;
 use elemix_compiler::diagnostics::{Diagnostic, Severity};
@@ -16,37 +14,27 @@ use std::path::{Path, PathBuf};
 #[derive(Parser)]
 #[command(name = "elemix-compiler", about = "Compile elemix templates")]
 struct Cli {
-    /// Directories or globs of `.ts` files to scan.
     #[arg(long, num_args = 1..)]
     dirs: Vec<String>,
 
-    /// A single `.ts` file to process.
     #[arg(long)]
     file: Option<PathBuf>,
 
-    /// Emit compiled files into this directory. When unset, prints instead.
     #[arg(long)]
     out: Option<PathBuf>,
 
-    /// Read source from stdin and write the compiled `.ts` to stdout.
     #[arg(long)]
     stdin: bool,
 
-    /// Emit the server-render (SSR) code for every registered component.
-    /// Off by default.
     #[arg(long)]
     ssr: bool,
 
-    /// Emit the client-hydration code for every registered component.
-    /// Off by default.
     #[arg(long)]
     hydrate: bool,
 
-    /// Minify CSS in SSR mode.
     #[arg(long)]
     minify: bool,
 
-    /// Emit sourcemaps.
     #[arg(long)]
     sourcemap: bool,
 }
@@ -54,26 +42,12 @@ struct Cli {
 fn main() {
     let cli = Cli::parse();
 
-    // Pipe mode: source in on stdin, compiled `.ts` out on stdout. Drives the
-    // Vite plugin — one compile per module, no temp files. No banner here: this
-    // path is hot and machine-driven, stdout is reserved for compiled output.
     if cli.stdin {
         let mut source = String::new();
         io::stdin().read_to_string(&mut source).expect("read stdin");
-        // Dev path: never fail. Diagnostics are inlined into `code` (so they
-        // surface in the browser) and echoed to stderr (so they show in the
-        // Vite terminal); the compile always succeeds and HMR stays alive.
-        let (code, diags) = if cli.hydrate {
-            compile_hydrate(&source, cli.minify)
-        } else if cli.ssr {
-            compile_ssr(&source, cli.minify)
-        } else {
-            compile_diagnostics_mode(&source, false, false, cli.minify)
-        };
+        let (code, diags) = compile_dispatch(&source, cli.ssr, cli.hydrate, cli.minify);
         report(None, &diags);
         let payload = if cli.sourcemap {
-            // Machine envelope: the Vite plugin parses this and returns
-            // `{ code, map }` so the source-map chain is never severed.
             let map = line_map(&source, &code, "input.ts");
             format!("{{\"code\":{},\"map\":{map}}}", json_string(&code))
         } else {
@@ -92,11 +66,6 @@ fn main() {
         std::process::exit(2);
     }
 
-    // Build path: the compiler is a transform, not a gate. Every file compiles
-    // and is written best-effort, with any errors inlined as a runtime `throw`
-    // (and reported on stderr). Failing a build on an elemix error is the
-    // analyzer's / tsc's job, not this pass — so a bad component still emits and
-    // surfaces loudly at runtime instead of blocking the transform.
     for path in collect_ts_files(&cli.dirs) {
         process(
             &path,
@@ -121,8 +90,6 @@ fn main() {
     }
 }
 
-/// Print diagnostics to stderr (never stdout — that's reserved for compiled
-/// output / the pipe envelope). Errors red, warnings yellow.
 fn report(path: Option<&Path>, diags: &[Diagnostic]) {
     if diags.is_empty() {
         return;
@@ -144,16 +111,11 @@ fn report(path: Option<&Path>, diags: &[Diagnostic]) {
     }
 }
 
-/// Version embedded at build time, Go-`ldflags` style. The npm `build` script
-/// injects the authoritative `package.json` version as `ELEMIX_VERSION`; a bare
-/// `cargo build` falls back to the in-sync Cargo.toml version.
 const VERSION: &str = match option_env!("ELEMIX_VERSION") {
     Some(v) => v,
     None => env!("CARGO_PKG_VERSION"),
 };
 
-/// Branded startup banner, printed to stderr so it never mixes with compiled
-/// output or emit messages on stdout. Omitted in `--stdin` (pipe) mode.
 fn banner() {
     eprintln!();
     eprintln!("  \x1b[35m▐▌\x1b[0m  \x1b[1melemix\x1b[0m \x1b[2m·\x1b[0m template compiler");
@@ -187,10 +149,21 @@ fn process(
     }
 }
 
-/// Write the compiled source to `<dir>/<filename>`, plus a sidecar `.map` and a
-/// `sourceMappingURL` footer when `sourcemap` is set. Best-effort: the file is
-/// always written, with any error diagnostic inlined as a runtime `throw` (and
-/// reported on stderr) — the compiler is a transform, never a build gate.
+fn compile_dispatch(
+    source: &str,
+    ssr: bool,
+    hydrate: bool,
+    minify: bool,
+) -> (String, Vec<Diagnostic>) {
+    if hydrate {
+        compile_hydrate(source, minify)
+    } else if ssr {
+        compile_ssr(source, minify)
+    } else {
+        compile_diagnostics_mode(source, false, false, minify)
+    }
+}
+
 fn emit(
     dir: &Path,
     src: &Path,
@@ -203,13 +176,7 @@ fn emit(
     let name = src.file_name().expect("source has a file name");
     let dest = dir.join(name);
 
-    let (code, diags) = if hydrate {
-        compile_hydrate(source, minify)
-    } else if ssr {
-        compile_ssr(source, minify)
-    } else {
-        compile_diagnostics_mode(source, false, false, minify)
-    };
+    let (code, diags) = compile_dispatch(source, ssr, hydrate, minify);
     report(Some(src), &diags);
 
     fs::create_dir_all(dir).expect("create out dir");
