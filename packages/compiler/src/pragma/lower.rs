@@ -54,7 +54,7 @@ impl std::fmt::Display for ExpandError {
 
 /// Expand every pragma in `source`. Identity when there are none.
 pub fn expand(source: &str) -> Result<String, ExpandError> {
-    expand_mode(source, false, false)
+    expand_mode(source, false, false, false)
 }
 
 /// True when a component can hydrate WITHOUT its props being present, so
@@ -98,7 +98,12 @@ fn props_safe(body: &str) -> bool {
     true
 }
 
-pub fn expand_mode(source: &str, ssr: bool, minify: bool) -> Result<String, ExpandError> {
+pub fn expand_mode(
+    source: &str,
+    ssr: bool,
+    hydrate: bool,
+    minify: bool,
+) -> Result<String, ExpandError> {
     let located = locate(source).map_err(|e| ExpandError::Locate(e.err))?;
     let no_pragmas = located.states.is_empty()
         && located.classes.iter().all(|c| {
@@ -137,17 +142,37 @@ pub fn expand_mode(source: &str, ssr: bool, minify: bool) -> Result<String, Expa
     for st in &located.states {
         // `#store` already lowers to `$__store(…)` (per-request-scoped internally),
         // so it needs no SSR `$__scopedStore` rewrite — only module `#state` does.
-        let repl = if ssr && st.module && st.store_name.is_none() {
-            scoped_store(&st.repl)
+        let repl = if st.module && st.store_name.is_none() {
+            if ssr {
+                scoped_store(&st.repl)
+            } else if hydrate {
+                module_state(&st.repl)
+            } else {
+                st.repl.clone()
+            }
         } else {
             st.repl.clone()
         };
         edits.push((st.start, st.end, repl));
     }
+    // Component `#state`, plus a PLAIN-CSR (non-hydrate, non-SSR) module `#state`,
+    // keep `$__state` from `/runtime`. A module `#state` only becomes reset-capable
+    // (`$__moduleState`) on the hydrate build, where a soft-nav can call
+    // `$__resetModuleStates()`; a pure-CSR app has no such boundary and stays a
+    // plain singleton (and never pulls `/ssr-runtime/client`).
     let needs_state = located
         .states
         .iter()
-        .any(|st| st.store_name.is_none() && !(ssr && st.module));
+        .any(|st| st.store_name.is_none() && (!st.module || (!ssr && !hydrate)));
+    // A HYDRATE module `#state` lowers to `$__moduleState`, pulled from
+    // `/ssr-runtime/client` (the client half of the SSR runtime — request-boundary
+    // machinery, NOT the cookie `#store`). Emitted here in the pragma pass so it
+    // rides the same output whether or not the hydrate post-pass runs.
+    let needs_module_state = hydrate
+        && located
+            .states
+            .iter()
+            .any(|st| st.store_name.is_none() && st.module);
     // `#store` pulls `$__store` from `/runtime` in the CSR build; the SSR build
     // gets it from `/ssr-runtime` via `add_ssr_runtime_import` (scans the output).
     let needs_store = !ssr && located.states.iter().any(|st| st.store_name.is_some());
@@ -394,6 +419,13 @@ pub fn expand_mode(source: &str, ssr: bool, minify: bool) -> Result<String, Expa
             ),
         ));
     }
+    if needs_module_state {
+        edits.push((
+            0,
+            0,
+            "import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';\n".to_string(),
+        ));
+    }
 
     // Apply back-to-front so earlier offsets stay valid; on a tie the wider
     // replace applies first.
@@ -414,6 +446,23 @@ fn trailing_newline(source: &str, at: usize) -> usize {
 /// the initializer lazy so each request's render scope builds its own instance.
 fn scoped_store(repl: &str) -> String {
     let s = repl.replacen("$__state", "$__scopedStore", 1);
+    match (s.find('('), s.rfind(')')) {
+        (Some(open), Some(close)) if open < close => {
+            format!("{}(() => ({}))", &s[..open], &s[open + 1..close])
+        }
+        _ => s,
+    }
+}
+
+/// Rewrite a module `#state` repl for the HYDRATE build:
+/// ` = $__state<T>(INIT)` -> ` = $__moduleState<T>(() => (INIT))`. Module `#state`
+/// is transient GLOBAL state (not a cookie `#store`): `$__moduleState` registers the
+/// factory so `$__resetModuleStates()` (called by hydris `navigate()` at each
+/// soft-nav boundary) rebuilds it fresh, mirroring the server's per-request scope.
+/// Only the hydrate build does this — a plain-CSR app has no nav boundary, so it
+/// keeps a plain `$__state` singleton and never pulls `/ssr-runtime/client`.
+fn module_state(repl: &str) -> String {
+    let s = repl.replacen("$__state", "$__moduleState", 1);
     match (s.find('('), s.rfind(')')) {
         (Some(open), Some(close)) if open < close => {
             format!("{}(() => ({}))", &s[..open], &s[open + 1..close])

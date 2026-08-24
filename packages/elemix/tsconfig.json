@@ -7,6 +7,7 @@
         "index.ts",
         "runtime.ts",
         "ssr-runtime.ts",
+        "ssr-runtime-client.ts",
         "directives.ts",
         "utilities.ts",
         "src/component",

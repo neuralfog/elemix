@@ -50,7 +50,7 @@ pub fn compile(source: &str) -> String {
 /// Like [`compile`], but also returns the diagnostics it inlined so a build
 /// front-end can report them (and fail fast on errors).
 pub fn compile_diagnostics(source: &str) -> (String, Vec<Diagnostic>) {
-    compile_diagnostics_mode(source, false, false)
+    compile_diagnostics_mode(source, false, false, false)
 }
 
 /// The shared CSR pipeline, with `ssr` selecting how free `tpl` templates lower:
@@ -59,13 +59,14 @@ pub fn compile_diagnostics(source: &str) -> (String, Vec<Diagnostic>) {
 pub fn compile_diagnostics_mode(
     source: &str,
     ssr: bool,
+    hydrate: bool,
     minify: bool,
 ) -> (String, Vec<Diagnostic>) {
     let spliced = splice::inline_helpers(source);
     let diags = pragma::diagnose::collect(&spliced);
     // Best-effort transform: a pragma error makes `expand` bail, so the
     // pragmas pass through unexpanded — the inlined `throw` is what surfaces it.
-    let expanded = pragma::expand_mode(&spliced, ssr, minify).unwrap_or(spliced);
+    let expanded = pragma::expand_mode(&spliced, ssr, hydrate, minify).unwrap_or(spliced);
     let lowered = free_template::lower(&rewrite::rewrite(&expanded), ssr);
     let compiled = imports::merge_runtime_imports(&lowered);
     let out = diagnostics::inline(&compiled, &diags);
@@ -148,7 +149,7 @@ pub fn compile_ssr(source: &str, minify: bool) -> (String, Vec<Diagnostic>) {
         injected.insert_str(at, &text);
     }
 
-    let (out, diags) = compile_diagnostics_mode(&injected, true, minify);
+    let (out, diags) = compile_diagnostics_mode(&injected, true, false, minify);
     (imports::add_ssr_runtime_import(&out), diags)
 }
 
@@ -195,7 +196,7 @@ pub fn compile_hydrate(source: &str, minify: bool) -> (String, Vec<Diagnostic>) 
         injected = format!("{decls}\n{injected}");
     }
 
-    let (out, diags) = compile_diagnostics_mode(&injected, false, minify);
+    let (out, diags) = compile_diagnostics_mode(&injected, false, true, minify);
     (imports::add_hydrate_runtime_import(&out), diags)
 }
 

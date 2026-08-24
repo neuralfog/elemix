@@ -418,10 +418,39 @@ fn state_without_an_annotation_infers() {
 }
 
 #[test]
-fn state_works_on_a_module_const() {
+fn module_state_stays_a_plain_state_singleton_in_plain_csr() {
+    // Plain CSR has no soft-nav boundary, so a module `#state` keeps a plain
+    // `$__state` singleton — no reset machinery, and never pulls `/ssr-runtime/client`.
     let src = "import { Component } from '@neuralfog/elemix';\n// #state\nexport const cart: CartState = { items: [] };\nclass Foo extends Component {}";
     let out = expand(src).unwrap();
     assert!(out.contains("export const cart = $__state<CartState>({ items: [] });"));
+    assert!(!out.contains("$__moduleState"));
+    assert!(!out.contains("ssr-runtime/client"));
+}
+
+#[test]
+fn module_state_lowers_to_module_state_in_the_hydrate_build() {
+    // The hydrate build makes module `#state` reset-capable: `$__moduleState` from
+    // `/ssr-runtime/client`, so hydris `navigate()` can rebuild it fresh per soft-nav.
+    let src = "// #state\nexport const cart = { items: [] };";
+    let (code, _) = elemix_compiler::compile_hydrate(src, false);
+    assert!(code.contains("$__moduleState(() => ({ items: [] }))"));
+    assert!(code.contains("from '@neuralfog/elemix/ssr-runtime/client'"));
+    assert!(!code.contains("$__scopedStore"));
+}
+
+#[test]
+fn module_state_lowers_to_scoped_store_in_ssr() {
+    // The SSR build keeps its per-request scope proxy — reset would poison concurrent
+    // requests. Only the client (single-threaded) rebuilds via `$__moduleState`.
+    let src = "// #state\nexport const cart: CartState = { items: [] };";
+    let staged = expand_mode(src, true, false, false).unwrap();
+    assert!(
+        staged.contains("export const cart = $__scopedStore<CartState>(() => ({ items: [] }));")
+    );
+    assert!(!staged.contains("$__moduleState"));
+    let (code, _) = elemix_compiler::compile_ssr(src, false);
+    assert!(code.contains("import { $__scopedStore } from '@neuralfog/elemix/ssr-runtime';"));
 }
 
 #[test]
@@ -548,7 +577,7 @@ fn store_is_imported_from_ssr_runtime_in_the_ssr_build() {
     // `$__store` is isomorphic (it scopes per-request itself), so the repl is the
     // same in SSR — only the import source differs (no `$__scopedStore` rewrite).
     let src = "// #store user-prefs\nexport const prefs = { theme: 'system' };";
-    let staged = expand_mode(src, true, false).unwrap();
+    let staged = expand_mode(src, true, false, false).unwrap();
     assert!(staged
         .contains("export const prefs = $__store('user-prefs', () => ({ theme: 'system' }));"));
     assert!(!staged.contains("$__scopedStore"));

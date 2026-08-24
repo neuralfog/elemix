@@ -81,6 +81,8 @@ import { NavHomeApp } from '../../nav/NavHomeApp';
 import { NavAboutApp } from '../../nav/NavAboutApp';
 import { NavStoreAApp } from '../../nav/NavStoreAApp';
 import { NavStoreBApp } from '../../nav/NavStoreBApp';
+import { NavStateAApp } from '../../nav/NavStateAApp';
+import { NavStateBApp } from '../../nav/NavStateBApp';
 
 export class TestController {
     counterApp(): Reply {
@@ -101,6 +103,14 @@ export class TestController {
 
     navStoreB(): Reply {
         return Reply.view(NavStoreBApp);
+    }
+
+    navStateA(): Reply {
+        return Reply.view(NavStateAApp);
+    }
+
+    navStateB(): Reply {
+        return Reply.view(NavStateBApp);
     }
 
     documentPageApp(): Reply {

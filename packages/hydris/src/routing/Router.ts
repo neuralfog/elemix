@@ -10,6 +10,7 @@ import {
     MethodNotAllowedException,
     NotFoundException,
 } from '../error/HttpException';
+import { compressDynamic } from '../http/compression';
 import { resolveIp, resolveProtocol } from '../http/proxy';
 import { type HandlerResult, toResponse } from '../http/Reply';
 import { Request } from '../http/Request';
@@ -213,9 +214,15 @@ export class Router {
                 : this.globalMiddlewares;
 
         try {
-            return await Pipeline.run(req, scope, globals, core, onError);
+            return await compressDynamic(
+                await Pipeline.run(req, scope, globals, core, onError),
+                req,
+            );
         } catch (error) {
-            return this.failure(error, req, def, scope);
+            return compressDynamic(
+                await this.failure(error, req, def, scope),
+                req,
+            );
         } finally {
             try {
                 const disposal = scope.dispose();

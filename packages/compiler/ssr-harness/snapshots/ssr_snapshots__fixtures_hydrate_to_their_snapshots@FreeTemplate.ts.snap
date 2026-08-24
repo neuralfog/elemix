@@ -1,15 +1,16 @@
 ---
-source: ssr-tests/ssr_snapshots.rs
-expression: compile_hydrate(&source).0
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/FreeTemplate.ts
 ---
-import { $__template, $__clone, $__model, $__effect, $__setProp, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__model, $__effect, $__setProp } from '@neuralfog/elemix/runtime';
 const _ft0 = $__template('<label>Name <input type="text"/></label><profile-card></profile-card>');
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';
 import { ref } from '@neuralfog/elemix';
 
 import './ProfileCard';
 
-export const store = $__state({ name: ref('Ada Lovelace'), likes: 0 });
+export const store = $__moduleState(() => ({ name: ref('Ada Lovelace'), likes: 0 }));
 
 export const render = () => (() => {
 const _r0 = $__clone(_ft0);

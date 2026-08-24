@@ -1,3 +1,5 @@
+import { $__resetModuleStates } from '@neuralfog/elemix/ssr-runtime/client';
+
 type UnsafeBody = { setHTMLUnsafe(html: string): void };
 type NavWindow = Window & { __hydrisNav?: boolean };
 
@@ -80,6 +82,7 @@ const mergeHead = (incoming: HTMLHeadElement): void => {
 let inflight: AbortController | undefined;
 
 const swap = async (html: string): Promise<void> => {
+    $__resetModuleStates();
     const incoming = new DOMParser().parseFromString(html, 'text/html');
     mergeHead(incoming.head);
 

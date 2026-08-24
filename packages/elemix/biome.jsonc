@@ -18,6 +18,13 @@
             "!**/coverage/**/*"
         ]
     },
+    "linter": {
+        "rules": {
+            "suspicious": {
+                "noDocumentCookie": "off"
+            }
+        }
+    },
     "overrides": [
         {
             "includes": ["**/*.test.ts", "**/*.harness.ts"],

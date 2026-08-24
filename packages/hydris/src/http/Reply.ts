@@ -7,12 +7,12 @@ import {
     resetConfigScript,
     resetDocumentStyle,
 } from '../render/reset';
+import { resolveClientBundle } from '../render/client';
 import {
     getDefaultDocument,
     renderView,
     type ViewClass,
 } from '../render/render';
-import { getAssetVersion } from '../render/version';
 import { type CookieOptions, parseCookies, serializeCookie } from './Cookie';
 
 type ViewData<V> = V extends new () => Component<unknown, infer D> ? D : never;
@@ -48,15 +48,10 @@ const parseStores = (req?: HeaderSource): Record<string, unknown> => {
 const storesScript = (seed: Record<string, unknown>): string =>
     `<script>window.__hydris_stores=${JSON.stringify(seed).replace(/</g, '\\u003c')}</script>`;
 
-const assetQuery = (): string => {
-    const version = getAssetVersion();
-    return version === undefined ? '' : `?v=${version}`;
-};
-
 const clientScript = (name: string | undefined): string =>
     name === undefined
         ? ''
-        : `<script type="module" defer src="/_elemix/${name}.js${assetQuery()}"></script>`;
+        : `<script type="module" defer src="/_elemix/${resolveClientBundle(name)}"></script>`;
 
 const bundleName = (View: unknown): string | undefined => {
     const bundle = (View as { $$__module?: string }).$$__module;

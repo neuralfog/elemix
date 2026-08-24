@@ -61,7 +61,7 @@ describe('assetHandler', () => {
         expect(res.status).toBe(404);
     });
 
-    it('applies Cache-Control when configured', async () => {
+    it('applies immutable Cache-Control when configured', async () => {
         const res = await assetHandler({ dir, maxAge: 3600, immutable: true })(
             reqWith('hello.txt'),
         );
@@ -70,25 +70,36 @@ describe('assetHandler', () => {
         );
     });
 
-    it('sets no Cache-Control by default', async () => {
+    it('revalidates (no-cache) by default so assets bust without a version', async () => {
         const res = await assetHandler({ dir })(reqWith('hello.txt'));
-        expect(res.headers.get('cache-control')).toBeNull();
+        expect(res.headers.get('cache-control')).toBe('no-cache');
     });
 
-    it('serves immutable when the request carries ?v= (busted url)', async () => {
-        const res = await assetHandler({ dir })(
-            reqWith('hello.txt', 'http://localhost/static/hello.txt?v=abc'),
-        );
-        expect(res.headers.get('cache-control')).toBe(
-            `public, max-age=${31536000}, immutable`,
-        );
-    });
-
-    it('does NOT serve immutable for a bare request (no ?v=)', async () => {
+    it('applies a plain max-age when configured without immutable', async () => {
         const res = await assetHandler({ dir, maxAge: 60 })(
-            reqWith('hello.txt', 'http://localhost/static/hello.txt'),
+            reqWith('hello.txt'),
         );
         expect(res.headers.get('cache-control')).toBe('public, max-age=60');
+    });
+
+    it('sends an ETag and returns 304 when it matches', async () => {
+        const first = await assetHandler({ dir })(reqWith('hello.txt'));
+        const etag = first.headers.get('etag');
+        expect(etag).not.toBeNull();
+
+        const raw = {
+            url: 'http://localhost/x',
+            method: 'GET',
+            headers: new Headers({ 'if-none-match': etag as string }),
+        } as unknown as globalThis.Request;
+        const cached = await assetHandler({ dir })(
+            new Request(
+                raw,
+                new MatchedRoute({} as never, { '*': 'hello.txt' }),
+            ),
+        );
+        expect(cached.status).toBe(304);
+        expect(cached.headers.get('etag')).toBe(etag);
     });
 });
 

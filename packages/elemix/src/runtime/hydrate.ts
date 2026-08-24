@@ -1,4 +1,41 @@
+import { $__reactive, $__toRaw } from './state';
+
 export { $__setViewData, $__viewData } from './viewdata';
+
+type ModuleStateEntry = {
+    obj: Record<PropertyKey, unknown>;
+    factory: () => unknown;
+};
+
+const moduleStates: ModuleStateEntry[] = [];
+
+export const $__moduleState = <T>(factory: () => T): T => {
+    const value = $__reactive(factory()) as T;
+    if (
+        typeof window !== 'undefined' &&
+        value !== null &&
+        typeof value === 'object'
+    ) {
+        moduleStates.push({
+            obj: value as Record<PropertyKey, unknown>,
+            factory,
+        });
+    }
+    return value;
+};
+
+export const $__resetModuleStates = (): void => {
+    for (const { obj, factory } of moduleStates) {
+        const fresh = factory() as Record<PropertyKey, unknown>;
+        const raw = $__toRaw(obj) as Record<PropertyKey, unknown>;
+        for (const key of Object.keys(raw)) {
+            if (!(key in fresh)) delete obj[key];
+        }
+        for (const key of Object.keys(fresh)) {
+            obj[key] = fresh[key];
+        }
+    }
+};
 
 export const $__dynLens = (el: Element): number[] => {
     const data = el.getAttribute('data-t');

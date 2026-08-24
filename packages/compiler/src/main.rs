@@ -68,7 +68,7 @@ fn main() {
         } else if cli.ssr {
             compile_ssr(&source, cli.minify)
         } else {
-            compile_diagnostics_mode(&source, false, cli.minify)
+            compile_diagnostics_mode(&source, false, false, cli.minify)
         };
         report(None, &diags);
         let payload = if cli.sourcemap {
@@ -208,7 +208,7 @@ fn emit(
     } else if ssr {
         compile_ssr(source, minify)
     } else {
-        compile_diagnostics_mode(source, false, minify)
+        compile_diagnostics_mode(source, false, false, minify)
     };
     report(Some(src), &diags);
 

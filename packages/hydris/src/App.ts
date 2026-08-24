@@ -1,10 +1,16 @@
 import type { DiContainer } from './container/DiContainer';
 import type { ServiceProviderClass } from './container/ServiceProvider';
 import type { ErrorRenderer, ErrorReporter } from './error/render';
-import { type AssetConfig, assetHandler, isVersioned } from './http/assets';
+import { type AssetConfig, assetHandler } from './http/assets';
+import {
+    type CompressionOptions,
+    getCompression,
+    lockCompression,
+    setCompression,
+} from './http/compression';
 import { Request } from './http/Request';
 import type { Middleware } from './middleware/Middleware';
-import { clientAsset } from './render/client';
+import { clientAssetResponse, precompressClientAssets } from './render/client';
 import {
     type DevOptions,
     enableDevMode,
@@ -20,7 +26,6 @@ import {
 } from './render/render';
 import { brandDim, serveBanner } from './render/banner';
 import { setResetStyles } from './render/reset';
-import { lockAssetVersion, setAssetVersion } from './render/version';
 import { container, router } from './routing/Route';
 import {
     handleUnhandled,
@@ -66,8 +71,8 @@ export class App {
         router.registerStatic(`${base}/*`, assetHandler(config));
     }
 
-    static version(token: string): void {
-        setAssetVersion(token);
+    static compression(options: CompressionOptions = {}): void {
+        setCompression(options);
     }
 
     static devMode(options?: DevOptions): void {
@@ -104,14 +109,14 @@ export class App {
 
     static serve(options: ServeOptions = {}): void {
         lockDefaultDocument();
-        lockAssetVersion();
+        lockCompression();
         const { trustProxy = false, elemixAssets, ...serveOptions } = options;
 
         router.registerStatic('/_elemix/*', (req: Request) => {
-            const bundle = clientAsset(
+            const bundle = clientAssetResponse(
                 `/_elemix/${req.param('*')}`,
+                req,
                 elemixAssets?.maxAge,
-                isVersioned(req.url),
             );
             return bundle ?? new Response('Not Found', { status: 404 });
         });
@@ -144,6 +149,19 @@ export class App {
         );
         if (isLiveReload()) console.log(brandDim('live reload enabled'));
         if (isDevMode()) process.send?.({ __hydris_dev__: { ready: true } });
+
+        if (getCompression() !== null) {
+            void precompressClientAssets().then((stats) => {
+                if (stats.count === 0) return;
+                const kb = (bytes: number): string =>
+                    `${(bytes / 1024).toFixed(1)}KB`;
+                console.log(
+                    brandDim(
+                        `precompressed ${stats.count} bundles ${kb(stats.raw)} -> ${kb(stats.best)}`,
+                    ),
+                );
+            });
+        }
 
         let closing = false;
         const shutdown = async (signal: string): Promise<void> => {

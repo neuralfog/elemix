@@ -1,4 +1,5 @@
-import { rmSync, watch } from 'node:fs';
+import { rmSync, watch, writeFileSync } from 'node:fs';
+import { basename, join } from 'node:path';
 import { clientPlugin, findViews } from './client';
 import { log, logError } from './log';
 import { ssrPlugin } from './plugin';
@@ -12,6 +13,8 @@ export type AppBuildOptions = {
     host?: string;
     minify?: boolean;
 };
+
+export const MANIFEST = 'manifest.json';
 
 type DevMessage = {
     __hydris_dev__?: { watch?: string; ready?: boolean };
@@ -33,21 +36,46 @@ const report = (result: Bun.BuildOutput): boolean => {
 
 type ClientResult = 'built' | 'empty' | 'failed';
 
-const buildClient = async (opts: AppBuildOptions): Promise<ClientResult> => {
+export const buildManifest = (
+    pages: string[],
+    outputs: Bun.BuildArtifact[],
+): Record<string, string> => {
+    const entries = outputs.filter((output) => output.kind === 'entry-point');
+    const manifest: Record<string, string> = {};
+    for (const page of pages) {
+        const name = basename(page).replace(/\.[tj]sx?$/, '');
+        const output = entries.find((entry) =>
+            basename(entry.path).startsWith(`${name}-`),
+        );
+        if (output) manifest[name] = basename(output.path);
+    }
+    return manifest;
+};
+
+const buildClient = async (
+    opts: AppBuildOptions,
+    hashEntries = false,
+): Promise<ClientResult> => {
     const views = await findViews(opts.root);
     if (views.pages.length === 0) return 'empty';
-    const built = report(
-        await Bun.build({
-            entrypoints: views.pages,
-            outdir: opts.clientOut ?? CLIENT_OUT,
-            target: 'browser',
-            splitting: true,
-            minify: opts.minify ?? false,
-            naming: { entry: '[name].[ext]' },
-            plugins: [clientPlugin(views), sassPlugin],
-        }),
-    );
-    return built ? 'built' : 'failed';
+    const dir = opts.clientOut ?? CLIENT_OUT;
+    const result = await Bun.build({
+        entrypoints: views.pages,
+        outdir: dir,
+        target: 'browser',
+        splitting: true,
+        minify: opts.minify ?? false,
+        naming: {
+            entry: hashEntries ? '[name]-[hash].[ext]' : '[name].[ext]',
+        },
+        plugins: [clientPlugin(views), sassPlugin],
+    });
+    if (!report(result)) return 'failed';
+    if (hashEntries) {
+        const manifest = buildManifest(views.pages, result.outputs);
+        writeFileSync(join(dir, MANIFEST), JSON.stringify(manifest));
+    }
+    return 'built';
 };
 
 const buildServer = (opts: AppBuildOptions): Promise<Bun.BuildOutput> =>
@@ -65,7 +93,10 @@ export const build = async (opts: AppBuildOptions = {}): Promise<void> => {
     rmSync(opts.serverOut ?? SERVER_OUT, { recursive: true, force: true });
     rmSync(opts.clientOut ?? CLIENT_OUT, { recursive: true, force: true });
     if (!report(await buildServer(opts))) process.exit(1);
-    const client = await buildClient({ ...opts, minify: opts.minify ?? true });
+    const client = await buildClient(
+        { ...opts, minify: opts.minify ?? true },
+        true,
+    );
     if (client === 'failed') process.exit(1);
     const serverOut = opts.serverOut ?? SERVER_OUT;
     log(

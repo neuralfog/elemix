@@ -4,7 +4,6 @@ import { $__reactive, $__toRaw } from './state';
 
 let seed: Record<string, unknown> | undefined;
 let seedPicked = false;
-let persist: ((name: string, value: string) => void) | undefined;
 
 export const $__setStores = (
     data: Record<string, unknown> | undefined,
@@ -12,6 +11,43 @@ export const $__setStores = (
     seed = data;
     seedPicked = true;
 };
+
+const COOKIE_PREFIX = 'store.';
+const COOKIE_MAX_BYTES = 4096;
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+const writeCookie = (name: string, value: string): void => {
+    const cookie = `${COOKIE_PREFIX}${name}=${encodeURIComponent(
+        value,
+    )}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+    if (cookie.length > COOKIE_MAX_BYTES) {
+        throw new Error(
+            `store "${name}" exceeds the ${COOKIE_MAX_BYTES} byte cookie limit (${cookie.length}); keep client stores small and store larger data server-side`,
+        );
+    }
+    document.cookie = cookie;
+};
+
+const flushQueue = new Map<string, string>();
+let flushScheduled = false;
+
+const flushCookies = (): void => {
+    flushScheduled = false;
+    const entries = [...flushQueue];
+    flushQueue.clear();
+    for (const [name, value] of entries) writeCookie(name, value);
+};
+
+const cookiePersist = (name: string, value: string): void => {
+    flushQueue.set(name, value);
+    if (!flushScheduled) {
+        flushScheduled = true;
+        queueMicrotask(flushCookies);
+    }
+};
+
+let persist: ((name: string, value: string) => void) | undefined =
+    cookiePersist;
 
 export const $__setStorePersister = (
     fn: (name: string, value: string) => void,

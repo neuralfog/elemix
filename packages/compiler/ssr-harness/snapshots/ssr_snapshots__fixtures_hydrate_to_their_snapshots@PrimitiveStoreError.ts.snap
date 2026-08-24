@@ -1,14 +1,14 @@
 ---
-source: ssr-tests/ssr_snapshots.rs
-expression: compile_hydrate(&source).0
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/PrimitiveStoreError.ts
 ---
 throw new Error('[elemix] module-level `#state` must be an object - a bare primitive export can\'t be reactive. Wrap it in a store object, e.g. `export const store = { count: 0 };` and read `store.count`. (Bare primitives are reactive only as component class fields.)');
-import { $__state } from '@neuralfog/elemix/runtime';
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';
 // Diagnostic fixture: a MODULE-LEVEL `#state` with a bare primitive initializer.
 // A module export has no `this` to hang an accessor on, so it can't be made
 // reactive single-file — the compiler rejects it and inlines a module-scope
 // `throw new Error('[elemix] …')` steering to an object store. (Bare primitives
 // are reactive only as component class fields.)
 
-export const count = $__state(0);
+export const count = $__moduleState(() => (0));

@@ -1,18 +1,18 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/BeforeMountStoreApp.ts
 ---
 import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';
 import { Component } from '@neuralfog/elemix';
 
 type Store = {
     count: number;
 };
 
-export const counter = $__state<Store>({ count: 0 });
+export const counter = $__moduleState<Store>(() => ({ count: 0 }));
 
 const _t0 = $__template('<button>count is <!----></button>');
 

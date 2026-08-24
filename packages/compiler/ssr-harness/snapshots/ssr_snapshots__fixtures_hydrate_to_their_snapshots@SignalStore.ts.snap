@@ -1,8 +1,8 @@
 ---
-source: ssr-tests/ssr_snapshots.rs
-expression: compile_hydrate(&source).0
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/SignalStore.ts
 ---
-import { $__state } from '@neuralfog/elemix/runtime';
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';
 
-export const counter = $__state({ count: 0 });
+export const counter = $__moduleState(() => ({ count: 0 }));
