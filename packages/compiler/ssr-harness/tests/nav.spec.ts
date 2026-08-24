@@ -294,7 +294,8 @@ test.describe('client store SSR round-trip', () => {
         });
         const html = await res.text();
         expect(html).toContain('data-count="42"');
-        expect(html).toContain('window.__hydris_stores={"prefs":{"count":42}}');
+        expect(html).toContain('id="__hydris_stores"');
+        expect(html).toContain('{"prefs":{"count":42}}');
     });
 
     test('no cookie renders the store default', async ({ request }) => {
@@ -326,14 +327,15 @@ test.describe('client store SSR round-trip', () => {
         await page.click('#to-store-b');
         await expect(page.locator('#count-b')).toHaveText('3');
 
-        const seeded = await page.evaluate(
-            () =>
-                (
-                    window as unknown as {
-                        __hydris_stores?: { prefs?: { count?: number } };
-                    }
-                ).__hydris_stores?.prefs?.count,
-        );
+        const seeded = await page.evaluate(() => {
+            const el = document.getElementById('__hydris_stores');
+            const parsed = el?.textContent
+                ? (JSON.parse(el.textContent) as {
+                      prefs?: { count?: number };
+                  })
+                : undefined;
+            return parsed?.prefs?.count;
+        });
         expect(seeded).toBe(3);
     });
 

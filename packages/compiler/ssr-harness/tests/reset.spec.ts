@@ -11,8 +11,7 @@ test.describe('ResetProbe (App.resetStyles)', () => {
             '<style data-ssr>.reset-probe{color:rgb(7,8,9)}',
         );
 
-        expect(served).toContain('window.__elemix__');
-        expect(served).toContain('config.reset=');
+        expect(served).toContain('id="__elemix_reset"');
 
         await page.waitForFunction(() => !!customElements.get('reset-probe'));
 

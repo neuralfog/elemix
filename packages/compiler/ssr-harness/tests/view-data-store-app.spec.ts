@@ -7,7 +7,7 @@ test.describe('ViewDataStoreApp', () => {
         const response = await page.goto('/view-data-store-app');
         const served = (await response?.text()) ?? '';
         expect(served).toContain('class="count">5</span>');
-        expect(served).toContain('window.__elemix_vd=');
+        expect(served).toContain('id="__elemix_vd"');
 
         await page.waitForFunction(() =>
             customElements.get('view-data-store-app'),

@@ -1,6 +1,9 @@
 import { $__resetModuleStates } from '@neuralfog/elemix/ssr-runtime/client';
+import { navSanitizerConfig } from './sanitizer';
 
-type UnsafeBody = { setHTMLUnsafe(html: string): void };
+type UnsafeBody = {
+    setHTMLUnsafe(html: string, options?: { sanitizer?: unknown }): void;
+};
 type NavWindow = Window & { __hydrisNav?: boolean };
 
 const supported = (): boolean => {
@@ -22,25 +25,33 @@ const bodyInner = (html: string): string => {
     return start >= 0 && end > start ? html.slice(start, end) : html;
 };
 
-const runScript = (source: HTMLScriptElement): Promise<void> =>
-    new Promise<void>((resolve) => {
-        const script = document.createElement('script');
-        for (const attr of Array.from(source.attributes)) {
-            script.setAttribute(attr.name, attr.value);
-        }
-        script.textContent = source.textContent;
-        if (source.src) {
-            script.addEventListener('load', () => resolve());
-            script.addEventListener('error', () => resolve());
-            source.replaceWith(script);
-        } else {
-            source.replaceWith(script);
-            resolve();
-        }
-    });
+const ELEMIX_PREFIX = '/_elemix/';
 
-const isModule = (s: HTMLScriptElement): boolean =>
-    s.type === 'module' || Boolean(s.src);
+const bundleSources = (): string[] => {
+    const out: string[] = [];
+    for (const s of Array.from(
+        document.body.querySelectorAll<HTMLScriptElement>(
+            'script[type="module"][src]',
+        ),
+    )) {
+        const url = new URL(s.src, location.href);
+        if (
+            url.origin === location.origin &&
+            url.pathname.startsWith(ELEMIX_PREFIX)
+        ) {
+            out.push(url.href);
+        }
+    }
+    return out;
+};
+
+const loadBundles = async (): Promise<void> => {
+    for (const src of bundleSources()) {
+        try {
+            await import(src);
+        } catch {}
+    }
+};
 
 const cloneForHead = (el: Element): Node => {
     if (el.tagName === 'SCRIPT') {
@@ -86,13 +97,11 @@ const swap = async (html: string): Promise<void> => {
     const incoming = new DOMParser().parseFromString(html, 'text/html');
     mergeHead(incoming.head);
 
-    (document.body as unknown as UnsafeBody).setHTMLUnsafe(bodyInner(html));
+    (document.body as unknown as UnsafeBody).setHTMLUnsafe(bodyInner(html), {
+        sanitizer: navSanitizerConfig,
+    });
 
-    const scripts = Array.from(
-        document.body.querySelectorAll<HTMLScriptElement>('script'),
-    );
-    for (const s of scripts) if (!isModule(s)) await runScript(s);
-    for (const s of scripts) if (isModule(s)) await runScript(s);
+    await loadBundles();
 };
 
 const run = async (url: string, push: boolean): Promise<void> => {

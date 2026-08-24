@@ -15,6 +15,6 @@ export const resetDocumentStyle = (): string =>
 export const resetConfigScript = (): string =>
     resetStyles === undefined
         ? ''
-        : `<script>window.__elemix__=window.__elemix__||{};window.__elemix__.config=window.__elemix__.config||{};window.__elemix__.config.reset=${JSON.stringify(
+        : `<script type="application/json" id="__elemix_reset">${JSON.stringify(
               resetStyles,
-          )}</script>`;
+          ).replace(/</g, '\\u003c')}</script>`;

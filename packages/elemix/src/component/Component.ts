@@ -6,6 +6,7 @@ import {
     $__untrack,
     type Scope,
 } from '../runtime/reactive';
+import { $__island } from '../runtime/island';
 import { $__reactive } from '../runtime/state';
 import { $__viewData } from '../runtime/viewdata';
 import { $__hydrating, $__sheet } from '../runtime/dom';
@@ -45,7 +46,8 @@ let resetSheet: CSSStyleSheet | undefined;
 let resetSource: string | undefined;
 
 const reset = (): CSSStyleSheet | undefined => {
-    const source = window.__elemix__?.config?.reset;
+    const source =
+        window.__elemix__?.config?.reset ?? $__island<string>('__elemix_reset');
     if (!source) return undefined;
     if (source !== resetSource) {
         resetSheet = new CSSStyleSheet();

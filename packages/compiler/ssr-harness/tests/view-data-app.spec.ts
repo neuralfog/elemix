@@ -9,7 +9,7 @@ test.describe('ViewDataApp', () => {
         expect(served).toContain('class="title">Hello viewData</h1>');
         expect(served).toContain('class="count">3</span>');
         expect(served).toContain('class="leaf-name">Ada</span>');
-        expect(served).toContain('window.__elemix_vd=');
+        expect(served).toContain('id="__elemix_vd"');
 
         await page.waitForFunction(
             () =>

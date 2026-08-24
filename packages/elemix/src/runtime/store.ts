@@ -1,3 +1,4 @@
+import { $__island } from './island';
 import { $__rootEffect } from './reactive';
 import { $__moduleState } from './ssr';
 import { $__reactive, $__toRaw } from './state';
@@ -57,8 +58,7 @@ export const $__setStorePersister = (
 
 const seedFor = (name: string): unknown => {
     if (!seedPicked && typeof window !== 'undefined') {
-        seed = (window as { __hydris_stores?: Record<string, unknown> })
-            .__hydris_stores;
+        seed = $__island<Record<string, unknown>>('__hydris_stores');
         seedPicked = true;
     }
     return seed?.[name];

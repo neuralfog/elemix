@@ -20,7 +20,7 @@ type ViewData<V> = V extends new () => Component<unknown, infer D> ? D : never;
 const viewDataScript = (data: unknown): string =>
     data === undefined
         ? ''
-        : `<script>window.__elemix_vd=${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
+        : `<script type="application/json" id="__elemix_vd">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 
 type HeaderSource = { headers: Headers };
 
@@ -46,7 +46,7 @@ const parseStores = (req?: HeaderSource): Record<string, unknown> => {
 };
 
 const storesScript = (seed: Record<string, unknown>): string =>
-    `<script>window.__hydris_stores=${JSON.stringify(seed).replace(/</g, '\\u003c')}</script>`;
+    `<script type="application/json" id="__hydris_stores">${JSON.stringify(seed).replace(/</g, '\\u003c')}</script>`;
 
 const clientScript = (name: string | undefined): string =>
     name === undefined
