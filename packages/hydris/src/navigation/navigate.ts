@@ -1,5 +1,6 @@
 import { $__resetModuleStates } from '@neuralfog/elemix/ssr-runtime/client';
-import { navSanitizerConfig } from './sanitizer';
+import { Header, HeaderValue } from '../constants';
+import { NavSanitizer } from './NavSanitizer';
 
 type UnsafeBody = {
     setHTMLUnsafe(html: string, options?: { sanitizer?: unknown }): void;
@@ -98,7 +99,7 @@ const swap = async (html: string): Promise<void> => {
     mergeHead(incoming.head);
 
     (document.body as unknown as UnsafeBody).setHTMLUnsafe(bodyInner(html), {
-        sanitizer: navSanitizerConfig,
+        sanitizer: NavSanitizer.config(),
     });
 
     await loadBundles();
@@ -113,11 +114,11 @@ const run = async (url: string, push: boolean): Promise<void> => {
     let target = url;
     try {
         const res = await fetch(url, {
-            headers: { 'x-hydris-nav': '1' },
+            headers: { [Header.XHydrisNav]: HeaderValue.NavEnabled },
             credentials: 'same-origin',
             signal: controller.signal,
         });
-        const type = res.headers.get('content-type') ?? '';
+        const type = res.headers.get(Header.ContentType) ?? '';
         if (!type.includes('text/html')) return hard(url);
         target = res.url || url;
         if (new URL(target).origin !== location.origin) return hard(url);

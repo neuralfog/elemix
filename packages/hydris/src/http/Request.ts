@@ -1,5 +1,6 @@
 import type { MatchedRoute } from '../routing/MatchedRoute';
-import { parseCookies } from './Cookie';
+import { CookieAuthority } from './CookieAuthority';
+import { Header } from '../constants';
 
 export class Request<T = Record<string, unknown>> {
     id = '';
@@ -69,7 +70,9 @@ export class Request<T = Record<string, unknown>> {
 
     get cookies(): Map<string, string> {
         if (this.cookieCache === undefined) {
-            this.cookieCache = parseCookies(this.raw.headers.get('cookie'));
+            this.cookieCache = CookieAuthority.parse(
+                this.raw.headers.get(Header.Cookie),
+            );
         }
         return this.cookieCache;
     }

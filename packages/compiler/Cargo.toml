@@ -17,10 +17,6 @@ name = "elemix-compiler"
 path = "src/main.rs"
 required-features = ["cli"]
 
-# SSR tests + their snapshots live in the ssr-harness package (a different
-# harness from the CSR `tests/`), so the targets are declared explicitly — Cargo
-# only auto-discovers integration tests under `tests/`. insta emits the `.snap`
-# files next to each source file, i.e. `ssr-harness/snapshots/`.
 [[test]]
 name = "ssr"
 path = "ssr-harness/ssr.rs"

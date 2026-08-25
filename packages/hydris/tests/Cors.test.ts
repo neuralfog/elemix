@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { Reply } from '../src/http/Reply';
 import { Request } from '../src/http/Request';
 import { Cors } from '../src/middleware/Cors';
@@ -20,7 +21,7 @@ describe('Cors config passed to the constructor', () => {
             credentials: true,
         });
         const res = await cors.handle(
-            ctx('GET', { origin: 'https://app.example' }),
+            ctx(Method.Get, { origin: 'https://app.example' }),
             ok,
         );
         expect(res.headers.get('Access-Control-Allow-Origin')).toBe(
@@ -37,7 +38,7 @@ describe('Cors config passed to the constructor', () => {
             origin: ['https://a.example', 'https://b.example'],
         });
         const res = await cors.handle(
-            ctx('GET', { origin: 'https://evil.example' }),
+            ctx(Method.Get, { origin: 'https://evil.example' }),
             ok,
         );
         expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull();
@@ -45,7 +46,7 @@ describe('Cors config passed to the constructor', () => {
 
     it('defaults to a wildcard origin with no config', async () => {
         const res = await new Cors().handle(
-            ctx('GET', { origin: 'https://anything.example' }),
+            ctx(Method.Get, { origin: 'https://anything.example' }),
             ok,
         );
         expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
@@ -53,12 +54,12 @@ describe('Cors config passed to the constructor', () => {
 
     it('answers preflight with the configured methods, headers and max-age', async () => {
         const cors = new Cors({
-            methods: ['GET', 'POST'],
+            methods: [Method.Get, Method.Post],
             allowedHeaders: ['X-Token'],
             maxAge: 600,
         });
         const res = await cors.handle(
-            ctx('OPTIONS', { origin: 'https://app.example' }),
+            ctx(Method.Options, { origin: 'https://app.example' }),
             ok,
         );
         expect(res.status).toBe(204);
@@ -78,7 +79,7 @@ describe('Cors instance in the route pipeline', () => {
 
         const req = new Request({
             url: 'http://localhost/cors/ping',
-            method: 'GET',
+            method: Method.Get,
             headers: new Headers({ origin: 'https://app.example' }),
         } as unknown as globalThis.Request);
 

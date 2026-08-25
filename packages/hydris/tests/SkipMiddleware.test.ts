@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
@@ -7,7 +8,7 @@ import { Router } from '../src/routing/Router';
 const request = (path: string): Request =>
     new Request({
         url: `http://localhost${path}`,
-        method: 'GET',
+        method: Method.Get,
         headers: new Headers(),
     } as unknown as globalThis.Request);
 
@@ -24,9 +25,9 @@ describe('skipMiddlewares', () => {
         Tagger.hits = 0;
         const router = new Router();
         router.use([new Tagger()]);
-        router.register('GET', '/guarded', () => Reply.text('a'));
+        router.register(Method.Get, '/guarded', () => Reply.text('a'));
         router
-            .register('GET', '/open', () => Reply.text('b'))
+            .register(Method.Get, '/open', () => Reply.text('b'))
             .skip.push(Tagger);
 
         await router.dispatch(request('/guarded'));
@@ -41,7 +42,7 @@ describe('skipMiddlewares', () => {
         const router = new Router();
         router.use([Tagger]);
         router
-            .register('GET', '/open', () => Reply.text('b'))
+            .register(Method.Get, '/open', () => Reply.text('b'))
             .skip.push(Tagger);
         await router.dispatch(request('/open'));
         expect(Tagger.hits).toBe(0);
@@ -52,7 +53,9 @@ describe('skipMiddlewares', () => {
         const mw = new Tagger();
         const router = new Router();
         router.use([mw]);
-        router.register('GET', '/open', () => Reply.text('b')).skip.push(mw);
+        router
+            .register(Method.Get, '/open', () => Reply.text('b'))
+            .skip.push(mw);
         await router.dispatch(request('/open'));
         expect(Tagger.hits).toBe(0);
     });
@@ -61,9 +64,11 @@ describe('skipMiddlewares', () => {
         Tagger.hits = 0;
         const router = new Router();
         router.use([new Tagger()]);
-        router.register('GET', '/a', () => Reply.text('a'));
-        router.register('GET', '/b', () => Reply.text('b')).skip.push(Tagger);
-        router.register('GET', '/c', () => Reply.text('c'));
+        router.register(Method.Get, '/a', () => Reply.text('a'));
+        router
+            .register(Method.Get, '/b', () => Reply.text('b'))
+            .skip.push(Tagger);
+        router.register(Method.Get, '/c', () => Reply.text('c'));
 
         await router.dispatch(request('/a'));
         await router.dispatch(request('/b'));

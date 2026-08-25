@@ -1,9 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { App } from '../src/App';
-import { assetHandler } from '../src/http/assets';
+import { AssetHandler } from '../src/http/AssetHandler';
 import { Request } from '../src/http/Request';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
 import { MatchedRoute } from '../src/routing/MatchedRoute';
@@ -26,7 +27,7 @@ afterAll(() => {
 const reqWith = (star: string, url = 'http://localhost/x'): Request => {
     const raw = {
         url,
-        method: 'GET',
+        method: Method.Get,
         headers: new Headers(),
     } as unknown as globalThis.Request;
     return new Request(raw, new MatchedRoute({} as never, { '*': star }));
@@ -35,64 +36,70 @@ const reqWith = (star: string, url = 'http://localhost/x'): Request => {
 const request = (path: string): Request =>
     new Request({
         url: `http://localhost${path}`,
-        method: 'GET',
+        method: Method.Get,
         headers: new Headers(),
     } as unknown as globalThis.Request);
 
 describe('assetHandler', () => {
     it('serves a file inside the dir', async () => {
-        const res = await assetHandler({ dir })(reqWith('hello.txt'));
+        const res = await AssetHandler.create({ dir })(reqWith('hello.txt'));
         expect(res.status).toBe(200);
         expect(await res.text()).toBe('hello world');
     });
 
     it('serves nested files', async () => {
-        const res = await assetHandler({ dir })(reqWith('sub/nested.txt'));
+        const res = await AssetHandler.create({ dir })(
+            reqWith('sub/nested.txt'),
+        );
         expect(await res.text()).toBe('nested');
     });
 
     it('404s for a missing file', async () => {
-        const res = await assetHandler({ dir })(reqWith('nope.txt'));
+        const res = await AssetHandler.create({ dir })(reqWith('nope.txt'));
         expect(res.status).toBe(404);
     });
 
     it('blocks path traversal out of the dir', async () => {
-        const res = await assetHandler({ dir })(reqWith('../../etc/passwd'));
+        const res = await AssetHandler.create({ dir })(
+            reqWith('../../etc/passwd'),
+        );
         expect(res.status).toBe(404);
     });
 
     it('applies immutable Cache-Control when configured', async () => {
-        const res = await assetHandler({ dir, maxAge: 3600, immutable: true })(
-            reqWith('hello.txt'),
-        );
+        const res = await AssetHandler.create({
+            dir,
+            maxAge: 3600,
+            immutable: true,
+        })(reqWith('hello.txt'));
         expect(res.headers.get('cache-control')).toBe(
             'public, max-age=3600, immutable',
         );
     });
 
     it('revalidates (no-cache) by default so assets bust without a version', async () => {
-        const res = await assetHandler({ dir })(reqWith('hello.txt'));
+        const res = await AssetHandler.create({ dir })(reqWith('hello.txt'));
         expect(res.headers.get('cache-control')).toBe('no-cache');
     });
 
     it('applies a plain max-age when configured without immutable', async () => {
-        const res = await assetHandler({ dir, maxAge: 60 })(
+        const res = await AssetHandler.create({ dir, maxAge: 60 })(
             reqWith('hello.txt'),
         );
         expect(res.headers.get('cache-control')).toBe('public, max-age=60');
     });
 
     it('sends an ETag and returns 304 when it matches', async () => {
-        const first = await assetHandler({ dir })(reqWith('hello.txt'));
+        const first = await AssetHandler.create({ dir })(reqWith('hello.txt'));
         const etag = first.headers.get('etag');
         expect(etag).not.toBeNull();
 
         const raw = {
             url: 'http://localhost/x',
-            method: 'GET',
+            method: Method.Get,
             headers: new Headers({ 'if-none-match': etag as string }),
         } as unknown as globalThis.Request;
-        const cached = await assetHandler({ dir })(
+        const cached = await AssetHandler.create({ dir })(
             new Request(
                 raw,
                 new MatchedRoute({} as never, { '*': 'hello.txt' }),
@@ -116,7 +123,7 @@ describe('static route dispatch', () => {
         Tagger.hits = 0;
         const router = new Router();
         router.use([new Tagger()]);
-        router.registerStatic('/files/*', assetHandler({ dir }));
+        router.registerStatic('/files/*', AssetHandler.create({ dir }));
 
         const res = await router.dispatch(request('/files/hello.txt'));
         expect(res.status).toBe(200);
@@ -128,8 +135,8 @@ describe('static route dispatch', () => {
         Tagger.hits = 0;
         const router = new Router();
         router.use([new Tagger()]);
-        router.registerStatic('/files/*', assetHandler({ dir }));
-        router.register('GET', '/page', () => new Response('page'));
+        router.registerStatic('/files/*', AssetHandler.create({ dir }));
+        router.register(Method.Get, '/page', () => new Response('page'));
 
         await router.dispatch(request('/page'));
         expect(Tagger.hits).toBe(1);

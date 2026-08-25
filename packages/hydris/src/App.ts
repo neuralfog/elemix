@@ -1,7 +1,7 @@
 import type { DiContainer } from './container/DiContainer';
 import type { ServiceProviderClass } from './container/ServiceProvider';
-import type { ErrorRenderer, ErrorReporter } from './error/render';
-import { type AssetConfig, assetHandler } from './http/assets';
+import type { ErrorRenderer, ErrorReporter } from './error/ErrorRenderer';
+import { AssetHandler, type AssetConfig } from './http/AssetHandler';
 import {
     type CompressionOptions,
     getCompression,
@@ -26,13 +26,12 @@ import {
 } from './render/render';
 import { brandDim, serveBanner } from './render/banner';
 import { setResetStyles } from './render/reset';
-import { container, router } from './routing/Route';
-import { segmentsOf } from './routing/RouteDefinition';
 import {
-    handleUnhandled,
-    setUnhandledHandler,
     type UnhandledHandler,
-} from './unhandled';
+    UnhandledErrors,
+} from './error/UnhandledErrors';
+import { container, router } from './routing/Route';
+import { RouteDefinition } from './routing/RouteDefinition';
 
 export type ServeOptions = {
     port?: number;
@@ -101,10 +100,10 @@ const installProcessHandlers = (server: Bun.Server): void => {
     process.on('SIGTERM', () => void shutdown('SIGTERM'));
     process.on('SIGINT', () => void shutdown('SIGINT'));
     process.on('unhandledRejection', (reason) => {
-        handleUnhandled(reason);
+        UnhandledErrors.handle(reason);
     });
     process.on('uncaughtException', (error) => {
-        handleUnhandled(error);
+        UnhandledErrors.handle(error);
     });
 };
 
@@ -114,7 +113,7 @@ export class App {
     }
 
     static onUnhandled(handler: UnhandledHandler): void {
-        setUnhandledHandler(handler);
+        UnhandledErrors.setHandler(handler);
     }
 
     static providers(providers: ServiceProviderClass[]): void {
@@ -129,8 +128,8 @@ export class App {
     }
 
     static assets(prefix: string, config: AssetConfig): void {
-        const base = `/${segmentsOf(prefix).join('/')}`;
-        router.registerStatic(`${base}/*`, assetHandler(config));
+        const base = `/${RouteDefinition.segmentsOf(prefix).join('/')}`;
+        router.registerStatic(`${base}/*`, AssetHandler.create(config));
     }
 
     static compression(options: CompressionOptions = {}): void {

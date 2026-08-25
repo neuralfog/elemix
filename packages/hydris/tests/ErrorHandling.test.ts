@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
+import { DiContainer } from '../src/container/DiContainer';
 import { ErrorHandler } from '../src/error/ErrorHandler';
 import { NotFoundException } from '../src/error/HttpException';
-import { statusOf } from '../src/error/render';
+import { DefaultErrorRenderer } from '../src/error/ErrorRenderer';
 import { Reply } from '../src/http/Reply';
 import { Request } from '../src/http/Request';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
@@ -21,29 +23,29 @@ const req = (
 describe('error boundary', () => {
     it('renders an unexpected throw as 500 without leaking the message', async () => {
         const r = new Router();
-        r.register('GET', '/boom', () => {
+        r.register(Method.Get, '/boom', () => {
             throw new Error('kaboom secret');
         });
 
-        const res = await r.dispatch(req('GET', '/boom'));
+        const res = await r.dispatch(req(Method.Get, '/boom'));
         expect(res.status).toBe(500);
         expect(await res.text()).not.toContain('kaboom');
     });
 
     it('maps an HttpException to its status and shows its message', async () => {
         const r = new Router();
-        r.register('GET', '/missing', () => {
+        r.register(Method.Get, '/missing', () => {
             throw new NotFoundException('no such user');
         });
 
-        const res = await r.dispatch(req('GET', '/missing'));
+        const res = await r.dispatch(req(Method.Get, '/missing'));
         expect(res.status).toBe(404);
         expect(await res.text()).toContain('no such user');
     });
 
     it('renders an unmatched route as a 404 through the error path', async () => {
         const r = new Router();
-        const res = await r.dispatch(req('GET', '/nope'));
+        const res = await r.dispatch(req(Method.Get, '/nope'));
         expect(res.status).toBe(404);
     });
 });
@@ -51,12 +53,12 @@ describe('error boundary', () => {
 describe('content negotiation', () => {
     it('returns json when the client accepts json', async () => {
         const r = new Router();
-        r.register('GET', '/j', () => {
+        r.register(Method.Get, '/j', () => {
             throw new NotFoundException('gone');
         });
 
         const res = await r.dispatch(
-            req('GET', '/j', { accept: 'application/json' }),
+            req(Method.Get, '/j', { accept: 'application/json' }),
         );
         expect(res.headers.get('content-type')).toContain('application/json');
         expect(await res.json()).toEqual({ error: 'gone', status: 404 });
@@ -64,11 +66,11 @@ describe('content negotiation', () => {
 
     it('returns an html page by default', async () => {
         const r = new Router();
-        r.register('GET', '/j', () => {
+        r.register(Method.Get, '/j', () => {
             throw new NotFoundException('gone');
         });
 
-        const res = await r.dispatch(req('GET', '/j'));
+        const res = await r.dispatch(req(Method.Get, '/j'));
         expect(res.headers.get('content-type')).toContain('text/html');
     });
 });
@@ -77,13 +79,15 @@ describe('custom renderers', () => {
     it('uses a registered global renderer', async () => {
         const r = new Router();
         r.renderError((error) =>
-            Reply.text(`custom:${statusOf(error)}`).status(statusOf(error)),
+            Reply.text(`custom:${DefaultErrorRenderer.status(error)}`).status(
+                DefaultErrorRenderer.status(error),
+            ),
         );
-        r.register('GET', '/x', () => {
+        r.register(Method.Get, '/x', () => {
             throw new NotFoundException();
         });
 
-        const res = await r.dispatch(req('GET', '/x'));
+        const res = await r.dispatch(req(Method.Get, '/x'));
         expect(res.status).toBe(404);
         expect(await res.text()).toBe('custom:404');
     });
@@ -91,21 +95,22 @@ describe('custom renderers', () => {
     it('lets a route renderer override the global one', async () => {
         const r = new Router();
         r.renderError(() => Reply.text('global'));
-        const def = r.register('GET', '/api/thing', () => {
+        const def = r.register(Method.Get, '/api/thing', () => {
             throw new Error('x');
         });
         def.renderer = (error) =>
-            Reply.json({ scoped: true, status: statusOf(error) }).status(
-                statusOf(error),
-            );
-        r.register('GET', '/web/thing', () => {
+            Reply.json({
+                scoped: true,
+                status: DefaultErrorRenderer.status(error),
+            }).status(DefaultErrorRenderer.status(error));
+        r.register(Method.Get, '/web/thing', () => {
             throw new Error('y');
         });
 
-        const api = await r.dispatch(req('GET', '/api/thing'));
+        const api = await r.dispatch(req(Method.Get, '/api/thing'));
         expect(await api.json()).toEqual({ scoped: true, status: 500 });
 
-        const web = await r.dispatch(req('GET', '/web/thing'));
+        const web = await r.dispatch(req(Method.Get, '/web/thing'));
         expect(await web.text()).toBe('global');
     });
 });
@@ -114,12 +119,13 @@ describe('prefix-scoped renderers', () => {
     it('renders a 404 under a group prefix with the group renderer', async () => {
         const r = new Router();
         r.renderErrorFor('/api', (error) =>
-            Reply.json({ api: true, status: statusOf(error) }).status(
-                statusOf(error),
-            ),
+            Reply.json({
+                api: true,
+                status: DefaultErrorRenderer.status(error),
+            }).status(DefaultErrorRenderer.status(error)),
         );
 
-        const res = await r.dispatch(req('GET', '/api/test/hdshd'));
+        const res = await r.dispatch(req(Method.Get, '/api/test/hdshd'));
         expect(res.status).toBe(404);
         expect(res.headers.get('content-type')).toContain('application/json');
         expect(await res.json()).toEqual({ api: true, status: 404 });
@@ -129,7 +135,7 @@ describe('prefix-scoped renderers', () => {
         const r = new Router();
         r.renderErrorFor('/api', () => Reply.json({ api: true }));
 
-        const res = await r.dispatch(req('GET', '/web/nope'));
+        const res = await r.dispatch(req(Method.Get, '/web/nope'));
         expect(res.status).toBe(404);
         expect(res.headers.get('content-type')).toContain('text/html');
     });
@@ -138,7 +144,7 @@ describe('prefix-scoped renderers', () => {
         const r = new Router();
         r.renderErrorFor('/api', () => Reply.json({ api: true }));
 
-        const res = await r.dispatch(req('GET', '/apidocs/x'));
+        const res = await r.dispatch(req(Method.Get, '/apidocs/x'));
         expect(res.headers.get('content-type')).toContain('text/html');
     });
 
@@ -147,10 +153,10 @@ describe('prefix-scoped renderers', () => {
         r.renderErrorFor('/api', () => Reply.text('api'));
         r.renderErrorFor('/api/v2', () => Reply.text('v2'));
 
-        expect(await (await r.dispatch(req('GET', '/api/v2/x'))).text()).toBe(
-            'v2',
-        );
-        expect(await (await r.dispatch(req('GET', '/api/x'))).text()).toBe(
+        expect(
+            await (await r.dispatch(req(Method.Get, '/api/v2/x'))).text(),
+        ).toBe('v2');
+        expect(await (await r.dispatch(req(Method.Get, '/api/x'))).text()).toBe(
             'api',
         );
     });
@@ -160,10 +166,10 @@ describe('prefix-scoped renderers', () => {
         r.renderErrorFor('/', () => Reply.text('web'));
         r.renderErrorFor('/api/test', () => Reply.json({ api: true }));
 
-        expect(await (await r.dispatch(req('GET', '/nope'))).text()).toBe(
+        expect(await (await r.dispatch(req(Method.Get, '/nope'))).text()).toBe(
             'web',
         );
-        const api = await r.dispatch(req('GET', '/api/test/x'));
+        const api = await r.dispatch(req(Method.Get, '/api/test/x'));
         expect(await api.json()).toEqual({ api: true });
     });
 });
@@ -186,10 +192,10 @@ describe('error resilience', () => {
                 throw new Error('mw boom');
             }
         }
-        const route = r.register('GET', '/x', () => Reply.text('ok'));
+        const route = r.register(Method.Get, '/x', () => Reply.text('ok'));
         route.middlewares.push(Outer, Boom);
 
-        const res = await r.dispatch(req('GET', '/x'));
+        const res = await r.dispatch(req(Method.Get, '/x'));
         expect(res.status).toBe(500);
         expect(res.headers.get('x-outer')).toBe('seen');
         expect(order).toEqual(['outer:before', 'outer:after']);
@@ -214,12 +220,10 @@ describe('error resilience', () => {
                 return Reply.text('fine');
             }
         }
-        Object.defineProperty(Handler, Symbol.for('ssr.inject'), {
-            value: [BadDispose],
-        });
-        r.register('GET', '/ok', [Handler, 'show']);
+        DiContainer.inject(Handler, [BadDispose]);
+        r.register(Method.Get, '/ok', [Handler, 'show']);
 
-        const res = await r.dispatch(req('GET', '/ok'));
+        const res = await r.dispatch(req(Method.Get, '/ok'));
         expect(res.status).toBe(200);
         expect(await res.text()).toBe('fine');
         expect(reported).toHaveLength(1);
@@ -230,11 +234,11 @@ describe('error resilience', () => {
 describe('named group renderers', () => {
     it('renders errors for a named group by name', async () => {
         const r = new Router();
-        const route = r.register('GET', '/n/x', () => Reply.text('ok'));
+        const route = r.register(Method.Get, '/n/x', () => Reply.text('ok'));
         r.nameGroup('mygroup', [route], '/');
         r.renderErrorForName('mygroup', () => Reply.text('named').status(404));
 
-        const res = await r.dispatch(req('GET', '/n/x/deep'));
+        const res = await r.dispatch(req(Method.Get, '/n/x/deep'));
         expect(res.status).toBe(404);
         expect(await res.text()).toBe('named');
     });
@@ -253,14 +257,14 @@ describe('class-based error handlers', () => {
             render(error: unknown): Reply {
                 return Reply.json({
                     handled: true,
-                    status: statusOf(error),
-                }).status(statusOf(error));
+                    status: DefaultErrorRenderer.status(error),
+                }).status(DefaultErrorRenderer.status(error));
             }
         }
         const r = new Router();
         r.renderErrorFor('/api', ApiErrors);
 
-        const res = await r.dispatch(req('GET', '/api/x'));
+        const res = await r.dispatch(req(Method.Get, '/api/x'));
         expect(res.status).toBe(404);
         expect(await res.json()).toEqual({ handled: true, status: 404 });
     });
@@ -268,18 +272,18 @@ describe('class-based error handlers', () => {
     it('accepts a class as the global renderer', async () => {
         class Errs extends ErrorHandler {
             render(error: unknown): Reply {
-                return Reply.text(`E${statusOf(error)}`).status(
-                    statusOf(error),
-                );
+                return Reply.text(
+                    `E${DefaultErrorRenderer.status(error)}`,
+                ).status(DefaultErrorRenderer.status(error));
             }
         }
         const r = new Router();
         r.renderError(Errs);
-        r.register('GET', '/x', () => {
+        r.register(Method.Get, '/x', () => {
             throw new NotFoundException();
         });
 
-        const res = await r.dispatch(req('GET', '/x'));
+        const res = await r.dispatch(req(Method.Get, '/x'));
         expect(await res.text()).toBe('E404');
     });
 });
@@ -291,11 +295,11 @@ describe('reporters', () => {
         r.onError((error) => {
             seen.push(error);
         });
-        r.register('GET', '/boom', () => {
+        r.register(Method.Get, '/boom', () => {
             throw new Error('logged');
         });
 
-        await r.dispatch(req('GET', '/boom'));
+        await r.dispatch(req(Method.Get, '/boom'));
         expect(seen).toHaveLength(1);
         expect((seen[0] as Error).message).toBe('logged');
     });
@@ -305,11 +309,11 @@ describe('reporters', () => {
         r.onError(() => {
             throw new Error('reporter blew up');
         });
-        r.register('GET', '/ok', () => {
+        r.register(Method.Get, '/ok', () => {
             throw new NotFoundException();
         });
 
-        const res = await r.dispatch(req('GET', '/ok'));
+        const res = await r.dispatch(req(Method.Get, '/ok'));
         expect(res.status).toBe(404);
     });
 });
@@ -320,11 +324,11 @@ describe('meta fallback', () => {
         r.renderError(() => {
             throw new Error('renderer broke');
         });
-        r.register('GET', '/z', () => {
+        r.register(Method.Get, '/z', () => {
             throw new NotFoundException();
         });
 
-        const res = await r.dispatch(req('GET', '/z'));
+        const res = await r.dispatch(req(Method.Get, '/z'));
         expect(res.status).toBe(500);
         expect(await res.text()).toBe('Internal Server Error');
     });

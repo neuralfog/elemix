@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
+import { CookieAuthority } from '../src/http/CookieAuthority';
 import { Reply } from '../src/http/Reply';
 import { Request as HydrisRequest } from '../src/http/Request';
 import { Csrf } from '../src/middleware/Csrf';
@@ -7,6 +9,11 @@ import { Router } from '../src/routing/Router';
 
 const SECRET = 'test-secret-key';
 const ok: Next = async () => new Response('ok', { status: 200 });
+
+beforeEach(() => {
+    CookieAuthority.secret(SECRET);
+    Csrf.config({});
+});
 
 const contextFor = (
     method: string,
@@ -26,134 +33,126 @@ const contextFor = (
     return new HydrisRequest(raw, null);
 };
 
+const csrf = (req: HydrisRequest): Csrf => new Csrf(new CookieAuthority(req));
+
 const cookieValue = (res: Response): string => {
     const set = res.headers.get('set-cookie') ?? '';
     return /csrf=([^;]+)/.exec(set)?.[1] ?? '';
 };
 
 const issue = async (): Promise<{ token: string; cookie: string }> => {
-    const mw = new Csrf({ secret: SECRET });
-    const ctx = contextFor('GET');
-    const res = await mw.handle(ctx, ok);
-    return { token: ctx.csrf, cookie: `csrf=${cookieValue(res)}` };
+    const req = contextFor(Method.Get);
+    const res = await csrf(req).handle(req, ok);
+    return { token: req.csrf, cookie: `csrf=${cookieValue(res)}` };
 };
 
 describe('Csrf', () => {
     it('issues a token cookie on a safe request and exposes ctx.csrf', async () => {
-        const mw = new Csrf({ secret: SECRET });
-        const ctx = contextFor('GET');
-        const res = await mw.handle(ctx, ok);
+        const req = contextFor(Method.Get);
+        const res = await csrf(req).handle(req, ok);
         expect(res.status).toBe(200);
-        expect(ctx.csrf.length).toBeGreaterThan(0);
+        expect(req.csrf.length).toBeGreaterThan(0);
         const set = res.headers.get('set-cookie') ?? '';
         expect(set).toContain('csrf=');
         expect(set).toContain('HttpOnly');
-        expect(cookieValue(res)).toContain(`${ctx.csrf}.`);
+        expect(decodeURIComponent(cookieValue(res))).toContain(`${req.csrf}.`);
     });
 
     it('does not validate safe methods', async () => {
-        const res = await new Csrf({ secret: SECRET }).handle(
-            contextFor('HEAD'),
-            ok,
-        );
+        const req = contextFor(Method.Head);
+        const res = await csrf(req).handle(req, ok);
         expect(res.status).toBe(200);
     });
 
     it('rejects an unsafe request with no token', async () => {
-        await expect(
-            new Csrf({ secret: SECRET }).handle(contextFor('POST'), ok),
-        ).rejects.toThrow('Invalid CSRF token');
+        const req = contextFor(Method.Post);
+        await expect(csrf(req).handle(req, ok)).rejects.toThrow(
+            'Invalid CSRF token',
+        );
     });
 
     it('accepts a POST whose header token matches the cookie', async () => {
         const { token, cookie } = await issue();
-        const res = await new Csrf({ secret: SECRET }).handle(
-            contextFor('POST', { cookie, headers: { 'x-csrf-token': token } }),
-            ok,
-        );
+        const req = contextFor(Method.Post, {
+            cookie,
+            headers: { 'x-csrf-token': token },
+        });
+        const res = await csrf(req).handle(req, ok);
         expect(res.status).toBe(200);
     });
 
     it('rejects a POST whose header token does not match', async () => {
         const { cookie } = await issue();
-        await expect(
-            new Csrf({ secret: SECRET }).handle(
-                contextFor('POST', {
-                    cookie,
-                    headers: { 'x-csrf-token': 'not-the-token' },
-                }),
-                ok,
-            ),
-        ).rejects.toThrow('Invalid CSRF token');
+        const req = contextFor(Method.Post, {
+            cookie,
+            headers: { 'x-csrf-token': 'not-the-token' },
+        });
+        await expect(csrf(req).handle(req, ok)).rejects.toThrow(
+            'Invalid CSRF token',
+        );
     });
 
     it('rejects a POST with a tampered cookie signature', async () => {
         const { token, cookie } = await issue();
-        await expect(
-            new Csrf({ secret: SECRET }).handle(
-                contextFor('POST', {
-                    cookie: `${cookie}tampered`,
-                    headers: { 'x-csrf-token': token },
-                }),
-                ok,
-            ),
-        ).rejects.toThrow('Invalid CSRF token');
+        const req = contextFor(Method.Post, {
+            cookie: `${cookie}tampered`,
+            headers: { 'x-csrf-token': token },
+        });
+        await expect(csrf(req).handle(req, ok)).rejects.toThrow(
+            'Invalid CSRF token',
+        );
     });
 
-    it('rejects a token signed with a different secret', async () => {
-        const { token, cookie } = await issue();
-        await expect(
-            new Csrf({ secret: 'other-secret' }).handle(
-                contextFor('POST', {
-                    cookie,
-                    headers: { 'x-csrf-token': token },
-                }),
-                ok,
-            ),
-        ).rejects.toThrow('Invalid CSRF token');
+    it('rejects a cookie token signed with a different secret', async () => {
+        const token = 'sometoken';
+        CookieAuthority.secret('other-secret');
+        const foreign = new CookieAuthority(contextFor(Method.Get)).sign(
+            'csrf',
+            token,
+        );
+        CookieAuthority.secret(SECRET);
+        const req = contextFor(Method.Post, {
+            cookie: `csrf=${encodeURIComponent(foreign)}`,
+            headers: { 'x-csrf-token': token },
+        });
+        await expect(csrf(req).handle(req, ok)).rejects.toThrow(
+            'Invalid CSRF token',
+        );
     });
 
     it('accepts a token submitted as a form field', async () => {
         const { token, cookie } = await issue();
-        const res = await new Csrf({ secret: SECRET }).handle(
-            contextFor('POST', {
-                cookie,
-                body: new URLSearchParams({ _csrf: token }),
-            }),
-            ok,
-        );
+        const req = contextFor(Method.Post, {
+            cookie,
+            body: new URLSearchParams({ _csrf: token }),
+        });
+        const res = await csrf(req).handle(req, ok);
         expect(res.status).toBe(200);
     });
 
     it('enforces trusted origins when configured', async () => {
+        Csrf.config({ trustedOrigins: ['https://app.example'] });
         const { token, cookie } = await issue();
-        const mw = new Csrf({
-            secret: SECRET,
-            trustedOrigins: ['https://app.example'],
-        });
-        await expect(
-            mw.handle(
-                contextFor('POST', {
-                    cookie,
-                    headers: {
-                        'x-csrf-token': token,
-                        origin: 'https://evil.example',
-                    },
-                }),
-                ok,
-            ),
-        ).rejects.toThrow('Invalid CSRF token');
 
-        const good = await mw.handle(
-            contextFor('POST', {
-                cookie,
-                headers: {
-                    'x-csrf-token': token,
-                    origin: 'https://app.example',
-                },
-            }),
-            ok,
+        const denied = contextFor(Method.Post, {
+            cookie,
+            headers: {
+                'x-csrf-token': token,
+                origin: 'https://evil.example',
+            },
+        });
+        await expect(csrf(denied).handle(denied, ok)).rejects.toThrow(
+            'Invalid CSRF token',
         );
+
+        const allowed = contextFor(Method.Post, {
+            cookie,
+            headers: {
+                'x-csrf-token': token,
+                origin: 'https://app.example',
+            },
+        });
+        const good = await csrf(allowed).handle(allowed, ok);
         expect(good.status).toBe(200);
     });
 });
@@ -161,16 +160,16 @@ describe('Csrf', () => {
 describe('Csrf failure rendering (content negotiation)', () => {
     const guarded = (): Router => {
         const r = new Router();
-        r.register('POST', '/guard', () => Reply.text('ok')).middlewares.push(
-            new Csrf({ secret: SECRET }),
-        );
+        r.register(Method.Post, '/guard', () =>
+            Reply.text('ok'),
+        ).middlewares.push(Csrf);
         return r;
     };
 
     const post = (accept: string): HydrisRequest =>
         new HydrisRequest(
             new Request('http://localhost/guard', {
-                method: 'POST',
+                method: Method.Post,
                 headers: { accept },
             }),
         );

@@ -1,4 +1,4 @@
-import type { Method } from './Method';
+import type { Method } from '../constants';
 import type { RouteDefinition } from './RouteDefinition';
 
 export class MatchedRoute {

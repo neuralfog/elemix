@@ -1,6 +1,6 @@
 import type { Handler } from './HandlerDispatcher';
-import type { Method } from './Method';
-import { compile, type RouteDefinition, type Segment } from './RouteDefinition';
+import type { Method } from '../constants';
+import { RouteDefinition, type Segment } from './RouteDefinition';
 
 const matchSegments = (
     segments: Segment[],
@@ -55,7 +55,7 @@ export class RouteCollection {
             method,
             path,
             handler,
-            segments: compile(path),
+            segments: RouteDefinition.compile(path),
             middlewares: [],
             skip: [],
             isStatic,

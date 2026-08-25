@@ -1,56 +1,26 @@
 import { DiContainer } from '../container/DiContainer';
-import { isErrorHandlerClass } from '../error/ErrorHandler';
+import { CoreServiceProvider } from '../core/CoreServiceProvider';
+import { ErrorHandler } from '../error/ErrorHandler';
 import {
+    DefaultErrorRenderer,
     type ErrorRenderer,
     type ErrorReporter,
-    defaultErrorRenderer,
-    statusOf,
-} from '../error/render';
+} from '../error/ErrorRenderer';
 import {
     MethodNotAllowedException,
     NotFoundException,
 } from '../error/HttpException';
 import { compressDynamic } from '../http/compression';
-import { resolveIp, resolveProtocol } from '../http/proxy';
+import { Header, Method } from '../constants';
+import { ProxyResolver } from '../http/ProxyResolver';
 import { type HandlerResult, toResponse } from '../http/Reply';
-import { Request } from '../http/Request';
+import type { Request } from '../http/Request';
 import type { Middleware } from '../middleware/Middleware';
 import { type ErrorSink, Pipeline } from '../middleware/Pipeline';
-import { type Handler, invokeHandler } from './HandlerDispatcher';
+import { type Handler, HandlerDispatcher } from './HandlerDispatcher';
 import { MatchedRoute } from './MatchedRoute';
-import type { Method } from './Method';
 import { RouteCollection } from './RouteCollection';
-import { segmentsOf, type RouteDefinition } from './RouteDefinition';
-
-const pathnameOf = (url: string): string => {
-    const start = url.indexOf('/', url.indexOf('://') + 3);
-    if (start === -1) return '/';
-    const query = url.indexOf('?', start);
-    return query === -1 ? url.slice(start) : url.slice(start, query);
-};
-
-const isSkipped = (entry: Middleware, skip: Middleware[]): boolean =>
-    skip.some(
-        (s) => s === entry || (typeof s === 'function' && entry instanceof s),
-    );
-
-const callerFile = (): string | null => {
-    const stack = new Error().stack;
-    if (stack === undefined) return null;
-    for (const line of stack.split('\n')) {
-        const match = line.match(/([^()\s]+\.[tj]s):\d+:\d+/);
-        if (match === null) continue;
-        const path = match[1];
-        if (
-            /\/routing\/Router\.[tj]s$/.test(path) ||
-            /\/routing\/Route\.[tj]s$/.test(path)
-        ) {
-            continue;
-        }
-        return (path.split('/').pop() ?? '').replace(/\.[tj]s$/, '');
-    }
-    return null;
-};
+import { RouteDefinition } from './RouteDefinition';
 
 type PrefixRenderer = {
     prefix: string;
@@ -74,11 +44,39 @@ export class Router {
 
     constructor(container: DiContainer = new DiContainer()) {
         this.container = container;
-        this.container.contextTokens(
-            'http',
-            [Request, MatchedRoute],
-            'jobs have no HTTP request; read what you need at enqueue and pass it via job args',
+        new CoreServiceProvider().register(this.container);
+    }
+
+    private static pathnameOf(url: string): string {
+        const start = url.indexOf('/', url.indexOf('://') + 3);
+        if (start === -1) return '/';
+        const query = url.indexOf('?', start);
+        return query === -1 ? url.slice(start) : url.slice(start, query);
+    }
+
+    private static isSkipped(entry: Middleware, skip: Middleware[]): boolean {
+        return skip.some(
+            (s) =>
+                s === entry || (typeof s === 'function' && entry instanceof s),
         );
+    }
+
+    private static callerFile(): string | null {
+        const stack = new Error().stack;
+        if (stack === undefined) return null;
+        for (const line of stack.split('\n')) {
+            const match = line.match(/([^()\s]+\.[tj]s):\d+:\d+/);
+            if (match === null) continue;
+            const path = match[1];
+            if (
+                /\/routing\/Router\.[tj]s$/.test(path) ||
+                /\/routing\/Route\.[tj]s$/.test(path)
+            ) {
+                continue;
+            }
+            return (path.split('/').pop() ?? '').replace(/\.[tj]s$/, '');
+        }
+        return null;
     }
 
     get size(): number {
@@ -138,13 +136,13 @@ export class Router {
 
     register(method: Method, path: string, handler: Handler): RouteDefinition {
         const route = this.routes.add(method, path, handler);
-        const file = this.pendingFile ?? callerFile();
+        const file = this.pendingFile ?? Router.callerFile();
         if (file !== null) this.nameGroup(file, [route], '/');
         return route;
     }
 
     registerStatic(path: string, handler: Handler): RouteDefinition {
-        return this.routes.add('GET', path, handler, true);
+        return this.routes.add(Method.Get, path, handler, true);
     }
 
     async dispatch(
@@ -152,17 +150,16 @@ export class Router {
         socketIp = '',
         trustProxy = false,
     ): Promise<Response> {
-        const parts = segmentsOf(pathnameOf(req.url));
+        const parts = RouteDefinition.segmentsOf(Router.pathnameOf(req.url));
         const matched = this.routes.match(req.method as Method, parts);
         req.route = matched
             ? new MatchedRoute(matched.route, matched.params)
             : null;
-        const route = req.route;
 
         if (matched?.route.isStatic) {
             try {
                 return toResponse(
-                    await invokeHandler(
+                    await HandlerDispatcher.invoke(
                         matched.route.handler,
                         this.container,
                         req,
@@ -175,13 +172,10 @@ export class Router {
         }
 
         req.id = Bun.randomUUIDv7();
-        req.ip = resolveIp(req, socketIp, trustProxy);
-        req.protocol = resolveProtocol(req, trustProxy);
+        req.ip = ProxyResolver.resolveIp(req, socketIp, trustProxy);
+        req.protocol = ProxyResolver.resolveProtocol(req, trustProxy);
 
-        const scope = this.container.scope();
-        scope.value(DiContainer, scope);
-        scope.value(Request, req);
-        if (route) scope.value(MatchedRoute, route);
+        const scope = CoreServiceProvider.requestScope(this.container, req);
 
         const def = matched?.route ?? null;
         const onError: ErrorSink = (error) =>
@@ -201,7 +195,11 @@ export class Router {
                 matchedDef.middlewares,
                 async () =>
                     toResponse(
-                        await invokeHandler(matchedDef.handler, scope, req),
+                        await HandlerDispatcher.invoke(
+                            matchedDef.handler,
+                            scope,
+                            req,
+                        ),
                         req,
                     ),
                 onError,
@@ -210,7 +208,9 @@ export class Router {
 
         const globals =
             def !== null && def.skip.length > 0
-                ? this.globalMiddlewares.filter((m) => !isSkipped(m, def.skip))
+                ? this.globalMiddlewares.filter(
+                      (m) => !Router.isSkipped(m, def.skip),
+                  )
                 : this.globalMiddlewares;
 
         try {
@@ -235,7 +235,7 @@ export class Router {
 
     private async report(error: unknown, req: Request): Promise<void> {
         if (this.reporters.length === 0) {
-            if (statusOf(error) >= 500) console.error(error);
+            if (DefaultErrorRenderer.status(error) >= 500) console.error(error);
             return;
         }
         for (const reporter of this.reporters) {
@@ -266,7 +266,7 @@ export class Router {
             error instanceof MethodNotAllowedException &&
             error.allowed.length > 0
         ) {
-            res.headers.set('Allow', error.allowed.join(', '));
+            res.headers.set(Header.Allow, error.allowed.join(', '));
         }
         return res;
     }
@@ -277,7 +277,7 @@ export class Router {
         req: Request,
         scope: DiContainer,
     ): HandlerResult | Promise<HandlerResult> {
-        if (isErrorHandlerClass(renderer)) {
+        if (ErrorHandler.isClass(renderer)) {
             return scope.get(renderer).render(error, req);
         }
         return renderer(error, req);
@@ -288,7 +288,7 @@ export class Router {
         def: RouteDefinition | null,
     ): ErrorRenderer {
         if (def?.renderer) return def.renderer;
-        const path = pathnameOf(req.url);
+        const path = Router.pathnameOf(req.url);
         let best: PrefixRenderer | null = null;
         for (const entry of this.prefixRenderers) {
             const p = entry.prefix;
@@ -297,6 +297,6 @@ export class Router {
                 best = entry;
             }
         }
-        return best?.renderer ?? this.renderer ?? defaultErrorRenderer;
+        return best?.renderer ?? this.renderer ?? DefaultErrorRenderer.render;
     }
 }

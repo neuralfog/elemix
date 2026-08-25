@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compressAsset, warmAsset } from '../http/compression';
+import { Header, HeaderValue, Mime } from '../constants';
 import type { Request } from '../http/Request';
 
 const ASSETS = join(process.cwd(), 'public', '_elemix');
@@ -9,7 +10,7 @@ const HASHED = /-[a-z0-9]{8,}\.js$/;
 
 export const DEFAULT_ASSET_MAX_AGE = 31_536_000;
 
-const CLIENT_CONTENT_TYPE = 'text/javascript; charset=utf-8';
+const CLIENT_CONTENT_TYPE = Mime.JavaScript;
 
 let manifest: Record<string, string> | null | undefined;
 
@@ -42,12 +43,12 @@ const resolveClientAsset = (
     const file = match[1];
     const cacheControl = HASHED.test(file)
         ? `public, max-age=${maxAge}, immutable`
-        : 'no-cache';
+        : HeaderValue.NoCache;
     return {
         absPath: join(ASSETS, file),
         headers: {
-            'content-type': CLIENT_CONTENT_TYPE,
-            'cache-control': cacheControl,
+            [Header.ContentType]: CLIENT_CONTENT_TYPE,
+            [Header.CacheControl]: cacheControl,
         },
     };
 };

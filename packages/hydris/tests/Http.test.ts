@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { parseCookies, serializeCookie } from '../src/http/Cookie';
+import { Method } from '../src/constants';
+import { CookieAuthority } from '../src/http/CookieAuthority';
 import { Reply } from '../src/http/Reply';
 import { Request } from '../src/http/Request';
 import { Route, router } from '../src/routing/Route';
@@ -7,7 +8,7 @@ import { Route, router } from '../src/routing/Route';
 const request = (
     path: string,
     headers: Record<string, string> = {},
-    method = 'GET',
+    method = Method.Get,
 ): globalThis.Request =>
     ({
         url: `http://localhost${path}`,
@@ -93,13 +94,13 @@ describe('Reply cookies', () => {
 });
 
 describe('cookie helpers', () => {
-    it('serializeCookie encodes the value and defaults Path=/', () => {
-        expect(serializeCookie('n', 'a b')).toBe('n=a%20b; Path=/');
+    it('serialize encodes the value and defaults Path=/', () => {
+        expect(CookieAuthority.serialize('n', 'a b')).toBe('n=a%20b; Path=/');
     });
 
-    it('parseCookies handles null and malformed pairs', () => {
-        expect(parseCookies(null).size).toBe(0);
-        const jar = parseCookies('a=1; broken; b=2');
+    it('parse handles null and malformed pairs', () => {
+        expect(CookieAuthority.parse(null).size).toBe(0);
+        const jar = CookieAuthority.parse('a=1; broken; b=2');
         expect(jar.get('a')).toBe('1');
         expect(jar.get('b')).toBe('2');
         expect(jar.has('broken')).toBe(false);

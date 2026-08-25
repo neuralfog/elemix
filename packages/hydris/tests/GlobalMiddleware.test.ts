@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { App } from '../src/App';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
 import { Request } from '../src/http/Request';
@@ -23,11 +24,11 @@ describe('global middlewares', () => {
             }
         }
         r.use([Global]);
-        r.register('GET', '/a', () => Reply.text('a'));
-        r.register('GET', '/b', () => Reply.text('b'));
+        r.register(Method.Get, '/a', () => Reply.text('a'));
+        r.register(Method.Get, '/b', () => Reply.text('b'));
 
-        await r.dispatch(req('GET', '/a'));
-        await r.dispatch(req('GET', '/b'));
+        await r.dispatch(req(Method.Get, '/a'));
+        await r.dispatch(req(Method.Get, '/b'));
         expect(hits).toEqual(['/a', '/b']);
     });
 
@@ -51,13 +52,13 @@ describe('global middlewares', () => {
             }
         }
         r.use([Outer]);
-        const wrap = r.register('GET', '/wrap', () => {
+        const wrap = r.register(Method.Get, '/wrap', () => {
             order.push('handler');
             return Reply.text('ok');
         });
         wrap.middlewares.push(Inner);
 
-        await r.dispatch(req('GET', '/wrap'));
+        await r.dispatch(req(Method.Get, '/wrap'));
         expect(order).toEqual([
             'global:before',
             'route:before',
@@ -73,18 +74,18 @@ describe('global middlewares', () => {
         class Preflight extends BaseMiddleware {
             handle(ctx: Request, next: Next): Promise<Response> | Response {
                 hits.push(ctx.method);
-                if (ctx.method === 'OPTIONS') {
+                if (ctx.method === Method.Options) {
                     return new Response(null, { status: 204 });
                 }
                 return next();
             }
         }
         r.use([Preflight]);
-        r.register('GET', '/thing', () => Reply.text('ok'));
+        r.register(Method.Get, '/thing', () => Reply.text('ok'));
 
-        const pre = await r.dispatch(req('OPTIONS', '/thing'));
+        const pre = await r.dispatch(req(Method.Options, '/thing'));
         expect(pre.status).toBe(204);
-        expect(hits).toEqual(['OPTIONS']);
+        expect(hits).toEqual([Method.Options]);
     });
 
     it('runs global middlewares on an unmatched path, then 404s', async () => {
@@ -98,7 +99,7 @@ describe('global middlewares', () => {
         }
         r.use([Mark]);
 
-        const res = await r.dispatch(req('GET', '/nope'));
+        const res = await r.dispatch(req(Method.Get, '/nope'));
         expect(res.status).toBe(404);
         expect(ran).toBe(true);
     });
@@ -114,7 +115,7 @@ describe('global middlewares', () => {
         App.middlewares([Track]);
         Route.get('/global/app', () => Reply.text('ok'));
 
-        await router.dispatch(req('GET', '/global/app'));
+        await router.dispatch(req(Method.Get, '/global/app'));
         expect(seen).toContain('/global/app');
     });
 });

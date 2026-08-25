@@ -1,3 +1,4 @@
+import { Header, HeaderValue } from '../constants';
 import type { Request } from '../http/Request';
 import { BaseMiddleware, type Next } from './Middleware';
 
@@ -15,20 +16,27 @@ export type SecureHeadersConfig = {
     contentSecurityPolicy: string | false;
 };
 
-export const defaultSecureHeaders: SecureHeadersConfig = {
-    contentTypeOptions: true,
-    frameOptions: 'SAMEORIGIN',
-    referrerPolicy: 'no-referrer',
-    hsts: false,
-    contentSecurityPolicy: false,
-};
-
 export class SecureHeaders extends BaseMiddleware {
+    private static readonly defaults: SecureHeadersConfig = {
+        contentTypeOptions: true,
+        frameOptions: 'SAMEORIGIN',
+        referrerPolicy: 'no-referrer',
+        hsts: false,
+        contentSecurityPolicy: false,
+    };
+
+    private static hstsValue(config: HstsConfig): string {
+        const parts = [`max-age=${Math.floor(config.maxAge)}`];
+        if (config.includeSubDomains) parts.push('includeSubDomains');
+        if (config.preload) parts.push('preload');
+        return parts.join('; ');
+    }
+
     private readonly options: SecureHeadersConfig;
 
     constructor(options: Partial<SecureHeadersConfig> = {}) {
         super();
-        this.options = { ...defaultSecureHeaders, ...options };
+        this.options = { ...SecureHeaders.defaults, ...options };
     }
 
     async handle(_req: Request, next: Next): Promise<Response> {
@@ -40,26 +48,22 @@ export class SecureHeaders extends BaseMiddleware {
     private apply(headers: Headers): void {
         const o = this.options;
         if (o.contentTypeOptions) {
-            headers.set('X-Content-Type-Options', 'nosniff');
+            headers.set(Header.XContentTypeOptions, HeaderValue.NoSniff);
         }
         if (o.frameOptions !== false) {
-            headers.set('X-Frame-Options', o.frameOptions);
+            headers.set(Header.XFrameOptions, o.frameOptions);
         }
         if (o.referrerPolicy !== false) {
-            headers.set('Referrer-Policy', o.referrerPolicy);
+            headers.set(Header.ReferrerPolicy, o.referrerPolicy);
         }
         if (o.hsts !== false) {
-            headers.set('Strict-Transport-Security', hstsValue(o.hsts));
+            headers.set(
+                Header.StrictTransportSecurity,
+                SecureHeaders.hstsValue(o.hsts),
+            );
         }
         if (o.contentSecurityPolicy !== false) {
-            headers.set('Content-Security-Policy', o.contentSecurityPolicy);
+            headers.set(Header.ContentSecurityPolicy, o.contentSecurityPolicy);
         }
     }
 }
-
-const hstsValue = (config: HstsConfig): string => {
-    const parts = [`max-age=${Math.floor(config.maxAge)}`];
-    if (config.includeSubDomains) parts.push('includeSubDomains');
-    if (config.preload) parts.push('preload');
-    return parts.join('; ');
-};

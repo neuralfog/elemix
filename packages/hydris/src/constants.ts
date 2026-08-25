@@ -1,0 +1,63 @@
+export enum Header {
+    Accept = 'Accept',
+    AcceptEncoding = 'Accept-Encoding',
+    AccessControlAllowCredentials = 'Access-Control-Allow-Credentials',
+    AccessControlAllowHeaders = 'Access-Control-Allow-Headers',
+    AccessControlAllowMethods = 'Access-Control-Allow-Methods',
+    AccessControlAllowOrigin = 'Access-Control-Allow-Origin',
+    AccessControlExposeHeaders = 'Access-Control-Expose-Headers',
+    AccessControlMaxAge = 'Access-Control-Max-Age',
+    AccessControlRequestHeaders = 'Access-Control-Request-Headers',
+    Allow = 'Allow',
+    CacheControl = 'Cache-Control',
+    CfConnectingIp = 'CF-Connecting-IP',
+    Connection = 'Connection',
+    ContentEncoding = 'Content-Encoding',
+    ContentLength = 'Content-Length',
+    ContentSecurityPolicy = 'Content-Security-Policy',
+    ContentType = 'Content-Type',
+    Cookie = 'Cookie',
+    ETag = 'ETag',
+    IfNoneMatch = 'If-None-Match',
+    Location = 'Location',
+    Origin = 'Origin',
+    ReferrerPolicy = 'Referrer-Policy',
+    SetCookie = 'Set-Cookie',
+    StrictTransportSecurity = 'Strict-Transport-Security',
+    TrueClientIp = 'True-Client-IP',
+    Vary = 'Vary',
+    XContentTypeOptions = 'X-Content-Type-Options',
+    XCsrfToken = 'X-CSRF-Token',
+    XForwardedFor = 'X-Forwarded-For',
+    XForwardedProto = 'X-Forwarded-Proto',
+    XFrameOptions = 'X-Frame-Options',
+    XHydrisNav = 'X-Hydris-Nav',
+}
+
+export enum Mime {
+    Html = 'text/html; charset=utf-8',
+    Text = 'text/plain; charset=utf-8',
+    Json = 'application/json; charset=utf-8',
+    JavaScript = 'text/javascript; charset=utf-8',
+    EventStream = 'text/event-stream',
+}
+
+export enum HeaderValue {
+    True = 'true',
+    NavEnabled = '1',
+    NoSniff = 'nosniff',
+    NoCache = 'no-cache',
+    KeepAlive = 'keep-alive',
+}
+
+export enum Method {
+    Get = 'GET',
+    Head = 'HEAD',
+    Post = 'POST',
+    Put = 'PUT',
+    Patch = 'PATCH',
+    Delete = 'DELETE',
+    Connect = 'CONNECT',
+    Options = 'OPTIONS',
+    Trace = 'TRACE',
+}

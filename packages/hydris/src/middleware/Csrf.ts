@@ -1,11 +1,11 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { ForbiddenException } from '../error/HttpException';
-import { type CookieOptions, serializeCookie } from '../http/Cookie';
+import type { CookieAuthority, CookieOptions } from '../http/CookieAuthority';
+import { Header, Method } from '../constants';
 import type { Request } from '../http/Request';
 import { BaseMiddleware, type Next } from './Middleware';
 
 export type CsrfOptions = {
-    secret: string;
     cookieName?: string;
     headerName?: string;
     fieldName?: string;
@@ -18,25 +18,37 @@ type ResolvedCsrf = Required<Omit<CsrfOptions, 'cookie'>> & {
     cookie: CookieOptions;
 };
 
-const defaults: Omit<ResolvedCsrf, 'secret'> = {
-    cookieName: 'csrf',
-    headerName: 'x-csrf-token',
-    fieldName: '_csrf',
-    safeMethods: ['GET', 'HEAD', 'OPTIONS'],
-    trustedOrigins: [],
-    cookie: { httpOnly: true, secure: true, sameSite: 'Lax', path: '/' },
-};
-
 export class Csrf extends BaseMiddleware {
+    private static readonly defaults: ResolvedCsrf = {
+        cookieName: 'csrf',
+        headerName: Header.XCsrfToken,
+        fieldName: '_csrf',
+        safeMethods: [Method.Get, Method.Head, Method.Options],
+        trustedOrigins: [],
+        cookie: { httpOnly: true, secure: true, sameSite: 'Lax', path: '/' },
+    };
+
+    private static stored: CsrfOptions = {};
+
+    static config(options: CsrfOptions): void {
+        Csrf.stored = options;
+    }
+
+    private static equal(a: string, b: string): boolean {
+        const left = Buffer.from(a);
+        const right = Buffer.from(b);
+        return left.length === right.length && timingSafeEqual(left, right);
+    }
+
     private readonly options: ResolvedCsrf;
 
-    constructor(options: CsrfOptions) {
+    constructor(private readonly cookies: CookieAuthority) {
         super();
-        this.options = { ...defaults, ...options };
+        this.options = { ...Csrf.defaults, ...Csrf.stored };
     }
 
     async handle(req: Request, next: Next): Promise<Response> {
-        const cookieToken = this.read(req);
+        const cookieToken = this.cookies.get(this.options.cookieName);
         const token = cookieToken ?? this.generate();
         req.csrf = token;
 
@@ -49,25 +61,14 @@ export class Csrf extends BaseMiddleware {
 
         const res = await next();
         if (cookieToken === null) {
-            res.headers.append(
-                'Set-Cookie',
-                serializeCookie(
-                    this.options.cookieName,
-                    `${token}.${this.sign(token)}`,
-                    this.options.cookie,
-                ),
+            this.cookies.setCookie(
+                res,
+                this.options.cookieName,
+                token,
+                this.options.cookie,
             );
         }
         return res;
-    }
-
-    private read(req: Request): string | null {
-        const raw = req.cookies.get(this.options.cookieName);
-        if (raw === undefined) return null;
-        const dot = raw.lastIndexOf('.');
-        if (dot === -1) return null;
-        const token = raw.slice(0, dot);
-        return equal(raw.slice(dot + 1), this.sign(token)) ? token : null;
     }
 
     private async verify(
@@ -77,12 +78,12 @@ export class Csrf extends BaseMiddleware {
         if (cookieToken === null) return false;
         if (!this.originAllowed(req)) return false;
         const submitted = await this.submitted(req);
-        return submitted !== null && equal(submitted, cookieToken);
+        return submitted !== null && Csrf.equal(submitted, cookieToken);
     }
 
     private originAllowed(req: Request): boolean {
         if (this.options.trustedOrigins.length === 0) return true;
-        const origin = req.headers.get('origin');
+        const origin = req.headers.get(Header.Origin);
         if (origin === null) return true;
         return this.options.trustedOrigins.includes(origin);
     }
@@ -91,7 +92,7 @@ export class Csrf extends BaseMiddleware {
         const header = req.headers.get(this.options.headerName);
         if (header) return header;
 
-        const type = req.headers.get('content-type') ?? '';
+        const type = req.headers.get(Header.ContentType) ?? '';
         if (
             type.includes('form-urlencoded') ||
             type.includes('multipart/form-data')
@@ -107,19 +108,7 @@ export class Csrf extends BaseMiddleware {
         return null;
     }
 
-    private sign(token: string): string {
-        return createHmac('sha256', this.options.secret)
-            .update(token)
-            .digest('base64url');
-    }
-
     private generate(): string {
         return randomBytes(32).toString('base64url');
     }
 }
-
-const equal = (a: string, b: string): boolean => {
-    const left = Buffer.from(a);
-    const right = Buffer.from(b);
-    return left.length === right.length && timingSafeEqual(left, right);
-};

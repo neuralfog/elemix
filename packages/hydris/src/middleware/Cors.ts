@@ -1,3 +1,4 @@
+import { Header, HeaderValue, Method } from '../constants';
 import type { Request } from '../http/Request';
 import { BaseMiddleware, type Next } from './Middleware';
 
@@ -10,26 +11,46 @@ export type CorsConfig = {
     maxAge: number;
 };
 
-export const defaultCorsOptions: CorsConfig = {
-    origin: '*',
-    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [],
-    exposedHeaders: [],
-    credentials: false,
-    maxAge: 86400,
-};
-
 export class Cors extends BaseMiddleware {
+    private static readonly defaults: CorsConfig = {
+        origin: '*',
+        methods: [
+            Method.Get,
+            Method.Head,
+            Method.Post,
+            Method.Put,
+            Method.Patch,
+            Method.Delete,
+            Method.Options,
+        ],
+        allowedHeaders: [],
+        exposedHeaders: [],
+        credentials: false,
+        maxAge: 86400,
+    };
+
+    private static appendVary(headers: Headers, field: string): void {
+        const existing = headers.get(Header.Vary);
+        if (!existing) {
+            headers.set(Header.Vary, field);
+            return;
+        }
+        const parts = existing.split(',').map((part) => part.trim());
+        if (!parts.includes(field)) {
+            headers.set(Header.Vary, `${existing}, ${field}`);
+        }
+    }
+
     private readonly options: CorsConfig;
 
     constructor(options: Partial<CorsConfig> = {}) {
         super();
-        this.options = { ...defaultCorsOptions, ...options };
+        this.options = { ...Cors.defaults, ...options };
     }
 
     handle(req: Request, next: Next): Response | Promise<Response> {
-        const origin = req.headers.get('origin');
-        return req.method === 'OPTIONS'
+        const origin = req.headers.get(Header.Origin);
+        return req.method === Method.Options
             ? this.preflight(req, origin)
             : this.decorate(next, origin);
     }
@@ -39,16 +60,16 @@ export class Cors extends BaseMiddleware {
         const headers = new Headers();
 
         this.applyOrigin(headers, origin);
-        headers.set('Access-Control-Allow-Methods', methods.join(', '));
+        headers.set(Header.AccessControlAllowMethods, methods.join(', '));
 
-        const requested = req.headers.get('access-control-request-headers');
+        const requested = req.headers.get(Header.AccessControlRequestHeaders);
         const allowed = allowedHeaders.length
             ? allowedHeaders.join(', ')
             : requested;
-        if (allowed) headers.set('Access-Control-Allow-Headers', allowed);
+        if (allowed) headers.set(Header.AccessControlAllowHeaders, allowed);
 
-        headers.set('Access-Control-Max-Age', String(maxAge));
-        appendVary(headers, 'Access-Control-Request-Headers');
+        headers.set(Header.AccessControlMaxAge, String(maxAge));
+        Cors.appendVary(headers, Header.AccessControlRequestHeaders);
 
         return new Response(null, { status: 204, headers });
     }
@@ -63,7 +84,7 @@ export class Cors extends BaseMiddleware {
         this.applyOrigin(res.headers, origin);
         if (exposedHeaders.length) {
             res.headers.set(
-                'Access-Control-Expose-Headers',
+                Header.AccessControlExposeHeaders,
                 exposedHeaders.join(', '),
             );
         }
@@ -74,11 +95,11 @@ export class Cors extends BaseMiddleware {
         const value = this.resolveOrigin(origin);
         if (value === null) return;
 
-        headers.set('Access-Control-Allow-Origin', value);
+        headers.set(Header.AccessControlAllowOrigin, value);
         if (this.options.credentials) {
-            headers.set('Access-Control-Allow-Credentials', 'true');
+            headers.set(Header.AccessControlAllowCredentials, HeaderValue.True);
         }
-        if (value !== '*') appendVary(headers, 'Origin');
+        if (value !== '*') Cors.appendVary(headers, Header.Origin);
     }
 
     private resolveOrigin(origin: string | null): string | null {
@@ -90,13 +111,3 @@ export class Cors extends BaseMiddleware {
         return list.includes(origin) ? origin : null;
     }
 }
-
-const appendVary = (headers: Headers, field: string): void => {
-    const existing = headers.get('Vary');
-    if (!existing) {
-        headers.set('Vary', field);
-        return;
-    }
-    const parts = existing.split(',').map((part) => part.trim());
-    if (!parts.includes(field)) headers.set('Vary', `${existing}, ${field}`);
-};

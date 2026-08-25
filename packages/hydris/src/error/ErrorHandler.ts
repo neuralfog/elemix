@@ -6,12 +6,13 @@ export abstract class ErrorHandler {
         error: unknown,
         req: Request,
     ): HandlerResult | Promise<HandlerResult>;
+
+    static isClass(value: unknown): value is ErrorHandlerClass {
+        return (
+            typeof value === 'function' &&
+            (value as { prototype?: unknown }).prototype instanceof ErrorHandler
+        );
+    }
 }
 
 export type ErrorHandlerClass = new (...args: never[]) => ErrorHandler;
-
-export const isErrorHandlerClass = (
-    value: unknown,
-): value is ErrorHandlerClass =>
-    typeof value === 'function' &&
-    (value as { prototype?: unknown }).prototype instanceof ErrorHandler;

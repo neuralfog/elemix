@@ -5,7 +5,7 @@ import {
     ScopeRequiredError,
     UnboundTokenError,
 } from './errors';
-import { describe, type TokenLike } from './Token';
+import { type TokenLike, Tokens } from './Token';
 import {
     type BuildableLifetime,
     type Disposable,
@@ -15,24 +15,10 @@ import {
     DiServiceType,
 } from './types';
 
-const SERVICE_LIFETIME: Record<DiServiceType, BuildableLifetime> = {
-    [DiServiceType.Singleton]: 'singleton',
-    [DiServiceType.Scoped]: 'scoped',
-    [DiServiceType.Transient]: 'transient',
-};
-
-const lifetimeOf = (declared?: DiServiceType): BuildableLifetime =>
-    SERVICE_LIFETIME[declared ?? DiServiceType.Singleton];
-
 type Registration = {
     lifetime: BuildableLifetime;
     factory: Factory<unknown>;
 };
-
-const hasDispose = (value: unknown): value is Disposable =>
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as { dispose?: unknown }).dispose === 'function';
 
 export class DiContainer {
     private registrations: Map<object, Registration> | null = null;
@@ -46,6 +32,47 @@ export class DiContainer {
 
     constructor(private readonly parent: DiContainer | null = null) {
         this.root_ = parent === null ? this : parent.root_;
+    }
+
+    private static readonly INJECT = Symbol.for('ssr.inject');
+
+    static inject(cls: object, deps: readonly TokenLike<unknown>[]): void {
+        Object.defineProperty(cls, DiContainer.INJECT, { value: deps });
+    }
+
+    private static autoFactory(cls: ServiceClass): Factory<object> {
+        return (c: DiContainer): object => {
+            const deps =
+                (cls as { [DiContainer.INJECT]?: readonly unknown[] })[
+                    DiContainer.INJECT
+                ] ?? [];
+            const args = deps.map((dep) => c.get(dep as TokenLike<unknown>));
+            const build = cls as unknown as new (...args: unknown[]) => object;
+            return new build(...args);
+        };
+    }
+
+    private static readonly SERVICE_LIFETIME: Record<
+        DiServiceType,
+        BuildableLifetime
+    > = {
+        [DiServiceType.Singleton]: 'singleton',
+        [DiServiceType.Scoped]: 'scoped',
+        [DiServiceType.Transient]: 'transient',
+    };
+
+    private static lifetimeOf(declared?: DiServiceType): BuildableLifetime {
+        return DiContainer.SERVICE_LIFETIME[
+            declared ?? DiServiceType.Singleton
+        ];
+    }
+
+    private static hasDispose(value: unknown): value is Disposable {
+        return (
+            typeof value === 'object' &&
+            value !== null &&
+            typeof (value as { dispose?: unknown }).dispose === 'function'
+        );
     }
 
     value<T>(token: TokenLike<T>, instance: T): this {
@@ -69,7 +96,7 @@ export class DiContainer {
     }
 
     bind(cls: ServiceClass): Binding {
-        const factory = autoFactory(cls);
+        const factory = DiContainer.autoFactory(cls);
         const key = cls as object;
         const set = (lifetime: BuildableLifetime): void => {
             this.register(key, { lifetime, factory });
@@ -101,8 +128,8 @@ export class DiContainer {
     private registerService(service: Service): void {
         if (typeof service === 'function') {
             this.register(service as object, {
-                lifetime: lifetimeOf(service.service),
-                factory: autoFactory(service),
+                lifetime: DiContainer.lifetimeOf(service.service),
+                factory: DiContainer.autoFactory(service),
             });
             return;
         }
@@ -116,7 +143,7 @@ export class DiContainer {
                 ? (provide as ServiceClass).service
                 : undefined;
         this.register(provide as object, {
-            lifetime: lifetimeOf(declared),
+            lifetime: DiContainer.lifetimeOf(declared),
             factory: service.factory,
         });
     }
@@ -182,7 +209,7 @@ export class DiContainer {
             const chain = building === null ? [key] : [...building, key];
             throw new ForbiddenDependencyError(
                 context,
-                chain.map(describe),
+                chain.map(Tokens.describe),
                 this.root_.contextHint?.get(context),
             );
         }
@@ -204,11 +231,11 @@ export class DiContainer {
             if (typeof key === 'function') {
                 return this.runFactory(
                     key,
-                    autoFactory(key as ServiceClass),
+                    DiContainer.autoFactory(key as ServiceClass),
                     this,
                 );
             }
-            throw new UnboundTokenError(describe(key));
+            throw new UnboundTokenError(Tokens.describe(key));
         }
 
         switch (registration.lifetime) {
@@ -225,7 +252,7 @@ export class DiContainer {
             }
             case 'scoped': {
                 if (this.parent === null) {
-                    throw new ScopeRequiredError(describe(key));
+                    throw new ScopeRequiredError(Tokens.describe(key));
                 }
                 const instance = this.runFactory(
                     key,
@@ -248,7 +275,9 @@ export class DiContainer {
     ): unknown {
         const building = this.root_.buildingSet();
         if (building.has(key)) {
-            throw new CircularDependencyError([...building, key].map(describe));
+            throw new CircularDependencyError(
+                [...building, key].map(Tokens.describe),
+            );
         }
         building.add(key);
         try {
@@ -259,7 +288,9 @@ export class DiContainer {
     }
 
     private remember(instance: unknown): void {
-        if (hasDispose(instance)) this.disposableList().push(instance);
+        if (DiContainer.hasDispose(instance)) {
+            this.disposableList().push(instance);
+        }
     }
 
     private register(key: object, registration: Registration): void {
@@ -314,14 +345,3 @@ class Scope extends DiContainer {
         );
     }
 }
-
-const INJECT = Symbol.for('ssr.inject');
-
-const autoFactory =
-    (cls: ServiceClass): Factory<object> =>
-    (c: DiContainer): object => {
-        const deps = (cls as { [INJECT]?: readonly unknown[] })[INJECT] ?? [];
-        const args = deps.map((dep) => c.get(dep as TokenLike<unknown>));
-        const build = cls as unknown as new (...args: unknown[]) => object;
-        return new build(...args);
-    };

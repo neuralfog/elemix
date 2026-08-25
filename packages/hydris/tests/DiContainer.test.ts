@@ -5,7 +5,7 @@ import {
     type Provider,
     ScopeRequiredError,
     DiServiceType,
-    token,
+    Tokens,
     UnboundTokenError,
 } from '../src/container';
 
@@ -13,7 +13,7 @@ describe('value bindings', () => {
     it('returns the exact instance', () => {
         const c = new DiContainer();
         const config = { url: 'x' };
-        const CONFIG = token<{ url: string }>('Config');
+        const CONFIG = Tokens.create<{ url: string }>('Config');
         c.value(CONFIG, config);
         expect(c.get(CONFIG)).toBe(config);
     });
@@ -87,7 +87,7 @@ describe('start with services', () => {
 
     it('registers value', () => {
         const c = new DiContainer();
-        const CONFIG = token<{ url: string }>('Config');
+        const CONFIG = Tokens.create<{ url: string }>('Config');
         c.start([{ provide: CONFIG, value: { url: 'x' } }]);
         expect(c.get(CONFIG).url).toBe('x');
     });
@@ -216,7 +216,7 @@ describe('auto-resolution', () => {
 
     it('throws for an unbound interface token', () => {
         const c = new DiContainer();
-        const MAILER = token<{ send(): void }>('Mailer');
+        const MAILER = Tokens.create<{ send(): void }>('Mailer');
         expect(() => c.get(MAILER)).toThrow(UnboundTokenError);
     });
 });
@@ -227,7 +227,7 @@ describe('interface tokens', () => {
             send(): string;
         }
         const c = new DiContainer();
-        const MAILER = token<Mailer>('Mailer');
+        const MAILER = Tokens.create<Mailer>('Mailer');
         c.singleton(MAILER, () => ({ send: () => 'sent' }));
         expect(c.get(MAILER).send()).toBe('sent');
     });

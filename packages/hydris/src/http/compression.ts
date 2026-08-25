@@ -1,4 +1,5 @@
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
+import { Header, Method } from '../constants';
 import type { Request } from './Request';
 
 export type CompressionOptions = {
@@ -134,13 +135,13 @@ const compress = (
 };
 
 const addVary = (headers: Headers): void => {
-    const existing = headers.get('vary');
+    const existing = headers.get(Header.Vary);
     if (existing === null) {
-        headers.set('vary', 'Accept-Encoding');
+        headers.set(Header.Vary, Header.AcceptEncoding);
         return;
     }
     if (/(^|,\s*)accept-encoding(\s*,|$)/i.test(existing)) return;
-    headers.set('vary', `${existing}, Accept-Encoding`);
+    headers.set(Header.Vary, `${existing}, ${Header.AcceptEncoding}`);
 };
 
 const assetCache = new Map<string, Uint8Array>();
@@ -209,9 +210,9 @@ const bytesResponse = (
     headers: Record<string, string>,
 ): Response => {
     const out = new Headers(headers);
-    out.set('content-type', contentType);
-    out.set('content-encoding', encoding);
-    out.set('content-length', String(bytes.length));
+    out.set(Header.ContentType, contentType);
+    out.set(Header.ContentEncoding, encoding);
+    out.set(Header.ContentLength, String(bytes.length));
     addVary(out);
     return new Response(asBody(bytes), { headers: out });
 };
@@ -226,8 +227,8 @@ export const compressAsset = async (
     if (cfg === null) return new Response(file, { headers });
     if (!(await file.exists())) return new Response(file, { headers });
 
-    const contentType = headers['content-type'] ?? file.type;
-    const encoding = negotiate(req.headers.get('accept-encoding'), cfg);
+    const contentType = headers[Header.ContentType] ?? file.type;
+    const encoding = negotiate(req.headers.get(Header.AcceptEncoding), cfg);
     const identity = (): Response => {
         const out = new Headers(headers);
         addVary(out);
@@ -305,12 +306,12 @@ export const compressDynamic = async (
 ): Promise<Response> => {
     const cfg = config;
     if (cfg === null) return res;
-    if (req.method === 'HEAD') return res;
-    if (res.headers.has('content-encoding')) return res;
+    if (req.method === Method.Head) return res;
+    if (res.headers.has(Header.ContentEncoding)) return res;
     if (!isCompressibleStatus(res.status)) return res;
-    if (!isCompressible(res.headers.get('content-type'))) return res;
+    if (!isCompressible(res.headers.get(Header.ContentType))) return res;
 
-    const encoding = negotiate(req.headers.get('accept-encoding'), cfg);
+    const encoding = negotiate(req.headers.get(Header.AcceptEncoding), cfg);
     if (encoding === null) {
         addVary(res.headers);
         return res;
@@ -318,7 +319,7 @@ export const compressDynamic = async (
 
     const body = new Uint8Array(await res.arrayBuffer());
     if (body.length < cfg.threshold) {
-        res.headers.set('content-length', String(body.length));
+        res.headers.set(Header.ContentLength, String(body.length));
         addVary(res.headers);
         return rebuild(res, body);
     }
@@ -329,8 +330,8 @@ export const compressDynamic = async (
         BROTLI_DYNAMIC_QUALITY,
         GZIP_DYNAMIC_LEVEL,
     );
-    res.headers.set('content-encoding', encoding);
-    res.headers.set('content-length', String(compressed.length));
+    res.headers.set(Header.ContentEncoding, encoding);
+    res.headers.set(Header.ContentLength, String(compressed.length));
     addVary(res.headers);
     return rebuild(res, compressed);
 };

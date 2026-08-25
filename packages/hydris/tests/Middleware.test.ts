@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
 import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
@@ -34,7 +35,7 @@ describe('route middlewares', () => {
             return Reply.text('ok');
         }).middlewares([A, B]);
 
-        const res = await router.dispatch(req('GET', '/mw/order'));
+        const res = await router.dispatch(req(Method.Get, '/mw/order'));
         expect(await res.text()).toBe('ok');
         expect(order).toEqual([
             'a:before',
@@ -57,7 +58,7 @@ describe('route middlewares', () => {
             return Reply.text('secret');
         }).middlewares([Deny]);
 
-        const res = await router.dispatch(req('GET', '/mw/guard'));
+        const res = await router.dispatch(req(Method.Get, '/mw/guard'));
         expect(res.status).toBe(403);
         expect(await res.text()).toBe('denied');
         expect(handlerRan).toBe(false);
@@ -75,7 +76,9 @@ describe('route middlewares', () => {
         Route.get('/mw/rewrite', () => Reply.text('inner')).middlewares([Wrap]);
 
         expect(
-            await (await router.dispatch(req('GET', '/mw/rewrite'))).text(),
+            await (
+                await router.dispatch(req(Method.Get, '/mw/rewrite'))
+            ).text(),
         ).toBe('[inner]');
     });
 
@@ -97,7 +100,7 @@ describe('route middlewares', () => {
             .middlewares([First])
             .middlewares([Second]);
 
-        await router.dispatch(req('GET', '/mw/chain'));
+        await router.dispatch(req(Method.Get, '/mw/chain'));
         expect(order).toEqual(['first', 'second']);
     });
 
@@ -113,8 +116,8 @@ describe('route middlewares', () => {
         }
         Route.get('/mw/fresh', () => Reply.text('ok')).middlewares([Counting]);
 
-        await router.dispatch(req('GET', '/mw/fresh'));
-        await router.dispatch(req('GET', '/mw/fresh'));
+        await router.dispatch(req(Method.Get, '/mw/fresh'));
+        await router.dispatch(req(Method.Get, '/mw/fresh'));
         expect(seen).toEqual([1, 2]);
     });
 });
@@ -133,8 +136,8 @@ describe('group middlewares', () => {
             Route.get('/b', () => Reply.text('b'));
         }).middlewares([Track]);
 
-        await router.dispatch(req('GET', '/g/a'));
-        await router.dispatch(req('GET', '/g/b'));
+        await router.dispatch(req(Method.Get, '/g/a'));
+        await router.dispatch(req(Method.Get, '/g/b'));
         expect(hits).toEqual(['/g/a', '/g/b']);
     });
 
@@ -156,7 +159,7 @@ describe('group middlewares', () => {
             Route.get('/x', () => Reply.text('x')).middlewares([RouteMw]);
         }).middlewares([Group]);
 
-        await router.dispatch(req('GET', '/wrap/x'));
+        await router.dispatch(req(Method.Get, '/wrap/x'));
         expect(order).toEqual(['group', 'route']);
     });
 
@@ -188,7 +191,7 @@ describe('group middlewares', () => {
             }).middlewares([V2]);
         }).middlewares([Api]);
 
-        await router.dispatch(req('GET', '/mwnest/v2/ping'));
+        await router.dispatch(req(Method.Get, '/mwnest/v2/ping'));
         expect(order).toEqual(['api', 'v2', 'route']);
     });
 });

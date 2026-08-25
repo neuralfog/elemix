@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { Request } from '../src/http/Request';
 import { Reply } from '../src/http/Reply';
 import { Route, router } from '../src/routing/Route';
@@ -22,15 +23,15 @@ describe('Route facade', () => {
         Route.trace('/facade/trace', () => Reply.text('t'));
 
         const cases: [string, string, string][] = [
-            ['GET', '/facade/get', 'g'],
-            ['HEAD', '/facade/head', 'h'],
-            ['POST', '/facade/post', 'p'],
-            ['PUT', '/facade/put', 'pu'],
-            ['PATCH', '/facade/patch', 'pa'],
-            ['DELETE', '/facade/delete', 'd'],
-            ['CONNECT', '/facade/connect', 'c'],
-            ['OPTIONS', '/facade/options', 'o'],
-            ['TRACE', '/facade/trace', 't'],
+            [Method.Get, '/facade/get', 'g'],
+            [Method.Head, '/facade/head', 'h'],
+            [Method.Post, '/facade/post', 'p'],
+            [Method.Put, '/facade/put', 'pu'],
+            [Method.Patch, '/facade/patch', 'pa'],
+            [Method.Delete, '/facade/delete', 'd'],
+            [Method.Connect, '/facade/connect', 'c'],
+            [Method.Options, '/facade/options', 'o'],
+            [Method.Trace, '/facade/trace', 't'],
         ];
 
         for (const [method, path, body] of cases) {
@@ -48,7 +49,7 @@ describe('Route facade', () => {
         }
         Route.get('/facade/handler', [HelloHandler, 'show']);
 
-        const res = await router.dispatch(req('GET', '/facade/handler'));
+        const res = await router.dispatch(req(Method.Get, '/facade/handler'));
         expect(await res.text()).toBe('from handler');
     });
 
@@ -60,7 +61,7 @@ describe('Route facade', () => {
         }
         Route.get('/facade/users/:id', [UserHandler, 'show']);
 
-        const res = await router.dispatch(req('GET', '/facade/users/7'));
+        const res = await router.dispatch(req(Method.Get, '/facade/users/7'));
         expect(await res.text()).toBe('user 7');
     });
 
@@ -75,10 +76,14 @@ describe('Route facade', () => {
         Route.get('/facade/counter', [CountingHandler, 'show']);
 
         expect(
-            await (await router.dispatch(req('GET', '/facade/counter'))).text(),
+            await (
+                await router.dispatch(req(Method.Get, '/facade/counter'))
+            ).text(),
         ).toBe('#1');
         expect(
-            await (await router.dispatch(req('GET', '/facade/counter'))).text(),
+            await (
+                await router.dispatch(req(Method.Get, '/facade/counter'))
+            ).text(),
         ).toBe('#2');
     });
 
@@ -97,13 +102,17 @@ describe('Route facade', () => {
         Route.getAll('/ga', GetAllController);
 
         expect(
-            await (await router.dispatch(req('GET', '/ga/index'))).text(),
+            await (await router.dispatch(req(Method.Get, '/ga/index'))).text(),
         ).toBe('idx');
         expect(
-            await (await router.dispatch(req('GET', '/ga/list-users'))).text(),
+            await (
+                await router.dispatch(req(Method.Get, '/ga/list-users'))
+            ).text(),
         ).toBe('camel');
         expect(
-            await (await router.dispatch(req('GET', '/ga/delete-user'))).text(),
+            await (
+                await router.dispatch(req(Method.Get, '/ga/delete-user'))
+            ).text(),
         ).toBe('snake');
     });
 });
@@ -116,10 +125,10 @@ describe('Route.group', () => {
         });
 
         expect(
-            await (await router.dispatch(req('GET', '/v1/users'))).text(),
+            await (await router.dispatch(req(Method.Get, '/v1/users'))).text(),
         ).toBe('list');
         expect(
-            await (await router.dispatch(req('POST', '/v1/users'))).text(),
+            await (await router.dispatch(req(Method.Post, '/v1/users'))).text(),
         ).toBe('create');
     });
 
@@ -130,11 +139,11 @@ describe('Route.group', () => {
         Route.get('/outside', () => Reply.text('outside'));
 
         expect(
-            await (await router.dispatch(req('GET', '/outside'))).text(),
+            await (await router.dispatch(req(Method.Get, '/outside'))).text(),
         ).toBe('outside');
-        expect((await router.dispatch(req('GET', '/v1/outside'))).status).toBe(
-            404,
-        );
+        expect(
+            (await router.dispatch(req(Method.Get, '/v1/outside'))).status,
+        ).toBe(404);
     });
 
     it('nests groups', async () => {
@@ -145,7 +154,9 @@ describe('Route.group', () => {
         });
 
         expect(
-            await (await router.dispatch(req('GET', '/api/v2/ping'))).text(),
+            await (
+                await router.dispatch(req(Method.Get, '/api/v2/ping'))
+            ).text(),
         ).toBe('pong');
     });
 
@@ -157,7 +168,9 @@ describe('Route.group', () => {
         });
 
         expect(
-            await (await router.dispatch(req('GET', '/shop/item/7'))).text(),
+            await (
+                await router.dispatch(req(Method.Get, '/shop/item/7'))
+            ).text(),
         ).toBe('item 7');
     });
 
@@ -167,7 +180,9 @@ describe('Route.group', () => {
         });
 
         expect(
-            await (await router.dispatch(req('GET', '/norm/thing'))).text(),
+            await (
+                await router.dispatch(req(Method.Get, '/norm/thing'))
+            ).text(),
         ).toBe('ok');
     });
 
@@ -177,12 +192,12 @@ describe('Route.group', () => {
             Route.get('/np/b', () => Reply.text('b'));
         });
 
-        expect(await (await router.dispatch(req('GET', '/np/a'))).text()).toBe(
-            'a',
-        );
-        expect(await (await router.dispatch(req('GET', '/np/b'))).text()).toBe(
-            'b',
-        );
+        expect(
+            await (await router.dispatch(req(Method.Get, '/np/a'))).text(),
+        ).toBe('a');
+        expect(
+            await (await router.dispatch(req(Method.Get, '/np/b'))).text(),
+        ).toBe('b');
     });
 
     it('applies a prefixless group renderError to its routes', async () => {
@@ -192,7 +207,7 @@ describe('Route.group', () => {
             });
         }).renderError(() => Reply.text('grouped').status(500));
 
-        const res = await router.dispatch(req('GET', '/np/boom'));
+        const res = await router.dispatch(req(Method.Get, '/np/boom'));
         expect(res.status).toBe(500);
         expect(await res.text()).toBe('grouped');
     });
@@ -202,7 +217,7 @@ describe('Route.group', () => {
             Route.get('/np3/thing', () => Reply.text('ok'));
         }).renderError(() => Reply.text('grouped404').status(404));
 
-        const res = await router.dispatch(req('GET', '/np3/thing/deeper'));
+        const res = await router.dispatch(req(Method.Get, '/np3/thing/deeper'));
         expect(res.status).toBe(404);
         expect(await res.text()).toBe('grouped404');
     });

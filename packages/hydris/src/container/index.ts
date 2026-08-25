@@ -11,7 +11,7 @@ export {
     ServiceProvider,
     type ServiceProviderClass,
 } from './ServiceProvider';
-export { type Ctor, token, type Token, type TokenLike } from './Token';
+export { type Ctor, type Token, type TokenLike, Tokens } from './Token';
 export { DiServiceType } from './types';
 export type {
     BuildableLifetime,

@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'bun:test';
-import { DiContainer, ForbiddenDependencyError, token } from '../src/container';
+import {
+    DiContainer,
+    ForbiddenDependencyError,
+    Tokens,
+} from '../src/container';
 
-const REQUEST = token<{ url: string }>('Request');
+const REQUEST = Tokens.create<{ url: string }>('Request');
 
 const withHttpContext = (): DiContainer => {
     const c = new DiContainer();

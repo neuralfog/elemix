@@ -314,6 +314,22 @@ test.describe('client store SSR round-trip', () => {
         expect(html).toContain('data-count="0"');
     });
 
+    test('a store.__proto__ cookie cannot seed another store via the prototype', async ({
+        request,
+    }) => {
+        const res = await request.get('/nav-store-b', {
+            headers: {
+                cookie: `store.__proto__=${encodeURIComponent(
+                    JSON.stringify({ prefs: { count: 9 } }),
+                )}`,
+            },
+        });
+        expect(res.status()).toBe(200);
+        const html = await res.text();
+        expect(html).toContain('data-count="0"');
+        expect(html).not.toContain('data-count="9"');
+    });
+
     test('client mutation reaches SSR on soft-nav', async ({ page }) => {
         await page.goto('/nav-store-a');
         await ready(page);

@@ -1,30 +1,32 @@
-import type { ErrorRenderer } from '../error/render';
+import type { Method } from '../constants';
+import type { ErrorRenderer } from '../error/ErrorRenderer';
 import type { Middleware } from '../middleware/Middleware';
 import type { Handler } from './HandlerDispatcher';
-import type { Method } from './Method';
 
 export type Segment =
     | { param: false; value: string }
     | { param: true; name: string }
     | { wildcard: true };
 
-export type RouteDefinition = {
-    method: Method;
-    path: string;
-    handler: Handler;
-    segments: Segment[];
-    middlewares: Middleware[];
-    skip: Middleware[];
-    isStatic: boolean;
-    renderer?: ErrorRenderer;
-};
+export class RouteDefinition {
+    declare method: Method;
+    declare path: string;
+    declare handler: Handler;
+    declare segments: Segment[];
+    declare middlewares: Middleware[];
+    declare skip: Middleware[];
+    declare isStatic: boolean;
+    declare renderer?: ErrorRenderer;
 
-export const segmentsOf = (path: string): string[] =>
-    path.split('/').filter(Boolean);
+    static segmentsOf(path: string): string[] {
+        return path.split('/').filter(Boolean);
+    }
 
-export const compile = (path: string): Segment[] =>
-    segmentsOf(path).map((seg) => {
-        if (seg === '*') return { wildcard: true };
-        if (seg.startsWith(':')) return { param: true, name: seg.slice(1) };
-        return { param: false, value: seg };
-    });
+    static compile(path: string): Segment[] {
+        return RouteDefinition.segmentsOf(path).map((seg) => {
+            if (seg === '*') return { wildcard: true };
+            if (seg.startsWith(':')) return { param: true, name: seg.slice(1) };
+            return { param: false, value: seg };
+        });
+    }
+}

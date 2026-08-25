@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, spyOn } from 'bun:test';
 import { App } from '../src/App';
-import { handleUnhandled, setUnhandledHandler } from '../src/unhandled';
+import { UnhandledErrors } from '../src/error/UnhandledErrors';
 
 describe('App.onUnhandled', () => {
     afterEach(() => {
-        setUnhandledHandler((error) => {
+        UnhandledErrors.setHandler((error) => {
             console.error(error);
         });
     });
@@ -14,7 +14,7 @@ describe('App.onUnhandled', () => {
         App.onUnhandled((error) => seen.push(error));
 
         const err = new Error('boom');
-        handleUnhandled(err);
+        UnhandledErrors.handle(err);
 
         expect(seen).toEqual([err]);
     });
@@ -26,7 +26,7 @@ describe('App.onUnhandled', () => {
         App.onUnhandled((error) => second.push(error));
 
         const err = new Error('again');
-        handleUnhandled(err);
+        UnhandledErrors.handle(err);
 
         expect(first).toEqual([]);
         expect(second).toEqual([err]);
@@ -35,7 +35,7 @@ describe('App.onUnhandled', () => {
     it('defaults to console.error when no handler is registered', () => {
         const spy = spyOn(console, 'error').mockImplementation(() => {});
         const err = new Error('default');
-        handleUnhandled(err);
+        UnhandledErrors.handle(err);
         expect(spy).toHaveBeenCalledWith(err);
         spy.mockRestore();
     });

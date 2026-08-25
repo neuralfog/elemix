@@ -1,9 +1,10 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { gunzipSync } from 'node:zlib';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { assetHandler } from '../src/http/assets';
+import { AssetHandler } from '../src/http/AssetHandler';
 import {
     compressDynamic,
     resetCompression,
@@ -38,13 +39,13 @@ const assetReq = (star: string, accept?: string): Request => {
     if (accept !== undefined) headers.set('accept-encoding', accept);
     const raw = {
         url: 'http://localhost/static/x',
-        method: 'GET',
+        method: Method.Get,
         headers,
     } as unknown as globalThis.Request;
     return new Request(raw, new MatchedRoute({} as never, { '*': star }));
 };
 
-const dynamicReq = (accept?: string, method = 'GET'): Request => {
+const dynamicReq = (accept?: string, method = Method.Get): Request => {
     const headers = new Headers();
     if (accept !== undefined) headers.set('accept-encoding', accept);
     return new Request({
@@ -56,14 +57,18 @@ const dynamicReq = (accept?: string, method = 'GET'): Request => {
 
 describe('static asset compression', () => {
     it('leaves assets untouched when compression is off', async () => {
-        const res = await assetHandler({ dir })(assetReq('app.js', 'br, gzip'));
+        const res = await AssetHandler.create({ dir })(
+            assetReq('app.js', 'br, gzip'),
+        );
         expect(res.headers.get('content-encoding')).toBeNull();
         expect(res.headers.get('vary')).toBeNull();
     });
 
     it('serves brotli when the client prefers it', async () => {
         setCompression();
-        const res = await assetHandler({ dir })(assetReq('app.js', 'br, gzip'));
+        const res = await AssetHandler.create({ dir })(
+            assetReq('app.js', 'br, gzip'),
+        );
         expect(res.headers.get('content-encoding')).toBe('br');
         expect(res.headers.get('vary')).toBe('Accept-Encoding');
         const body = new Uint8Array(await res.arrayBuffer());
@@ -72,7 +77,9 @@ describe('static asset compression', () => {
 
     it('falls back to gzip when brotli is unavailable', async () => {
         setCompression();
-        const res = await assetHandler({ dir })(assetReq('app.js', 'gzip'));
+        const res = await AssetHandler.create({ dir })(
+            assetReq('app.js', 'gzip'),
+        );
         expect(res.headers.get('content-encoding')).toBe('gzip');
         const decoded = gunzipSync(
             new Uint8Array(await res.arrayBuffer()),
@@ -82,33 +89,39 @@ describe('static asset compression', () => {
 
     it('serves identity when the client accepts no encoding', async () => {
         setCompression();
-        const res = await assetHandler({ dir })(assetReq('app.js'));
+        const res = await AssetHandler.create({ dir })(assetReq('app.js'));
         expect(res.headers.get('content-encoding')).toBeNull();
         expect(res.headers.get('vary')).toBe('Accept-Encoding');
     });
 
     it('does not compress below the threshold', async () => {
         setCompression();
-        const res = await assetHandler({ dir })(assetReq('tiny.js', 'br'));
+        const res = await AssetHandler.create({ dir })(
+            assetReq('tiny.js', 'br'),
+        );
         expect(res.headers.get('content-encoding')).toBeNull();
     });
 
     it('does not compress incompressible types', async () => {
         setCompression();
-        const res = await assetHandler({ dir })(assetReq('logo.png', 'br'));
+        const res = await AssetHandler.create({ dir })(
+            assetReq('logo.png', 'br'),
+        );
         expect(res.headers.get('content-encoding')).toBeNull();
     });
 
     it('respects a disabled brotli option', async () => {
         setCompression({ brotli: false });
-        const res = await assetHandler({ dir })(assetReq('app.js', 'br, gzip'));
+        const res = await AssetHandler.create({ dir })(
+            assetReq('app.js', 'br, gzip'),
+        );
         expect(res.headers.get('content-encoding')).toBe('gzip');
     });
 
     it('caches the compressed bytes per asset', async () => {
         setCompression();
-        const a = await assetHandler({ dir })(assetReq('app.js', 'br'));
-        const b = await assetHandler({ dir })(assetReq('app.js', 'br'));
+        const a = await AssetHandler.create({ dir })(assetReq('app.js', 'br'));
+        const b = await AssetHandler.create({ dir })(assetReq('app.js', 'br'));
         const first = new Uint8Array(await a.arrayBuffer());
         const second = new Uint8Array(await b.arrayBuffer());
         expect(second).toEqual(first);
@@ -122,7 +135,7 @@ describe('build-emitted disk siblings', () => {
         const sentinel = Buffer.from('SENTINEL_BROTLI_PAYLOAD_FROM_DISK');
         writeFileSync(join(dir, name), `console.log("${big}");`);
         writeFileSync(join(dir, `${name}.br`), sentinel);
-        const res = await assetHandler({ dir })(assetReq(name, 'br'));
+        const res = await AssetHandler.create({ dir })(assetReq(name, 'br'));
         expect(res.headers.get('content-encoding')).toBe('br');
         const body = new Uint8Array(await res.arrayBuffer());
         expect(Buffer.from(body).toString()).toBe(sentinel.toString());
@@ -135,7 +148,7 @@ describe('build-emitted disk siblings', () => {
         writeFileSync(join(dir, name), `console.log("${big}");`);
         writeFileSync(join(dir, `${name}.gz`), sentinel);
         await warmAsset(join(dir, name));
-        const res = await assetHandler({ dir })(assetReq(name, 'gzip'));
+        const res = await AssetHandler.create({ dir })(assetReq(name, 'gzip'));
         const body = new Uint8Array(await res.arrayBuffer());
         expect(Buffer.from(body).toString()).toBe(sentinel.toString());
     });
@@ -157,7 +170,9 @@ describe('asset precompute (warmAsset)', () => {
         setCompression();
         const warmed = await warmAsset(join(dir, 'app.js'));
         expect(warmed).not.toBeNull();
-        const res = await assetHandler({ dir })(assetReq('app.js', 'br'));
+        const res = await AssetHandler.create({ dir })(
+            assetReq('app.js', 'br'),
+        );
         const served = new Uint8Array(await res.arrayBuffer());
         expect(res.headers.get('content-encoding')).toBe('br');
         expect(served.length).toBe((warmed as { best: number }).best);
@@ -226,7 +241,7 @@ describe('dynamic response compression', () => {
         setCompression();
         const res = await compressDynamic(
             htmlReply(),
-            dynamicReq('br', 'HEAD'),
+            dynamicReq('br', Method.Head),
         );
         expect(res.headers.get('content-encoding')).toBeNull();
     });
@@ -267,14 +282,14 @@ describe('router integration', () => {
     const routed = (path: string, accept: string): Request =>
         new Request({
             url: `http://localhost${path}`,
-            method: 'GET',
+            method: Method.Get,
             headers: new Headers({ 'accept-encoding': accept }),
         } as unknown as globalThis.Request);
 
     it('compresses a dynamic route through dispatch', async () => {
         setCompression();
         const router = new Router();
-        router.register('GET', '/page', () =>
+        router.register(Method.Get, '/page', () =>
             Reply.html(`<!doctype html><body>${big}</body>`),
         );
         const res = await router.dispatch(routed('/page', 'br, gzip'));
@@ -284,7 +299,7 @@ describe('router integration', () => {
     it('compresses a static asset through dispatch', async () => {
         setCompression();
         const router = new Router();
-        router.registerStatic('/static/*', assetHandler({ dir }));
+        router.registerStatic('/static/*', AssetHandler.create({ dir }));
         const res = await router.dispatch(routed('/static/app.js', 'gzip'));
         expect(res.headers.get('content-encoding')).toBe('gzip');
         const decoded = gunzipSync(
@@ -295,7 +310,7 @@ describe('router integration', () => {
 
     it('leaves everything untouched when disabled', async () => {
         const router = new Router();
-        router.register('GET', '/page', () =>
+        router.register(Method.Get, '/page', () =>
             Reply.html(`<!doctype html><body>${big}</body>`),
         );
         const res = await router.dispatch(routed('/page', 'br, gzip'));

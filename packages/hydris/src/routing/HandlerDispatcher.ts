@@ -22,27 +22,31 @@ export type Handler =
     | HandlerFn
     | readonly [new (...args: never[]) => object, PropertyKey];
 
-const INJECT_METHODS = Symbol.for('ssr.inject.methods');
-
 type MethodTable = Record<PropertyKey, readonly TokenLike<unknown>[]>;
 
-export const invokeHandler = (
-    handler: Handler,
-    scope: DiContainer,
-    req: Request,
-): HandlerResult | Promise<HandlerResult> => {
-    if (typeof handler === 'function') return handler(req);
-    const [HandlerClass, method] = handler;
-    const instance = scope.get(HandlerClass) as Record<
-        PropertyKey,
-        (...args: unknown[]) => HandlerResult | Promise<HandlerResult>
-    >;
-    const table = (HandlerClass as { [INJECT_METHODS]?: MethodTable })[
-        INJECT_METHODS
-    ];
-    const deps = table?.[method];
-    if (deps) {
-        return instance[method](...deps.map((dep) => scope.get(dep)));
+export class HandlerDispatcher {
+    private static readonly INJECT_METHODS = Symbol.for('ssr.inject.methods');
+
+    static invoke(
+        handler: Handler,
+        scope: DiContainer,
+        req: Request,
+    ): HandlerResult | Promise<HandlerResult> {
+        if (typeof handler === 'function') return handler(req);
+        const [HandlerClass, method] = handler;
+        const instance = scope.get(HandlerClass) as Record<
+            PropertyKey,
+            (...args: unknown[]) => HandlerResult | Promise<HandlerResult>
+        >;
+        const table = (
+            HandlerClass as {
+                [HandlerDispatcher.INJECT_METHODS]?: MethodTable;
+            }
+        )[HandlerDispatcher.INJECT_METHODS];
+        const deps = table?.[method];
+        if (deps) {
+            return instance[method](...deps.map((dep) => scope.get(dep)));
+        }
+        return instance[method](req);
     }
-    return instance[method](req);
-};
+}

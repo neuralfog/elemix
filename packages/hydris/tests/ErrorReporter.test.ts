@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { Request } from '../src/http/Request';
 import { Router } from '../src/routing/Router';
 
@@ -26,11 +27,11 @@ const captureErrors = async (fn: () => Promise<void>): Promise<unknown[]> => {
 describe('default error reporter', () => {
     it('logs a 5xx to console.error when no reporter is registered', async () => {
         const router = new Router();
-        router.register('GET', '/boom', (): never => {
+        router.register(Method.Get, '/boom', (): never => {
             throw new Error('kaboom');
         });
         const errors = await captureErrors(async () => {
-            const res = await router.dispatch(req('GET', '/boom'));
+            const res = await router.dispatch(req(Method.Get, '/boom'));
             expect(res.status).toBe(500);
         });
         expect(errors.length).toBe(1);
@@ -40,7 +41,7 @@ describe('default error reporter', () => {
     it('does not log an expected 4xx (unmatched route)', async () => {
         const router = new Router();
         const errors = await captureErrors(async () => {
-            const res = await router.dispatch(req('GET', '/missing'));
+            const res = await router.dispatch(req(Method.Get, '/missing'));
             expect(res.status).toBe(404);
         });
         expect(errors.length).toBe(0);
@@ -52,11 +53,11 @@ describe('default error reporter', () => {
         router.onError((error) => {
             seen.push(error);
         });
-        router.register('GET', '/boom', (): never => {
+        router.register(Method.Get, '/boom', (): never => {
             throw new Error('kaboom');
         });
         const errors = await captureErrors(async () => {
-            await router.dispatch(req('GET', '/boom'));
+            await router.dispatch(req(Method.Get, '/boom'));
         });
         expect(errors.length).toBe(0);
         expect(seen.length).toBe(1);

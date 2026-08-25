@@ -5,7 +5,7 @@ export type {
     HandlerRef,
 } from './HandlerDispatcher';
 export { MatchedRoute } from './MatchedRoute';
-export type { Method } from './Method';
+export { Method } from '../constants';
 export { Route, router } from './Route';
 export type { RouteDefinition } from './RouteDefinition';
 export { Router } from './Router';

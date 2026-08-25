@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { Method } from '../src/constants';
 import { container, Route, router } from '../src/routing/Route';
 import { BaseMiddleware, type Next } from '../src/middleware/Middleware';
 import { Request } from '../src/http/Request';
@@ -27,7 +28,7 @@ describe('handler dependency injection', () => {
         }
         Route.get('/di/greet/:name', [GreetHandler, 'show']);
 
-        const res = await router.dispatch(req('GET', '/di/greet/ada'));
+        const res = await router.dispatch(req(Method.Get, '/di/greet/ada'));
         expect(await res.text()).toBe('hi ada');
     });
 
@@ -40,7 +41,7 @@ describe('handler dependency injection', () => {
         }
         Route.get('/di/ctx', [CtxHandler, 'show']);
 
-        const res = await router.dispatch(req('GET', '/di/ctx'));
+        const res = await router.dispatch(req(Method.Get, '/di/ctx'));
         expect(await res.text()).toBe('/di/ctx');
     });
 
@@ -60,7 +61,7 @@ describe('handler dependency injection', () => {
         }
         Route.get('/di/list', [ListHandler, 'index']);
 
-        const res = await router.dispatch(req('GET', '/di/list'));
+        const res = await router.dispatch(req(Method.Get, '/di/list'));
         expect(await res.text()).toBe('rows');
     });
 });
@@ -83,7 +84,7 @@ describe('middleware dependency injection', () => {
         }
         Route.get('/di/audit', () => Reply.text('ok')).middlewares([AuditMw]);
 
-        await router.dispatch(req('GET', '/di/audit'));
+        await router.dispatch(req(Method.Get, '/di/audit'));
         expect(container.get(Audit).paths).toContain('/di/audit');
     });
 
@@ -100,7 +101,7 @@ describe('middleware dependency injection', () => {
         }
         Route.get('/di/mwreq', () => Reply.text('ok')).middlewares([PathMw]);
 
-        await router.dispatch(req('GET', '/di/mwreq'));
+        await router.dispatch(req(Method.Get, '/di/mwreq'));
         expect(seen).toEqual(['/di/mwreq']);
     });
 });
@@ -113,8 +114,8 @@ describe('request id', () => {
             return Reply.text(ctx.id);
         });
 
-        const a = await (await router.dispatch(req('GET', '/id'))).text();
-        const b = await (await router.dispatch(req('GET', '/id'))).text();
+        const a = await (await router.dispatch(req(Method.Get, '/id'))).text();
+        const b = await (await router.dispatch(req(Method.Get, '/id'))).text();
 
         const uuid =
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -134,7 +135,7 @@ describe('body parsing', () => {
 
         const request = new Request(
             new globalThis.Request('http://localhost/body/json', {
-                method: 'POST',
+                method: Method.Post,
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({ name: 'ada' }),
             }),
@@ -150,7 +151,7 @@ describe('body parsing', () => {
 
         const request = new Request(
             new globalThis.Request('http://localhost/body/text', {
-                method: 'POST',
+                method: Method.Post,
                 body: 'hello',
             }),
         );
@@ -167,7 +168,7 @@ describe('request bag', () => {
             return Reply.text('ok');
         });
 
-        await router.dispatch(req('GET', '/bag/default'));
+        await router.dispatch(req(Method.Get, '/bag/default'));
         expect(seen).toEqual({});
     });
 
@@ -188,7 +189,7 @@ describe('request bag', () => {
         }
         Route.get('/bag/me', [MeHandler, 'show']).middlewares([SetUser]);
 
-        const res = await router.dispatch(req('GET', '/bag/me'));
+        const res = await router.dispatch(req(Method.Get, '/bag/me'));
         expect(await res.text()).toBe('ada');
     });
 
@@ -201,7 +202,7 @@ describe('request bag', () => {
             return Reply.text(String(ctx.bag.n));
         });
 
-        const res = await router.dispatch(req('GET', '/bag/ctx'));
+        const res = await router.dispatch(req(Method.Get, '/bag/ctx'));
         expect(await res.text()).toBe('7');
     });
 });
@@ -222,7 +223,7 @@ describe('method injection', () => {
         }
         Route.get('/mi/show', [ReqHandler, 'show']);
 
-        const res = await router.dispatch(req('GET', '/mi/show'));
+        const res = await router.dispatch(req(Method.Get, '/mi/show'));
         expect(await res.text()).toBe('/mi/show');
         expect(container.get(Logger).last).toBe('/mi/show');
     });
@@ -235,7 +236,7 @@ describe('method injection', () => {
         }
         Route.get('/mi/plain/:id', [PlainHandler, 'show']);
 
-        const res = await router.dispatch(req('GET', '/mi/plain/7'));
+        const res = await router.dispatch(req(Method.Get, '/mi/plain/7'));
         expect(await res.text()).toBe('7');
     });
 });
@@ -252,8 +253,8 @@ describe('matched route', () => {
             return Reply.text('ok');
         });
 
-        await router.dispatch(req('GET', '/route/users/42'));
-        expect(method).toBe('GET');
+        await router.dispatch(req(Method.Get, '/route/users/42'));
+        expect(method).toBe(Method.Get);
         expect(path).toBe('/route/users/:id');
         expect(id).toBe('42');
     });
@@ -278,7 +279,7 @@ describe('request scope lifecycle', () => {
         }
         Route.get('/di/scoped', [ScopedHandler, 'show']);
 
-        await router.dispatch(req('GET', '/di/scoped'));
+        await router.dispatch(req(Method.Get, '/di/scoped'));
         expect(disposed).toEqual(['req']);
     });
 });

@@ -9,9 +9,8 @@ export {
     ValidationException,
 } from './HttpException';
 export {
-    defaultErrorRenderer,
+    DefaultErrorRenderer,
     type ErrorRenderer,
     type ErrorRendererFn,
     type ErrorReporter,
-    statusOf,
-} from './render';
+} from './ErrorRenderer';

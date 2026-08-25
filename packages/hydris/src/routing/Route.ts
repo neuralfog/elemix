@@ -1,15 +1,15 @@
-import type { ErrorRenderer } from '../error/render';
+import type { ErrorRenderer } from '../error/ErrorRenderer';
 import type { Middleware } from '../middleware/Middleware';
 import type { HandlerFn, HandlerRef } from './HandlerDispatcher';
-import type { Method } from './Method';
-import { segmentsOf, type RouteDefinition } from './RouteDefinition';
+import { Method } from '../constants';
+import { RouteDefinition } from './RouteDefinition';
 import { Router } from './Router';
 
 export const router = new Router();
 export const container = router.container;
 
 const join = (base: string, path: string): string => {
-    const segments = segmentsOf(`${base}/${path}`);
+    const segments = RouteDefinition.segmentsOf(`${base}/${path}`);
     return `/${segments.join('/')}`;
 };
 
@@ -108,7 +108,7 @@ export class Route {
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('GET', path, handler);
+        return Route.make(Method.Get, path, handler);
     }
 
     static getAll<T extends object>(
@@ -120,7 +120,7 @@ export class Route {
             if (name === 'constructor') continue;
             const descriptor = Object.getOwnPropertyDescriptor(proto, name);
             if (typeof descriptor?.value !== 'function') continue;
-            Route.make('GET', join(basePath, kebab(name)), [
+            Route.make(Method.Get, join(basePath, kebab(name)), [
                 controller,
                 name,
             ] as unknown as HandlerRef<T>);
@@ -131,55 +131,55 @@ export class Route {
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('HEAD', path, handler);
+        return Route.make(Method.Head, path, handler);
     }
 
     static post<T extends object>(
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('POST', path, handler);
+        return Route.make(Method.Post, path, handler);
     }
 
     static put<T extends object>(
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('PUT', path, handler);
+        return Route.make(Method.Put, path, handler);
     }
 
     static patch<T extends object>(
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('PATCH', path, handler);
+        return Route.make(Method.Patch, path, handler);
     }
 
     static delete<T extends object>(
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('DELETE', path, handler);
+        return Route.make(Method.Delete, path, handler);
     }
 
     static connect<T extends object>(
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('CONNECT', path, handler);
+        return Route.make(Method.Connect, path, handler);
     }
 
     static options<T extends object>(
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('OPTIONS', path, handler);
+        return Route.make(Method.Options, path, handler);
     }
 
     static trace<T extends object>(
         path: string,
         handler: HandlerFn | HandlerRef<T>,
     ): RouteBuilder {
-        return Route.make('TRACE', path, handler);
+        return Route.make(Method.Trace, path, handler);
     }
 }

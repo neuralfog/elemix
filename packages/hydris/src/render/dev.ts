@@ -1,3 +1,5 @@
+import { Header, HeaderValue, Mime } from '../constants';
+
 export type DevOptions = {
     liveReload?: boolean;
     watch?: string;
@@ -52,9 +54,9 @@ export const liveReloadResponse = (): Response => {
     });
     return new Response(stream, {
         headers: {
-            'content-type': 'text/event-stream',
-            'cache-control': 'no-cache',
-            connection: 'keep-alive',
+            [Header.ContentType]: Mime.EventStream,
+            [Header.CacheControl]: HeaderValue.NoCache,
+            [Header.Connection]: HeaderValue.KeepAlive,
         },
     });
 };
