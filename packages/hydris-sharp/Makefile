@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := run
 
-.PHONY: run run-r kill test watch build release restore clean format format-check
+.PHONY: run run-r kill test smoke watch build release restore clean format format-check
 
 run:
 	dotnet run
@@ -18,10 +18,13 @@ kill:
 test:
 	dotnet test Tests/Hydris.Tests.csproj --logger "console;verbosity=detailed"
 
-format:
+smoke-aot:
+	bash tests/aot-smoke/run.sh
+
+lint-fix:
 	dotnet format hydris-sharp.slnx
 
-format-check:
+lint:
 	dotnet format hydris-sharp.slnx --verify-no-changes
 
 watch:
@@ -30,7 +33,7 @@ watch:
 build:
 	dotnet build
 
-release:
+buildr:
 	dotnet build -c Release
 
 restore:

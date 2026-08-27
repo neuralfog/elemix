@@ -1,17 +1,5 @@
 name: release
 
-# One `v*` tag releases the whole toolchain, gated end-to-end:
-#
-#   test → changelog → build-compiler (6 binaries) → publish-* → release-notes
-#
-# Nothing publishes unless everything before it is green. The `test` gate runs
-# the full suite (which also `pnpm build`s every package + the wasm conformance),
-# so the only build it can't cover is the cross-platform binaries — that's the
-# one explicit build job, and EVERY publish needs it. Cross-package order
-# (vite after compiler, storybook after elemix) comes from `needs:`, not npm
-# polling — the deps were just published, so only a short CDN wait remains.
-#
-# Manual runs: workflow_dispatch with an explicit version.
 on:
   push:
     tags: ['v*']
@@ -26,7 +14,6 @@ defaults:
     shell: bash
 
 jobs:
-  # ── the released version, from the tag or the manual input ──────────────────
   version:
     runs-on: ubuntu-latest
     outputs:
@@ -40,11 +27,9 @@ jobs:
             echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
           fi
 
-  # ── gate 1: the full test suite (reused from test.yml) ──────────────────────
   test:
     uses: ./.github/workflows/test.yml
 
-  # ── gate 2: the root changelog's top entry == <version>, well-formed ────────
   changelog:
     needs: [test, version]
     runs-on: ubuntu-latest
@@ -56,21 +41,13 @@ jobs:
       - name: Check changelog
         run: node scripts/changelog.mjs check "${{ needs.version.outputs.value }}"
 
-  # ── mirror the Neovim plugin to its own repo ────────────────────────────────
-  #    Plugin managers install a whole repo, not a monorepo subdir, so
-  #    `git subtree split` mirrors packages/nvim to neuralfog/elemix.nvim (default
-  #    branch + a v<version> tag). Needs an NVIM_MIRROR_TOKEN secret with push
-  #    access to the mirror repo. No binary build, so it only rides the test gate.
   publish-nvim:
     needs: [changelog, version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # subtree split needs the full history
-          # Don't persist the default GITHUB_TOKEN as a global http.extraheader:
-          # it would override the NVIM_MIRROR_TOKEN embedded in the push URL, so
-          # the mirror push would auth as github-actions[bot] (no access) -> 403.
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v6
         with:
@@ -80,18 +57,6 @@ jobs:
           NVIM_MIRROR_TOKEN: ${{ secrets.NVIM_MIRROR_TOKEN }}
         run: node scripts/publish-nvim.mjs "${{ needs.version.outputs.value }}"
 
-  # ── publish the VS Code extension to the Marketplace ────────────────────────
-  #    The Marketplace only accepts a clean `major.minor.patch` (no `-dev.N`
-  #    suffix, no leading zeros), so the extension drops the suffix: `bump` stamps
-  #    packages/vscode with the base version (0.9.0-dev.22 -> 0.9.0), and this job
-  #    does the same from the root version. A dev root publishes to the
-  #    pre-release channel (`--pre-release` flag - the flag marks pre-release, not
-  #    the number); a clean root ships stable and becomes "latest".
-  #    NOTE: every 0.9.0-dev.N maps to the same 0.9.0, so this publishes ONCE per
-  #    base version - the Marketplace rejects a duplicate/non-increasing version.
-  #    No binary build, so it only rides the test gate. Needs a VSCE_PAT secret
-  #    (Azure DevOps PAT, "Marketplace > Manage" scope, for the `neuralfog`
-  #    publisher).
   publish-vscode:
     name: publish elemix-vscode
     needs: [changelog, version]
@@ -113,10 +78,10 @@ jobs:
         run: |
           V="${{ needs.version.outputs.value }}"
           if [[ "$V" == *-* ]]; then
-            MKT="${V%%-*}"          # 0.9.0-dev.22 -> 0.9.0
+            MKT="${V%%-*}"
             CHANNEL="--pre-release"
           else
-            MKT="$V"               # already a clean x.y.z
+            MKT="$V"
             CHANNEL=""
           fi
           echo "publishing elemix-vscode $MKT (from $V), channel='${CHANNEL:-stable}'"
@@ -139,10 +104,6 @@ jobs:
       - name: Build
         run: pnpm --filter elemix-vscode build
 
-      # The Marketplace rejects re-publishing a version that already exists, and
-      # every 0.9.0-dev.N maps to the same base 0.9.0 — so a re-publish of the
-      # same base is expected and must NOT fail the release. Treat "already
-      # exists" as success; any other error still fails.
       - name: Publish
         working-directory: packages/vscode
         env:
@@ -159,7 +120,6 @@ jobs:
           fi
           exit "$code"
 
-      # Also produce the .vsix so the GitHub Release ships an installable artifact.
       - name: Package VSIX
         working-directory: packages/vscode
         run: pnpm exec vsce package --no-dependencies ${{ steps.mkt.outputs.channel }} -o "elemix-vscode-${{ steps.mkt.outputs.version }}.vsix"
@@ -169,16 +129,11 @@ jobs:
           name: vsix
           path: packages/vscode/elemix-vscode-*.vsix
 
-  # ── the one build the test gate can't cover: the 6 cross-platform binaries.
-  #    A failure on ANY target blocks every publish below. ──────────────────────
   build-compiler:
     needs: changelog
     name: build ${{ matrix.pkg }}
     runs-on: ${{ matrix.os }}
     env:
-      # Cargo's curl downloader intermittently dies mid crates.io fetch on the
-      # Windows runners with "[16] Error in the HTTP2 framing layer". Drop HTTP/2
-      # multiplexing (→ HTTP/1.1) and give cargo more retries to ride out the flake.
       CARGO_HTTP_MULTIPLEXING: false
       CARGO_NET_RETRY: 10
     strategy:
@@ -193,8 +148,6 @@ jobs:
             target: aarch64-unknown-linux-musl
             os: ubuntu-latest
             zig: true
-          # Cross-compiled on Apple Silicon (the macOS SDK is universal) so we
-          # don't depend on the deprecated, often-queued Intel macos-13 runner.
           - pkg: darwin-x64
             target: x86_64-apple-darwin
             os: macos-latest
@@ -219,7 +172,6 @@ jobs:
           workspaces: packages/compiler
           key: ${{ matrix.target }}
 
-      # Linux musl (x64 + arm64) cross-compiles cleanly from one runner via zig.
       - uses: mlugg/setup-zig@v2
         if: ${{ matrix.zig }}
       - name: Install cargo-zigbuild
@@ -253,9 +205,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # ── the analyzer's 6 cross-platform binaries (same matrix as the compiler).
-  #    Native-only — it spawns node + the project's tsc, so there's no wasm here.
-  #    It depends on the compiler crate as a library (path dep), built alongside. ─
   build-analyzer:
     needs: changelog
     name: build analyzer ${{ matrix.pkg }}
@@ -332,7 +281,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # ── the formatter's 6 cross-platform binaries (same matrix).
   build-formatter:
     needs: changelog
     name: build formatter ${{ matrix.pkg }}
@@ -409,8 +357,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # ── publish: nothing here runs unless build-compiler (⇒ changelog ⇒ test) is
-  #    fully green. That's the "publish only if everything built" guarantee. ────
 
   publish-compiler:
     name: publish compiler to npm
@@ -418,7 +364,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
@@ -427,7 +373,6 @@ jobs:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
 
-      # Restore each platform package (now carrying its binary) over the scaffold.
       - uses: actions/download-artifact@v8
         with:
           pattern: npm-*
@@ -439,22 +384,17 @@ jobs:
             pkg="${dir#artifacts/npm-}"
             cp -r "$dir/." "packages/compiler/npm/$pkg/"
           done
-          # upload-artifact zips files and drops the Unix exec bit — restore it so
-          # the published tarball ships an executable binary (npm preserves modes).
           chmod +x packages/compiler/npm/*/elemix-compiler 2>/dev/null || true
 
       - name: Stamp version
         run: node packages/compiler/npm/version.mjs "${{ needs.version.outputs.value }}"
 
-      # Ship the changelog inside the launcher package (its `files` lists it).
-      # Single source of truth is the root CHANGELOG.md, copied in at publish time.
       - name: Stage changelog into launcher
         run: cp CHANGELOG.md packages/compiler/npm/elemix-compiler/CHANGELOG.md
 
       - name: Stage README into launcher
         run: cp packages/compiler/README.md packages/compiler/npm/elemix-compiler/README.md
 
-      # Platform packages first, then the launcher that depends on them.
       - name: Publish
         working-directory: packages/compiler/npm
         env:
@@ -475,7 +415,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
@@ -484,7 +424,6 @@ jobs:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
 
-      # Restore each platform package (now carrying its binary) over the scaffold.
       - uses: actions/download-artifact@v8
         with:
           pattern: ea-npm-*
@@ -496,22 +435,17 @@ jobs:
             pkg="${dir#artifacts/ea-npm-}"
             cp -r "$dir/." "packages/analyzer/npm/$pkg/"
           done
-          # upload-artifact drops the Unix exec bit — restore it so the published
-          # tarball ships an executable binary (npm preserves modes).
           chmod +x packages/analyzer/npm/*/elemix-analyzer 2>/dev/null || true
 
       - name: Stamp version
         run: node packages/analyzer/npm/version.mjs "${{ needs.version.outputs.value }}"
 
-      # Ship the changelog inside the launcher (its `files` lists it), from the
-      # single source of truth — the root CHANGELOG.md.
       - name: Stage changelog into launcher
         run: cp CHANGELOG.md packages/analyzer/npm/elemix-analyzer/CHANGELOG.md
 
       - name: Stage README into launcher
         run: cp packages/analyzer/README.md packages/analyzer/npm/elemix-analyzer/README.md
 
-      # Platform packages first, then the launcher that depends on them.
       - name: Publish
         working-directory: packages/analyzer/npm
         env:
@@ -532,7 +466,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
@@ -541,7 +475,6 @@ jobs:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
 
-      # Restore each platform package (now carrying its binary) over the scaffold.
       - uses: actions/download-artifact@v8
         with:
           pattern: etf-npm-*
@@ -553,22 +486,17 @@ jobs:
             pkg="${dir#artifacts/etf-npm-}"
             cp -r "$dir/." "packages/formatter/npm/$pkg/"
           done
-          # upload-artifact drops the Unix exec bit — restore it so the published
-          # tarball ships an executable binary (npm preserves modes).
           chmod +x packages/formatter/npm/*/elemix-template-formatter 2>/dev/null || true
 
       - name: Stamp version
         run: node packages/formatter/npm/version.mjs "${{ needs.version.outputs.value }}"
 
-      # Ship the changelog inside the launcher (its `files` lists it), from the
-      # single source of truth — the root CHANGELOG.md.
       - name: Stage changelog into launcher
         run: cp CHANGELOG.md packages/formatter/npm/elemix-template-formatter/CHANGELOG.md
 
       - name: Stage README into launcher
         run: cp packages/formatter/README.md packages/formatter/npm/elemix-template-formatter/README.md
 
-      # Platform packages first, then the launcher that depends on them.
       - name: Publish
         working-directory: packages/formatter/npm
         env:
@@ -589,7 +517,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
@@ -614,7 +542,6 @@ jobs:
         working-directory: packages/compiler
         run: wasm-pack build --target web --out-dir pkg --no-default-features --features wasm
 
-      # Set the published name + stamp the version (like the binaries).
       - name: Finalize package
         working-directory: packages/compiler
         run: node scripts/wasm-pkg.mjs "${{ needs.version.outputs.value }}"
@@ -622,8 +549,6 @@ jobs:
       - name: Stage README into wasm package
         run: cp packages/compiler/README.md packages/compiler/pkg/README.md
 
-      # Hand the built wasm package to release-notes so it can be attached to the
-      # GitHub Release alongside the native binaries (same as the npm-* artifacts).
       - uses: actions/upload-artifact@v7
         with:
           name: wasm-pkg
@@ -648,7 +573,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -678,7 +603,6 @@ jobs:
       - name: Build
         run: pnpm --filter @neuralfog/elemix build
 
-      # Ship the changelog (its `files` lists it) — staged from the root source.
       - name: Stage changelog
         run: cp CHANGELOG.md packages/elemix/CHANGELOG.md
 
@@ -695,12 +619,11 @@ jobs:
 
   publish-storybook:
     name: publish @neuralfog/elemix-storybook
-    # After elemix is on npm (peer dependency).
     needs: [publish-elemix, version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -714,9 +637,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Stamp BOTH manifests: storybook's own version, and elemix's — pnpm
-      # rewrites storybook's `workspace:*` peer-dep to whatever elemix's version
-      # field says at publish time, so it must read the released version.
       - name: Stamp version + elemix peer-dep
         env:
           VERSION: ${{ needs.version.outputs.value }}
@@ -732,14 +652,11 @@ jobs:
             console.log(`elemix-storybook@${v} (peer @neuralfog/elemix ${v})`);
           '
 
-      # Storybook builds against elemix's types — build the library first.
       - name: Build
         run: |
           pnpm --filter @neuralfog/elemix build
           pnpm --filter @neuralfog/elemix-storybook build
 
-      # `needs: publish-elemix` already ran the publish — this only rides out
-      # npm's CDN propagation lag so an installer never sees a missing peer.
       - name: Wait for the elemix peer dependency
         run: |
           DEP="${{ needs.version.outputs.value }}"
@@ -754,7 +671,6 @@ jobs:
           echo "::error::@neuralfog/elemix@$DEP did not propagate in time"
           exit 1
 
-      # Ship the changelog (its `files` lists it) — staged from the root source.
       - name: Stage changelog
         run: cp CHANGELOG.md packages/storybook/CHANGELOG.md
 
@@ -771,12 +687,11 @@ jobs:
 
   publish-testing-library:
     name: publish @neuralfog/elemix-testing-library
-    # After elemix is on npm (peer dependency).
     needs: [publish-elemix, version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -790,9 +705,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Stamp BOTH manifests: testing-library's own version, and elemix's — pnpm
-      # rewrites the `workspace:*` peer-dep to whatever elemix's version field
-      # says at publish time, so it must read the released version.
       - name: Stamp version + elemix peer-dep
         env:
           VERSION: ${{ needs.version.outputs.value }}
@@ -808,14 +720,11 @@ jobs:
             console.log(`elemix-testing-library@${v} (peer @neuralfog/elemix ${v})`);
           '
 
-      # testing-library builds against elemix's types — build the library first.
       - name: Build
         run: |
           pnpm --filter @neuralfog/elemix build
           pnpm --filter @neuralfog/elemix-testing-library build
 
-      # `needs: publish-elemix` already ran the publish — this only rides out
-      # npm's CDN propagation lag so an installer never sees a missing peer.
       - name: Wait for the elemix peer dependency
         run: |
           DEP="${{ needs.version.outputs.value }}"
@@ -830,7 +739,6 @@ jobs:
           echo "::error::@neuralfog/elemix@$DEP did not propagate in time"
           exit 1
 
-      # Ship the changelog (its `files` lists it) — staged from the root source.
       - name: Stage changelog
         run: cp CHANGELOG.md packages/testing-library/CHANGELOG.md
 
@@ -847,12 +755,11 @@ jobs:
 
   publish-vite:
     name: publish @neuralfog/elemix-vite
-    # After the compiler is on npm (runtime dependency, pinned to this version).
     needs: [publish-compiler, version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -869,8 +776,6 @@ jobs:
       - name: Build
         run: pnpm --filter @neuralfog/elemix-vite build
 
-      # Stamp the published version AND pin the native compiler dependency to it
-      # (this release's compiler version), overriding whatever was committed.
       - name: Stamp version + compiler pin
         env:
           VERSION: ${{ needs.version.outputs.value }}
@@ -886,7 +791,6 @@ jobs:
             console.log(`elemix-vite@${v} (compiler dep ${v})`);
           '
 
-      # `needs: publish-compiler` already ran the publish — ride out CDN lag.
       - name: Wait for the compiler dependency
         run: |
           DEP="${{ needs.version.outputs.value }}"
@@ -901,7 +805,6 @@ jobs:
           echo "::error::@neuralfog/elemix-compiler@$DEP did not propagate in time"
           exit 1
 
-      # Ship the changelog (its `files` lists it) — staged from the root source.
       - name: Stage changelog
         run: cp CHANGELOG.md packages/vite/CHANGELOG.md
 
@@ -918,12 +821,11 @@ jobs:
 
   publish-hydris:
     name: publish @neuralfog/hydris
-    # After elemix is on npm (exact-pinned peer dependency, shared runtime).
     needs: [publish-elemix, version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -937,7 +839,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # hydris pins its `@neuralfog/elemix` peer to the exact release version.
       - name: Stamp version + elemix peer-dep
         env:
           VERSION: ${{ needs.version.outputs.value }}
@@ -953,13 +854,11 @@ jobs:
             console.log(`hydris@${v} (peer @neuralfog/elemix ${v})`);
           '
 
-      # hydris builds against elemix's types — build the library first.
       - name: Build
         run: |
           pnpm --filter @neuralfog/elemix build
           pnpm --filter @neuralfog/hydris build
 
-      # `needs: publish-elemix` already ran the publish — ride out CDN lag.
       - name: Wait for the elemix peer dependency
         run: |
           DEP="${{ needs.version.outputs.value }}"
@@ -990,12 +889,11 @@ jobs:
 
   publish-ssr-plugin:
     name: publish @neuralfog/elemix-ssr-plugin
-    # After the compiler is on npm (spawned at build/render time).
     needs: [publish-compiler, version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -1009,7 +907,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # The plugin spawns the native compiler; pin the dep to the release version.
       - name: Stamp version + compiler dep
         env:
           VERSION: ${{ needs.version.outputs.value }}
@@ -1025,7 +922,6 @@ jobs:
             console.log(`elemix-ssr-plugin@${v} (compiler dep ${v})`);
           '
 
-      # `needs: publish-compiler` already ran the publish — ride out CDN lag.
       - name: Wait for the compiler dependency
         run: |
           DEP="${{ needs.version.outputs.value }}"
@@ -1054,16 +950,13 @@ jobs:
           echo "publishing @neuralfog/elemix-ssr-plugin@$VERSION under dist-tag: $TAG"
           pnpm publish --access public --provenance --no-git-checks --tag "$TAG"
 
-  # ── publish create-elemix-app to npm ────────────────────────────────────────
-  #    Standalone scaffolding CLI (unscoped). It only clones the template repo,
-  #    so it has no cross-package deps and just rides the test + changelog gate.
   publish-create-app:
     name: publish create-elemix-app
     needs: [changelog, version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -1093,7 +986,6 @@ jobs:
       - name: Build
         run: pnpm --filter create-elemix-app build
 
-      # Ship the changelog (its `files` lists it) — staged from the root source.
       - name: Stage changelog
         run: cp CHANGELOG.md packages/create-app/CHANGELOG.md
 
@@ -1108,7 +1000,6 @@ jobs:
           echo "publishing create-elemix-app@$VERSION under dist-tag: $TAG"
           npm publish --access public --provenance --tag "$TAG"
 
-  # ── after everything is on npm: one GitHub Release from the changelog ───────
   release-notes:
     name: GitHub Release
     needs:
@@ -1127,15 +1018,13 @@ jobs:
       - publish-vscode
     runs-on: ubuntu-latest
     permissions:
-      contents: write # create the GitHub Release
+      contents: write
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      # Every binary built this run, restored from the build/publish jobs:
-      #   npm-<pkg> → compiler | ea-npm-<pkg> → analyzer | etf-npm-<pkg> → formatter | wasm-pkg → wasm.
       - uses: actions/download-artifact@v8
         with:
           pattern: npm-*
@@ -1157,22 +1046,16 @@ jobs:
           name: vsix
           path: vsix
 
-      # Pack each platform into a downloadable archive so the GitHub Release ships
-      # the prebuilt binaries, not just npm links. tar for unix (preserves the
-      # exec bit), zip for the Windows .exe, and a SHA256SUMS for verification.
       - name: Package prebuilt binaries
         run: |
           set -euo pipefail
           VERSION="${{ needs.version.outputs.value }}"
           mkdir -p dist-assets
-          # tool = elemix-compiler | elemix-analyzer, from its artifact dir.
           pack() {
             local tool="$1" dir="$2" pkg="$3"
             if [ -f "$dir/$tool.exe" ]; then
               ( cd "$dir" && zip -qj "$GITHUB_WORKSPACE/dist-assets/$tool-$VERSION-$pkg.zip" "$tool.exe" )
             else
-              # upload-artifact zips files and drops the Unix exec bit — restore it
-              # so the tarball's binary is runnable straight out of the download.
               chmod +x "$dir/$tool"
               tar -czf "dist-assets/$tool-$VERSION-$pkg.tar.gz" -C "$dir" "$tool"
             fi
@@ -1196,12 +1079,10 @@ jobs:
           [ -z "$TAG" ] && TAG="v$VERSION"
           PRERELEASE=()
           [[ "$VERSION" == *-* ]] && PRERELEASE=(--prerelease)
-          # Idempotent: update notes if a release for this tag already exists.
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release edit "$TAG" --notes-file RELEASE_NOTES.md "${PRERELEASE[@]}"
           else
             gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md "${PRERELEASE[@]}"
           fi
-          # Attach (or replace) the prebuilt binaries and the VS Code extension.
           gh release upload "$TAG" dist-assets/* --clobber
           gh release upload "$TAG" vsix/*.vsix --clobber

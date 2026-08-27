@@ -4,7 +4,6 @@ on:
   push:
     branches: [main, master]
   pull_request:
-  # Callable as the first gate of the release pipeline (release.yml).
   workflow_call:
 
 jobs:
@@ -22,14 +21,14 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      # Bun runs the `bun test` suites for the ssr-plugin and hydris packages.
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      # Rust toolchain — the compiler builds with cargo and `pnpm test` runs
-      # `cargo test`; the wasm32 target + wasm-pack drive the wasm conformance gate;
-      # clippy + rustfmt back `pnpm lint`.
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
@@ -49,8 +48,6 @@ jobs:
       - name: Lint changelog
         run: node scripts/changelog.mjs lint
 
-      # Browsers for the compiler's Storybook conformance plays — every story runs
-      # headless in Chromium, Firefox, and WebKit (Safari's engine).
       - name: Install Playwright browsers
         run: pnpm --filter @neuralfog/elemix-compiler exec playwright install --with-deps chromium firefox webkit
 
