@@ -2,13 +2,12 @@ using System.Text;
 
 namespace Hydris.Cli;
 
-public sealed class BannerInfo {
+public sealed record BannerInfo {
     public string Host { get; init; } = "localhost";
     public int Port { get; init; }
     public string Protocol { get; init; } = "http";
     public bool Dev { get; init; }
     public long Ms { get; init; }
-    public int Renderers { get; init; }
 }
 
 public static class Banner {
@@ -35,7 +34,6 @@ public static class Banner {
         builder.Append($"  {Bar}  {Dim($"v{Version}")}  {Dim("ready in")} {Bold(info.Ms.ToString())} {Dim("ms")}  {Dim("·")}  {mode}\n");
         builder.Append('\n');
         builder.Append($"  {Arrow}  {Label("Local:")}{Cyan(local)}\n");
-        builder.Append($"  {Arrow}  {Label("Renderers:")}{Bold(info.Renderers.ToString())}\n");
         builder.Append('\n');
         return builder.ToString();
     }

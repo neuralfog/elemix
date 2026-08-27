@@ -22,17 +22,11 @@
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Net.Sockets;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Text;
+using System.Threading;
 using System.Threading.Channels;
 
 namespace Hydris.Renderer;
-
-public readonly record struct RenderRequest(string Method, string Path);
-
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
-[JsonSerializable(typeof(RenderRequest))]
-internal partial class RenderJson : JsonSerializerContext;
 
 public sealed class ManagerOptions {
     public int SidecarCount { get; init; } = Math.Min(Environment.ProcessorCount, 8);
@@ -49,11 +43,31 @@ public sealed class Manager : IAsyncDisposable {
     private readonly Process[] Sidecars;
     private readonly Channel<Connection> Pool;
     private readonly string ScriptPath;
+    private readonly Timer Meter;
 
     private Manager(Process[] sidecars, Channel<Connection> pool, string scriptPath) {
         Sidecars = sidecars;
         Pool = pool;
         ScriptPath = scriptPath;
+        Meter = new Timer(_ => LogMemory(), null, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
+    }
+
+    private void LogMemory() {
+        long rss = 0;
+        var alive = 0;
+        foreach (var sidecar in Sidecars) {
+            try {
+                sidecar.Refresh();
+                if (!sidecar.HasExited) {
+                    rss += sidecar.WorkingSet64;
+                    alive++;
+                }
+            } catch (InvalidOperationException) {
+                continue;
+            }
+        }
+
+        Console.WriteLine($"[bun] {alive} sidecars, {rss / 1024.0 / 1024.0:F1} MB RSS total ({(alive > 0 ? rss / alive / 1024.0 / 1024.0 : 0):F1} MB each)");
     }
 
     public static async Task<Manager> StartAsync(ManagerOptions options, CancellationToken ct = default) {
@@ -80,16 +94,18 @@ public sealed class Manager : IAsyncDisposable {
         return new Manager(sidecars, pool, scriptPath);
     }
 
-    public async Task<byte[]> RenderAsync(RenderRequest request, CancellationToken ct) {
+    public async Task<byte[]> RenderAsync(string source, CancellationToken ct) {
         var connection = await Pool.Reader.ReadAsync(ct);
         try {
-            return await connection.RenderAsync(request, ct);
+            return await connection.RenderAsync(source, ct);
         } finally {
             await Pool.Writer.WriteAsync(connection, ct);
         }
     }
 
     public async ValueTask DisposeAsync() {
+        await Meter.DisposeAsync();
+
         Pool.Writer.TryComplete();
         while (Pool.Reader.TryRead(out var connection))
             await connection.DisposeAsync();
@@ -149,13 +165,13 @@ public sealed class Manager : IAsyncDisposable {
         private Socket? Socket;
         private NetworkStream? Stream;
 
-        public async Task<byte[]> RenderAsync(RenderRequest request, CancellationToken ct) {
+        public async Task<byte[]> RenderAsync(string source, CancellationToken ct) {
             await EnsureConnected(ct);
 
-            var json = JsonSerializer.SerializeToUtf8Bytes(request, RenderJson.Default.RenderRequest);
-            var frame = new byte[4 + json.Length];
-            BinaryPrimitives.WriteUInt32LittleEndian(frame, (uint)json.Length);
-            json.CopyTo(frame.AsSpan(4));
+            var payload = Encoding.UTF8.GetBytes(source);
+            var frame = new byte[4 + payload.Length];
+            BinaryPrimitives.WriteUInt32LittleEndian(frame, (uint)payload.Length);
+            payload.CopyTo(frame.AsSpan(4));
             await Stream!.WriteAsync(frame, ct);
 
             await Stream.ReadExactlyAsync(Header, ct);

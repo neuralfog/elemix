@@ -3,12 +3,14 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Hydris.Error;
+using Hydris.Renderer;
 using Microsoft.AspNetCore.Http.Features;
 
 namespace Hydris.Http;
 
 public sealed class Reply {
     private static string RootPath = AppContext.BaseDirectory;
+    private static IRenderer? ActiveRenderer;
 
     private static readonly FrozenDictionary<string, string> MimeTypes = new Dictionary<string, string> {
         [".html"] = "text/html; charset=utf-8",
@@ -67,6 +69,32 @@ public sealed class Reply {
 
     public static Reply Html(string body) =>
         new(Encoding.UTF8.GetBytes(body), 200, "text/html; charset=utf-8");
+
+    // @Temp
+    public static Reply TestRender(string template, string args) {
+        ArgumentNullException.ThrowIfNull(template);
+        ArgumentNullException.ThrowIfNull(args);
+        var renderer = ActiveRenderer
+            ?? throw new InvalidOperationException("no renderer configured; select one with App.UseRenderer(...)");
+
+        var pending = renderer.RenderAsync(template, args);
+        var payload = pending.IsCompletedSuccessfully
+            ? pending.Result
+            : pending.AsTask().GetAwaiter().GetResult();
+        return new Reply(payload, 200, "text/html; charset=utf-8");
+    }
+
+    public static async Task<Reply> RenderAsync(string template, string args) {
+        ArgumentNullException.ThrowIfNull(template);
+        ArgumentNullException.ThrowIfNull(args);
+        var renderer = ActiveRenderer
+            ?? throw new InvalidOperationException("no renderer configured; select one with App.UseRenderer(...)");
+
+        var payload = await renderer.RenderAsync(template, args);
+        return new Reply(payload, 200, "text/html; charset=utf-8");
+    }
+
+    internal static void UseRenderer(IRenderer renderer) => ActiveRenderer = renderer;
 
     public static Reply Json<T>(T value, JsonTypeInfo<T> typeInfo) =>
         new(JsonSerializer.SerializeToUtf8Bytes(value, typeInfo), 200, "application/json; charset=utf-8");

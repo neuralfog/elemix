@@ -9,7 +9,12 @@
     <AssemblyName>Hydris</AssemblyName>
     <IsAotCompatible>true</IsAotCompatible>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup Condition="Exists('../native/libhydrisqjs.so')">
+    <Content Include="../native/libhydrisqjs.so" Link="libhydrisqjs.so" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

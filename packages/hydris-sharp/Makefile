@@ -42,3 +42,12 @@ restore:
 clean:
 	dotnet clean
 	rm -rf bin obj Hydris/bin Hydris/obj Tests/bin Tests/obj
+
+bench:
+	wrk -t12 -c400 -d10s http://127.0.0.1:5000/test-render
+
+benchnr:
+	wrk -t12 -c400 -d10s http://127.0.0.1:5000/
+
+build-native:
+	bash native/build.sh

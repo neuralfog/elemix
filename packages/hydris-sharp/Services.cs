@@ -14,8 +14,13 @@ public sealed class UserService {
 [Handler]
 [Use(typeof(Tenant))]
 public sealed class UserController(UserService users, Request request) {
+
+    [Get("/test-render")]
+    public Task<Reply> TestRender() =>
+        Reply.RenderAsync("(a, b) => `<p>${a} and ${b}</p>`", "[\"hello\",\"world\"]");
+
     [Get("/")]
-    public Reply Index() => Reply.Text("hello from hydris");
+    public Reply Index() => Reply.Text("hello and world");
 
     [Get("/users/:id")]
     [Use(typeof(Audit))]

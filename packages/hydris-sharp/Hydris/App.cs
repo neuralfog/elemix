@@ -5,6 +5,7 @@ using Hydris.Cli;
 using Hydris.Container;
 using Hydris.Core;
 using Hydris.Error;
+using Hydris.Http;
 using Hydris.Middleware;
 using Hydris.Renderer;
 using Hydris.Routing;
@@ -22,6 +23,7 @@ public sealed class App {
 
     private readonly List<Type> Middlewares = [];
     private IErrorRenderer Errors = new DefaultErrorRenderer();
+    private RendererKind Renderer = RendererKind.Bun;
 
     public App() {
         new CoreServiceProvider().Register(Container);
@@ -40,6 +42,11 @@ public sealed class App {
         return this;
     }
 
+    public App UseRenderer(RendererKind kind) {
+        Renderer = kind;
+        return this;
+    }
+
     public async Task Serve(int port = 5000) {
         var stopwatch = Stopwatch.StartNew();
 
@@ -50,9 +57,21 @@ public sealed class App {
         using var loggerFactory = LoggerFactory.Create(builder =>
             builder.AddSimpleConsole(o => o.SingleLine = true).SetMinimumLevel(LogLevel.Warning));
 
-        await using var render = rendererCount > 0
-            ? await Manager.StartAsync(new ManagerOptions { SidecarCount = rendererCount })
-            : null;
+        Manager? manager = null;
+        IRenderer? renderer = null;
+        if (Renderer == RendererKind.QuickJs) {
+            renderer = new QuickJsRenderer();
+        } else if (rendererCount > 0) {
+            manager = await Manager.StartAsync(new ManagerOptions { SidecarCount = rendererCount });
+            renderer = new BunRenderer(manager);
+        }
+
+        await using var managerLifetime = manager;
+        using var rendererLifetime = renderer as IDisposable;
+        if (renderer is not null) {
+            Container.Value(renderer);
+            Reply.UseRenderer(renderer);
+        }
 
         var kestrel = new KestrelServerOptions();
         kestrel.Listen(BindAddress(), port);
@@ -68,8 +87,7 @@ public sealed class App {
         Console.Write(Banner.Serve(new BannerInfo {
             Port = port,
             Dev = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") != "Production",
-            Ms = stopwatch.ElapsedMilliseconds,
-            Renderers = rendererCount,
+            Ms = stopwatch.ElapsedMilliseconds
         }));
 
         var shutdown = new TaskCompletionSource();
