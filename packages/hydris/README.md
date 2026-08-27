@@ -3,3 +3,5 @@
 # Hydris
 
 SSR for elemix
+
+To be killed with fire 🔥🔥🔥 Sooner the better. It only serves as the point of refrence for now.
