@@ -45,17 +45,17 @@ public sealed class App {
 
         Container.Start();
 
-        var rendererCount = int.TryParse(Environment.GetEnvironmentVariable("SIDECARS"), out var n) && n > 0
-            ? n
-            : Math.Min(Environment.ProcessorCount, 8);
+        var rendererCount = RendererCount();
 
         using var loggerFactory = LoggerFactory.Create(builder =>
             builder.AddSimpleConsole(o => o.SingleLine = true).SetMinimumLevel(LogLevel.Warning));
 
-        await using var render = await Manager.StartAsync(new ManagerOptions { SidecarCount = rendererCount });
+        await using var render = rendererCount > 0
+            ? await Manager.StartAsync(new ManagerOptions { SidecarCount = rendererCount })
+            : null;
 
         var kestrel = new KestrelServerOptions();
-        kestrel.Listen(IPAddress.Loopback, port);
+        kestrel.Listen(BindAddress(), port);
 
         var transport = new SocketTransportFactory(
             Options.Create(new SocketTransportOptions()),
@@ -84,5 +84,17 @@ public sealed class App {
             context.Cancel = true;
             shutdown.TrySetResult();
         }
+    }
+
+    private static int RendererCount() {
+        var raw = Environment.GetEnvironmentVariable("SIDECARS");
+        if (int.TryParse(raw, out var n))
+            return n < 0 ? 0 : n;
+        return Math.Min(Environment.ProcessorCount, 8);
+    }
+
+    private static IPAddress BindAddress() {
+        var host = Environment.GetEnvironmentVariable("HYDRIS_HOST");
+        return string.IsNullOrEmpty(host) ? IPAddress.Loopback : IPAddress.Parse(host);
     }
 }
