@@ -5,7 +5,6 @@ input_file: fixtures/WarnApp.ts
 ---
 console.warn('[elemix] WarnApp: tag `warnapp` is not a valid custom element name - it must contain a hyphen');
 import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
-
 import { Component } from '@neuralfog/elemix';
 
 const _t0 = $__template('<span>hi</span>');

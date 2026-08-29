@@ -1,0 +1,7 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/counter.ts
+---
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';
+export const counter = $__moduleState(() => ({ count: 0 }));

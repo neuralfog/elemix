@@ -1,0 +1,42 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/NavStateAApp.ts
+---
+import { $__ssrText, $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__setAttr, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { counter } from './counter';
+import { StateDocument } from './StateDocument';
+
+const _t0 = $__template('<main id="page-a"><span id="state-a"> </span><button id="inc-a">inc</button></main>');
+
+export class NavStateAApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'nav-state-a-app'}><template shadowrootmode="open" shadowrootserializable=""><main id="page-a"${$__ssrAttr('data-count', counter.count)}><span id="state-a">`, $__ssrText(counter.count), `</span><button id="inc-a">inc</button></main></template></${this.$$__tag ?? 'nav-state-a-app'}>`];
+}
+
+
+    inc = (): void => {
+        counter.count++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.firstChild!;
+const _n3 = _n1.firstChild!.nextSibling!;
+$__event(_n3, 'click', this.inc);
+$__effect(() => {
+const _v4 = (counter.count);
+$__setAttr(_n1, 'data-count', (_v4));
+$__setText(_n2, (_v4));
+});
+return _r0;
+}
+}
+$__defineComponent('nav-state-a-app', NavStateAApp);
+NavStateAApp.prototype.$$__tag = 'nav-state-a-app';
+NavStateAApp.$$__propSafe = true;
+NavStateAApp.$$__document = StateDocument;

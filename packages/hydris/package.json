@@ -1,79 +1,21 @@
 {
     "name": "@neuralfog/hydris",
-    "version": "0.9.5",
-    "license": "MIT",
-    "author": "brownhounds",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/neuralfog/elemix.git",
-        "directory": "packages/hydris"
-    },
-    "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "files": [
-        "./dist/**/*",
-        "CHANGELOG.md"
-    ],
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
-        },
-        "./config": {
-            "types": "./dist/config/index.d.ts",
-            "import": "./dist/config/index.js"
-        },
-        "./container": {
-            "types": "./dist/container/index.d.ts",
-            "import": "./dist/container/index.js"
-        },
-        "./http": {
-            "types": "./dist/http/index.d.ts",
-            "import": "./dist/http/index.js"
-        },
-        "./routing": {
-            "types": "./dist/routing/index.d.ts",
-            "import": "./dist/routing/index.js"
-        },
-        "./middleware": {
-            "types": "./dist/middleware/index.d.ts",
-            "import": "./dist/middleware/index.js"
-        },
-        "./errors": {
-            "types": "./dist/error/index.d.ts",
-            "import": "./dist/error/index.js"
-        },
-        "./view": {
-            "types": "./dist/render/index.d.ts",
-            "import": "./dist/render/index.js"
-        },
-        "./navigation": {
-            "types": "./src/navigation/index.ts",
-            "import": "./src/navigation/index.ts"
-        },
-        "./store": {
-            "types": "./src/store/index.ts",
-            "import": "./src/store/index.ts"
-        }
-    },
+    "version": "0.0.0",
+    "private": true,
     "scripts": {
-        "clean": "rm -rf ./dist",
-        "dev": "bun run --watch src/index.ts",
-        "build": "npm run clean && tsc -p tsconfig.build.json",
-        "test": "bun test",
-        "lint": "tsc --noEmit && biome format && biome lint --error-on-warnings",
-        "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings && tsc --noEmit"
+        "build": "make build-native && make buildr",
+        "test": "make test",
+        "lint": "make lint",
+        "lint:fix": "make lint-fix"
     },
-    "peerDependencies": {
-        "@neuralfog/elemix": "0.9.5"
+    "dependencies": {
+        "@neuralfog/elemix": "workspace:*",
+        "@neuralfog/elemix-ssr": "workspace:*"
+    },
+    "optionalDependencies": {
+        "@neuralfog/elemix-compiler-linux-x64": "0.9.5"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.5.5",
-        "@neuralfog/elemix": "workspace:*",
-        "@neuralfog/elemix-ssr-plugin": "workspace:*",
-        "@types/bun": "1.2.19",
-        "typescript": "7.0.2",
-        "@neuralfog/ts-config": "0.1.2"
+        "sass": "1.103.1"
     }
 }

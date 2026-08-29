@@ -179,7 +179,10 @@ fn compiles_a_directory_of_fixtures() {
         let src = std::fs::read_to_string(entry.path()).unwrap();
         let name = entry.file_name();
         assert!(!src.contains("tpl`"), "tpl` leaked in {name:?}");
-        assert!(!src.contains("repeat("), "repeat( leaked in {name:?}");
+        let list_helper_leaked = src
+            .match_indices("repeat(")
+            .any(|(i, _)| i == 0 || src.as_bytes()[i - 1] != b'.');
+        assert!(!list_helper_leaked, "repeat( leaked in {name:?}");
     }
 }
 

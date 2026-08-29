@@ -1,0 +1,47 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/NavHomeApp.ts
+---
+import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { NavDocument } from './NavDocument';
+
+const _t0 = $__template('<main id="page" data-page="home"><h1>Home</h1><button id="counter">count <!----></button></main>');
+
+export class NavHomeApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!.nextSibling!;
+const _d1 = $__dynLens(_n0);
+const _v2 = $__splitRun(_n0.firstChild as Text, [6], _d1);
+$__event(_n0, 'click', this.inc);
+$__effect(() => {
+$__setText(_v2[0], (this.state.count));
+});
+}
+
+
+    state = $__state({ count: 0 });
+
+    inc = (): void => {
+        this.state.count++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n2 = _n1.firstChild!.nextSibling!;
+$__event(_n1, 'click', this.inc);
+const _x3 = document.createTextNode('');
+_n2.replaceWith(_x3);
+$__effect(() => {
+$__setText(_x3, (this.state.count));
+});
+return _r0;
+}
+}
+$__defineComponent('nav-home-app', NavHomeApp);
+NavHomeApp.prototype.$$__tag = 'nav-home-app';
+NavHomeApp.$$__document = NavDocument;

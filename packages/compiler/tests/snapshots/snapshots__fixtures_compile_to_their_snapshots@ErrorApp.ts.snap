@@ -5,7 +5,6 @@ input_file: fixtures/ErrorApp.ts
 ---
 throw new Error('[elemix] ErrorApp: unknown compiler hint `#frobnicate`');
 import { $__template, $__clone } from '@neuralfog/elemix/runtime';
-
 import { Component } from '@neuralfog/elemix';
 
 // #component #frobnicate

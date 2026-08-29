@@ -1,0 +1,16 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@neuralfog/elemix':
+        specifier: link:../../../elemix
+        version: link:../../../elemix
+      '@neuralfog/elemix-ssr':
+        specifier: link:../../../elemix-ssr
+        version: link:../../../elemix-ssr

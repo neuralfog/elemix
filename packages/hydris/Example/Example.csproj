@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishAot>true</PublishAot>
+    <RootNamespace>Hydris.Example</RootNamespace>
+    <AssemblyName>hydris-example</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="public/**" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="ssr/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Hydris/Hydris.csproj" />
+    <ProjectReference Include="../Hydris.QuickJs/Hydris.QuickJs.csproj" />
+    <ProjectReference Include="../Hydris.Generators/Hydris.Generators.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>

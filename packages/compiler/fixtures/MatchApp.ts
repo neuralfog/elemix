@@ -99,9 +99,12 @@ export class MatchApp extends Component {
         </div>
         <div class="stage">
             ${match(this.state.load, 'kind', {
-                idle: () => tpl`<div class="card idle">Pick a state above</div>`,
-                loading: (m) => tpl`<div class="card loading"><span class="spinner"></span>Working ${m.pct}%</div>`,
-                ready: (m) => tpl`<div class="card ready">✓ Deployed to ${m.url}</div>`,
+                idle: () =>
+                    tpl`<div class="card idle">Pick a state above</div>`,
+                loading: (m) =>
+                    tpl`<div class="card loading"><span class="spinner"></span>Working ${m.pct}%</div>`,
+                ready: (m) =>
+                    tpl`<div class="card ready">✓ Deployed to ${m.url}</div>`,
                 failed: (m) => tpl`<div class="card failed">✕ ${m.error}</div>`,
             })}
         </div>

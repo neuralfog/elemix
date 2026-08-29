@@ -1,0 +1,7 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/counter.ts
+---
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime';
+export const counter = $__moduleState(() => ({ count: 0 }));

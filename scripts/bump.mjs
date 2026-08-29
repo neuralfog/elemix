@@ -49,20 +49,6 @@ for (const file of files) {
     console.log(`${file} -> ${stamp}`);
 }
 
-// hydris ships in lockstep with elemix and pins its `@neuralfog/elemix` peer to
-// the exact release version, so that pin moves with every bump. Scoped to the
-// version-shaped value (starts with a digit) so the `workspace:*` devDependency
-// entry is left untouched.
-const hydrisPkg = 'packages/hydris/package.json';
-if (existsSync(hydrisPkg)) {
-    const text = readFileSync(hydrisPkg, 'utf8').replace(
-        /("@neuralfog\/elemix":\s*")\d[^"]*(")/,
-        `$1${next}$2`,
-    );
-    writeFileSync(hydrisPkg, text);
-    console.log(`${hydrisPkg} peer @neuralfog/elemix -> ${next}`);
-}
-
 // Sync the compiler's published npm packages (launcher + per-platform binaries,
 // cross-deps pinned) to the same version — reusing the stamper the release
 // workflow runs.

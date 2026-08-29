@@ -1,0 +1,20 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/StoreDocument.ts
+---
+import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import '@neuralfog/elemix-ssr/navigation/NavLink';
+
+const _t0 = $__template('<html lang="en"><head><meta charset="utf-8"/><title>Store</title></head><body><nav class="nav"><nav-link route="/nav-store-a"><a id="to-store-a" href="/nav-store-a">A</a></nav-link><nav-link route="/nav-store-b"><a id="to-store-b" href="/nav-store-b">B</a></nav-link></nav><slot></slot></body></html>');
+
+export class StoreDocument extends Component {
+    static $$__noShadow = true;
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('store-document', StoreDocument);
+StoreDocument.prototype.$$__tag = 'store-document';

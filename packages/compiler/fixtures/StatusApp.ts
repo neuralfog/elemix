@@ -111,10 +111,23 @@ export class StatusApp extends Component {
         </div>
         <div class="stage">
             ${choose([
-                [this.state.status === 'loading', () => tpl`<div class="card loading"><span class="spinner"></span>Working…</div>`],
-                [this.state.status === 'ready', () => tpl`<div class="card ready">✓ Deployed</div>`],
-                [this.state.status === 'failed', () => tpl`<div class="card failed">✕ Build failed</div>`],
-                [true, () => tpl`<div class="card idle">Pick a status above</div>`],
+                [
+                    this.state.status === 'loading',
+                    () =>
+                        tpl`<div class="card loading"><span class="spinner"></span>Working…</div>`,
+                ],
+                [
+                    this.state.status === 'ready',
+                    () => tpl`<div class="card ready">✓ Deployed</div>`,
+                ],
+                [
+                    this.state.status === 'failed',
+                    () => tpl`<div class="card failed">✕ Build failed</div>`,
+                ],
+                [
+                    true,
+                    () => tpl`<div class="card idle">Pick a status above</div>`,
+                ],
             ])}
         </div>
         <button class="link" @click=${this.toggleLog}>

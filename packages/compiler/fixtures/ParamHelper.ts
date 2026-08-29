@@ -43,7 +43,11 @@ export class RowList extends Component {
         tpl`<div>
             <button class="add" @click=${this.add}>add row</button>
             <ul class="list">
-                ${repeat(this.state.rows, (r) => this.row(r), (r) => r.id)}
+                ${repeat(
+                    this.state.rows,
+                    (r) => this.row(r),
+                    (r) => r.id,
+                )}
             </ul>
         </div>`;
 }

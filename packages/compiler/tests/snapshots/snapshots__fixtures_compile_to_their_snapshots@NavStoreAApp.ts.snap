@@ -1,0 +1,42 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/NavStoreAApp.ts
+---
+import { $__template, $__clone, $__event, $__effect, $__setText, $__setAttr, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { StoreDocument } from './StoreDocument';
+import { prefs } from './store';
+
+const _t0 = $__template('<main id="page-a"><span id="count-a"> </span><button id="inc">inc</button><button id="bloat">bloat</button></main>');
+
+export class NavStoreAApp extends Component {
+
+    inc = (): void => {
+        prefs.count++;
+    };
+
+    bloat = (): void => {
+        prefs.big = 'x'.repeat(5000);
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.firstChild!;
+const _n3 = _n1.firstChild!.nextSibling!;
+const _n4 = _n1.firstChild!.nextSibling!.nextSibling!;
+$__event(_n3, 'click', this.inc);
+$__event(_n4, 'click', this.bloat);
+$__effect(() => {
+const _v5 = (prefs.count);
+$__setAttr(_n1, 'data-count', (_v5));
+$__setText(_n2, (_v5));
+});
+return _r0;
+}
+}
+$__defineComponent('nav-store-a-app', NavStoreAApp);
+NavStoreAApp.prototype.$$__tag = 'nav-store-a-app';
+NavStoreAApp.$$__document = StoreDocument;

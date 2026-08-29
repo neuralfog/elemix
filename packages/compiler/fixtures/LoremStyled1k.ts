@@ -34,7 +34,8 @@ export class LoremStyled1k extends Component {
         <div class="lorem">
             ${repeat(
                 this.state.items,
-                (i) => tpl`<lorem-paragraph-styled :index=${i} :text=${LOREM} />`,
+                (i) =>
+                    tpl`<lorem-paragraph-styled :index=${i} :text=${LOREM} />`,
                 (i) => i,
             )}
         </div>

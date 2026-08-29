@@ -1,6 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/StyleApp.ts
 ---
 import { $__template, $__clone, $__event, $__effect, $__setStyle, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
@@ -72,7 +72,8 @@ $__setStyle(_n0 as HTMLElement, ({
     });
 
     recolor = (): void => {
-        this.state.color = this.state.color === '#1e293b' ? '#ffffff' : '#1e293b';
+        this.state.color =
+            this.state.color === '#1e293b' ? '#ffffff' : '#1e293b';
     };
 
     resize = (): void => {

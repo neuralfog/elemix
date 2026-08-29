@@ -99,10 +99,23 @@ const _t5 = $__templateEl('<pre class="log">status = <!----></pre>');
 export class StatusApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'status-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage">`, ($__ssrChoose([
-                [this.state.status === 'loading', () => $__ssrTpl(`<div class="card loading"><span class="spinner"></span>Working…</div>`)],
-                [this.state.status === 'ready', () => $__ssrTpl(`<div class="card ready">✓ Deployed</div>`)],
-                [this.state.status === 'failed', () => $__ssrTpl(`<div class="card failed">✕ Build failed</div>`)],
-                [true, () => $__ssrTpl(`<div class="card idle">Pick a status above</div>`)],
+                [
+                    this.state.status === 'loading',
+                    () =>
+                        $__ssrTpl(`<div class="card loading"><span class="spinner"></span>Working…</div>`),
+                ],
+                [
+                    this.state.status === 'ready',
+                    () => $__ssrTpl(`<div class="card ready">✓ Deployed</div>`),
+                ],
+                [
+                    this.state.status === 'failed',
+                    () => $__ssrTpl(`<div class="card failed">✕ Build failed</div>`),
+                ],
+                [
+                    true,
+                    () => $__ssrTpl(`<div class="card idle">Pick a status above</div>`),
+                ],
             ])), `</div>${(() => {const _t0 = (this.state.showLog ? 'Hide' : 'Show');return `<button class="link" data-t="${$__ssrLen(_t0)}">${$__ssrText(_t0)} log</button>`;})()} `, ($__ssrWhen(
             this.state.showLog,
             () => $__ssrTpl(`<pre class="log">status = `, $__ssrText(this.state.status), `</pre>`),

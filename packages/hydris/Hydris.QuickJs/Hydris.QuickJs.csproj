@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Hydris.QuickJs</RootNamespace>
+    <AssemblyName>Hydris.QuickJs</AssemblyName>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <QjsRid Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</QjsRid>
+    <QjsRid Condition="'$(QjsRid)' == ''">$(NETCoreSdkPortableRuntimeIdentifier)</QjsRid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="native/runtimes/**/*"
+             Pack="true"
+             PackagePath="runtimes/%(RecursiveDir)%(Filename)%(Extension)"
+             Link="%(Filename)%(Extension)">
+      <CopyToOutputDirectory Condition="$([System.String]::Copy('%(RecursiveDir)').StartsWith('$(QjsRid)/'))">PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Hydris/Hydris.csproj" />
+    <InternalsVisibleTo Include="hydris-build" />
+  </ItemGroup>
+
+</Project>

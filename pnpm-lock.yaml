@@ -25,6 +25,9 @@ importers:
       '@neuralfog/elemix':
         specifier: workspace:*
         version: link:../elemix
+      '@neuralfog/elemix-ssr':
+        specifier: workspace:*
+        version: link:../elemix-ssr
       '@neuralfog/elemix-testing-library':
         specifier: workspace:*
         version: link:../testing-library
@@ -64,19 +67,10 @@ importers:
       '@neuralfog/elemix':
         specifier: workspace:*
         version: link:../../elemix
-      '@neuralfog/elemix-ssr-plugin':
-        specifier: workspace:*
-        version: link:../../ssr-plugin
-      '@neuralfog/hydris':
-        specifier: workspace:*
-        version: link:../../hydris
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.5
         version: 2.5.5
-      '@neuralfog/elemix-compiler':
-        specifier: workspace:*
-        version: link:..
       '@neuralfog/ts-config':
         specifier: 0.1.2
         version: 0.1.2
@@ -144,58 +138,52 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@26.1.1)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(jsdom@29.1.1)(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.1)(sass@1.101.0))
 
-  packages/formatter: {}
-
-  packages/hydris:
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 2.5.5
-        version: 2.5.5
+  packages/elemix-ssr:
+    dependencies:
       '@neuralfog/elemix':
         specifier: workspace:*
         version: link:../elemix
-      '@neuralfog/elemix-ssr-plugin':
-        specifier: workspace:*
-        version: link:../ssr-plugin
-      '@neuralfog/ts-config':
-        specifier: 0.1.2
-        version: 0.1.2
-      '@types/bun':
-        specifier: 1.2.19
-        version: 1.2.19(@types/react@19.2.17)
-      typescript:
-        specifier: 7.0.2
-        version: 7.0.2
-
-  packages/hydris-sharp: {}
-
-  packages/ssr-plugin:
-    dependencies:
-      '@babel/parser':
-        specifier: 7.28.4
-        version: 7.28.4
-      '@neuralfog/elemix-compiler':
-        specifier: 0.0.0-dev.2
-        version: 0.0.0-dev.2
       sass:
-        specifier: 1.101.0
-        version: 1.101.0
+        specifier: 1.103.1
+        version: 1.103.1
     devDependencies:
-      '@babel/types':
-        specifier: 7.28.4
-        version: 7.28.4
       '@biomejs/biome':
-        specifier: 2.5.5
-        version: 2.5.5
+        specifier: 2.5.3
+        version: 2.5.3
+      '@neuralfog/biome-config':
+        specifier: 0.1.2
+        version: 0.1.2(@biomejs/biome@2.5.3)
       '@neuralfog/ts-config':
         specifier: 0.1.2
         version: 0.1.2
       '@types/bun':
-        specifier: 1.2.19
-        version: 1.2.19(@types/react@19.2.17)
+        specifier: 1.4.0
+        version: 1.4.0
+      '@types/node':
+        specifier: 26.1.1
+        version: 26.1.1
       typescript:
         specifier: 7.0.2
         version: 7.0.2
+
+  packages/formatter: {}
+
+  packages/hydris:
+    dependencies:
+      '@neuralfog/elemix':
+        specifier: workspace:*
+        version: link:../elemix
+      '@neuralfog/elemix-ssr':
+        specifier: workspace:*
+        version: link:../elemix-ssr
+    devDependencies:
+      sass:
+        specifier: 1.103.1
+        version: 1.103.1
+    optionalDependencies:
+      '@neuralfog/elemix-compiler-linux-x64':
+        specifier: 0.9.5
+        version: 0.9.5
 
   packages/storybook:
     devDependencies:
@@ -414,11 +402,6 @@ packages:
     resolution: {integrity: sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/parser@7.28.4':
-    resolution: {integrity: sha512-yZbBqeM6TkpP9du/I2pUZnJsRMGGvOuIrhjzC1AwHwW+6he4mni6Bp/m8ijn0iOuZuPI2BfkCoSRunpyjnrQKg==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-
   '@babel/parser@7.29.8':
     resolution: {integrity: sha512-E8lTAYNB1KW+FH+VGJuZM1ioAx2E6oVlvQFRrf5P8ZZmsiJXYAD9vTFV7yyEURNzgh1dFqMZuO6tUwcARbqFCA==}
     engines: {node: '>=6.0.0'}
@@ -426,14 +409,6 @@ packages:
 
   '@babel/runtime@7.29.7':
     resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/types@7.28.4':
-    resolution: {integrity: sha512-bkFqkLhh3pMBUQQkpVgWDWq/lqzc2678eUyDlTBhRqhCHFguYYGM0Efga7tYk4TogG/3x0EEl66/OQ+WGbWB/Q==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/types@7.29.7':
-    resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
   '@babel/types@7.29.8':
@@ -845,6 +820,11 @@ packages:
 
   '@neuralfog/elemix-compiler-linux-x64@0.0.0-dev.2':
     resolution: {integrity: sha512-eFh9b5dqpenixby5rbAPaKuC/SJ7G/ZdC+dkkTm6ZBNVbU2mxCeQ/Ml1u/8MCu8XG4F0fTl168zN08NpakUI8Q==}
+    cpu: [x64]
+    os: [linux]
+
+  '@neuralfog/elemix-compiler-linux-x64@0.9.5':
+    resolution: {integrity: sha512-BT/gxZbdgpTdhMn05VK0OW4nc5+cqgtaVze4SnEUsvKCabKvX6gJtknoqeLxNYm0HBmIuEkmP5Vhojo2HLl51Q==}
     cpu: [x64]
     os: [linux]
 
@@ -1458,6 +1438,9 @@ packages:
   '@types/bun@1.2.19':
     resolution: {integrity: sha512-d9ZCmrH3CJ2uYKXQIUuZ/pUnTqIvLDS0SK7pFmbx8ma+ziH/FRMoAq5bYpRG7y+w1gl+HgyNZbtqgMq4W4e2Lg==}
 
+  '@types/bun@1.4.0':
+    resolution: {integrity: sha512-K+lZULY23vRgK/CfTjFIV+tyifaNdSMlPh9j+6mQ/cLfpOznLyAuzgV/JQysyECpkBQLVMSyvjlr2fBUSA9wFQ==}
+
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
@@ -1835,6 +1818,9 @@ packages:
     resolution: {integrity: sha512-uAOTaZSPuYsWIXRpj7o56Let0g/wjihKCkeRqUBhlLVM/Bt+Fj9xTo+LhC1OV1XDaGkz4hNC80et5xgy+9KTHQ==}
     peerDependencies:
       '@types/react': ^19
+
+  bun-types@1.4.0:
+    resolution: {integrity: sha512-iIKw23BspnQQYd3prITOBxeUsxBHnwzX6YJfGMuNOZzeNcMmVqzIIVGRm1l69ogaPQmb4wB6BN8mA5bE9YuC5Q==}
 
   bundle-name@4.1.0:
     resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
@@ -2759,6 +2745,11 @@ packages:
     engines: {node: '>=20.19.0'}
     hasBin: true
 
+  sass@1.103.1:
+    resolution: {integrity: sha512-9icZURbP51S6S0QGoyaeqk9uB06GNWxsFYWfH5RgpFgqK5FA8tJcM3AdVxrZEVJ7dz+L87nG95gBKf4VuaMHGw==}
+    engines: {node: '>=20.19.0'}
+    hasBin: true
+
   sax@1.6.0:
     resolution: {integrity: sha512-6R3J5M4AcbtLUdZmRv2SygeVaM7IhrLXu9BmnOGmmACak8fiUtOsYNWUS4uK7upbmHIBbLBeFeI//477BKLBzA==}
     engines: {node: '>=11.0.0'}
@@ -3362,25 +3353,11 @@ snapshots:
 
   '@babel/helper-validator-identifier@7.29.7': {}
 
-  '@babel/parser@7.28.4':
-    dependencies:
-      '@babel/types': 7.29.7
-
   '@babel/parser@7.29.8':
     dependencies:
       '@babel/types': 7.29.8
 
   '@babel/runtime@7.29.7': {}
-
-  '@babel/types@7.28.4':
-    dependencies:
-      '@babel/helper-string-parser': 7.29.7
-      '@babel/helper-validator-identifier': 7.29.7
-
-  '@babel/types@7.29.7':
-    dependencies:
-      '@babel/helper-string-parser': 7.29.7
-      '@babel/helper-validator-identifier': 7.29.7
 
   '@babel/types@7.29.8':
     dependencies:
@@ -3670,6 +3647,9 @@ snapshots:
     optional: true
 
   '@neuralfog/elemix-compiler-linux-x64@0.0.0-dev.2':
+    optional: true
+
+  '@neuralfog/elemix-compiler-linux-x64@0.9.5':
     optional: true
 
   '@neuralfog/elemix-compiler-win32-arm64@0.0.0-dev.2':
@@ -4147,6 +4127,10 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
+  '@types/bun@1.4.0':
+    dependencies:
+      bun-types: 1.4.0
+
   '@types/chai@5.2.3':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -4535,6 +4519,10 @@ snapshots:
     dependencies:
       '@types/node': 26.1.1
       '@types/react': 19.2.17
+
+  bun-types@1.4.0:
+    dependencies:
+      '@types/node': 26.1.1
 
   bundle-name@4.1.0:
     dependencies:
@@ -5521,6 +5509,14 @@ snapshots:
   safer-buffer@2.1.2: {}
 
   sass@1.101.0:
+    dependencies:
+      chokidar: 5.0.0
+      immutable: 5.1.9
+      source-map-js: 1.2.1
+    optionalDependencies:
+      '@parcel/watcher': 2.5.6
+
+  sass@1.103.1:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.9

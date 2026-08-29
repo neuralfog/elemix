@@ -4,7 +4,6 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/LifecycleStore.ts
 ---
 import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';
-
 export type LogEntry = { id: number; event: string };
 
 export const log = $__moduleState<{ entries: LogEntry[] }>(() => ({ entries: [] }));

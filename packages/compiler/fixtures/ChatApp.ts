@@ -114,7 +114,8 @@ export class ChatApp extends Component {
         <div class="log">
             ${repeat(
                 this.state.messages,
-                (m) => tpl`<div class=${{ msg: true, me: m.me }}>${m.text}</div>`,
+                (m) =>
+                    tpl`<div class=${{ msg: true, me: m.me }}>${m.text}</div>`,
                 (m) => m.id,
             )}
         </div>

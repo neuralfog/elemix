@@ -10,18 +10,58 @@ type State = {
 };
 
 const A = [
-    'pretty', 'large', 'big', 'small', 'tall', 'short', 'long', 'handsome',
-    'plain', 'quaint', 'clean', 'elegant', 'easy', 'angry', 'crazy', 'helpful',
-    'mushy', 'odd', 'unsightly', 'adorable', 'important', 'inexpensive',
-    'cheap', 'expensive', 'fancy',
+    'pretty',
+    'large',
+    'big',
+    'small',
+    'tall',
+    'short',
+    'long',
+    'handsome',
+    'plain',
+    'quaint',
+    'clean',
+    'elegant',
+    'easy',
+    'angry',
+    'crazy',
+    'helpful',
+    'mushy',
+    'odd',
+    'unsightly',
+    'adorable',
+    'important',
+    'inexpensive',
+    'cheap',
+    'expensive',
+    'fancy',
 ];
 const C = [
-    'red', 'yellow', 'blue', 'green', 'pink', 'brown', 'purple', 'white',
-    'black', 'orange',
+    'red',
+    'yellow',
+    'blue',
+    'green',
+    'pink',
+    'brown',
+    'purple',
+    'white',
+    'black',
+    'orange',
 ];
 const N = [
-    'table', 'chair', 'house', 'bbq', 'desk', 'car', 'pony', 'cookie',
-    'sandwich', 'burger', 'pizza', 'mouse', 'keyboard',
+    'table',
+    'chair',
+    'house',
+    'bbq',
+    'desk',
+    'car',
+    'pony',
+    'cookie',
+    'sandwich',
+    'burger',
+    'pizza',
+    'mouse',
+    'keyboard',
 ];
 
 const rnd = (max: number): number => Math.floor(Math.random() * max);
@@ -131,7 +171,9 @@ export class BenchApp extends Component {
             <tbody>
                 ${repeat(
                     this.state.rows,
-                    (row) => tpl`<tr class=${{ danger: this.state.selected === row.id }}>
+                    (
+                        row,
+                    ) => tpl`<tr class=${{ danger: this.state.selected === row.id }}>
                         <td class="col-id">${row.id}</td>
                         <td><a class="lbl" @click=${() => this.select(row.id)}>${row.label}</a></td>
                         <td><a class="remove" @click=${() => this.removeRow(row.id)}>×</a></td>

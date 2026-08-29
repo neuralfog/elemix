@@ -1,4 +1,3 @@
-
 export type LogEntry = { id: number; event: string };
 
 // #state

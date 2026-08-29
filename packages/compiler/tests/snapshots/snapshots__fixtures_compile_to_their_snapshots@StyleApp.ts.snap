@@ -55,7 +55,8 @@ export class StyleApp extends Component {
     });
 
     recolor = (): void => {
-        this.state.color = this.state.color === '#1e293b' ? '#ffffff' : '#1e293b';
+        this.state.color =
+            this.state.color === '#1e293b' ? '#ffffff' : '#1e293b';
     };
 
     resize = (): void => {

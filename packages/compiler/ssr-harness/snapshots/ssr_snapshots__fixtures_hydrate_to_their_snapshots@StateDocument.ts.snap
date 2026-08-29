@@ -1,0 +1,24 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/StateDocument.ts
+---
+import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import '@neuralfog/elemix-ssr/navigation/NavLink';
+
+const _t0 = $__template('<html lang="en"><head><meta charset="utf-8"/><title>State</title></head><body><nav class="nav"><nav-link route="/nav-state-a"><a id="to-state-a" href="/nav-state-a">A</a></nav-link><nav-link route="/nav-state-b"><a id="to-state-b" href="/nav-state-b">B</a></nav-link></nav><slot></slot></body></html>');
+
+export class StateDocument extends Component {
+    static $$__noShadow = true;
+$$__hydrate(root: Node): void {
+
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('state-document', StateDocument);
+StateDocument.prototype.$$__tag = 'state-document';

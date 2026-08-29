@@ -1,0 +1,27 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/NavAboutApp.ts
+---
+import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { NavDocument } from './NavDocument';
+
+const _t0 = $__template('<main id="page" data-page="about"><h1>About</h1></main>');
+
+export class NavAboutApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'nav-about-app'}><template shadowrootmode="open" shadowrootserializable=""><main id="page" data-page="about"><h1>About</h1></main></template></${this.$$__tag ?? 'nav-about-app'}>`];
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('nav-about-app', NavAboutApp);
+NavAboutApp.prototype.$$__tag = 'nav-about-app';
+NavAboutApp.$$__propSafe = true;
+NavAboutApp.$$__document = NavDocument;

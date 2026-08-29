@@ -1,0 +1,64 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/NavDocument.ts
+---
+import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__child, $__effect, $__setText, $__setAttr, $__defineComponent } from '@neuralfog/elemix/runtime';
+const _h0 = $__template('<meta name="about-only" content="yes"/><style id="about-style">.about{color:red}</style><script>window.__aboutScript=(window.__aboutScript||0)+1;</script>');
+
+import { Component } from '@neuralfog/elemix';
+import '@neuralfog/elemix-ssr/navigation/NavLink';
+
+type Data = { title?: string; page?: string };
+
+const _t0 = $__template('<html lang="en"><head><meta charset="utf-8"/><title> </title><meta name="page"/><style id="nav-style">.nav{display:flex;gap:8px}</style><script id="head-once">window.__headRuns=(window.__headRuns||0)+1;</script> <!----></head><body><nav class="nav"><nav-link route="/nav-home-app"><a id="to-home" href="/nav-home-app">Home</a></nav-link><nav-link route="/nav-about-app"><a id="to-about" href="/nav-about-app">About</a></nav-link><a id="hard-link" href="/nav-home-app">Hard</a><nav-link route="/nav-about-app"><button id="disabled-btn" aria-disabled="true">Off</button></nav-link></nav><slot></slot></body></html>');
+const _t1 = $__template('<meta name="about-only" content="yes"/><style id="about-style">.about{color:red}</style><script>window.__aboutScript=(window.__aboutScript||0)+1;</script>');
+
+export class NavDocument extends Component<unknown, Data> {
+    static $$__noShadow = true;
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!.firstChild!.nextSibling!;
+const _n1 = $__text(_n0);
+const _n2 = root.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__effect(() => {
+$__setText(_n1, (this.viewData?.title ?? 'Nav'));
+});
+$__effect(() => {
+$__setAttr(_n2, 'content', (this.viewData?.page ?? ''));
+});
+const _n3 = root.firstChild!.firstChild!;
+const _b4 = $__bounds(_n3, 6, 0);
+$__fresh(() => {
+const _a5 = $__reanchor(_n3, _b4[0], _b4[1]);
+$__child(_a5, () => (this.viewData?.page === 'about'
+                        ? (() => {
+const _r6 = $__clone(_h0);
+return _r6;
+})()
+                        : ''));
+});
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__child(_n3, () => (this.viewData?.page === 'about'
+                        ? (() => {
+const _r4 = $__clone(_t1);
+return _r4;
+})()
+                        : ''));
+$__effect(() => {
+$__setText(_n1, (this.viewData?.title ?? 'Nav'));
+});
+$__effect(() => {
+$__setAttr(_n2, 'content', (this.viewData?.page ?? ''));
+});
+return _r0;
+}
+}
+$__defineComponent('nav-document', NavDocument);
+NavDocument.prototype.$$__tag = 'nav-document';

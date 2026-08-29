@@ -5,6 +5,10 @@ import { fileURLToPath } from 'node:url';
 
 const HARNESS_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const PID_FILE = join(HARNESS_ROOT, 'tests', '.server.pid');
+const SHARP = join(HARNESS_ROOT, 'sharp');
+const BUILD_PROJECT = join(HARNESS_ROOT, '..', '..', 'hydris', 'Hydris.Build');
+const BINARY = join(SHARP, 'bin', 'Release', 'net10.0', 'hydris-harness');
+const VIEWS_ROOT = join(HARNESS_ROOT, '..');
 
 export const PORT = Number(process.env.HARNESS_PORT ?? 4319);
 export const BASE_URL = `http://localhost:${PORT}`;
@@ -40,13 +44,26 @@ const waitForReady = async (timeoutMs: number): Promise<void> => {
 };
 
 export const startHarness = async (): Promise<void> => {
+    if (process.env.HARNESS_EXTERNAL) {
+        await waitForReady(30_000);
+        return;
+    }
     if (!process.env.HARNESS_SKIP_BUILD) {
-        await run('pnpm', ['build']);
+        await run('dotnet', [
+            'run',
+            '--project',
+            BUILD_PROJECT,
+            '--',
+            SHARP,
+            VIEWS_ROOT,
+            '-O',
+        ]);
+        await run('dotnet', ['build', '-c', 'Release', SHARP]);
     }
 
-    const server = spawn('bun', ['./dist/index.js'], {
-        cwd: HARNESS_ROOT,
-        env: { ...process.env, PORT: String(PORT), NODE_ENV: 'production' },
+    const server = spawn(BINARY, [], {
+        cwd: SHARP,
+        env: { ...process.env, PORT: String(PORT) },
         detached: true,
         stdio: 'ignore',
     });

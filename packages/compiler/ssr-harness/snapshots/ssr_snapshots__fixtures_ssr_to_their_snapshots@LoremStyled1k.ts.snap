@@ -33,7 +33,8 @@ export class LoremStyled1k extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'lorem-styled1k'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="lorem">`, ($__ssrRepeat(
                 this.state.items,
-                (i) => $__ssrTpl($__ssrChild('lorem-paragraph-styled', {index: (i), text: (LOREM)})),
+                (i) =>
+                    $__ssrTpl($__ssrChild('lorem-paragraph-styled', {index: (i), text: (LOREM)})),
                 (i) => i,
             )), `</div></template></${this.$$__tag ?? 'lorem-styled1k'}>`];
 }
@@ -46,7 +47,8 @@ return [`<${this.$$__tag ?? 'lorem-styled1k'}><template shadowrootmode="open" sh
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-$__list(_n1, () => (this.state.items), (i) => i, (i) => (() => {
+$__list(_n1, () => (this.state.items), (i) => i, (i) =>
+                    (() => {
 const _r2 = $__cloneEl(_t1);
 $__effect(() => {
 $__setProp(_r2, 'index', (i));

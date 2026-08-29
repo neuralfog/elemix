@@ -120,7 +120,8 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
-$__list(_n1, () => (this.state.messages), (m) => m.id, (m) => (() => {
+$__list(_n1, () => (this.state.messages), (m) => m.id, (m) =>
+                    (() => {
 const _r4 = $__cloneEl(_t1);
 const _n5 = _r4.firstChild!;
 $__effect(() => {

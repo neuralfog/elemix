@@ -4,24 +4,17 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "elemix-ssr dev",
-        "build": "elemix-ssr build",
-        "start": "bun run src/index.ts",
-        "preview": "NODE_ENV=production bun run ./dist/index.js",
         "test": "playwright test",
         "test:headed": "playwright test --headed",
         "test:ui": "playwright test --ui",
-        "lint": "tsc --noEmit && biome format && biome lint --error-on-warnings",
-        "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings && tsc --noEmit"
+        "lint": "biome format && biome lint --error-on-warnings",
+        "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings"
     },
     "dependencies": {
-        "@neuralfog/elemix": "workspace:*",
-        "@neuralfog/hydris": "workspace:*",
-        "@neuralfog/elemix-ssr-plugin": "workspace:*"
+        "@neuralfog/elemix": "workspace:*"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.5",
-        "@neuralfog/elemix-compiler": "workspace:*",
         "@neuralfog/ts-config": "0.1.2",
         "@playwright/test": "1.61.1",
         "@types/bun": "1.2.19",

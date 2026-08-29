@@ -1,0 +1,30 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/NavStateBApp.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__setAttr, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { counter } from './counter';
+import { StateDocument } from './StateDocument';
+
+const _t0 = $__template('<main id="page-b"><span id="state-b"> </span></main>');
+
+export class NavStateBApp extends Component {
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.firstChild!;
+$__effect(() => {
+const _v3 = (counter.count);
+$__setAttr(_n1, 'data-count', (_v3));
+$__setText(_n2, (_v3));
+});
+return _r0;
+}
+}
+$__defineComponent('nav-state-b-app', NavStateBApp);
+NavStateBApp.prototype.$$__tag = 'nav-state-b-app';
+NavStateBApp.$$__document = StateDocument;

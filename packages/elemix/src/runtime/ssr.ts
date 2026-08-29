@@ -11,7 +11,7 @@ const DATA_H: Record<string, string> = {
     '<': '&lt;',
 };
 
-const dataAttr = (props: Record<string, unknown>): string =>
+export const $__ssrData = (props: Record<string, unknown>): string =>
     Object.keys(props).length === 0
         ? ''
         : ` data-h='${JSON.stringify(props).replace(/[&'<]/g, (c) => DATA_H[c] ?? c)}'`;
@@ -195,7 +195,7 @@ export const $__ssrChild = (
     if (ctor === undefined) return '';
     const clientOnly = (ctor as { $$__client?: boolean }).$$__client === true;
     const propSafe = (ctor as { $$__propSafe?: boolean }).$$__propSafe === true;
-    const inject = `${attrs}${clientOnly || !propSafe ? dataAttr(props) : ''}`;
+    const inject = `${attrs}${clientOnly || !propSafe ? $__ssrData(props) : ''}`;
     const hasSlot =
         slot !== undefined &&
         slot !== '' &&

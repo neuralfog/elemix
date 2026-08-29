@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/BenchApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
@@ -18,18 +17,58 @@ type State = {
 };
 
 const A = [
-    'pretty', 'large', 'big', 'small', 'tall', 'short', 'long', 'handsome',
-    'plain', 'quaint', 'clean', 'elegant', 'easy', 'angry', 'crazy', 'helpful',
-    'mushy', 'odd', 'unsightly', 'adorable', 'important', 'inexpensive',
-    'cheap', 'expensive', 'fancy',
+    'pretty',
+    'large',
+    'big',
+    'small',
+    'tall',
+    'short',
+    'long',
+    'handsome',
+    'plain',
+    'quaint',
+    'clean',
+    'elegant',
+    'easy',
+    'angry',
+    'crazy',
+    'helpful',
+    'mushy',
+    'odd',
+    'unsightly',
+    'adorable',
+    'important',
+    'inexpensive',
+    'cheap',
+    'expensive',
+    'fancy',
 ];
 const C = [
-    'red', 'yellow', 'blue', 'green', 'pink', 'brown', 'purple', 'white',
-    'black', 'orange',
+    'red',
+    'yellow',
+    'blue',
+    'green',
+    'pink',
+    'brown',
+    'purple',
+    'white',
+    'black',
+    'orange',
 ];
 const N = [
-    'table', 'chair', 'house', 'bbq', 'desk', 'car', 'pony', 'cookie',
-    'sandwich', 'burger', 'pizza', 'mouse', 'keyboard',
+    'table',
+    'chair',
+    'house',
+    'bbq',
+    'desk',
+    'car',
+    'pony',
+    'cookie',
+    'sandwich',
+    'burger',
+    'pizza',
+    'mouse',
+    'keyboard',
 ];
 
 const rnd = (max: number): number => Math.floor(Math.random() * max);
@@ -84,7 +123,9 @@ const _n6 = root.firstChild!.nextSibling!.firstChild!;
 const _b7 = $__bounds(_n6, 0, 0);
 $__fresh(() => {
 const _a8 = $__reanchor(_n6, _b7[0], _b7[1]);
-$__list(_a8, () => (this.state.rows), (row) => row.id, (row) => (() => {
+$__list(_a8, () => (this.state.rows), (row) => row.id, (
+                        row,
+                    ) => (() => {
 const _r9 = $__cloneEl(_h0);
 const _n10 = _r9.firstChild!.firstChild!;
 const _n11 = _r9.firstChild!.nextSibling!.firstChild!;
@@ -178,7 +219,9 @@ $__event(_n3, 'click', this.add);
 $__event(_n4, 'click', this.update);
 $__event(_n5, 'click', this.clear);
 $__event(_n6, 'click', this.swapRows);
-$__list(_n7, () => (this.state.rows), (row) => row.id, (row) => (() => {
+$__list(_n7, () => (this.state.rows), (row) => row.id, (
+                        row,
+                    ) => (() => {
 const _r8 = $__cloneEl(_t1);
 const _n9 = _r8.firstChild!.firstChild!;
 const _n10 = _r8.firstChild!.nextSibling!.firstChild!;

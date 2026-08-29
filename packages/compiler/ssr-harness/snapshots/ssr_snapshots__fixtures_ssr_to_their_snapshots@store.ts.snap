@@ -1,0 +1,8 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/store.ts
+---
+import { store } from '@neuralfog/elemix/runtime';
+
+export const prefs = store('prefs', { count: 0, big: '' });

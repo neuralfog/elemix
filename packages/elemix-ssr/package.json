@@ -1,0 +1,33 @@
+{
+    "name": "@neuralfog/elemix-ssr",
+    "version": "0.0.0",
+    "license": "MIT",
+    "author": "brownhounds",
+    "type": "module",
+    "files": [
+        "./src/**/*"
+    ],
+    "exports": {
+        ".": "./src/index.ts",
+        "./navigation": "./src/navigation/index.ts",
+        "./navigation/NavLink": "./src/navigation/NavLink.ts",
+        "./build": "./src/build/index.ts"
+    },
+    "scripts": {
+        "build": "tsc --noEmit",
+        "lint": "tsc --noEmit && biome format && biome lint --error-on-warnings",
+        "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings && tsc --noEmit"
+    },
+    "dependencies": {
+        "@neuralfog/elemix": "workspace:*",
+        "sass": "1.103.1"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.5.3",
+        "@neuralfog/biome-config": "0.1.2",
+        "@neuralfog/ts-config": "0.1.2",
+        "@types/bun": "1.4.0",
+        "@types/node": "26.1.1",
+        "typescript": "7.0.2"
+    }
+}

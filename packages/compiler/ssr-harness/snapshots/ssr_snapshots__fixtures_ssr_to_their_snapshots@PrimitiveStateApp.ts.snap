@@ -7,7 +7,6 @@ import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state, $__dep, $__track, $__trigger } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
-
 const css = `
     :host {
         --accent: #6366f1;

@@ -1,0 +1,7 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/counter.ts
+---
+import { $__state } from '@neuralfog/elemix/runtime';
+export const counter = $__state({ count: 0 });

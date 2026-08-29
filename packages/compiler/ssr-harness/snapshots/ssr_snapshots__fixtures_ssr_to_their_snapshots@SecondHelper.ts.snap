@@ -7,7 +7,6 @@ import { $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
-
 const _t0 = $__template('<span class="plain">plain</span>');
 const _t1 = $__template('<div class="card"><!----><p class="body">body</p></div>');
 const _t2 = $__templateEl('<h2 class="heading">Title</h2>');

@@ -6,6 +6,9 @@
             "!**/node_modules/**/*",
             "!**/dist/**/*",
             "!**/public/**/*",
+            "!**/bin/**/*",
+            "!**/obj/**/*",
+            "!**/ssr/**/*",
             "!**/test-results/**/*",
             "!**/playwright-report/**/*"
         ]
@@ -21,6 +24,9 @@
             "!**/node_modules/**/*",
             "!**/dist/**/*",
             "!**/public/**/*",
+            "!**/bin/**/*",
+            "!**/obj/**/*",
+            "!**/ssr/**/*",
             "!**/test-results/**/*",
             "!**/playwright-report/**/*"
         ]

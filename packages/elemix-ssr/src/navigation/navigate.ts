@@ -1,0 +1,163 @@
+import { $__resetModuleStates } from '@neuralfog/elemix/ssr-runtime/client';
+import { navSanitizerConfig } from './NavSanitizer';
+
+const NAV_HEADER = 'X-Hydris-Nav';
+const NAV_ENABLED = '1';
+
+type UnsafeBody = {
+    setHTMLUnsafe(html: string, options?: { sanitizer?: unknown }): void;
+};
+type NavWindow = Window & { __hydrisNav?: boolean };
+
+const supported = (): boolean => {
+    if (typeof document === 'undefined' || document.body == null) return false;
+    return (
+        typeof (document.body as unknown as Partial<UnsafeBody>)
+            .setHTMLUnsafe === 'function'
+    );
+};
+
+const hard = (url: string): void => {
+    window.location.href = url;
+};
+
+const bodyInner = (html: string): string => {
+    const open = /<body[^>]*>/i.exec(html);
+    const start = open ? open.index + open[0].length : -1;
+    const end = html.lastIndexOf('</body>');
+    return start >= 0 && end > start ? html.slice(start, end) : html;
+};
+
+const ELEMIX_PREFIX = '/_elemix/';
+
+const bundleSources = (): string[] => {
+    const out: string[] = [];
+    for (const s of Array.from(
+        document.body.querySelectorAll<HTMLScriptElement>(
+            'script[type="module"][src]',
+        ),
+    )) {
+        const url = new URL(s.src, location.href);
+        if (
+            url.origin === location.origin &&
+            url.pathname.startsWith(ELEMIX_PREFIX)
+        ) {
+            out.push(url.href);
+        }
+    }
+    return out;
+};
+
+const loadBundles = async (): Promise<void> => {
+    for (const src of bundleSources()) {
+        try {
+            await import(src);
+        } catch {}
+    }
+};
+
+const cloneForHead = (el: Element): Node => {
+    if (el.tagName === 'SCRIPT') {
+        const script = document.createElement('script');
+        for (const attr of Array.from(el.attributes)) {
+            script.setAttribute(attr.name, attr.value);
+        }
+        script.textContent = el.textContent;
+        return script;
+    }
+    return document.importNode(el, true);
+};
+
+const mergeHead = (incoming: HTMLHeadElement): void => {
+    const current = document.head;
+
+    const title = incoming.querySelector('title');
+    if (title) document.title = title.textContent ?? document.title;
+
+    const incomingEls = Array.from(incoming.children).filter(
+        (el) => el.tagName !== 'TITLE',
+    );
+    const incomingKeys = new Set(incomingEls.map((el) => el.outerHTML));
+    const currentKeys = new Set(
+        Array.from(current.children).map((el) => el.outerHTML),
+    );
+
+    for (const el of Array.from(current.children)) {
+        if (el.tagName === 'TITLE') continue;
+        if (!incomingKeys.has(el.outerHTML)) el.remove();
+    }
+    for (const el of incomingEls) {
+        if (!currentKeys.has(el.outerHTML)) {
+            current.appendChild(cloneForHead(el));
+        }
+    }
+};
+
+let inflight: AbortController | undefined;
+
+const swap = async (html: string): Promise<void> => {
+    $__resetModuleStates();
+    const incoming = new DOMParser().parseFromString(html, 'text/html');
+    mergeHead(incoming.head);
+
+    (document.body as unknown as UnsafeBody).setHTMLUnsafe(bodyInner(html), {
+        sanitizer: navSanitizerConfig(),
+    });
+
+    await loadBundles();
+};
+
+const run = async (url: string, push: boolean): Promise<void> => {
+    inflight?.abort();
+    const controller = new AbortController();
+    inflight = controller;
+
+    let html: string;
+    let target = url;
+    try {
+        const res = await fetch(url, {
+            headers: { [NAV_HEADER]: NAV_ENABLED },
+            credentials: 'same-origin',
+            signal: controller.signal,
+        });
+        const type = res.headers.get('content-type') ?? '';
+        if (!type.includes('text/html')) return hard(url);
+        target = res.url || url;
+        if (new URL(target).origin !== location.origin) return hard(url);
+        html = await res.text();
+    } catch {
+        if (controller.signal.aborted) return;
+        return hard(url);
+    }
+    if (controller.signal.aborted) return;
+
+    if (push) history.pushState(null, '', target);
+    else if (target !== location.href) history.replaceState(null, '', target);
+    try {
+        await swap(html);
+    } catch {
+        return hard(target);
+    }
+    if (push) window.scrollTo(0, 0);
+};
+
+export const navigate = (to: string): void => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(to, location.href);
+    if (!supported() || url.origin !== location.origin) {
+        hard(url.href);
+        return;
+    }
+    void run(url.href, url.href !== location.href);
+};
+
+if (typeof window !== 'undefined' && supported()) {
+    const w = window as NavWindow;
+    if (!w.__hydrisNav) {
+        w.__hydrisNav = true;
+        history.scrollRestoration = 'manual';
+        window.addEventListener('popstate', () => {
+            void run(location.href, false);
+        });
+    }
+}

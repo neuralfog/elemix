@@ -18,5 +18,6 @@ export class SlotChip extends Component<{ label: string }> {
     // #styles
     styles = css;
 
-    template = (): Template => tpl`<span class="chip">${this.props.label}</span>`;
+    template = (): Template =>
+        tpl`<span class="chip">${this.props.label}</span>`;
 }

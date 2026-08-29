@@ -1,0 +1,17 @@
+{
+    "name": "hydris-example",
+    "private": true,
+    "imports": {
+        "#views/*": "./Views/*"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@neuralfog/elemix": "link:../../elemix",
+        "@neuralfog/elemix-ssr": "link:../../elemix-ssr"
+    },
+    "devDependencies": {
+        "typescript": "7.0.2"
+    }
+}

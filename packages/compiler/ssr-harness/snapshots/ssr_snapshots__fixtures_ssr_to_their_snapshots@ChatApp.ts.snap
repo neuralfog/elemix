@@ -97,7 +97,8 @@ export class ChatApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'chat-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="log">`, ($__ssrRepeat(
                 this.state.messages,
-                (m) => $__ssrTpl(`<div${$__ssrClass({ msg: true, me: m.me })}>`, $__ssrText(m.text), `</div>`),
+                (m) =>
+                    $__ssrTpl(`<div${$__ssrClass({ msg: true, me: m.me })}>`, $__ssrText(m.text), `</div>`),
                 (m) => m.id,
             )), `</div><div class="composer"><input type="text" placeholder="Type a message…"${$__ssrAttr('value', (this.state.draft).value)}/><button>Send</button></div></template></${this.$$__tag ?? 'chat-app'}>`];
 }
@@ -129,7 +130,8 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
 const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
-$__list(_n1, () => (this.state.messages), (m) => m.id, (m) => (() => {
+$__list(_n1, () => (this.state.messages), (m) => m.id, (m) =>
+                    (() => {
 const _r4 = $__cloneEl(_t1);
 const _n5 = _r4.firstChild!;
 $__effect(() => {

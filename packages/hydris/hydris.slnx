@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Hydris.Tests.csproj" />
+  </Folder>
+  <Project Path="Example/Example.csproj" />
+  <Project Path="Hydris.Build/Hydris.Build.csproj" />
+  <Project Path="Hydris.QuickJs/Hydris.QuickJs.csproj" />
+  <Project Path="Hydris.Generators/Hydris.Generators.csproj" />
+  <Project Path="Hydris/Hydris.csproj" />
+</Solution>

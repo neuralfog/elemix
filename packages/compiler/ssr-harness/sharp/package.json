@@ -1,0 +1,11 @@
+{
+    "name": "hydris-harness-sharp",
+    "private": true,
+    "imports": {
+        "#views/*": "./Views/*"
+    },
+    "dependencies": {
+        "@neuralfog/elemix": "link:../../../elemix",
+        "@neuralfog/elemix-ssr": "link:../../../elemix-ssr"
+    }
+}

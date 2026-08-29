@@ -1,7 +1,0 @@
-{
-    "extends": "@neuralfog/ts-config/index.json",
-    "compilerOptions": {
-        "types": ["bun"]
-    },
-    "include": ["src", "tests"]
-}

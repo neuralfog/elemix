@@ -1,7 +1,6 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
-
 const css = `
     :host {
         --accent: #6366f1;

@@ -76,9 +76,12 @@ const _t6 = $__templateEl('<span class="mode">compact</span>');
 export class MatchApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'match-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Idle</button><button>Loading</button><button>Ready</button><button>Failed</button></div><div class="stage">`, ($__ssrMatch(this.state.load, 'kind', {
-                idle: () => $__ssrTpl(`<div class="card idle">Pick a state above</div>`),
-                loading: (m) => $__ssrTpl(`<div class="card loading"><span class="spinner"></span>Working `, $__ssrText(m.pct), `%</div>`),
-                ready: (m) => $__ssrTpl(`<div class="card ready">✓ Deployed to `, $__ssrText(m.url), `</div>`),
+                idle: () =>
+                    $__ssrTpl(`<div class="card idle">Pick a state above</div>`),
+                loading: (m) =>
+                    $__ssrTpl(`<div class="card loading"><span class="spinner"></span>Working `, $__ssrText(m.pct), `%</div>`),
+                ready: (m) =>
+                    $__ssrTpl(`<div class="card ready">✓ Deployed to `, $__ssrText(m.url), `</div>`),
                 failed: (m) => $__ssrTpl(`<div class="card failed">✕ `, $__ssrText(m.error), `</div>`),
             })), `</div><button class="link">toggle mode</button> `, ($__ssrMatch(this.state.mode, {
             compact: () => $__ssrTpl(`<span class="mode">compact</span>`),
@@ -125,10 +128,12 @@ $__event(_n1, 'click', this.idle);
 $__event(_n2, 'click', this.loading);
 $__event(_n3, 'click', this.ready);
 $__event(_n4, 'click', this.failed);
-$__child(_n5, () => ((this.state.load)['kind'] === 'idle' ? (() => (() => {
+$__child(_n5, () => ((this.state.load)['kind'] === 'idle' ? (() =>
+                    (() => {
 const _r17 = $__cloneEl(_t4);
 return _r17;
-})())(this.state.load) : (this.state.load)['kind'] === 'loading' ? ((m) => (() => {
+})())(this.state.load) : (this.state.load)['kind'] === 'loading' ? ((m) =>
+                    (() => {
 const _r14 = $__cloneEl(_t3);
 const _n15 = _r14.firstChild!.nextSibling!.nextSibling!;
 const _x16 = document.createTextNode('');
@@ -137,7 +142,8 @@ $__effect(() => {
 $__setText(_x16, (m.pct));
 });
 return _r14;
-})())(this.state.load) : (this.state.load)['kind'] === 'ready' ? ((m) => (() => {
+})())(this.state.load) : (this.state.load)['kind'] === 'ready' ? ((m) =>
+                    (() => {
 const _r11 = $__cloneEl(_t2);
 const _n12 = _r11.firstChild!.nextSibling!;
 const _x13 = document.createTextNode('');

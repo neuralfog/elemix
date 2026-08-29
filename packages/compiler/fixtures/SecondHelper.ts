@@ -1,7 +1,6 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
-
 // #component
 export class PlainNote extends Component {
     template = (): Template => tpl`<span class="plain">plain</span>`;

@@ -1,6 +1,0 @@
-@use '#s/theme' as *;
-@use '#s/nested/base';
-
-.comp {
-    @include brand;
-}

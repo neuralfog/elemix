@@ -19,6 +19,7 @@
     },
     "devDependencies": {
         "@neuralfog/elemix": "workspace:*",
+        "@neuralfog/elemix-ssr": "workspace:*",
         "@neuralfog/elemix-testing-library": "workspace:*",
         "@storybook/addon-vitest": "10.5.10",
         "@storybook/html-vite": "10.5.10",

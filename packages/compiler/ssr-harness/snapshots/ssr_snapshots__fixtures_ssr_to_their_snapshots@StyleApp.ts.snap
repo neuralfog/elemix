@@ -64,7 +64,8 @@ return [`<${this.$$__tag ?? 'style-app'}><template shadowrootmode="open" shadowr
     });
 
     recolor = (): void => {
-        this.state.color = this.state.color === '#1e293b' ? '#ffffff' : '#1e293b';
+        this.state.color =
+            this.state.color === '#1e293b' ? '#ffffff' : '#1e293b';
     };
 
     resize = (): void => {
