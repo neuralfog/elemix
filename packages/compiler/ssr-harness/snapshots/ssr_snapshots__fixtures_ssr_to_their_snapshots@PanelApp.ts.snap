@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/PanelApp.ts
 ---
 import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -58,11 +58,6 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<div class="panel"><!----> <!----> <button>add</button><button>rename</button></div>');
-const _t1 = $__templateEl('<h2> </h2>');
-const _t2 = $__templateEl('<p class="stat"><!----> open</p>');
-
 export class PanelApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'panel-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel">`, ($__ssrTpl(`<h2>`, $__ssrText(this.state.title), `</h2>`)), ` `, ($__ssrTpl(`<p class="stat">`, $__ssrText(this.state.count), ` open</p>`)), ` <button>add</button><button>rename</button></div></template></${this.$$__tag ?? 'panel-app'}>`];
@@ -84,36 +79,8 @@ return [`<${this.$$__tag ?? 'panel-app'}><template shadowrootmode="open" shadowr
 
     
     
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__child(_n1, () => ((() => {
-const _r5 = $__cloneEl(_t1);
-const _n6 = _r5.firstChild!;
-$__effect(() => {
-$__setText(_n6, (this.state.title));
-});
-return _r5;
-})()));
-$__child(_n2, () => ((() => {
-const _r7 = $__cloneEl(_t2);
-const _n8 = _r7.firstChild!;
-const _x9 = document.createTextNode('');
-_n8.replaceWith(_x9);
-$__effect(() => {
-$__setText(_x9, (this.state.count));
-});
-return _r7;
-})()));
-$__event(_n3, 'click', this.add);
-$__event(_n4, 'click', this.rename);
-return _r0;
+    
 }
-}
-PanelApp.$$__sheets = [..._s0];
 $__defineComponent('panel-app', PanelApp);
 PanelApp.prototype.$$__tag = 'panel-app';
 PanelApp.$$__propSafe = true;

@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/PropsApp.ts
 ---
 import { $__ssrText, $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './PropsChild';
@@ -13,8 +13,6 @@ type State = {
     count: number;
     tags: string[];
 };
-
-const _t0 = $__template('<div class="parent">count <span class="pcount"> </span> tags <span class="ptags"> </span></div><props-child></props-child>');
 
 export class PropsApp extends Component {
 $$__ssr(): unknown[] {
@@ -34,24 +32,7 @@ return [`<${this.$$__tag ?? 'props-app'}><template shadowrootmode="open" shadowr
         this.state.tags.push(item);
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.nextSibling!;
-$__effect(() => {
-const _v4 = (this.state.count);
-$__setText(_n1, (_v4));
-$__setText(_n2, (this.state.tags.join(',')));
-$__setProp(_n3, 'label', ('hello'));
-$__setProp(_n3, 'count', (_v4));
-$__setProp(_n3, 'flag', (true));
-$__setProp(_n3, 'tags', (this.state.tags));
-$__setProp(_n3, 'onBump', (this.bump));
-$__setProp(_n3, 'onAdd', (this.add));
-});
-return _r0;
-}
+    
 }
 $__defineComponent('props-app', PropsApp);
 PropsApp.prototype.$$__tag = 'props-app';

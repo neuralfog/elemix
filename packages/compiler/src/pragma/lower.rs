@@ -144,6 +144,9 @@ pub fn expand_mode(
                 continue;
             }
             edits.push((sf.strip.0, sf.strip.1, String::new()));
+            if ssr {
+                continue;
+            }
             let var = match seen.get(&sf.value) {
                 Some(v) => v.clone(),
                 None => {
@@ -208,7 +211,7 @@ pub fn expand_mode(
             ));
         }
 
-        if !class.effects.is_empty() {
+        if !ssr && !class.effects.is_empty() {
             needs_effect = true;
             let sup = if inherits {
                 "\n        super.$$__effects?.();"
@@ -233,6 +236,9 @@ pub fn expand_mode(
             ("$$__onDispose", &class.disposes),
         ] {
             if methods.is_empty() {
+                continue;
+            }
+            if ssr && hook != "$$__beforeMount" {
                 continue;
             }
             let calls: String = methods

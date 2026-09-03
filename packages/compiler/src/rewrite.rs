@@ -45,35 +45,41 @@ struct Plan {
     main_import: Option<(usize, usize, Vec<String>)>,
 }
 
-pub fn rewrite(source: &str) -> String {
+pub fn rewrite(source: &str, ssr: bool) -> String {
     let plan = plan(source);
     if plan.comps.is_empty() {
         return source.to_string();
     }
 
-    let emitter = TsEmitter::new();
-    let templates: Vec<(Vec<String>, Vec<String>)> = plan
-        .comps
-        .iter()
-        .map(|c| (c.statics.clone(), c.holes.clone()))
-        .collect();
-    let (decls, bodies) = generate_all(&templates, &emitter);
-    let runtime_import = runtime_import(&decls, &bodies.join("\n"));
-
     let mut edits: Vec<(usize, usize, String)> = Vec::new();
 
-    for (c, body) in plan.comps.iter().zip(&bodies) {
-        let view = if c.prelude.is_empty() {
-            format!("$$__view(): DocumentFragment {{\n{body}}}")
-        } else {
-            format!("$$__view(): DocumentFragment {{\n{}\n{body}}}", c.prelude)
-        };
-        edits.push((c.member.0, c.member.1, view));
-    }
+    if ssr {
+        for c in &plan.comps {
+            edits.push((c.member.0, c.member.1, String::new()));
+        }
+    } else {
+        let emitter = TsEmitter::new();
+        let templates: Vec<(Vec<String>, Vec<String>)> = plan
+            .comps
+            .iter()
+            .map(|c| (c.statics.clone(), c.holes.clone()))
+            .collect();
+        let (decls, bodies) = generate_all(&templates, &emitter);
+        let runtime_import = runtime_import(&decls, &bodies.join("\n"));
 
-    let first_class = plan.comps.iter().map(|c| c.class_start).min().unwrap();
-    edits.push((first_class, first_class, format!("{decls}\n")));
-    edits.push((0, 0, format!("{runtime_import}\n")));
+        for (c, body) in plan.comps.iter().zip(&bodies) {
+            let view = if c.prelude.is_empty() {
+                format!("$$__view(): DocumentFragment {{\n{body}}}")
+            } else {
+                format!("$$__view(): DocumentFragment {{\n{}\n{body}}}", c.prelude)
+            };
+            edits.push((c.member.0, c.member.1, view));
+        }
+
+        let first_class = plan.comps.iter().map(|c| c.class_start).min().unwrap();
+        edits.push((first_class, first_class, format!("{decls}\n")));
+        edits.push((0, 0, format!("{runtime_import}\n")));
+    }
 
     if let Some((s, e)) = plan.directives_import {
         let e = e + trailing_newline(source, e);

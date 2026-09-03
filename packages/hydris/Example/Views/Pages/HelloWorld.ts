@@ -1,18 +1,21 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
 
-import '@neuralfog/elemix-ssr/navigation/NavLink';
 import { AppDocument } from '#views/Documents/AppDocument';
 
+type Greeting = {
+    user: string;
+};
+
 // #component
-export class AboutPage extends Component {
+export class HelloWorld extends Component<unknown, Greeting> {
     // #document
     document = AppDocument;
 
     template = (): Template => tpl`
-        <main id="page" data-page="about">
-            <h1>About</h1>
-            <nav-link route="/test-render"><a href="/test-render">Back home</a></nav-link>
+        <main>
+            <h1>Hello, World!</h1>
+            <p>${this.viewData.user}</p>
         </main>
     `;
 }

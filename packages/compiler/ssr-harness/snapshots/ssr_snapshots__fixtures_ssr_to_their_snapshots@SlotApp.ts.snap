@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SlotApp.ts
 ---
 import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './AppCard';
@@ -36,21 +36,14 @@ const css = `
     }
 `;
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<app-card><span slot="header">⭐ Featured</span><p>Default-slot content lives in the card body.</p><span slot="footer">Updated just now</span></app-card><app-card><p>This card has only body content — no header or footer slot.</p></app-card>');
-
 export class SlotApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'slot-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>`, $__ssrChild('app-card', {}, `<span slot="header">⭐ Featured</span><p>Default-slot content lives in the card body.</p><span slot="footer">Updated just now</span>`, '', ['header', 'footer']), $__ssrChild('app-card', {}, `<p>This card has only body content — no header or footer slot.</p>`), `</template></${this.$$__tag ?? 'slot-app'}>`];
 }
 
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-return _r0;
+    
 }
-}
-SlotApp.$$__sheets = [..._s0];
 $__defineComponent('slot-app', SlotApp);
 SlotApp.prototype.$$__tag = 'slot-app';
 SlotApp.$$__propSafe = true;

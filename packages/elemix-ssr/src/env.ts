@@ -26,18 +26,3 @@ g.customElements ??= {
         if (!registry.has(tag)) registry.set(tag, ctor);
     },
 };
-
-g.HTMLElement ??= class {
-    children: unknown[] = [];
-    attachShadow(): unknown {
-        return {};
-    }
-    attachInternals(): unknown {
-        return { setFormValue(): void {}, setValidity(): void {}, form: null };
-    }
-    getAttribute(): string | null {
-        return null;
-    }
-    setAttribute(): void {}
-    removeAttribute(): void {}
-};

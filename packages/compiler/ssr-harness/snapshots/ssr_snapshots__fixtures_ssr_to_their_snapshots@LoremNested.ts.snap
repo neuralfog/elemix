@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/LoremNested.ts
 ---
 import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Props = {
@@ -25,33 +25,14 @@ const css = `
     }
 `;
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<div class="node"><p class="para"><!---->: <!----></p><slot></slot></div>');
-
 export class LoremNested extends Component<Props> {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'lorem-nested'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="node">${(() => {const _t0 = (this.props.index);const _t1 = (this.props.text);return `<p class="para" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}">${$__ssrText(_t0)}: ${$__ssrText(_t1)}</p>`;})()}<slot></slot></div></template></${this.$$__tag ?? 'lorem-nested'}>`];
 }
 
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _x3 = document.createTextNode('');
-_n1.replaceWith(_x3);
-const _x4 = document.createTextNode('');
-_n2.replaceWith(_x4);
-$__effect(() => {
-$__setText(_x3, (this.props.index));
-});
-$__effect(() => {
-$__setText(_x4, (this.props.text));
-});
-return _r0;
+    
 }
-}
-LoremNested.$$__sheets = [..._s0];
 $__defineComponent('lorem-nested', LoremNested);
 LoremNested.prototype.$$__tag = 'lorem-nested';
 LoremNested.$$__propSafe = true;

@@ -4,15 +4,10 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/MethodHelperApp.ts
 ---
 import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { open: boolean; count: number };
-
-const _t0 = $__template('<div class="panel"><div class="row"><!----><!----></div> <!----> <button class="toggle">toggle</button><button class="inc">+1</button></div>');
-const _t1 = $__templateEl('<span class="chip"> </span>');
-const _t2 = $__templateEl('<div class="open"><!----><span class="count"> </span></div>');
-const _t3 = $__templateEl('<div class="closed">closed</div>');
 
 export class MethodHelperApp extends Component {
 $$__ssr(): unknown[] {
@@ -32,55 +27,7 @@ return [`<${this.$$__tag ?? 'method-helper-app'}><template shadowrootmode="open"
     };
 
     
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__child(_n1, () => ((() => {
-const _r6 = $__cloneEl(_t1);
-const _n7 = _r6.firstChild!;
-$__effect(() => {
-$__setText(_n7, ('a'));
-});
-return _r6;
-})()));
-$__child(_n2, () => ((() => {
-const _r8 = $__cloneEl(_t1);
-const _n9 = _r8.firstChild!;
-$__effect(() => {
-$__setText(_n9, ('b'));
-});
-return _r8;
-})()));
-$__child(_n3, () => (this.state.open
-                        ? (() => {
-const _r10 = $__cloneEl(_t2);
-const _n11 = _r10.firstChild!;
-const _n12 = _r10.firstChild!.nextSibling!.firstChild!;
-$__child(_n11, () => ((() => {
-const _r13 = $__cloneEl(_t1);
-const _n14 = _r13.firstChild!;
-$__effect(() => {
-$__setText(_n14, ('open'));
-});
-return _r13;
-})()));
-$__effect(() => {
-$__setText(_n12, (this.state.count));
-});
-return _r10;
-})()
-                        : (() => {
-const _r15 = $__cloneEl(_t3);
-return _r15;
-})()));
-$__event(_n4, 'click', this.toggle);
-$__event(_n5, 'click', this.inc);
-return _r0;
-}
+    
 }
 $__defineComponent('method-helper-app', MethodHelperApp);
 MethodHelperApp.prototype.$$__tag = 'method-helper-app';

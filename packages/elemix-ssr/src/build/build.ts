@@ -143,16 +143,26 @@ export const build = async (
                     };
                 }
                 const compiled = await compileCached(args.path);
-                if (!needs || !optimiserEnabled)
-                    return { contents: compiled, loader: 'ts' };
-                const result = optimiserSource(compiled, registry);
-                if (result.inlined > 0 && !optimised.has(args.path)) {
-                    optimised.add(args.path);
-                    console.log(
-                        `  ${cyan('[ssr]')} ${dim(relative(outputRoot, args.path))} ${green('optimised')}`,
-                    );
+                let code = compiled;
+                if (needs && optimiserEnabled) {
+                    const result = optimiserSource(compiled, registry);
+                    if (result.inlined > 0 && !optimised.has(args.path)) {
+                        optimised.add(args.path);
+                        console.log(
+                            `  ${cyan('[ssr]')} ${dim(relative(outputRoot, args.path))} ${green('optimised')}`,
+                        );
+                    }
+                    code = result.code;
                 }
-                return { contents: result.code, loader: 'ts' };
+                const remapped = args.path.endsWith(
+                    'elemix-ssr/src/component.ts',
+                )
+                    ? code
+                    : code.replace(
+                          /from '@neuralfog\/elemix'/g,
+                          "from '@neuralfog/elemix-ssr/component'",
+                      );
+                return { contents: remapped, loader: 'ts' };
             });
         },
     });
@@ -215,13 +225,14 @@ export const build = async (
         const pick = `(page as Record<string, unknown>)[${JSON.stringify(exportName)}] ?? (page as Record<string, unknown>).default ?? Object.values(page).find((e) => typeof e === 'function')`;
         writeFileSync(
             entry,
-            `import { ${resetImport} } from '@neuralfog/elemix-ssr';\n${NAV_IMPORT}\nimport * as page from ${JSON.stringify(view.source)};\n${resetCall}const view = ${pick};\nglobalThis.render = (ctx?: unknown) => render(view as never, ctx as never);\n`,
+            `import { ${resetImport} } from '@neuralfog/elemix-ssr';\nimport * as page from ${JSON.stringify(view.source)};\n${resetCall}const view = ${pick};\nglobalThis.render = (ctx?: unknown) => render(view as never, ctx as never);\n`,
         );
         const result = await Bun.build({
             entrypoints: [entry],
             plugins: [ssr, sassPlugin],
             format: 'iife',
             target: 'browser',
+            minify: { syntax: true, whitespace: false, identifiers: false },
         });
         if (!result.success) {
             logError(`ssr ${view.key} failed`);
@@ -232,7 +243,13 @@ export const build = async (
         const out = join(outputRoot, 'ssr', `${view.key}.js`);
         mkdirSync(dirname(out), { recursive: true });
         const code = await result.outputs[0].text();
-        writeFileSync(out, code);
+        const cleaned = /__require\(/.test(code)
+            ? code
+            : code.replace(
+                  /var __require = \/\* @__PURE__ \*\/[\s\S]*?Dynamic require of[\s\S]*?\}\);\n?/,
+                  '',
+              );
+        writeFileSync(out, cleaned);
     }
 
     const hydrate = elemixLoader('--hydrate');

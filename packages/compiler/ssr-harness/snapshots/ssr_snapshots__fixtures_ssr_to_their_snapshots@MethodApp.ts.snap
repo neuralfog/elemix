@@ -4,12 +4,10 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/MethodApp.ts
 ---
 import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { count: number };
-
-const _t0 = $__template('<div class="method"><span class="lbl"> </span><span class="count"> </span><button class="inc">+1</button></div>');
 
 export class MethodApp extends Component {
 $$__ssr(): unknown[] {
@@ -23,21 +21,7 @@ return [`<${this.$$__tag ?? 'method-app'}><template shadowrootmode="open" shadow
         this.state.count++;
     };
 
-    $$__view(): DocumentFragment {
-const label = 'count';
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n3, 'click', this.inc);
-$__effect(() => {
-$__setText(_n1, (label));
-});
-$__effect(() => {
-$__setText(_n2, (this.state.count));
-});
-return _r0;
-}
+    
 }
 $__defineComponent('method-app', MethodApp);
 MethodApp.prototype.$$__tag = 'method-app';

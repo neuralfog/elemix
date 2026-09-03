@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/SvgApp.ts
 ---
 import { $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setAttr, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -39,9 +39,6 @@ const css = `
 
 const COLORS = ['#6366f1', '#ef4444', '#22c55e', '#f59e0b'];
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<svg viewBox="0 0 200 200" width="200" height="200"><circle></circle></svg><button>move</button><button>grow</button><button>recolor</button>');
-
 export class SvgApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'svg-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><svg viewBox="0 0 200 200" width="200" height="200"><circle${$__ssrAttr('cx', this.state.cx)}${$__ssrAttr('cy', this.state.cy)}${$__ssrAttr('r', this.state.r)}${$__ssrAttr('fill', this.state.color)}></circle></svg><button>move</button><button>grow</button><button>recolor</button></template></${this.$$__tag ?? 'svg-app'}>`];
@@ -71,31 +68,8 @@ return [`<${this.$$__tag ?? 'svg-app'}><template shadowrootmode="open" shadowroo
         this.state.color = COLORS[this.colorIndex];
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n2, 'click', this.move);
-$__event(_n3, 'click', this.grow);
-$__event(_n4, 'click', this.recolor);
-$__effect(() => {
-$__setAttr(_n1, 'cx', (this.state.cx));
-});
-$__effect(() => {
-$__setAttr(_n1, 'cy', (this.state.cy));
-});
-$__effect(() => {
-$__setAttr(_n1, 'r', (this.state.r));
-});
-$__effect(() => {
-$__setAttr(_n1, 'fill', (this.state.color));
-});
-return _r0;
+    
 }
-}
-SvgApp.$$__sheets = [..._s0];
 $__defineComponent('svg-app', SvgApp);
 SvgApp.prototype.$$__tag = 'svg-app';
 SvgApp.$$__propSafe = true;

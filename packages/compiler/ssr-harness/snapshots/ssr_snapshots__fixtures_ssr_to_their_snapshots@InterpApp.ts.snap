@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/InterpApp.ts
 ---
 import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -39,9 +39,6 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<p class="full"><span class="k">full:</span> <!----><!----></p><p class="dash"><span class="k">dash:</span> <!---->-<!----></p><p class="middle"><span class="k">middle:</span> [<!---->]</p><p class="num"><span class="k">num:</span> <!----></p><button>swap</button><button>set middle</button><button>inc</button>');
-
 export class InterpApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'interp-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>`, (() => {const _t0 = (this.state.first);const _t1 = (this.state.last);return [`<p class="full" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}"><span class="k">full:</span> ${$__ssrText(_t0)}${$__ssrText(_t1)}</p>`];})(), (() => {const _t2 = (this.state.first);const _t3 = (this.state.last);return [`<p class="dash" data-t="${$__ssrLen(_t2)},${$__ssrLen(_t3)}"><span class="k">dash:</span> ${$__ssrText(_t2)}-${$__ssrText(_t3)}</p>`];})(), (() => {const _t4 = (this.state.middle);return [`<p class="middle" data-t="${$__ssrLen(_t4)}"><span class="k">middle:</span> [${$__ssrText(_t4)}]</p>`];})(), (() => {const _t5 = (this.state.n);return [`<p class="num" data-t="${$__ssrLen(_t5)}"><span class="k">num:</span> ${$__ssrText(_t5)}</p>`];})(), `<button>swap</button><button>set middle</button><button>inc</button></template></${this.$$__tag ?? 'interp-app'}>`];
@@ -69,46 +66,8 @@ return [`<${this.$$__tag ?? 'interp-app'}><template shadowrootmode="open" shadow
         this.state.n++;
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n9 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _x12 = document.createTextNode('');
-_n1.replaceWith(_x12);
-const _x13 = document.createTextNode('');
-_n2.replaceWith(_x13);
-const _x14 = document.createTextNode('');
-_n3.replaceWith(_x14);
-const _x15 = document.createTextNode('');
-_n4.replaceWith(_x15);
-const _x16 = document.createTextNode('');
-_n5.replaceWith(_x16);
-const _x17 = document.createTextNode('');
-_n6.replaceWith(_x17);
-$__event(_n7, 'click', this.swap);
-$__event(_n8, 'click', this.clearMiddle);
-$__event(_n9, 'click', this.inc);
-$__effect(() => {
-const _v10 = (this.state.first);
-const _v11 = (this.state.last);
-$__setText(_x12, (_v10));
-$__setText(_x13, (_v11));
-$__setText(_x14, (_v10));
-$__setText(_x15, (_v11));
-$__setText(_x16, (this.state.middle));
-$__setText(_x17, (this.state.n));
-});
-return _r0;
+    
 }
-}
-InterpApp.$$__sheets = [..._s0];
 $__defineComponent('interp-app', InterpApp);
 InterpApp.prototype.$$__tag = 'interp-app';
 InterpApp.$$__propSafe = true;

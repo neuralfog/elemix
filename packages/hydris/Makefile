@@ -44,6 +44,7 @@ bench:
 # 	wrk -t12 -c400 -d10s -H 'Accept-Encoding: br,gzip' http://127.0.0.1:5000/test-render
 # 	wrk -t12 -c400 -d10s http://localhost:5000/test-render
 	wrk -t12 -c400 -d10s http://localhost:5000/lorem-1k
+# 	wrk -t12 -c400 -d10s http://localhost:3000/lorem-1k
 
 build-native:
 	bash Hydris.QuickJs/native/build.sh

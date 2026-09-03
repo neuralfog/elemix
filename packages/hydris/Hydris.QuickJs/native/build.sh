@@ -3,10 +3,16 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC="$HERE/../../Vendor/quickjs-ng/0.16.2"
+MI="$HERE/../../Vendor/mimalloc/3.5.1"
 RUNTIMES="$HERE/runtimes"
 
 if [ ! -d "$SRC" ]; then
     echo "vendored quickjs-ng not found at $SRC" >&2
+    exit 1
+fi
+
+if [ ! -d "$MI" ]; then
+    echo "vendored mimalloc not found at $MI" >&2
     exit 1
 fi
 
@@ -16,7 +22,7 @@ if ! command -v zig >/dev/null 2>&1; then
 fi
 
 SHIM="$HERE/hydris_qjs.c"
-QJS=("$SRC/quickjs.c" "$SRC/dtoa.c" "$SRC/libregexp.c" "$SRC/libunicode.c")
+QJS=("$SRC/quickjs.c" "$SRC/dtoa.c" "$SRC/libregexp.c" "$SRC/libunicode.c" "$MI/src/static.c")
 
 ALL_RIDS=(
     linux-x64 linux-arm64
@@ -56,10 +62,10 @@ build_one() {
     esac
     mkdir -p "$out"
     echo "building $rid ($triple) -> runtimes/$rid/native/$lib"
-    zig cc -target "$triple" -shared -fPIC -O2 \
+    zig cc -target "$triple" -shared -fPIC -O2 -DNDEBUG -fno-semantic-interposition \
         -o "$out/$lib" \
         "$SHIM" "${QJS[@]}" \
-        -I"$SRC" "${libs[@]}"
+        -I"$SRC" -I"$MI/include" "${libs[@]}"
     find "$out" -type f ! -name "$lib" -delete
 }
 

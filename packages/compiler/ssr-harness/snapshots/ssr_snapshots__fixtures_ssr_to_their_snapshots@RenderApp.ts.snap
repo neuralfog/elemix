@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/RenderApp.ts
 ---
 import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const css = `
@@ -54,9 +54,6 @@ const css = `
     button.ghost:hover { background: #cbd5e1; }
 `;
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<div class="value"> </div><div class="buttons"><button class="ghost">Increment (silent)</button><button>Increment + render()</button></div>');
-
 export class RenderApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'render-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="value">`, $__ssrText(this.count), `</div><div class="buttons"><button class="ghost">Increment (silent)</button><button>Increment + render()</button></div></template></${this.$$__tag ?? 'render-app'}>`];
@@ -74,20 +71,8 @@ return [`<${this.$$__tag ?? 'render-app'}><template shadowrootmode="open" shadow
         this.render();
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
-$__event(_n2, 'click', this.silent);
-$__event(_n3, 'click', this.withRender);
-$__effect(() => {
-$__setText(_n1, (this.count));
-});
-return _r0;
+    
 }
-}
-RenderApp.$$__sheets = [..._s0];
 $__defineComponent('render-app', RenderApp);
 RenderApp.prototype.$$__tag = 'render-app';
 RenderApp.$$__propSafe = true;

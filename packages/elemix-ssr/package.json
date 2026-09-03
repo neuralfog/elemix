@@ -11,6 +11,7 @@
         ".": "./src/index.ts",
         "./navigation": "./src/navigation/index.ts",
         "./navigation/NavLink": "./src/navigation/NavLink.ts",
+        "./component": "./src/component.ts",
         "./build": "./src/build/index.ts"
     },
     "scripts": {

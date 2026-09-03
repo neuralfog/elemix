@@ -88,13 +88,22 @@ export const $__render = (rope: Rope): string => {
 
 export const $__ssrText = (value: unknown): Rope => {
     if (Array.isArray(value)) return value as Rope;
-    return value == null
-        ? ''
-        : String(value).replace(/[&<>]/g, (c) => TEXT[c] ?? c);
+    if (value == null) return '';
+    const s = String(value);
+    return s.indexOf('&') === -1 &&
+        s.indexOf('<') === -1 &&
+        s.indexOf('>') === -1
+        ? s
+        : s.replace(/[&<>]/g, (c) => TEXT[c] ?? c);
 };
 
 const attrEsc = (value: string): string =>
-    value.replace(/[&"<>]/g, (c) => ATTR[c] ?? c);
+    value.indexOf('&') === -1 &&
+    value.indexOf('"') === -1 &&
+    value.indexOf('<') === -1 &&
+    value.indexOf('>') === -1
+        ? value
+        : value.replace(/[&"<>]/g, (c) => ATTR[c] ?? c);
 
 export const $__ssrAttr = (name: string, value: unknown): string => {
     if (value === false || value === null || value === undefined) return '';

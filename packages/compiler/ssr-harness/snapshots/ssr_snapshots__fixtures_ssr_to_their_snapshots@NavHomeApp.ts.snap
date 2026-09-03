@@ -4,12 +4,10 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/NavHomeApp.ts
 ---
 import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { NavDocument } from './NavDocument';
-
-const _t0 = $__template('<main id="page" data-page="home"><h1>Home</h1><button id="counter">count <!----></button></main>');
 
 export class NavHomeApp extends Component {
 $$__ssr(): unknown[] {
@@ -23,18 +21,7 @@ return [`<${this.$$__tag ?? 'nav-home-app'}><template shadowrootmode="open" shad
         this.state.count++;
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n2 = _n1.firstChild!.nextSibling!;
-$__event(_n1, 'click', this.inc);
-const _x3 = document.createTextNode('');
-_n2.replaceWith(_x3);
-$__effect(() => {
-$__setText(_x3, (this.state.count));
-});
-return _r0;
-}
+    
 }
 $__defineComponent('nav-home-app', NavHomeApp);
 NavHomeApp.prototype.$$__tag = 'nav-home-app';

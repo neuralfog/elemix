@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/CardListApp.ts
 ---
 import { $__ssrChild, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './UserCard';
@@ -52,10 +52,6 @@ const css = `
 
 const NAMES = ['Ada', 'Grace', 'Linus', 'Margaret', 'Dennis', 'Barbara'];
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<div class="bar"><button>Add user</button></div><div class="list"><!----></div>');
-const _t1 = $__templateEl('<div class="row"><user-card></user-card><button class="promote">promote</button><button class="drop">×</button></div>');
-
 export class CardListApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'card-list-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar"><button>Add user</button></div><div class="list">`, ($__ssrRepeat(
@@ -94,30 +90,8 @@ return [`<${this.$$__tag ?? 'card-list-app'}><template shadowrootmode="open" sha
         if (i !== -1) this.state.users.splice(i, 1);
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
-$__event(_n1, 'click', this.add);
-$__list(_n2, () => (this.state.users), (user) => user.id, (user) => (() => {
-const _r3 = $__cloneEl(_t1);
-const _n4 = _r3.firstChild!;
-const _n5 = _r3.firstChild!.nextSibling!;
-const _n6 = _r3.firstChild!.nextSibling!.nextSibling!;
-$__event(_n5, 'click', () => this.promote(user.id));
-$__event(_n6, 'click', () => this.removeUser(user.id));
-$__effect(() => {
-$__setProp(_n4, 'name', (user.name));
-});
-$__effect(() => {
-$__setProp(_n4, 'role', (user.role));
-});
-return _r3;
-})());
-return _r0;
+    
 }
-}
-CardListApp.$$__sheets = [..._s0];
 $__defineComponent('card-list-app', CardListApp);
 CardListApp.prototype.$$__tag = 'card-list-app';
 CardListApp.$$__propSafe = true;

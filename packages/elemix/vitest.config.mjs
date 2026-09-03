@@ -5,6 +5,7 @@ export default defineConfig({
         name: '@neuralfog/elemix',
         root: './',
         environment: 'jsdom',
+        maxWorkers: process.env.CI ? undefined : '25%',
         coverage: {
             provider: 'v8',
             all: true,

@@ -417,6 +417,255 @@ const ensureImport = (src: string, helper: string): string => {
     return `import { ${helper} } from '@neuralfog/elemix/ssr-runtime';\n${src}`;
 };
 
+const HTML_TEXT: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+};
+
+const foldableConsts = (src: string): Map<string, string> => {
+    const out = new Map<string, string>();
+    const re =
+        /^(?:export\s+)?const\s+(\w+)\s*=\s*('[^'\\\n]*'|"[^"\\\n]*"|`[^`\\]*`)\s*;/gm;
+    for (const m of src.matchAll(re)) {
+        const raw = m[2];
+        const content = raw.slice(1, -1);
+        if (raw[0] === '`' && content.includes('${')) continue;
+        out.set(m[1], content);
+    }
+    return out;
+};
+
+const literalContent = (arg: string): string | null => {
+    const t = arg.trim();
+    if (t.length < 2) return null;
+    const q = t[0];
+    const end = t[t.length - 1];
+    if ((q === "'" || q === '"') && end === q) {
+        const inner = t.slice(1, -1);
+        if (inner.includes('\\') || inner.includes(q) || inner.includes('\n'))
+            return null;
+        return inner;
+    }
+    if (q === '`' && end === '`') {
+        const inner = t.slice(1, -1);
+        if (inner.includes('\\') || inner.includes('${')) return null;
+        return inner;
+    }
+    return null;
+};
+
+const unwrap = (s: string): string => {
+    let t = s.trim();
+    while (t.startsWith('(') && scanBalanced(t, 0) === t.length - 1)
+        t = t.slice(1, -1).trim();
+    return t;
+};
+
+const foldConstText = (src: string): string => {
+    const consts = foldableConsts(src);
+    const temps = new Map<string, string | null>();
+    const edits: Array<{ start: number; end: number; text: string }> = [];
+    const re = /(?:const\s+(_t\d+)\s*=\s*\()|((?:\$__ssrText|\$__ssrLen)\()/g;
+    const resolve = (raw: string): string | null => {
+        const arg = unwrap(raw);
+        const lit = literalContent(arg);
+        if (lit !== null) return lit;
+        if (consts.has(arg)) return consts.get(arg) as string;
+        if (/^_t\d+$/.test(arg)) {
+            const bound = temps.get(arg);
+            if (bound != null) return bound;
+        }
+        return null;
+    };
+    for (let m = re.exec(src); m !== null; m = re.exec(src)) {
+        const paren = m.index + m[0].length - 1;
+        const close = scanBalanced(src, paren);
+        if (close < 0) continue;
+        if (m[1] !== undefined) {
+            temps.set(m[1], resolve(src.slice(paren + 1, close).trim()));
+            re.lastIndex = close + 1;
+            continue;
+        }
+        const value = resolve(src.slice(paren + 1, close).trim());
+        if (value === null) continue;
+        const text = m[0].startsWith('$__ssrText')
+            ? JSON.stringify(value.replace(/[&<>]/g, (c) => HTML_TEXT[c]))
+            : String(value.length);
+        edits.push({ start: m.index, end: close + 1, text });
+        re.lastIndex = close + 1;
+    }
+    if (edits.length === 0) return src;
+    let out = src;
+    for (let i = edits.length - 1; i >= 0; i--)
+        out =
+            out.slice(0, edits[i].start) +
+            edits[i].text +
+            out.slice(edits[i].end);
+    return out;
+};
+
+const dropDeadTemps = (src: string): string => {
+    const consts = foldableConsts(src);
+    const removals: Array<[number, number]> = [];
+    const re = /const\s+(_t\d+)\s*=\s*\(/g;
+    for (let m = re.exec(src); m !== null; m = re.exec(src)) {
+        const paren = m.index + m[0].length - 1;
+        const close = scanBalanced(src, paren);
+        if (close < 0) continue;
+        let end = close + 1;
+        if (src[end] === ';') end++;
+        const expr = unwrap(src.slice(paren + 1, close));
+        const isConst = literalContent(expr) !== null || consts.has(expr);
+        if (isConst) {
+            const scopeEnd = scanBalanced(src, end);
+            const region =
+                scopeEnd < 0 ? src.slice(end) : src.slice(end, scopeEnd);
+            if (!new RegExp(`\\b${m[1]}\\b`).test(region))
+                removals.push([m.index, end]);
+        }
+        re.lastIndex = end;
+    }
+    if (removals.length === 0) return src;
+    let out = src;
+    for (let i = removals.length - 1; i >= 0; i--)
+        out = out.slice(0, removals[i][0]) + out.slice(removals[i][1]);
+    return out;
+};
+
+const SIMPLE_INIT = /^(?:[A-Za-z_$][\w$]*|-?\d+(?:\.\d+)?)$/;
+
+const substInCode = (s: string, subst: Map<string, string>): string => {
+    const apply = (code: string): string => {
+        let r = code;
+        for (const [n, v] of subst)
+            r = r.replace(new RegExp(`\\b${n}\\b`, 'g'), v);
+        return r;
+    };
+    let out = '';
+    let code = '';
+    let mode: 'code' | 'sq' | 'dq' | 'tmpl' = 'code';
+    const stack: string[] = [];
+    for (let i = 0; i < s.length; i++) {
+        const c = s[i];
+        if (mode === 'code') {
+            if (c === "'" || c === '"' || c === '`') {
+                out += apply(code) + c;
+                code = '';
+                mode = c === "'" ? 'sq' : c === '"' ? 'dq' : 'tmpl';
+            } else if (c === '(' || c === '[' || c === '{') {
+                stack.push(c);
+                code += c;
+            } else if (c === ')' || c === ']' || c === '}') {
+                if (stack.pop() === '${') {
+                    out += apply(code) + c;
+                    code = '';
+                    mode = 'tmpl';
+                } else code += c;
+            } else code += c;
+            continue;
+        }
+        if (mode === 'sq' || mode === 'dq') {
+            out += c;
+            if (c === '\\') out += s[++i] ?? '';
+            else if (
+                (mode === 'sq' && c === "'") ||
+                (mode === 'dq' && c === '"')
+            )
+                mode = 'code';
+            continue;
+        }
+        if (c === '\\') out += c + (s[++i] ?? '');
+        else if (c === '`') {
+            out += c;
+            mode = 'code';
+        } else if (c === '$' && s[i + 1] === '{') {
+            out += '${';
+            i++;
+            stack.push('${');
+            mode = 'code';
+        } else out += c;
+    }
+    return out + apply(code);
+};
+
+const collapseIIFE = (src: string): string => {
+    const edits: Array<{ start: number; end: number; text: string }> = [];
+    const re = /\(\(\)\s*=>\s*\{/g;
+    for (let m = re.exec(src); m !== null; m = re.exec(src)) {
+        const brace = m.index + m[0].length - 1;
+        const braceClose = scanBalanced(src, brace);
+        if (
+            braceClose < 0 ||
+            src.slice(braceClose + 1, braceClose + 4) !== ')()'
+        )
+            continue;
+        const body = src.slice(brace + 1, braceClose);
+        const subst = new Map<string, string>();
+        let pos = 0;
+        let ok = true;
+        for (;;) {
+            const d = /^\s*const\s+(_t\d+)\s*=\s*\(/.exec(body.slice(pos));
+            if (!d) break;
+            const paren = pos + d.index + d[0].length - 1;
+            const close = scanBalanced(body, paren);
+            if (close < 0) {
+                ok = false;
+                break;
+            }
+            const init = unwrap(body.slice(paren + 1, close));
+            if (!SIMPLE_INIT.test(init)) {
+                ok = false;
+                break;
+            }
+            subst.set(d[1], init);
+            pos = close + 1;
+            if (body[pos] === ';') pos++;
+        }
+        const rest = body.slice(pos).trimStart();
+        if (!ok || !/^return[\s`(]/.test(rest)) continue;
+        let expr = rest.slice(6).trim();
+        if (expr.endsWith(';')) expr = expr.slice(0, -1).trim();
+        edits.push({
+            start: m.index,
+            end: braceClose + 4,
+            text: subst.size > 0 ? substInCode(expr, subst) : expr,
+        });
+        re.lastIndex = braceClose + 4;
+    }
+    if (edits.length === 0) return src;
+    let out = src;
+    for (let i = edits.length - 1; i >= 0; i--)
+        out =
+            out.slice(0, edits[i].start) +
+            edits[i].text +
+            out.slice(edits[i].end);
+    return out;
+};
+
+const stripSsrTpl = (src: string): string => {
+    const edits: Array<{ start: number; end: number; text: string }> = [];
+    const re = /\$__ssrTpl\(/g;
+    for (let m = re.exec(src); m !== null; m = re.exec(src)) {
+        const paren = m.index + m[0].length - 1;
+        const close = scanBalanced(src, paren);
+        if (close < 0) continue;
+        const args = topLevelArgs(src, paren, close);
+        if (args.length === 1 && args[0] !== '') {
+            edits.push({ start: m.index, end: close + 1, text: args[0] });
+            re.lastIndex = close + 1;
+        }
+    }
+    if (edits.length === 0) return src;
+    let out = src;
+    for (let i = edits.length - 1; i >= 0; i--)
+        out =
+            out.slice(0, edits[i].start) +
+            edits[i].text +
+            out.slice(edits[i].end);
+    return out;
+};
+
 export const optimiserSource = (
     src: string,
     registry: Map<string, ChildMeta>,
@@ -463,6 +712,12 @@ export const optimiserSource = (
         inlined++;
         cursor = callStart;
     }
+    out = dropDeadTemps(foldConstText(out));
+    for (let prev = ''; prev !== out; ) {
+        prev = out;
+        out = collapseIIFE(out);
+    }
+    out = stripSsrTpl(out);
     if (inlined > 0) {
         const helpers = new Set<string>();
         for (const m of out.matchAll(/(?<!\$)\$__ssr\w+/g)) helpers.add(m[0]);

@@ -3,11 +3,8 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ResetProbe.ts
 ---
-import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
-
-const _s0 = $__sheet(':host { display: block; }');
-const _t0 = $__template('<span class="reset-probe">probe</span>');
 
 export class ResetProbe extends Component {
 $$__ssr(): unknown[] {
@@ -15,12 +12,8 @@ return [`<${this.$$__tag ?? 'reset-probe'}><template shadowrootmode="open" shado
 }
 
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-return _r0;
+    
 }
-}
-ResetProbe.$$__sheets = [..._s0];
 $__defineComponent('reset-probe', ResetProbe);
 ResetProbe.prototype.$$__tag = 'reset-probe';
 ResetProbe.$$__propSafe = true;

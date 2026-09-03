@@ -5,6 +5,7 @@ export default defineConfig({
         name: 'unit',
         environment: 'jsdom',
         globals: true,
+        maxWorkers: process.env.CI ? undefined : '25%',
         include: ['src/**/*.{test,spec}.ts'],
     },
 });

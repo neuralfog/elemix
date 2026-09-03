@@ -4,23 +4,14 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/InheritanceApp.ts
 ---
 import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const baseCss =
     ':host { display: block; } .btn { background: rgb(220, 38, 38); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; }';
 const derivedCss = '.btn { font-weight: 700; }';
 
-const _s0 = $__sheet(baseCss);
-const _t0 = $__template('<button class="btn">count <!----></button>');
-
 export class InheritBase extends Component {
-    $$__onMount(): void {
-        this.baseMounted();
-    }
-    $$__effects(): void {
-        $__effect(() => this.mirrorBase());
-    }
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'inherit-base'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${baseCss}</style>${(() => {const _t0 = (this.state.count);return `<button class="btn" data-t="${$__ssrLen(_t0)}">count ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'inherit-base'}>`];
 }
@@ -40,34 +31,13 @@ return [`<${this.$$__tag ?? 'inherit-base'}><template shadowrootmode="open" shad
         this.state.count++;
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!;
-const _n2 = _n1.firstChild!.nextSibling!;
-$__event(_n1, 'click', this.bump);
-const _x3 = document.createTextNode('');
-_n2.replaceWith(_x3);
-$__effect(() => {
-$__setText(_x3, (this.state.count));
-});
-return _r0;
+    
 }
-}
-InheritBase.$$__sheets = [..._s0];
 $__defineComponent('inherit-base', InheritBase);
 InheritBase.prototype.$$__tag = 'inherit-base';
 InheritBase.$$__propSafe = true;
 
-const _s1 = $__sheet(derivedCss);
 export class InheritDerived extends InheritBase {
-    $$__onMount(): void {
-        super.$$__onMount?.();
-        this.derivedMounted();
-    }
-    $$__effects(): void {
-        super.$$__effects?.();
-        $__effect(() => this.mirrorDerived());
-    }
 
     derivedMounted(): void {
         this.setAttribute('data-derived', 'on');
@@ -77,7 +47,6 @@ export class InheritDerived extends InheritBase {
         this.setAttribute('data-derived-fx', String(this.state.count));
     }
 }
-InheritDerived.$$__sheets = [...(Object.getPrototypeOf(InheritDerived).$$__sheets ?? []), ..._s1];
 $__defineComponent('inherit-derived', InheritDerived);
 InheritDerived.prototype.$$__tag = 'inherit-derived';
 InheritDerived.$$__propSafe = true;

@@ -2,15 +2,45 @@
 #include <stdlib.h>
 #include <string.h>
 #include "quickjs.h"
+#include "mimalloc.h"
 
 typedef struct {
     JSRuntime *rt;
     JSContext *ctx;
 } HqEngine;
 
+static void *hq_mi_calloc(void *opaque, size_t count, size_t size) {
+    return mi_calloc(count, size);
+}
+
+static void *hq_mi_malloc(void *opaque, size_t size) {
+    return mi_malloc(size);
+}
+
+static void hq_mi_free(void *opaque, void *ptr) {
+    mi_free(ptr);
+}
+
+static void *hq_mi_realloc(void *opaque, void *ptr, size_t size) {
+    return mi_realloc(ptr, size);
+}
+
+static size_t hq_mi_usable_size(const void *ptr) {
+    return mi_usable_size((void *)ptr);
+}
+
+static const JSMallocFunctions hq_malloc_funcs = {
+    hq_mi_calloc,
+    hq_mi_malloc,
+    hq_mi_free,
+    hq_mi_realloc,
+    hq_mi_usable_size,
+};
+
 void *hq_new(void) {
     HqEngine *e = malloc(sizeof(HqEngine));
-    e->rt = JS_NewRuntime();
+    e->rt = JS_NewRuntime2(&hq_malloc_funcs, NULL);
+    JS_SetGCThreshold(e->rt, (size_t)512 * 1024 * 1024);
     e->ctx = JS_NewContext(e->rt);
     return e;
 }

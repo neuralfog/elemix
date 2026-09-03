@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/DeepInheritanceApp.ts
 ---
 import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const baseCss =
@@ -13,16 +13,7 @@ const middleCss = '.btn { font-weight: 700; }';
 const legCss = '.btn { font-style: italic; }';
 const leafCss = '.btn { text-decoration-line: underline; }';
 
-const _s0 = $__sheet(baseCss);
-const _t0 = $__template('<button class="btn">count <!----></button>');
-
 export class DeepBase extends Component {
-    $$__onMount(): void {
-        this.baseMounted();
-    }
-    $$__effects(): void {
-        $__effect(() => this.mirrorBase());
-    }
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'deep-base'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${baseCss}</style>${(() => {const _t0 = (this.state.count);return `<button class="btn" data-t="${$__ssrLen(_t0)}">count ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'deep-base'}>`];
 }
@@ -42,34 +33,13 @@ return [`<${this.$$__tag ?? 'deep-base'}><template shadowrootmode="open" shadowr
         this.state.count++;
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!;
-const _n2 = _n1.firstChild!.nextSibling!;
-$__event(_n1, 'click', this.bump);
-const _x3 = document.createTextNode('');
-_n2.replaceWith(_x3);
-$__effect(() => {
-$__setText(_x3, (this.state.count));
-});
-return _r0;
+    
 }
-}
-DeepBase.$$__sheets = [..._s0];
 $__defineComponent('deep-base', DeepBase);
 DeepBase.prototype.$$__tag = 'deep-base';
 DeepBase.$$__propSafe = true;
 
-const _s1 = $__sheet(middleCss);
 export class DeepMiddle extends DeepBase {
-    $$__onMount(): void {
-        super.$$__onMount?.();
-        this.middleMounted();
-    }
-    $$__effects(): void {
-        super.$$__effects?.();
-        $__effect(() => this.mirrorMiddle());
-    }
 
     middleMounted(): void {
         this.setAttribute('data-middle', 'on');
@@ -79,21 +49,11 @@ export class DeepMiddle extends DeepBase {
         this.setAttribute('data-middle-fx', String(this.state.count));
     }
 }
-DeepMiddle.$$__sheets = [...(Object.getPrototypeOf(DeepMiddle).$$__sheets ?? []), ..._s1];
 $__defineComponent('deep-middle', DeepMiddle);
 DeepMiddle.prototype.$$__tag = 'deep-middle';
 DeepMiddle.$$__propSafe = true;
 
-const _s2 = $__sheet(legCss);
 export class DeepLeg extends DeepMiddle {
-    $$__onMount(): void {
-        super.$$__onMount?.();
-        this.legMounted();
-    }
-    $$__effects(): void {
-        super.$$__effects?.();
-        $__effect(() => this.mirrorLeg());
-    }
 
     legMounted(): void {
         this.setAttribute('data-leg', 'on');
@@ -103,21 +63,11 @@ export class DeepLeg extends DeepMiddle {
         this.setAttribute('data-leg-fx', String(this.state.count));
     }
 }
-DeepLeg.$$__sheets = [...(Object.getPrototypeOf(DeepLeg).$$__sheets ?? []), ..._s2];
 $__defineComponent('deep-leg', DeepLeg);
 DeepLeg.prototype.$$__tag = 'deep-leg';
 DeepLeg.$$__propSafe = true;
 
-const _s3 = $__sheet(leafCss);
 export class DeepLeaf extends DeepLeg {
-    $$__onMount(): void {
-        super.$$__onMount?.();
-        this.leafMounted();
-    }
-    $$__effects(): void {
-        super.$$__effects?.();
-        $__effect(() => this.mirrorLeaf());
-    }
 
     leafMounted(): void {
         this.setAttribute('data-leaf', 'on');
@@ -127,7 +77,6 @@ export class DeepLeaf extends DeepLeg {
         this.setAttribute('data-leaf-fx', String(this.state.count));
     }
 }
-DeepLeaf.$$__sheets = [...(Object.getPrototypeOf(DeepLeaf).$$__sheets ?? []), ..._s3];
 $__defineComponent('deep-leaf', DeepLeaf);
 DeepLeaf.prototype.$$__tag = 'deep-leaf';
 DeepLeaf.$$__propSafe = true;

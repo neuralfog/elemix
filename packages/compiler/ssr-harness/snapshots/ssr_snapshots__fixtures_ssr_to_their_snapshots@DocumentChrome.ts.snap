@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/DocumentChrome.ts
 ---
-import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const css = `
@@ -16,21 +16,14 @@ const css = `
     }
 `;
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<div class="bar">Harness</div>');
-
 export class DocumentChrome extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'document-chrome'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="bar">Harness</div></template></${this.$$__tag ?? 'document-chrome'}>`];
 }
 
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-return _r0;
+    
 }
-}
-DocumentChrome.$$__sheets = [..._s0];
 $__defineComponent('document-chrome', DocumentChrome);
 DocumentChrome.prototype.$$__tag = 'document-chrome';
 DocumentChrome.$$__propSafe = true;

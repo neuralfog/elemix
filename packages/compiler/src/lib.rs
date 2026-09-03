@@ -46,7 +46,7 @@ pub fn compile_diagnostics_mode(
     let spliced = splice::inline_helpers(source);
     let diags = pragma::diagnose::collect(&spliced);
     let expanded = pragma::expand_mode(&spliced, ssr, hydrate, minify).unwrap_or(spliced);
-    let lowered = free_template::lower(&rewrite::rewrite(&expanded), ssr);
+    let lowered = free_template::lower(&rewrite::rewrite(&expanded, ssr), ssr);
     let compiled = imports::merge_runtime_imports(&lowered);
     let out = diagnostics::inline(&compiled, &diags);
     (out, diags)

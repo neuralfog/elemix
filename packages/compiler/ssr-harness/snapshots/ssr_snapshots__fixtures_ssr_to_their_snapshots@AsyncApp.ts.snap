@@ -4,25 +4,14 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/AsyncApp.ts
 ---
 import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { phase: string; ticks: number };
 
-const _t0 = $__template('<div class="async"><span class="phase"> </span><span class="ticks"> </span><button class="bump">+1</button></div>');
-
 export class AsyncApp extends Component {
-    $$__onDispose(): void {
-        this.teardown();
-    }
-    $$__onMount(): void {
-        this.load();
-    }
     $$__beforeMount(): void {
         this.prepare();
-    }
-    $$__effects(): void {
-        $__effect(() => this.mirror());
     }
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'async-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="async"><span class="phase">`, $__ssrText(this.state.phase), `</span><span class="ticks">`, $__ssrText(this.state.ticks), `</span><button class="bump">+1</button></div></template></${this.$$__tag ?? 'async-app'}>`];
@@ -57,20 +46,7 @@ return [`<${this.$$__tag ?? 'async-app'}><template shadowrootmode="open" shadowr
         this.removeAttribute('data-phase');
     }
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n3, 'click', this.bump);
-$__effect(() => {
-$__setText(_n1, (this.state.phase));
-});
-$__effect(() => {
-$__setText(_n2, (this.state.ticks));
-});
-return _r0;
-}
+    
 }
 $__defineComponent('async-app', AsyncApp);
 AsyncApp.prototype.$$__tag = 'async-app';

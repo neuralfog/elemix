@@ -4,7 +4,7 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/StyleApp.ts
 ---
 import { $__ssrStyle } from '@neuralfog/elemix/ssr-runtime';
-import { $__template, $__clone, $__event, $__effect, $__setStyle, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -44,9 +44,6 @@ const css = `
     button:hover { background: #cbd5e1; }
 `;
 
-const _s0 = $__sheet(css);
-const _t0 = $__template('<div class="box">Styled box</div><button>color</button><button>size</button><button>background</button>');
-
 export class StyleApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'style-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="box"${$__ssrStyle({
@@ -76,26 +73,8 @@ return [`<${this.$$__tag ?? 'style-app'}><template shadowrootmode="open" shadowr
         this.state.bg = this.state.bg === '#e0e7ff' ? '#6366f1' : '#e0e7ff';
     };
 
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n2, 'click', this.recolor);
-$__event(_n3, 'click', this.resize);
-$__event(_n4, 'click', this.shade);
-$__effect(() => {
-$__setStyle(_n1 as HTMLElement, ({
-                color: this.state.color,
-                'font-size': `${this.state.size}px`,
-                background: this.state.bg,
-            }));
-});
-return _r0;
+    
 }
-}
-StyleApp.$$__sheets = [..._s0];
 $__defineComponent('style-app', StyleApp);
 StyleApp.prototype.$$__tag = 'style-app';
 StyleApp.$$__propSafe = true;

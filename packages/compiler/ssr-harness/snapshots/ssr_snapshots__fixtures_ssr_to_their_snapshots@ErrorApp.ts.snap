@@ -4,15 +4,9 @@ expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ErrorApp.ts
 ---
 throw new Error('[elemix] ErrorApp: unknown compiler hint `#frobnicate`');
-import { $__template, $__clone } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 // #component #frobnicate
-const _t0 = $__template('<button>boom</button>');
-
 export class ErrorApp extends Component {
-    $$__view(): DocumentFragment {
-const _r0 = $__clone(_t0);
-return _r0;
-}
+    
 }

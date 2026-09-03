@@ -10,7 +10,6 @@ export class AppDocument extends Component {
                 <title>Hydris Example</title>
             </head>
             <body>
-                <header id="chrome">hydris</header>
                 <slot></slot>
             </body>
         </html>

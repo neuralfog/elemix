@@ -12,6 +12,7 @@ export default defineConfig({
         name: 'unit',
         environment: 'jsdom',
         globals: true,
+        maxWorkers: process.env.CI ? undefined : '25%',
         include: ['test/**/*.{test,spec}.ts'],
         coverage: {
             provider: 'v8',
