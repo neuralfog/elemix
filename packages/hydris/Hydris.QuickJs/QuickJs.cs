@@ -20,6 +20,9 @@ internal static partial class QuickJs {
     [LibraryImport(Lib, EntryPoint = "hq_free")]
     internal static partial void FreeString(IntPtr text);
 
+    [LibraryImport(Lib, EntryPoint = "hq_free_render")]
+    internal static partial void FreeRender(IntPtr engine);
+
     [LibraryImport(Lib, EntryPoint = "hq_close")]
     internal static partial void Close(IntPtr engine);
 }

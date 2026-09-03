@@ -7,6 +7,8 @@
 typedef struct {
     JSRuntime *rt;
     JSContext *ctx;
+    const char *pendingCstr;
+    char *pendingBuf;
 } HqEngine;
 
 static void *hq_mi_calloc(void *opaque, size_t count, size_t size) {
@@ -42,31 +44,9 @@ void *hq_new(void) {
     e->rt = JS_NewRuntime2(&hq_malloc_funcs, NULL);
     JS_SetGCThreshold(e->rt, (size_t)512 * 1024 * 1024);
     e->ctx = JS_NewContext(e->rt);
+    e->pendingCstr = NULL;
+    e->pendingBuf = NULL;
     return e;
-}
-
-static char *stringify(JSContext *ctx, JSValue value, int *outLen) {
-    int failed = JS_IsException(value);
-    JSValue src = failed ? JS_GetException(ctx) : value;
-
-    size_t n = 0;
-    const char *s = JS_ToCStringLen(ctx, &n, src);
-    size_t prefix = failed ? 6 : 0;
-
-    char *out = malloc(prefix + n + 1);
-    if (failed) {
-        memcpy(out, "ERROR:", 6);
-    }
-    if (s) {
-        memcpy(out + prefix, s, n);
-        JS_FreeCString(ctx, s);
-    }
-
-    if (failed) {
-        JS_FreeValue(ctx, src);
-    }
-    *outLen = (int)(prefix + n);
-    return out;
 }
 
 uint8_t *hq_bytecode(void *handle, const char *code, int *outLen) {
@@ -144,9 +124,42 @@ char *hq_render(void *handle, const char *dataJson, int *outLen) {
     JS_FreeValue(e->ctx, fn);
     JS_FreeValue(e->ctx, global);
 
-    char *out = stringify(e->ctx, result, outLen);
+    if (!JS_IsException(result)) {
+        size_t n = 0;
+        const char *s = JS_ToCStringLen(e->ctx, &n, result);
+        JS_FreeValue(e->ctx, result);
+        e->pendingCstr = s;
+        *outLen = (int)n;
+        return (char *)s;
+    }
+
+    JSValue exc = JS_GetException(e->ctx);
+    size_t n = 0;
+    const char *s = JS_ToCStringLen(e->ctx, &n, exc);
+    char *buf = malloc(6 + n + 1);
+    memcpy(buf, "ERROR:", 6);
+    if (s) {
+        memcpy(buf + 6, s, n);
+        JS_FreeCString(e->ctx, s);
+    }
+    buf[6 + n] = 0;
+    JS_FreeValue(e->ctx, exc);
     JS_FreeValue(e->ctx, result);
-    return out;
+    e->pendingBuf = buf;
+    *outLen = (int)(6 + n);
+    return buf;
+}
+
+void hq_free_render(void *handle) {
+    HqEngine *e = (HqEngine *)handle;
+    if (e->pendingCstr) {
+        JS_FreeCString(e->ctx, e->pendingCstr);
+        e->pendingCstr = NULL;
+    }
+    if (e->pendingBuf) {
+        free(e->pendingBuf);
+        e->pendingBuf = NULL;
+    }
 }
 
 void hq_free(char *s) {
@@ -155,6 +168,7 @@ void hq_free(char *s) {
 
 void hq_close(void *handle) {
     HqEngine *e = (HqEngine *)handle;
+    hq_free_render(e);
     JS_FreeContext(e->ctx);
     JS_FreeRuntime(e->rt);
     free(e);

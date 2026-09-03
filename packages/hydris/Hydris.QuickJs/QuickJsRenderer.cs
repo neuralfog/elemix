@@ -51,7 +51,7 @@ public sealed class QuickJsRenderer : IRenderer, IDisposable {
             var bytes = new byte[length];
             if (length > 0)
                 Marshal.Copy(pointer, bytes, 0, length);
-            QuickJs.FreeString(pointer);
+            QuickJs.FreeRender(engine.Handle);
             return bytes;
         } finally {
             engine.LastUsed = Stopwatch.GetTimestamp();
