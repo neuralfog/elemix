@@ -1,3 +1,9 @@
+// @Todo
+// Changed my mind... This need killing with fire.
+//
+// Find remaining optimisation opportunites baserd on compiled ssr fixtures. Onece
+// proof of concept in javascript holds, mofe in to compiler behind --optimise flag
+//
 // @Note
 //
 // Optimiser for the SSR compiled sources.

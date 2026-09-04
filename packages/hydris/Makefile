@@ -3,7 +3,7 @@
 .PHONY: run run-r test lint-fix lint build buildr builda aot run-aot restore clean bench build-native
 
 run:
-	DOTNET_PROCESSOR_COUNT=1 dotnet run --project Example
+	dotnet run --project Example
 
 run-r:
 	dotnet run --project Example -c Release

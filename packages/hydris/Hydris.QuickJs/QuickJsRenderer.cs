@@ -26,6 +26,10 @@ public sealed class QuickJsRenderer : IRenderer, IDisposable {
         Reaper = new Timer(static state => ((QuickJsRenderer)state!).Reap(), this, ReapInterval, ReapInterval);
     }
 
+    // @Todo
+    // c runtime segfaults on fseek()
+    // IMPORTNAT: check if bundle abvailable before passing down via inetrop
+    // throw from level of c#
     public byte[] Render(string bundlePath, string? data) {
         ObjectDisposedException.ThrowIf(Disposed, this);
         ArgumentException.ThrowIfNullOrEmpty(bundlePath);

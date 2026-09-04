@@ -42,7 +42,6 @@ static const JSMallocFunctions hq_malloc_funcs = {
 void *hq_new(void) {
     HqEngine *e = malloc(sizeof(HqEngine));
     e->rt = JS_NewRuntime2(&hq_malloc_funcs, NULL);
-    JS_SetGCThreshold(e->rt, (size_t)512 * 1024 * 1024);
     e->ctx = JS_NewContext(e->rt);
     e->pendingCstr = NULL;
     e->pendingBuf = NULL;

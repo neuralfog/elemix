@@ -13,8 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="public/**" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="ssr/**" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="public/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="ssr/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
