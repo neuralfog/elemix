@@ -528,10 +528,10 @@ fn store_carries_the_type_annotation_as_a_generic() {
 }
 
 #[test]
-fn store_is_imported_from_runtime_in_the_csr_build() {
+fn store_is_imported_from_the_hydration_runtime_in_the_client_build() {
     let src = "// #store user-prefs\nexport const prefs = { theme: 'system' };";
     let out = expand(src).unwrap();
-    assert!(out.contains("import { $__store } from '@neuralfog/elemix/runtime';"));
+    assert!(out.contains("import { $__store } from '@neuralfog/elemix/ssr-runtime/client';"));
 }
 
 #[test]

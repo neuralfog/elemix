@@ -303,9 +303,6 @@ pub fn expand_mode(
     if needs_state {
         names.push("$__state");
     }
-    if needs_store {
-        names.push("$__store");
-    }
     if needs_reactive {
         names.push("$__dep");
         names.push("$__track");
@@ -324,11 +321,21 @@ pub fn expand_mode(
             ),
         ));
     }
-    if needs_module_state {
+    if needs_module_state || needs_store {
+        let mut client = Vec::new();
+        if needs_module_state {
+            client.push("$__moduleState");
+        }
+        if needs_store {
+            client.push("$__store");
+        }
         edits.push((
             0,
             0,
-            "import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';\n".to_string(),
+            format!(
+                "import {{ {} }} from '@neuralfog/elemix/ssr-runtime/client';\n",
+                client.join(", ")
+            ),
         ));
     }
 
