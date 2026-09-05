@@ -363,6 +363,8 @@ dependencies = [
  "oxc_parser",
  "oxc_span",
  "proptest",
+ "serde",
+ "serde_json",
  "wasm-bindgen",
 ]
 

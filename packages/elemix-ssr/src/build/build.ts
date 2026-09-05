@@ -7,11 +7,17 @@ import {
     writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
-import { collectMeta, optimiserSource, type ChildMeta } from './optimiser';
 import { compileString } from 'sass';
 import { sassPlugin } from './sass';
 
 type View = { key: string; source: string; export?: string | null };
+type ChildMeta = {
+    tag: string;
+    cls: string;
+    propSafe: boolean;
+    simple: boolean;
+    body: string;
+};
 
 const noColor = !process.stdout.isTTY || process.env.NO_COLOR !== undefined;
 const paint = (code: string, s: string): string =>
@@ -108,8 +114,37 @@ export const build = async (
         return code;
     };
 
+    const runCollectMeta = async (source: string): Promise<ChildMeta[]> => {
+        const proc = Bun.spawn([compiler, '--ssr-collect-meta'], {
+            stdin: Buffer.from(source),
+            stdout: 'pipe',
+            stderr: 'inherit',
+        });
+        const json = await new Response(proc.stdout).text();
+        await proc.exited;
+        return JSON.parse(json) as ChildMeta[];
+    };
+
+    const runOptimise = async (
+        source: string,
+        registryFile: string,
+    ): Promise<{ code: string; inlined: number }> => {
+        const proc = Bun.spawn(
+            [compiler, '--ssr-optimise', '--registry', registryFile],
+            { stdin: Buffer.from(source), stdout: 'pipe', stderr: 'pipe' },
+        );
+        const [code, err] = await Promise.all([
+            new Response(proc.stdout).text(),
+            new Response(proc.stderr).text(),
+        ]);
+        await proc.exited;
+        const m = err.match(/inlined:(\d+)/);
+        return { code, inlined: m ? Number(m[1]) : 0 };
+    };
+
     const MARKERS = ['#component', '#document', 'tpl`', '#state', '#store'];
     const optimiserEnabled = process.env.ELEMIX_OPTIMISE === '1';
+    const registryFile = join(outputRoot, '.hydris-build', 'registry.json');
     const compiledCache = new Map<string, string>();
     const registry = new Map<string, ChildMeta>();
     const optimised = new Set<string>();
@@ -121,7 +156,8 @@ export const build = async (
         const code = needs ? await runCompiler(src, '--ssr') : src;
         compiledCache.set(path, code);
         if (needs)
-            for (const meta of collectMeta(code)) registry.set(meta.tag, meta);
+            for (const meta of await runCollectMeta(code))
+                registry.set(meta.tag, meta);
         return code;
     };
 
@@ -145,7 +181,7 @@ export const build = async (
                 const compiled = await compileCached(args.path);
                 let code = compiled;
                 if (needs && optimiserEnabled) {
-                    const result = optimiserSource(compiled, registry);
+                    const result = await runOptimise(compiled, registryFile);
                     if (result.inlined > 0 && !optimised.has(args.path)) {
                         optimised.add(args.path);
                         console.log(
@@ -214,6 +250,7 @@ export const build = async (
             format: 'iife',
             target: 'browser',
         });
+        writeFileSync(registryFile, JSON.stringify([...registry.values()]));
     }
 
     for (const view of views) {

@@ -6,6 +6,7 @@ pub mod grammar;
 pub mod imports;
 mod locate;
 pub mod lower;
+pub mod optimise;
 pub mod pragma;
 pub mod rewrite;
 pub mod scan;

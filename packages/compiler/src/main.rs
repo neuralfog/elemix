@@ -37,10 +37,48 @@ struct Cli {
 
     #[arg(long)]
     sourcemap: bool,
+
+    #[arg(long = "ssr-collect-meta")]
+    ssr_collect_meta: bool,
+
+    #[arg(long = "ssr-optimise")]
+    ssr_optimise: bool,
+
+    #[arg(long)]
+    registry: Option<PathBuf>,
 }
 
 fn main() {
     let cli = Cli::parse();
+
+    if cli.ssr_collect_meta {
+        let mut source = String::new();
+        io::stdin().read_to_string(&mut source).expect("read stdin");
+        let metas = elemix_compiler::optimise::collect_meta(&source);
+        let json = serde_json::to_string(&metas).expect("serialize metas");
+        io::stdout()
+            .write_all(json.as_bytes())
+            .expect("write stdout");
+        return;
+    }
+
+    if cli.ssr_optimise {
+        let mut source = String::new();
+        io::stdin().read_to_string(&mut source).expect("read stdin");
+        let registry: Vec<elemix_compiler::optimise::ChildMeta> = match &cli.registry {
+            Some(p) => {
+                let txt = fs::read_to_string(p).expect("read registry file");
+                serde_json::from_str(&txt).expect("parse registry json")
+            }
+            None => Vec::new(),
+        };
+        let (code, inlined) = elemix_compiler::optimise::optimise(&source, &registry);
+        io::stdout()
+            .write_all(code.as_bytes())
+            .expect("write stdout");
+        eprintln!("inlined:{inlined}");
+        return;
+    }
 
     if cli.stdin {
         let mut source = String::new();

@@ -12,12 +12,15 @@ public sealed class TemplateCache : IRenderer, IDisposable {
         Inner = inner;
     }
 
-    public byte[] Render(string bundlePath, string? data) =>
-        data is null ? View(bundlePath).Html : Inner.Render(bundlePath, data);
+    public byte[] Render(string key, byte[] bytecode, string? data) =>
+        data is null ? View(key, bytecode).Html : Inner.Render(key, bytecode, data);
 
-    internal CachedView View(string bundlePath) {
-        ArgumentException.ThrowIfNullOrEmpty(bundlePath);
-        return Cache.GetOrAdd(bundlePath, static (path, inner) => new CachedView(inner.Render(path, null)), Inner);
+    internal CachedView View(string key, byte[] bytecode) {
+        ArgumentException.ThrowIfNullOrEmpty(key);
+        return Cache.GetOrAdd(
+            key,
+            static (k, arg) => new CachedView(arg.Inner.Render(k, arg.bytecode, null)),
+            (Inner, bytecode));
     }
 
     public void Dispose() => (Inner as IDisposable)?.Dispose();

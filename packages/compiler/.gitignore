@@ -1,5 +1,6 @@
 /target
 /pkg
+/.optloop
 storybook-static
 stories/compiled/.emited
 # Prebuilt binaries are dropped into the platform packages by CI at release time.

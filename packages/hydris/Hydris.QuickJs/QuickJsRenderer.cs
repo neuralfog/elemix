@@ -26,13 +26,10 @@ public sealed class QuickJsRenderer : IRenderer, IDisposable {
         Reaper = new Timer(static state => ((QuickJsRenderer)state!).Reap(), this, ReapInterval, ReapInterval);
     }
 
-    // @Todo
-    // c runtime segfaults on fseek()
-    // IMPORTNAT: check if bundle abvailable before passing down via inetrop
-    // throw from level of c#
-    public byte[] Render(string bundlePath, string? data) {
+    public byte[] Render(string key, byte[] bytecode, string? data) {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        ArgumentException.ThrowIfNullOrEmpty(bundlePath);
+        ArgumentException.ThrowIfNullOrEmpty(key);
+        Debug.Assert(bytecode is not null);
 
         if (!Engines.TryTake(out var engine)) {
             engine = new Engine { Handle = QuickJs.New() };
@@ -40,15 +37,14 @@ public sealed class QuickJsRenderer : IRenderer, IDisposable {
         }
 
         try {
-            if (engine.LoadedPath != bundlePath) {
-                var bytecode = File.ReadAllBytes(bundlePath);
+            if (engine.LoadedPath != key) {
                 var error = QuickJs.LoadBytecode(engine.Handle, bytecode, bytecode.Length);
                 if (error != IntPtr.Zero) {
                     var message = Marshal.PtrToStringUTF8(error) ?? "bundle failed to load";
                     QuickJs.FreeString(error);
-                    throw new InvalidOperationException($"{bundlePath}: {message}");
+                    throw new InvalidOperationException($"{key}: {message}");
                 }
-                engine.LoadedPath = bundlePath;
+                engine.LoadedPath = key;
             }
 
             var pointer = QuickJs.Render(engine.Handle, data ?? string.Empty, out var length);

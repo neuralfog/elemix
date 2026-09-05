@@ -38,18 +38,21 @@ const outletIndex = (html: string): number => {
     let depth = 0;
     let i = 0;
     while (i < html.length) {
-        if (depth === 0 && html.startsWith(OUTLET, i)) return i;
-        if (html.startsWith('<template', i)) {
+        const slot = html.indexOf(OUTLET, i);
+        if (slot < 0) return -1;
+        const open = html.indexOf('<template', i);
+        const close = html.indexOf('</template>', i);
+        if (open >= 0 && open < slot && (close < 0 || open <= close)) {
             depth++;
-            i += 9;
-            continue;
-        }
-        if (html.startsWith('</template>', i)) {
+            i = open + 9;
+        } else if (close >= 0 && close < slot && (open < 0 || close < open)) {
             if (depth > 0) depth--;
-            i += 11;
-            continue;
+            i = close + 11;
+        } else if (depth === 0) {
+            return slot;
+        } else {
+            i = slot + OUTLET.length;
         }
-        i++;
     }
     return -1;
 };

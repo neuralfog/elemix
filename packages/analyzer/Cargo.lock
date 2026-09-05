@@ -216,6 +216,8 @@ dependencies = [
  "oxc_ast_visit",
  "oxc_parser",
  "oxc_span",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

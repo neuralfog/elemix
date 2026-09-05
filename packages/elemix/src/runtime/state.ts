@@ -261,4 +261,6 @@ export const $__reactive = (value: unknown): unknown => {
 };
 
 export const $__state = <T extends object>(source: T): T =>
-    $__reactive(source) as T;
+    (globalThis as { __elemix_ssr?: boolean }).__elemix_ssr
+        ? source
+        : ($__reactive(source) as T);
