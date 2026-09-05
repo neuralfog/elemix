@@ -1,0 +1,26 @@
+{
+    "name": "@neuralfog/elemix-csr-harness",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "e2e": "playwright test",
+        "e2e:headed": "playwright test --headed",
+        "e2e:ui": "playwright test --ui",
+        "build:csr": "vite build",
+        "lint": "biome format && biome lint --error-on-warnings",
+        "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings"
+    },
+    "dependencies": {
+        "@neuralfog/elemix": "workspace:*"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.5.5",
+        "@neuralfog/elemix-vite": "workspace:*",
+        "@neuralfog/ts-config": "0.1.2",
+        "@playwright/test": "1.61.1",
+        "@types/bun": "1.2.19",
+        "typescript": "7.0.2",
+        "vite": "8.1.4"
+    }
+}

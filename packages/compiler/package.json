@@ -7,29 +7,17 @@
         "build": "ELEMIX_VERSION=$npm_package_version cargo build --release",
         "lint": "cargo clippy --all-targets -- -D warnings && cargo fmt --check",
         "lint:fix": "cargo clippy --all-targets --fix --allow-dirty --allow-staged && cargo fmt",
-        "test": "pnpm run test:rust && pnpm run test:wasm && pnpm run test:types && pnpm run test:storybook",
+        "test": "pnpm run test:rust && pnpm run test:wasm && pnpm run test:types && pnpm run test:csr",
         "test:rust": "cargo test",
         "test:types": "tsc --noEmit -p tsconfig.fixtures.json",
-        "test:storybook": "pnpm run compile:stories && vitest run",
-        "compile:stories": "rm -rf stories/compiled/.emited && cargo build && ./target/debug/elemix-compiler --dirs fixtures --out stories/compiled/.emited && cp fixtures/*.scss stories/compiled/.emited/",
+        "test:csr": "pnpm --filter @neuralfog/elemix-csr-harness run e2e",
         "build:wasm": "wasm-pack build --target web --out-dir pkg --no-default-features --features wasm && node scripts/wasm-pkg.mjs",
-        "test:wasm": "pnpm run build:wasm && node tests/wasm-conformance.mjs && node tests/wasm-robustness.mjs",
-        "storybook": "pnpm run build:wasm && pnpm run compile:stories && storybook dev -p 6006",
-        "build-storybook": "pnpm run build:wasm && pnpm run compile:stories && storybook build"
+        "test:wasm": "pnpm run build:wasm && node tests/wasm-conformance.mjs && node tests/wasm-robustness.mjs"
     },
     "devDependencies": {
         "@neuralfog/elemix": "workspace:*",
         "@neuralfog/elemix-ssr": "workspace:*",
-        "@neuralfog/elemix-testing-library": "workspace:*",
-        "@storybook/addon-vitest": "10.5.10",
-        "@storybook/html-vite": "10.5.10",
-        "@vitest/browser-playwright": "4.1.11",
-        "playwright": "1.61.1",
-        "sass": "1.101.0",
-        "storybook": "10.5.10",
         "typescript": "7.0.2",
-        "vite": "8.1.4",
-        "vitest": "4.1.11",
         "wasm-pack": "0.15.0"
     }
 }

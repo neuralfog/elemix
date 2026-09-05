@@ -1,0 +1,242 @@
+[
+    {
+        "tag": "async-app",
+        "fixture": "AsyncApp"
+    },
+    {
+        "tag": "attr-app",
+        "fixture": "AttrApp"
+    },
+    {
+        "tag": "before-mount-app",
+        "fixture": "BeforeMountApp"
+    },
+    {
+        "tag": "before-mount-store-app",
+        "fixture": "BeforeMountStoreApp"
+    },
+    {
+        "tag": "bench-app",
+        "fixture": "BenchApp"
+    },
+    {
+        "tag": "chat-app",
+        "fixture": "ChatApp"
+    },
+    {
+        "tag": "class-state-app",
+        "fixture": "ClassStateApp"
+    },
+    {
+        "tag": "client-only-app",
+        "fixture": "ClientOnlyApp"
+    },
+    {
+        "tag": "collection-app",
+        "fixture": "CollectionApp"
+    },
+    {
+        "tag": "conditional-app",
+        "fixture": "ConditionalApp"
+    },
+    {
+        "tag": "counter-app",
+        "fixture": "CounterApp"
+    },
+    {
+        "tag": "custom-event-app",
+        "fixture": "CustomEventApp"
+    },
+    {
+        "tag": "deep-leaf",
+        "fixture": "DeepInheritanceApp"
+    },
+    {
+        "tag": "deep-state-app",
+        "fixture": "DeepStateApp"
+    },
+    {
+        "tag": "derived-app",
+        "fixture": "DerivedApp"
+    },
+    {
+        "tag": "direct-app",
+        "fixture": "DirectApp"
+    },
+    {
+        "tag": "dynamic-child-app",
+        "fixture": "DynamicChildApp"
+    },
+    {
+        "tag": "effect-app",
+        "fixture": "EffectApp"
+    },
+    {
+        "tag": "first-widget",
+        "fixture": "TwoComponents"
+    },
+    {
+        "tag": "icon-button-app",
+        "fixture": "IconButtonApp"
+    },
+    {
+        "tag": "inherit-derived",
+        "fixture": "InheritanceApp"
+    },
+    {
+        "tag": "interp-app",
+        "fixture": "InterpApp"
+    },
+    {
+        "tag": "match-app",
+        "fixture": "MatchApp"
+    },
+    {
+        "tag": "method-app",
+        "fixture": "MethodApp"
+    },
+    {
+        "tag": "method-helper-app",
+        "fixture": "MethodHelperApp"
+    },
+    {
+        "tag": "model-app",
+        "fixture": "ModelApp"
+    },
+    {
+        "tag": "model-deep-app",
+        "fixture": "ModelDeepApp"
+    },
+    {
+        "tag": "model-forward-app",
+        "fixture": "ModelForwardApp"
+    },
+    {
+        "tag": "multi-root-app",
+        "fixture": "MultiRootApp"
+    },
+    {
+        "tag": "multi-root-row-app",
+        "fixture": "MultiRootRowApp"
+    },
+    {
+        "tag": "multi-state-app",
+        "fixture": "MultiStateApp"
+    },
+    {
+        "tag": "nested-app",
+        "fixture": "NestedApp"
+    },
+    {
+        "tag": "nested-template-app",
+        "fixture": "NestedTemplateApp"
+    },
+    {
+        "tag": "no-shadow-app",
+        "fixture": "NoShadowApp"
+    },
+    {
+        "tag": "panel-app",
+        "fixture": "PanelApp"
+    },
+    {
+        "tag": "plain-note",
+        "fixture": "SecondHelper"
+    },
+    {
+        "tag": "primitive-state-app",
+        "fixture": "PrimitiveStateApp"
+    },
+    {
+        "tag": "profile-app",
+        "fixture": "ProfileApp"
+    },
+    {
+        "tag": "proof-destructuring",
+        "fixture": "ProofDestructuring"
+    },
+    {
+        "tag": "props-app",
+        "fixture": "PropsApp"
+    },
+    {
+        "tag": "raw-app",
+        "fixture": "RawApp"
+    },
+    {
+        "tag": "ref-app",
+        "fixture": "RefApp"
+    },
+    {
+        "tag": "render-app",
+        "fixture": "RenderApp"
+    },
+    {
+        "tag": "reset-probe",
+        "fixture": "ResetProbe"
+    },
+    {
+        "tag": "reset-probe-light",
+        "fixture": "ResetProbeLight"
+    },
+    {
+        "tag": "row-list",
+        "fixture": "ParamHelper"
+    },
+    {
+        "tag": "scss-app",
+        "fixture": "ScssApp"
+    },
+    {
+        "tag": "slot-app",
+        "fixture": "SlotApp"
+    },
+    {
+        "tag": "slot-card",
+        "fixture": "SlotCard"
+    },
+    {
+        "tag": "status-app",
+        "fixture": "StatusApp"
+    },
+    {
+        "tag": "store-app",
+        "fixture": "StoreApp"
+    },
+    {
+        "tag": "style-app",
+        "fixture": "StyleApp"
+    },
+    {
+        "tag": "svg-app",
+        "fixture": "SvgApp"
+    },
+    {
+        "tag": "todo-app",
+        "fixture": "TodoApp"
+    },
+    {
+        "tag": "twin-list-app",
+        "fixture": "TwinListApp"
+    },
+    {
+        "tag": "ui-stepper",
+        "fixture": "StepperWidget"
+    },
+    {
+        "tag": "view-data-app",
+        "fixture": "ViewDataApp"
+    },
+    {
+        "tag": "view-data-rich-app",
+        "fixture": "ViewDataRichApp"
+    },
+    {
+        "tag": "view-data-store-app",
+        "fixture": "ViewDataStoreApp"
+    },
+    {
+        "tag": "when-else-app",
+        "fixture": "WhenElseApp"
+    }
+]
