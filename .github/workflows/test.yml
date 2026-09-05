@@ -53,7 +53,7 @@ jobs:
         run: node scripts/changelog.mjs lint
 
       - name: Install Playwright browsers
-        run: pnpm --filter @neuralfog/elemix-compiler exec playwright install --with-deps chromium firefox webkit
+        run: pnpm --filter @neuralfog/elemix-csr-harness exec playwright install --with-deps chromium firefox webkit
 
       - run: pnpm build
 
