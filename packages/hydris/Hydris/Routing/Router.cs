@@ -11,24 +11,24 @@ public sealed class Router {
     public int Count => Routes.Count;
 
     public void Map(Method method, string path, Func<Reply> handler) {
-        ArgumentNullException.ThrowIfNull(handler);
+        Debug.Assert(handler is not null);
         Add(method, path, [], false, _ => Task.FromResult(handler()));
     }
 
     public void Map<T>(Method method, string path, Func<T, Reply> action) {
-        ArgumentNullException.ThrowIfNull(action);
+        Debug.Assert(action is not null);
         Add(method, path, [], false, scope => Task.FromResult(action(scope.Get<T>())));
     }
 
     public void Map<T>(Method method, string path, IReadOnlyList<Type> middlewares, bool json, Func<T, Reply> action) {
-        ArgumentNullException.ThrowIfNull(middlewares);
-        ArgumentNullException.ThrowIfNull(action);
+        Debug.Assert(middlewares is not null);
+        Debug.Assert(action is not null);
         Add(method, path, middlewares, json, scope => Task.FromResult(action(scope.Get<T>())));
     }
 
     public void Map<T>(Method method, string path, IReadOnlyList<Type> middlewares, bool json, Func<T, Task<Reply>> action) {
-        ArgumentNullException.ThrowIfNull(middlewares);
-        ArgumentNullException.ThrowIfNull(action);
+        Debug.Assert(middlewares is not null);
+        Debug.Assert(action is not null);
         Add(method, path, middlewares, json, scope => action(scope.Get<T>()));
     }
 
@@ -52,7 +52,7 @@ public sealed class Router {
     public void Trace<T>(string path, Func<T, Reply> action) => Map(Method.Trace, path, action);
 
     public RouteMatch? Match(Method method, string path) {
-        ArgumentNullException.ThrowIfNull(path);
+        Debug.Assert(path is not null);
 
         var span = PathSpan(path);
         Span<Range> buffer = stackalloc Range[MaxSegments];
@@ -68,7 +68,7 @@ public sealed class Router {
     }
 
     public IReadOnlyList<Method> AllowedMethods(string path) {
-        ArgumentNullException.ThrowIfNull(path);
+        Debug.Assert(path is not null);
 
         var span = PathSpan(path);
         Span<Range> buffer = stackalloc Range[MaxSegments];
@@ -133,7 +133,7 @@ public sealed class Router {
     }
 
     private void Add(Method method, string path, IReadOnlyList<Type> middlewares, bool json, Func<DiContainer, Task<Reply>> handler) {
-        ArgumentNullException.ThrowIfNull(path);
+        Debug.Assert(path is not null);
         var route = new Route(method, path, handler, middlewares, json);
         Routes.Add(route);
         Tree.Insert(route);

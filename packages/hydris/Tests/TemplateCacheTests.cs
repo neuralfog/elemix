@@ -54,9 +54,4 @@ public sealed class TemplateCacheTests {
 
         Assert.True(inner.DisposedCalled);
     }
-
-    [Fact]
-    public void NullInnerIsRejected() {
-        Assert.Throws<ArgumentNullException>(() => new TemplateCache(null!));
-    }
 }

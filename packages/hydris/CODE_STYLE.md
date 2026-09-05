@@ -55,12 +55,44 @@ Formatting is enforced, not just documented. `.editorconfig` at the repository r
 - Immutable by default: `readonly` fields, `init`-only or `required` properties, `record` for data, `readonly record struct` for small value types.
 - No mutable static state. The rare exception is set-once startup configuration: a static assigned once at boot and never mutated afterward, called out where it lives.
 
+## Backing fields
+
+An auto-property has no backing field to name. When an accessor needs logic, the `field` keyword names the compiler-generated storage - there is no hand-written field, so nothing collides with the PascalCase property and nothing takes an underscore.
+
+```csharp
+public string User { get; init; }
+
+public string Name {
+    get => field;
+    set => field = value.Trim();
+}
+
+public int Score {
+    get;
+    set => field = Math.Max(0, value);
+}
+
+public Config Config => field ??= Load();
+```
+
+A separately named field appears only when it is a different shape than the property it backs - mutable storage behind a read-only view. It is PascalCase, named for the storage, and differs from the property name because it is a different thing.
+
+```csharp
+private readonly List<Row> RowStore = [];
+public IReadOnlyList<Row> Rows => RowStore;
+```
+
+Rejected: `_score`, `m_score`, `scoreBacking`, or a `ScoreValue` field shadowing a `Score` property - a suffix is underscore-thinking in disguise. If a member is genuinely named `field`, disambiguate with `@field`.
+
 ## Nullability
 
 - Nullable reference types are enabled. A legitimately nullable value is declared with the `?` suffix.
-- Guard arguments with the throw helpers: `ArgumentNullException.ThrowIfNull(argument)`, `ArgumentException.ThrowIfNullOrEmpty(text)`, `ObjectDisposedException.ThrowIf(disposed, this)`.
+- The type's nullability annotation picks the tool. `ArgumentNullException.ThrowIfNull` runs in Release, so it belongs on a **nullable** argument only - a parameter typed `T?`, where `null` is a value the type admits. A parameter typed `T` (non-nullable) is guaranteed non-null by the type system; re-checking it at runtime is dead weight. If a broken caller could still smuggle a `null` past the annotation, that is an internal invariant - assert it with `Debug.Assert(x is not null)`, caught in Debug and compiled away in Release.
+- This is only the pure-null check. Throw-helpers that guard a runtime **value** condition the type cannot express - `ArgumentException.ThrowIfNullOrEmpty(text)` (emptiness), `ArgumentOutOfRangeException.ThrowIfNegative(count)`, `ObjectDisposedException.ThrowIf(disposed, this)` - always run, on nullable and non-nullable arguments alike.
 - Null-check with `is null` / `is not null` or pattern matching.
 - Avoid the null-forgiving operator `!` unless it is unavoidable and the surrounding code guarantees the value is non-null.
+
+The guard belongs here because the parameter is nullable:
 
 ```csharp
 public void SetShader(Shader? newShader) {
@@ -69,11 +101,20 @@ public void SetShader(Shader? newShader) {
 }
 ```
 
+A non-nullable parameter takes no runtime null-check - the type is the contract; assert only to catch a caller that broke it:
+
+```csharp
+internal static byte[] Compile(string source) {
+    Debug.Assert(source is not null);
+    ...
+}
+```
+
 ## Defensive programming - fail early
 
 Validate at the boundary and fail on the first broken assumption, close to the cause rather than three frames later. Two tools, two jobs.
 
-- Input crossing a boundary is guarded with throw-helpers that always run. Anything entering a `public` or `internal` API is checked up front and throws a precise exception: `ArgumentNullException.ThrowIfNull(x)`, `ArgumentException.ThrowIfNullOrEmpty(text)`, `ArgumentOutOfRangeException.ThrowIfNegative(count)`, `ObjectDisposedException.ThrowIf(disposed, this)`. These ship in the library and hold in production.
+- A runtime **value** precondition crossing a boundary is guarded with a throw-helper that always runs, on a `public` or `internal` API alike: `ArgumentException.ThrowIfNullOrEmpty(text)`, `ArgumentOutOfRangeException.ThrowIfNegative(count)`, `ObjectDisposedException.ThrowIf(disposed, this)`, and `ArgumentNullException.ThrowIfNull(x)` when `x` is typed `T?`. These ship in the library and hold in production. What decides the guard is the argument, not the access modifier: a condition the type cannot express (empty, negative, disposed, or a genuinely nullable reference) is a runtime check; the non-nullness of a `T` argument is a type-system guarantee, not a runtime check - if you must catch a caller violating it, that is an internal invariant, so `Debug.Assert`, not a throw-helper.
 - Internal invariants are asserted with `Debug.Assert`. For a state a correct program can never reach, assert it: `Debug.Assert(index >= 0)`. `Debug.Assert` is `[Conditional("DEBUG")]`, so the call and its arguments compile away entirely in a Release build. The check costs nothing in the shipped package and never reaches the AOT compiler, so assert internal assumptions liberally.
 - Keep side effects out of `Debug.Assert`. The arguments are not evaluated once stripped, so the condition must be a pure read. `Debug.Assert(Advance())` stops advancing in Release.
 - Assert internal invariants with `Debug.Assert`, not `Trace.Assert`. `Trace.Assert` is `[Conditional("TRACE")]`, and `TRACE` is defined in Release too, so it is never stripped.

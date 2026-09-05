@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Hashing;
 using System.Runtime.InteropServices;
@@ -28,9 +29,9 @@ internal sealed class RenderCache<TValue> : IDisposable {
     internal int Count => Entries.Count;
 
     internal static UInt128 Key(string view, string viewData, string stores) {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(viewData);
-        ArgumentNullException.ThrowIfNull(stores);
+        Debug.Assert(view is not null);
+        Debug.Assert(viewData is not null);
+        Debug.Assert(stores is not null);
         var bytes = (view.Length + viewData.Length + stores.Length) * 2;
         var rented = bytes > StackLimit ? ArrayPool<byte>.Shared.Rent(bytes) : null;
         try {

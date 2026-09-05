@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Frozen;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -80,7 +81,7 @@ public sealed class Reply {
 
     public static Reply View<T>(string view, T data) where T : IViewData {
         ArgumentException.ThrowIfNullOrEmpty(view);
-        ArgumentNullException.ThrowIfNull(data);
+        Debug.Assert(data is not null);
         var buffer = new ArrayBufferWriter<byte>();
         using (var writer = new Utf8JsonWriter(buffer))
             data.Write(writer);
@@ -124,7 +125,7 @@ public sealed class Reply {
         new(JsonSerializer.SerializeToUtf8Bytes(value, typeInfo), 200, "application/json; charset=utf-8");
 
     public static Reply Binary(byte[] data) {
-        ArgumentNullException.ThrowIfNull(data);
+        Debug.Assert(data is not null);
         return new Reply(data, 200, "application/octet-stream");
     }
 

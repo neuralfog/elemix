@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 
 namespace Hydris.Cli;
@@ -23,7 +24,7 @@ public static class Banner {
     public static string Info(string message) => $"  {Bar}  {Dim(message)}";
 
     public static string Serve(BannerInfo info) {
-        ArgumentNullException.ThrowIfNull(info);
+        Debug.Assert(info is not null);
 
         var local = $"{info.Protocol}://{info.Host}:{info.Port}/";
         var mode = info.Dev ? Cyan("development") : Violet("production");

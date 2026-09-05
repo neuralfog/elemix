@@ -1,14 +1,11 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Hydris.QuickJs;
 
 internal static class BytecodeCompiler {
     internal static byte[] Compile(string source) {
-        // @Todo
-        // This is to much, change a code style, this is unnesescary runtime check
-        // only handle nulls if type is actually nullable
-        // otherwise use debug asserts to catch invariants early
-        ArgumentNullException.ThrowIfNull(source);
+        Debug.Assert(source is not null);
         var engine = QuickJs.New();
         try {
             var pointer = QuickJs.Bytecode(engine, source, out var length);

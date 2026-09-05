@@ -55,7 +55,7 @@ public sealed class App {
     }
 
     public App RenderErrors(IErrorRenderer renderer) {
-        ArgumentNullException.ThrowIfNull(renderer);
+        Debug.Assert(renderer is not null);
         Errors = renderer;
         return this;
     }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Hydris.Http;
 
 namespace Hydris.Renderer;
@@ -9,7 +10,7 @@ internal sealed class CachedView {
     public byte[] Html { get; }
 
     public CachedView(byte[] html) {
-        ArgumentNullException.ThrowIfNull(html);
+        Debug.Assert(html is not null);
         Html = html;
     }
 
