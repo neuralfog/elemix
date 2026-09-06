@@ -18,6 +18,7 @@
       "@neuralfog/elemix": ["../elemix/index.ts"],
       "@neuralfog/elemix/runtime": ["../elemix/runtime.ts"],
       "@neuralfog/elemix/directives": ["../elemix/directives.ts"],
+      "@neuralfog/elemix/navigation/NavLink": ["../elemix/src/navigation/NavLink.ts"],
       "@neuralfog/elemix/types": ["../elemix/src/types.ts"]
     }
   },

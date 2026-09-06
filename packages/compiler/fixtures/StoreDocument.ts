@@ -1,5 +1,5 @@
 import { Component, tpl } from '@neuralfog/elemix';
-import '@neuralfog/elemix-ssr/navigation/NavLink';
+import '@neuralfog/elemix/navigation/NavLink';
 import type { Template } from '@neuralfog/elemix/types';
 
 // #document

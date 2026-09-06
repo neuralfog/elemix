@@ -1,4 +1,4 @@
-import { $__resetModuleStates } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__resetModuleStates } from '../runtime/hydrate';
 import { navSanitizerConfig } from './NavSanitizer';
 
 const NAV_HEADER = 'X-Hydris-Nav';
@@ -7,7 +7,10 @@ const NAV_ENABLED = '1';
 type UnsafeBody = {
     setHTMLUnsafe(html: string, options?: { sanitizer?: unknown }): void;
 };
-type NavWindow = Window & { __hydrisNav?: boolean };
+type NavWindow = Window & {
+    __hydrisNav?: boolean;
+    __elemixNavigate?: (to: string) => void;
+};
 
 const supported = (): boolean => {
     if (typeof document === 'undefined' || document.body == null) return false;
@@ -151,9 +154,10 @@ export const navigate = (to: string): void => {
     void run(url.href, url.href !== location.href);
 };
 
-if (typeof window !== 'undefined' && supported()) {
+if (typeof window !== 'undefined') {
     const w = window as NavWindow;
-    if (!w.__hydrisNav) {
+    w.__elemixNavigate = navigate;
+    if (supported() && !w.__hydrisNav) {
         w.__hydrisNav = true;
         history.scrollRestoration = 'manual';
         window.addEventListener('popstate', () => {

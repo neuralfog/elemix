@@ -5,7 +5,7 @@ input_file: fixtures/StoreDocument.ts
 ---
 import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
-import '@neuralfog/elemix-ssr/navigation/NavLink';
+import '@neuralfog/elemix/navigation/NavLink';
 
 const _t0 = $__template('<html lang="en"><head><meta charset="utf-8"/><title>Store</title></head><body><nav class="nav"><nav-link route="/nav-store-a"><a id="to-store-a" href="/nav-store-a">A</a></nav-link><nav-link route="/nav-store-b"><a id="to-store-b" href="/nav-store-b">B</a></nav-link></nav><slot></slot></body></html>');
 

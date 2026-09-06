@@ -6,7 +6,7 @@ input_file: fixtures/StateDocument.ts
 import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
-import '@neuralfog/elemix-ssr/navigation/NavLink';
+import '@neuralfog/elemix/navigation/NavLink';
 
 export class StateDocument extends Component {
     static $$__noShadow = true;

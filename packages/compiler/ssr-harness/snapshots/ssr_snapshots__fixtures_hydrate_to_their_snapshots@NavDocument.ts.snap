@@ -8,7 +8,7 @@ import { $__template, $__clone, $__child, $__effect, $__setText, $__setAttr, $__
 const _h0 = $__template('<meta name="about-only" content="yes"/><style id="about-style">.about{color:red}</style><script>window.__aboutScript=(window.__aboutScript||0)+1;</script>');
 
 import { Component } from '@neuralfog/elemix';
-import '@neuralfog/elemix-ssr/navigation/NavLink';
+import '@neuralfog/elemix/navigation/NavLink';
 
 type Data = { title?: string; page?: string };
 

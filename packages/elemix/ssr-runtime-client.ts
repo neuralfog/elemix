@@ -1,8 +1,10 @@
+import './src/navigation/navigate';
+
 export * from './src/runtime/hydrate';
 export {
+    $__setStorePersister,
+    $__setStores,
     $__store,
     $__stores,
-    $__setStores,
-    $__setStorePersister,
     store,
 } from './src/runtime/store';

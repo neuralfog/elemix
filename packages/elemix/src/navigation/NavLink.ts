@@ -1,6 +1,7 @@
 import { Component, tpl } from '@neuralfog/elemix';
 import type { Template } from '@neuralfog/elemix/types';
-import { navigate } from './navigate';
+
+type NavWindow = Window & { __elemixNavigate?: (to: string) => void };
 
 // #component
 export class NavLink extends Component {
@@ -32,7 +33,9 @@ export class NavLink extends Component {
         }
 
         event.preventDefault();
-        navigate(route);
+        const nav = (window as NavWindow).__elemixNavigate;
+        if (nav) nav(route);
+        else window.location.href = route;
     };
 
     // #mount

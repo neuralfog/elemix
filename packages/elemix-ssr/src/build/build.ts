@@ -33,7 +33,13 @@ const tagged = (tag: string, path: string): void =>
 const logError = (message: string): void =>
     console.error(`  ${BAR}  ${message}`);
 
-const NAV_IMPORT = "import '@neuralfog/elemix-ssr/navigation';";
+const NAV_IMPORT = "import '@neuralfog/elemix/ssr-runtime/client';";
+
+const aliasSsr = (build: Bun.PluginBuilder): void => {
+    build.onResolve({ filter: /^@neuralfog\/elemix-ssr(\/|$)/ }, (args) => ({
+        path: Bun.resolveSync(args.path, import.meta.dir),
+    }));
+};
 
 const devBinary = (root: string): string | null => {
     let dir = root;
@@ -164,6 +170,7 @@ export const build = async (
     const elemixLoader = (mode: '--ssr' | '--hydrate'): Bun.BunPlugin => ({
         name: `elemix${mode}`,
         setup(build) {
+            aliasSsr(build);
             build.onLoad({ filter: /\.ts$/ }, async (args) => {
                 const source = await Bun.file(args.path).text();
                 if (args.path.includes('/node_modules/')) {
@@ -231,6 +238,7 @@ export const build = async (
         const register: Bun.BunPlugin = {
             name: 'elemix-register',
             setup(build) {
+                aliasSsr(build);
                 build.onLoad({ filter: /\.ts$/ }, async (args) => {
                     if (args.path.includes('/node_modules/'))
                         return {

@@ -2,7 +2,7 @@ import { Component, tpl } from '@neuralfog/elemix';
 import { repeat } from '@neuralfog/elemix/directives';
 import type { Template } from '@neuralfog/elemix/types';
 
-import '@neuralfog/elemix-ssr/navigation/NavLink';
+import '@neuralfog/elemix/navigation/NavLink';
 import css from '#views/Pages/HomePage.scss?inline';
 import '#views/Pages/UserCard';
 import { AppDocument } from '#views/Documents/AppDocument';

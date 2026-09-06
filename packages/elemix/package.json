@@ -9,12 +9,17 @@
         "directory": "packages/elemix"
     },
     "type": "module",
-    "sideEffects": false,
+    "sideEffects": [
+        "./src/navigation/*.ts",
+        "./dist/ssr-runtime-client.mjs",
+        "./dist/ssr-runtime-client.cjs"
+    ],
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",
     "types": "./dist/index.d.ts",
     "files": [
         "./dist/**/*",
+        "./src/navigation/**/*",
         "CHANGELOG.md"
     ],
     "exports": {
@@ -43,6 +48,7 @@
             "import": "./dist/directives.mjs",
             "require": "./dist/directives.cjs"
         },
+        "./navigation/NavLink": "./src/navigation/NavLink.ts",
         "./types": {
             "types": "./dist/src/types.d.ts"
         }

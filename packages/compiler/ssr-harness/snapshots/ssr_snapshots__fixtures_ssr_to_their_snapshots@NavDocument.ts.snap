@@ -6,7 +6,7 @@ input_file: fixtures/NavDocument.ts
 import { $__ssrText, $__ssrAttr, $__ssrChild, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
-import '@neuralfog/elemix-ssr/navigation/NavLink';
+import '@neuralfog/elemix/navigation/NavLink';
 
 type Data = { title?: string; page?: string };
 
