@@ -223,12 +223,6 @@ const removeRange = (
     }
 };
 
-const rowFirst = (node: Node): Node =>
-    node.nodeType === 11 ? (node.firstChild as Node) : node;
-
-const rowLast = (node: Node): Node =>
-    node.nodeType === 11 ? (node.lastChild as Node) : node;
-
 const removeRow = (first: Node, last: Node): void => {
     if (first === last) {
         (first as ChildNode).remove();
@@ -266,18 +260,26 @@ export const $__list = <T>(
     render: (item: T, index: number) => Node,
 ): void => {
     const nodes = new Map<unknown, Node>();
-    const tails = new Map<unknown, Node>();
+    let tails: Map<unknown, Node> | null = null;
     const rowScopes = new Map<unknown, Scope | null>();
     let order: unknown[] = [];
+    const tailOf = (key: unknown): Node =>
+        (tails !== null ? tails.get(key) : nodes.get(key)) as Node;
     const place = (key: unknown, node: Node): void => {
-        nodes.set(key, rowFirst(node));
-        tails.set(key, rowLast(node));
+        if (node.nodeType === 11) {
+            if (tails === null) tails = new Map();
+            nodes.set(key, node.firstChild as Node);
+            tails.set(key, node.lastChild as Node);
+        } else {
+            nodes.set(key, node);
+            if (tails !== null) tails.set(key, node);
+        }
     };
     const drop = (key: unknown): void => {
         dispose(rowScopes.get(key) ?? null);
         rowScopes.delete(key);
         nodes.delete(key);
-        tails.delete(key);
+        if (tails !== null) tails.delete(key);
     };
     $__effect(() => {
         const parent = anchor.parentNode;
@@ -298,7 +300,7 @@ export const $__list = <T>(
                 removeRange(
                     parent,
                     nodes.get(oldKeys[0]) as Node,
-                    tails.get(oldKeys[oldLen - 1]) as Node,
+                    tailOf(oldKeys[oldLen - 1]),
                     anchor,
                 );
                 $__untrack(() => {
@@ -306,7 +308,7 @@ export const $__list = <T>(
                 });
                 rowScopes.clear();
                 nodes.clear();
-                tails.clear();
+                tails?.clear();
             }
             return;
         }
@@ -327,7 +329,7 @@ export const $__list = <T>(
                 const frag = document.createDocumentFragment();
                 $__untrack(() => {
                     for (let i = s; i <= ne; i++) {
-                        const node = collect(() => render(list[i], i));
+                        const node = collect(render, list[i], i);
                         rowScopes.set(keys[i], takeScopes());
                         place(keys[i], node);
                         frag.appendChild(node);
@@ -341,7 +343,7 @@ export const $__list = <T>(
         if (s > ne) {
             for (let i = s; i <= oe; i++) {
                 const key = oldKeys[i];
-                removeRow(nodes.get(key) as Node, tails.get(key) as Node);
+                removeRow(nodes.get(key) as Node, tailOf(key));
                 drop(key);
             }
             return;
@@ -361,9 +363,9 @@ export const $__list = <T>(
             }
             if (trans) {
                 const aF = nodes.get(oldKeys[ne]) as Node;
-                const aL = tails.get(oldKeys[ne]) as Node;
+                const aL = tailOf(oldKeys[ne]);
                 const bF = nodes.get(oldKeys[s]) as Node;
-                const bL = tails.get(oldKeys[s]) as Node;
+                const bL = tailOf(oldKeys[s]);
                 const nextA = (aL as ChildNode).nextSibling;
                 moveRow(parent, aF, aL, bF);
                 moveRow(parent, bF, bL, nextA);
@@ -410,14 +412,14 @@ export const $__list = <T>(
             removeRange(
                 parent,
                 nodes.get(oldKeys[s]) as Node,
-                tails.get(oldKeys[oe]) as Node,
+                tailOf(oldKeys[oe]),
                 ref,
             );
             for (let q = 0; q < stale.length; q++) drop(stale[q]);
             const frag = document.createDocumentFragment();
             $__untrack(() => {
                 for (let i = s; i <= ne; i++) {
-                    const node = collect(() => render(list[i], i));
+                    const node = collect(render, list[i], i);
                     rowScopes.set(keys[i], takeScopes());
                     place(keys[i], node);
                     frag.appendChild(node);
@@ -429,7 +431,7 @@ export const $__list = <T>(
 
         for (let q = 0; q < stale.length; q++) {
             const key = stale[q];
-            removeRow(nodes.get(key) as Node, tails.get(key) as Node);
+            removeRow(nodes.get(key) as Node, tailOf(key));
             drop(key);
         }
 
@@ -459,17 +461,12 @@ export const $__list = <T>(
                 const r =
                     ni + 1 < len ? (nodes.get(keys[ni + 1]) as Node) : anchor;
                 if (isFresh) {
-                    const node = collect(() => render(list[ni], ni));
+                    const node = collect(render, list[ni], ni);
                     rowScopes.set(key, takeScopes());
                     place(key, node);
                     parent.insertBefore(node, r);
                 } else {
-                    moveRow(
-                        parent,
-                        nodes.get(key) as Node,
-                        tails.get(key) as Node,
-                        r,
-                    );
+                    moveRow(parent, nodes.get(key) as Node, tailOf(key), r);
                 }
             }
         });

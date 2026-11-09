@@ -1,6 +1,5 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: fixtures/ViewDataRichApp.ts
 ---
@@ -36,7 +35,7 @@ const _n8 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.n
 const _n9 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
 const _n10 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
 const _n11 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-$__list(_n11, () => (this.viewData.rows), (row) => row.id, (row) => (() => {
+$__list(_n11, () => (this.viewData.rows), (row) => row.id, (row) => {
 const _r12 = $__cloneEl(_t1);
 const _n13 = _r12.firstChild!;
 const _n14 = _r12.firstChild!.nextSibling!.nextSibling!;
@@ -49,7 +48,7 @@ $__effect(() => {
 $__setText(_x16, (row.label));
 });
 return _r12;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.viewData.str));
 });

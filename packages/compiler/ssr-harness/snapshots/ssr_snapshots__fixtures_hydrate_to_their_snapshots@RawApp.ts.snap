@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/RawApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -64,8 +63,7 @@ const _n8 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _b9 = $__bounds(_n8, 0, 0);
 $__fresh(() => {
 const _a10 = $__reanchor(_n8, _b9[0], _b9[1]);
-$__list(_a10, () => (this.state.rows), (row) => row.id, (row) =>
-                    (() => {
+$__list(_a10, () => (this.state.rows), (row) => row.id, (row) => {
 const _r11 = $__cloneEl(_h0);
 const _n12 = _r11.firstChild!.firstChild!;
 const _n13 = _r11.firstChild!.nextSibling!.firstChild!;
@@ -74,7 +72,7 @@ $__effect(() => {
 $__setText(_n13, (row.label));
 });
 return _r11;
-})());
+});
 });
 }
 
@@ -114,8 +112,7 @@ $__event(_n3, 'click', this.tickRaw);
 $__event(_n4, 'click', this.refresh);
 $__event(_n5, 'click', this.inc);
 $__event(_n6, 'click', this.addRow);
-$__list(_n7, () => (this.state.rows), (row) => row.id, (row) =>
-                    (() => {
+$__list(_n7, () => (this.state.rows), (row) => row.id, (row) => {
 const _r8 = $__cloneEl(_t1);
 const _n9 = _r8.firstChild!.firstChild!;
 const _n10 = _r8.firstChild!.nextSibling!.firstChild!;
@@ -124,7 +121,7 @@ $__effect(() => {
 $__setText(_n10, (row.label));
 });
 return _r8;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.state.sw.ticks));
 });

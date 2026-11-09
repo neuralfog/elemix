@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/TodoApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
@@ -91,7 +90,7 @@ const _n2 = root.firstChild!.nextSibling!.nextSibling!;
 const _b3 = $__bounds(_n2, 0, 0);
 $__fresh(() => {
 const _a4 = $__reanchor(_n2, _b3[0], _b3[1]);
-$__list(_a4, () => (this.state.todos), (todo) => todo.id, (todo) => (() => {
+$__list(_a4, () => (this.state.todos), (todo) => todo.id, (todo) => {
 const _r5 = $__cloneEl(_h0);
 const _n6 = _r5.firstChild!.firstChild!;
 const _n7 = _r5.firstChild!.nextSibling!;
@@ -100,7 +99,7 @@ $__effect(() => {
 $__setText(_n6, (todo.text));
 });
 return _r5;
-})());
+});
 });
 }
 
@@ -134,7 +133,7 @@ $__event(_n1, 'keydown', (e: KeyboardEvent) => {
                     if (e.key === 'Enter') this.addItem();
                 });
 $__event(_n2, 'click', this.addItem);
-$__list(_n3, () => (this.state.todos), (todo) => todo.id, (todo) => (() => {
+$__list(_n3, () => (this.state.todos), (todo) => todo.id, (todo) => {
 const _r4 = $__cloneEl(_t1);
 const _n5 = _r4.firstChild!.firstChild!;
 const _n6 = _r4.firstChild!.nextSibling!;
@@ -143,7 +142,7 @@ $__effect(() => {
 $__setText(_n5, (todo.text));
 });
 return _r4;
-})());
+});
 return _r0;
 }
 }

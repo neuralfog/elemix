@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/CollectionApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -149,17 +148,16 @@ const _n49 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling
 const _b50 = $__bounds(_n49, 0, 0);
 $__fresh(() => {
 const _a51 = $__reanchor(_n47, _b48[0], _b48[1]);
-$__list(_a51, () => ([...this.state.tags]), (tag) => tag, (tag) => (() => {
+$__list(_a51, () => ([...this.state.tags]), (tag) => tag, (tag) => {
 const _r52 = $__cloneEl(_h0);
 const _n53 = _r52.firstChild!;
 $__effect(() => {
 $__setText(_n53, (tag));
 });
 return _r52;
-})());
+});
 const _a54 = $__reanchor(_n49, _b50[0], _b50[1]);
-$__list(_a54, () => ([...this.state.scores.keys()]), (name) => name, (name) =>
-                    (() => {
+$__list(_a54, () => ([...this.state.scores.keys()]), (name) => name, (name) => {
 const _r55 = $__cloneEl(_h1);
 const _n56 = _r55.firstChild!;
 const _n57 = _r55.firstChild!.nextSibling!.nextSibling!;
@@ -174,7 +172,7 @@ $__effect(() => {
 $__setText(_x59, (this.state.scores.get(name)));
 });
 return _r55;
-})());
+});
 });
 }
 
@@ -327,16 +325,15 @@ $__event(_n26, 'click', this.addSeen);
 $__event(_n27, 'click', this.deleteSeen);
 $__event(_n28, 'click', this.setMeta);
 $__event(_n29, 'click', this.deleteMeta);
-$__list(_n30, () => ([...this.state.tags]), (tag) => tag, (tag) => (() => {
+$__list(_n30, () => ([...this.state.tags]), (tag) => tag, (tag) => {
 const _r32 = $__cloneEl(_t1);
 const _n33 = _r32.firstChild!;
 $__effect(() => {
 $__setText(_n33, (tag));
 });
 return _r32;
-})());
-$__list(_n31, () => ([...this.state.scores.keys()]), (name) => name, (name) =>
-                    (() => {
+});
+$__list(_n31, () => ([...this.state.scores.keys()]), (name) => name, (name) => {
 const _r34 = $__cloneEl(_t2);
 const _n35 = _r34.firstChild!;
 const _n36 = _r34.firstChild!.nextSibling!.nextSibling!;
@@ -351,7 +348,7 @@ $__effect(() => {
 $__setText(_x38, (this.state.scores.get(name)));
 });
 return _r34;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.state.tags.size));
 });

@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/ViewDataRichApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -84,7 +83,7 @@ const _n20 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!
 const _b21 = $__bounds(_n20, 0, 0);
 $__fresh(() => {
 const _a22 = $__reanchor(_n20, _b21[0], _b21[1]);
-$__list(_a22, () => (this.viewData.rows), (row) => row.id, (row) => (() => {
+$__list(_a22, () => (this.viewData.rows), (row) => row.id, (row) => {
 const _r23 = $__cloneEl(_h0);
 const _n24 = _r23.firstChild!;
 const _n25 = _r23.firstChild!.nextSibling!.nextSibling!;
@@ -97,7 +96,7 @@ $__effect(() => {
 $__setText(_x27, (row.label));
 });
 return _r23;
-})());
+});
 });
 }
 
@@ -114,7 +113,7 @@ const _n8 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.n
 const _n9 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
 const _n10 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
 const _n11 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-$__list(_n11, () => (this.viewData.rows), (row) => row.id, (row) => (() => {
+$__list(_n11, () => (this.viewData.rows), (row) => row.id, (row) => {
 const _r12 = $__cloneEl(_t1);
 const _n13 = _r12.firstChild!;
 const _n14 = _r12.firstChild!.nextSibling!.nextSibling!;
@@ -127,7 +126,7 @@ $__effect(() => {
 $__setText(_x16, (row.label));
 });
 return _r12;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.viewData.str));
 });

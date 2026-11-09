@@ -31,23 +31,23 @@ const _n1 = root.firstChild!;
 const _b2 = $__bounds(_n1, 0, 0);
 $__fresh(() => {
 const _a3 = $__reanchor(_n1, _b2[0], _b2[1]);
-$__list(_a3, () => (this.state.groups), (group) => group.id, (group) => (() => {
+$__list(_a3, () => (this.state.groups), (group) => group.id, (group) => {
 const _r4 = $__clone(_h0);
 const _n5 = _r4.firstChild!;
 const _n6 = _r4.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-$__list(_n5, () => (group.items), (item) => item, (item) => (() => {
+$__list(_n5, () => (group.items), (item) => item, (item) => {
 const _r7 = $__cloneEl(_h1);
 const _n8 = _r7.firstChild!;
 $__effect(() => {
 $__setText(_n8, (item));
 });
 return _r7;
-})());
+});
 const _x9 = document.createTextNode('');
 _n6.replaceWith(_x9);
 _x9.data = ($__toRaw(group).id);
 return _r4;
-})());
+});
 });
 }
 
@@ -69,23 +69,23 @@ return _r4;
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!;
-$__list(_n1, () => (this.state.groups), (group) => group.id, (group) => (() => {
+$__list(_n1, () => (this.state.groups), (group) => group.id, (group) => {
 const _r3 = $__clone(_t1);
 const _n4 = _r3.firstChild!;
 const _n5 = _r3.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-$__list(_n4, () => (group.items), (item) => item, (item) => (() => {
+$__list(_n4, () => (group.items), (item) => item, (item) => {
 const _r6 = $__cloneEl(_t2);
 const _n7 = _r6.firstChild!;
 $__effect(() => {
 $__setText(_n7, (item));
 });
 return _r6;
-})());
+});
 const _x8 = document.createTextNode('');
 _n5.replaceWith(_x8);
 _x8.data = ($__toRaw(group).id);
 return _r3;
-})());
+});
 $__event(_n2, 'click', this.addGroup);
 return _r0;
 }

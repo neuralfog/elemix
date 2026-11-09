@@ -551,7 +551,7 @@ fn lower_list(expr: &str, anchor: &str, ctx: &mut Ctx, emitter: &dyn Emitter) ->
     if let Some(r) = reactive {
         ctx.reactive.push(r);
     }
-    let render = substitute_html(&args[1], ctx, emitter, true);
+    let render = flatten_iife_body(&substitute_html(&args[1], ctx, emitter, true));
     if pushed {
         ctx.reactive.pop();
     }
@@ -657,7 +657,7 @@ fn lower_repeat_ternary(
     if let Some(r) = reactive {
         ctx.reactive.push(r);
     }
-    let render = substitute_html(&args[1], ctx, emitter, true);
+    let render = flatten_iife_body(&substitute_html(&args[1], ctx, emitter, true));
     if pushed {
         ctx.reactive.pop();
     }
@@ -742,6 +742,20 @@ fn key_compare_rhs(key: &str) -> String {
     } else {
         format!("'{k}'")
     }
+}
+
+fn flatten_iife_body(render: &str) -> String {
+    let Some((params, body)) = render.split_once("=>") else {
+        return render.to_string();
+    };
+    let trimmed = body.trim();
+    if let Some(inner) = trimmed
+        .strip_prefix("(() => {")
+        .and_then(|b| b.strip_suffix("})()"))
+    {
+        return format!("{params}=> {{{inner}}}");
+    }
+    render.to_string()
 }
 
 fn arrow_body(factory: Option<&String>) -> String {

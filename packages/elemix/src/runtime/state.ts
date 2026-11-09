@@ -1,4 +1,4 @@
-import { type Dep, $__dep, $__track, $__trigger } from './reactive';
+import { type Dep, $__track, $__trigger, activeScope } from './reactive';
 
 const RAW = Symbol();
 const ARRAY = Symbol();
@@ -16,18 +16,18 @@ const MUTATORS = new Set<string>([
 ]);
 
 const proxies = new WeakMap<object, object>();
-const deps = new WeakMap<object, Map<PropertyKey, Dep>>();
+const deps = new WeakMap<object, Record<PropertyKey, Dep>>();
 
 const depFor = (target: object, key: PropertyKey): Dep => {
     let map = deps.get(target);
-    if (!map) {
-        map = new Map();
+    if (map === undefined) {
+        map = Object.create(null) as Record<PropertyKey, Dep>;
         deps.set(target, map);
     }
-    let d = map.get(key);
-    if (!d) {
-        d = $__dep();
-        map.set(key, d);
+    let d = map[key];
+    if (d === undefined) {
+        d = { subs: null, subSlots: 0 };
+        map[key] = d;
     }
     return d;
 };
@@ -51,11 +51,12 @@ const objectHandler: ProxyHandler<Target> = {
     get(target, key) {
         if (key === RAW) return target;
         const value = target[key];
+        const track = typeof key !== 'symbol' && activeScope !== null;
         if (value === null || typeof value !== 'object') {
-            if (typeof key !== 'symbol') $__track(depFor(target, key));
+            if (track) $__track(depFor(target, key));
             return value;
         }
-        if (typeof key !== 'symbol') {
+        if (track) {
             $__track(depFor(target, key));
             if (Array.isArray(value)) $__track(depFor($__toRaw(value), ARRAY));
         }
@@ -76,11 +77,12 @@ const classHandler: ProxyHandler<Target> = {
         const value = hasOwn.call(target, key)
             ? target[key]
             : Reflect.get(target, key, receiver);
+        const track = typeof key !== 'symbol' && activeScope !== null;
         if (value === null || typeof value !== 'object') {
-            if (typeof key !== 'symbol') $__track(depFor(target, key));
+            if (track) $__track(depFor(target, key));
             return value;
         }
-        if (typeof key !== 'symbol') {
+        if (track) {
             $__track(depFor(target, key));
             if (Array.isArray(value)) $__track(depFor($__toRaw(value), ARRAY));
         }
@@ -107,7 +109,8 @@ const arrayHandler: ProxyHandler<Target> = {
             };
         }
         const value = target[key];
-        if (Array.isArray(value)) $__track(depFor($__toRaw(value), ARRAY));
+        if (activeScope !== null && Array.isArray(value))
+            $__track(depFor($__toRaw(value), ARRAY));
         return $__reactive(value);
     },
     set(target, key, value) {
@@ -248,12 +251,12 @@ export const $__reactive = (value: unknown): unknown => {
     const cached = proxies.get(obj);
     if (cached) return cached;
     if (obj[RAW_SKIP] === true) return obj;
-    const handler = Array.isArray(obj)
-        ? arrayHandler
-        : isCollection(obj)
-          ? collectionHandler
-          : isPlain(obj)
-            ? objectHandler
+    const handler = isPlain(obj)
+        ? objectHandler
+        : Array.isArray(obj)
+          ? arrayHandler
+          : isCollection(obj)
+            ? collectionHandler
             : classHandler;
     const p = new Proxy(obj, handler);
     proxies.set(obj, p);

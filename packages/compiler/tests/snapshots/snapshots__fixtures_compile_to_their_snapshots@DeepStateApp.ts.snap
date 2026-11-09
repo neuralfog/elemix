@@ -145,7 +145,7 @@ $__event(_n14, 'click', this.addRowGrid);
 $__event(_n15, 'click', this.toggleTask);
 $__event(_n16, 'click', this.addTask);
 $__event(_n17, 'click', this.addGroup);
-$__list(_n18, () => (this.state.groups), (group) => group.id, (group) => (() => {
+$__list(_n18, () => (this.state.groups), (group) => group.id, (group) => {
 const _r19 = $__cloneEl(_t1);
 const _n20 = _r19.firstChild!.firstChild!;
 const _n21 = _r19.firstChild!.nextSibling!.firstChild!;
@@ -154,7 +154,7 @@ $__effect(() => {
 $__setText(_n21, (group.tasks.length));
 });
 return _r19;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.state.profile.address.city));
 });

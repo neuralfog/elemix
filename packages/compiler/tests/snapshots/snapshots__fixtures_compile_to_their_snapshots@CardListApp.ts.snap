@@ -90,7 +90,7 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
 $__event(_n1, 'click', this.add);
-$__list(_n2, () => (this.state.users), (user) => user.id, (user) => (() => {
+$__list(_n2, () => (this.state.users), (user) => user.id, (user) => {
 const _r3 = $__cloneEl(_t1);
 const _n4 = _r3.firstChild!;
 const _n5 = _r3.firstChild!.nextSibling!;
@@ -104,7 +104,7 @@ $__effect(() => {
 $__setProp(_n4, 'role', (user.role));
 });
 return _r3;
-})());
+});
 return _r0;
 }
 }

@@ -125,7 +125,7 @@ $__fresh(() => {
 const _a8 = $__reanchor(_n6, _b7[0], _b7[1]);
 $__list(_a8, () => (this.state.rows), (row) => row.id, (
                         row,
-                    ) => (() => {
+                    ) => {
 const _r9 = $__cloneEl(_h0);
 const _n10 = _r9.firstChild!.firstChild!;
 const _n11 = _r9.firstChild!.nextSibling!.firstChild!;
@@ -141,7 +141,7 @@ $__effect(() => {
 $__setText(_n12, (row.label));
 });
 return _r9;
-})());
+});
 });
 }
 
@@ -221,7 +221,7 @@ $__event(_n5, 'click', this.clear);
 $__event(_n6, 'click', this.swapRows);
 $__list(_n7, () => (this.state.rows), (row) => row.id, (
                         row,
-                    ) => (() => {
+                    ) => {
 const _r8 = $__cloneEl(_t1);
 const _n9 = _r8.firstChild!.firstChild!;
 const _n10 = _r8.firstChild!.nextSibling!.firstChild!;
@@ -237,7 +237,7 @@ $__effect(() => {
 $__setText(_n11, (row.label));
 });
 return _r8;
-})());
+});
 return _r0;
 }
 }

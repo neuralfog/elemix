@@ -12,7 +12,7 @@ export type Scope = {
 
 export const $__dep = (): Dep => ({ subs: null, subSlots: 0 });
 
-let activeScope: Scope | null = null;
+export let activeScope: Scope | null = null;
 let sink: Scope | null = null;
 let collecting = false;
 let lastScopes: Scope | null = null;
@@ -46,7 +46,22 @@ const cleanSources = (scope: Scope): void => {
         deps.length = 0;
         depSlots.length = 0;
     } else {
-        removeSub(deps, scope.depSlots as number);
+        const slot = scope.depSlots as number;
+        const subs = deps.subs;
+        if (Array.isArray(subs)) {
+            const slots = deps.subSlots as number[];
+            const last = subs.pop() as Scope;
+            const lastSlot = slots.pop() as number;
+            if (slot < subs.length) {
+                subs[slot] = last;
+                slots[slot] = lastSlot;
+                if (Array.isArray(last.depSlots))
+                    last.depSlots[lastSlot] = slot;
+                else last.depSlots = slot;
+            }
+        } else {
+            deps.subs = null;
+        }
         scope.deps = null;
         scope.depSlots = 0;
     }
@@ -65,13 +80,17 @@ const runScope = (scope: Scope): void => {
 
 export const rerun = (scope: Scope): void => runScope(scope);
 
-export const collect = <T>(fn: () => T): T => {
+export const collect = <T, A = unknown, B = unknown>(
+    fn: (a: A, b: B) => T,
+    a?: A,
+    b?: B,
+): T => {
     const prevSink = sink;
     const prevCollecting = collecting;
     sink = null;
     collecting = true;
     try {
-        return fn();
+        return fn(a as A, b as B);
     } finally {
         lastScopes = sink;
         sink = prevSink;
@@ -105,49 +124,38 @@ export const $__untrack = <T>(fn: () => T): T => {
     }
 };
 
-const addDep = (scope: Scope, d: Dep): number => {
-    const deps = scope.deps;
-    if (deps === null) {
-        scope.deps = d;
-        return 0;
-    }
-    if (Array.isArray(deps)) {
-        deps.push(d);
-        (scope.depSlots as number[]).push(0);
-        return deps.length - 1;
-    }
-    scope.deps = [deps, d];
-    scope.depSlots = [scope.depSlots as number, 0];
-    return 1;
-};
-
-const setDepSlot = (scope: Scope, sslot: number, dslot: number): void => {
-    if (Array.isArray(scope.depSlots)) {
-        scope.depSlots[sslot] = dslot;
-    } else {
-        scope.depSlots = dslot;
-    }
-};
-
 export const $__track = (d: Dep): void => {
     const scope = activeScope;
     if (scope === null) return;
     const subs = d.subs;
     if (subs === scope) return;
-    if (Array.isArray(subs)) {
-        if (subs[subs.length - 1] === scope) return;
-        const sslot = addDep(scope, d);
-        setDepSlot(scope, sslot, subs.length);
-        (d.subSlots as number[]).push(sslot);
-        subs.push(scope);
-    } else if (subs === null) {
-        const sslot = addDep(scope, d);
-        setDepSlot(scope, sslot, 0);
+    if (Array.isArray(subs) && subs[subs.length - 1] === scope) return;
+
+    const dslot = subs === null ? 0 : Array.isArray(subs) ? subs.length : 1;
+
+    const deps = scope.deps;
+    let sslot: number;
+    if (deps === null) {
+        scope.deps = d;
+        scope.depSlots = dslot;
+        sslot = 0;
+    } else if (Array.isArray(deps)) {
+        deps.push(d);
+        (scope.depSlots as number[]).push(dslot);
+        sslot = deps.length - 1;
+    } else {
+        scope.deps = [deps, d];
+        scope.depSlots = [scope.depSlots as number, dslot];
+        sslot = 1;
+    }
+
+    if (subs === null) {
         d.subs = scope;
         d.subSlots = sslot;
+    } else if (Array.isArray(subs)) {
+        subs.push(scope);
+        (d.subSlots as number[]).push(sslot);
     } else {
-        const sslot = addDep(scope, d);
-        setDepSlot(scope, sslot, 1);
         d.subs = [subs, scope];
         d.subSlots = [d.subSlots as number, sslot];
     }
@@ -172,7 +180,13 @@ export const $__effect = (fn: () => void): void => {
         scope.next = sink;
         sink = scope;
     }
-    runScope(scope);
+    const prev = activeScope;
+    activeScope = scope;
+    try {
+        fn();
+    } finally {
+        activeScope = prev;
+    }
 };
 
 export const $__rootEffect = (fn: () => void): void => {

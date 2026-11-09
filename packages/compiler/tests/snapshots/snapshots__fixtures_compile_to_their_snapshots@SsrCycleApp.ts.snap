@@ -1,6 +1,5 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: fixtures/SsrCycleApp.ts
 ---
@@ -39,14 +38,14 @@ const _r5 = $__cloneEl(_t2);
 return _r5;
 })()));
 $__event(_n2, 'click', this.toggle);
-$__list(_n3, () => (cycle.entries), (entry) => String(entry.id), (entry) => (() => {
+$__list(_n3, () => (cycle.entries), (entry) => String(entry.id), (entry) => {
 const _r6 = $__cloneEl(_t3);
 const _n7 = _r6.firstChild!;
 $__effect(() => {
 $__setText(_n7, (entry.event));
 });
 return _r6;
-})());
+});
 return _r0;
 }
 }

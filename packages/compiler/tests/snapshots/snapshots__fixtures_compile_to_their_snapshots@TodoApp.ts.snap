@@ -105,7 +105,7 @@ $__event(_n1, 'keydown', (e: KeyboardEvent) => {
                     if (e.key === 'Enter') this.addItem();
                 });
 $__event(_n2, 'click', this.addItem);
-$__list(_n3, () => (this.state.todos), (todo) => todo.id, (todo) => (() => {
+$__list(_n3, () => (this.state.todos), (todo) => todo.id, (todo) => {
 const _r4 = $__cloneEl(_t1);
 const _n5 = _r4.firstChild!.firstChild!;
 const _n6 = _r4.firstChild!.nextSibling!;
@@ -114,7 +114,7 @@ $__effect(() => {
 $__setText(_n5, (todo.text));
 });
 return _r4;
-})());
+});
 return _r0;
 }
 }

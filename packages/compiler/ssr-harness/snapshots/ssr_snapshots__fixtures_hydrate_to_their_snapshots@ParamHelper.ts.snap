@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/ParamHelper.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
@@ -40,7 +39,7 @@ const _n1 = root.firstChild!.firstChild!.nextSibling!;
 const _b2 = $__bounds(_n1, 0, 0);
 $__fresh(() => {
 const _a3 = $__reanchor(_n1, _b2[0], _b2[1]);
-$__list(_a3, () => (this.state.rows), (r) => r.id, (r) => (() => {
+$__list(_a3, () => (this.state.rows), (r) => r.id, (r) => {
 const _r4 = $__cloneEl(_h0);
 const _n5 = _r4.firstChild!;
 _r4.setAttribute('data-id', ($__toRaw(r).id));
@@ -48,7 +47,7 @@ $__effect(() => {
 $__setText(_n5, (r.name));
 });
 return _r4;
-})());
+});
 });
 }
 
@@ -69,7 +68,7 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
 $__event(_n1, 'click', this.add);
-$__list(_n2, () => (this.state.rows), (r) => r.id, (r) => (() => {
+$__list(_n2, () => (this.state.rows), (r) => r.id, (r) => {
 const _r3 = $__cloneEl(_t1);
 const _n4 = _r3.firstChild!;
 _r3.setAttribute('data-id', ($__toRaw(r).id));
@@ -77,7 +76,7 @@ $__effect(() => {
 $__setText(_n4, (r.name));
 });
 return _r3;
-})());
+});
 return _r0;
 }
 }

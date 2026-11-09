@@ -111,13 +111,13 @@ fn bindings_on_one_element_grab_it_once() {
 }
 
 #[test]
-fn repeat_lowers_to_list_with_an_iife_builder() {
+fn repeat_lowers_to_list_with_a_flattened_builder() {
     let out = gen(
         &["<ul>", "</ul>"],
         &["repeat(this.rows, (r) => tpl`<li>${r.t}</li>`, (r) => r.id)"],
     );
     assert!(out.contains("const _t1 = $__templateEl('<li> </li>');"));
-    assert!(out.contains("$__list(_n1, () => (this.rows), (r) => r.id, (r) => (() => {"));
+    assert!(out.contains("$__list(_n1, () => (this.rows), (r) => r.id, (r) => {"));
     assert!(out.contains("$__cloneEl(_t1)"));
     assert!(out.contains("$__setText("));
     assert!(out.contains("(r.t));"));

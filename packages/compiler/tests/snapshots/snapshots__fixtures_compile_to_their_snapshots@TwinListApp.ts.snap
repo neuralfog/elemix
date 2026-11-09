@@ -35,22 +35,22 @@ const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
 const _n3 = _r0.firstChild!.nextSibling!;
 const _n4 = _r0.firstChild!.nextSibling!.nextSibling!;
-$__list(_n1, () => (this.state.left), (item) => item, (item) => (() => {
+$__list(_n1, () => (this.state.left), (item) => item, (item) => {
 const _r5 = $__cloneEl(_t1);
 const _n6 = _r5.firstChild!;
 $__effect(() => {
 $__setText(_n6, (item));
 });
 return _r5;
-})());
-$__list(_n2, () => (this.state.right), (item) => item, (item) => (() => {
+});
+$__list(_n2, () => (this.state.right), (item) => item, (item) => {
 const _r7 = $__cloneEl(_t2);
 const _n8 = _r7.firstChild!;
 $__effect(() => {
 $__setText(_n8, (item));
 });
 return _r7;
-})());
+});
 $__event(_n3, 'click', this.addLeft);
 $__event(_n4, 'click', this.addRight);
 return _r0;

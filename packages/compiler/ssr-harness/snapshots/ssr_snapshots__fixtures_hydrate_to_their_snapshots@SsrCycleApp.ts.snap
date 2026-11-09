@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/SsrCycleApp.ts
 ---
 import { $__bounds, $__reanchor, $__seat, $__resume, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
@@ -50,14 +49,14 @@ return _r8;
 })())));
 $__fresh(() => {
 const _a9 = $__reanchor(_n3, _b4[0], _b4[1]);
-$__list(_a9, () => (cycle.entries), (entry) => String(entry.id), (entry) => (() => {
+$__list(_a9, () => (cycle.entries), (entry) => String(entry.id), (entry) => {
 const _r10 = $__cloneEl(_h2);
 const _n11 = _r10.firstChild!;
 $__effect(() => {
 $__setText(_n11, (entry.event));
 });
 return _r10;
-})());
+});
 });
 }
 
@@ -82,14 +81,14 @@ const _r5 = $__cloneEl(_t2);
 return _r5;
 })()));
 $__event(_n2, 'click', this.toggle);
-$__list(_n3, () => (cycle.entries), (entry) => String(entry.id), (entry) => (() => {
+$__list(_n3, () => (cycle.entries), (entry) => String(entry.id), (entry) => {
 const _r6 = $__cloneEl(_t3);
 const _n7 = _r6.firstChild!;
 $__effect(() => {
 $__setText(_n7, (entry.event));
 });
 return _r6;
-})());
+});
 return _r0;
 }
 }

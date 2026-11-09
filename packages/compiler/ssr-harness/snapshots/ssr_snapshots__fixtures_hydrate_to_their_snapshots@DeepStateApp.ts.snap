@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/DeepStateApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -95,7 +94,7 @@ const _n24 = root.firstChild!.nextSibling!.nextSibling!;
 const _b25 = $__bounds(_n24, 0, 0);
 $__fresh(() => {
 const _a26 = $__reanchor(_n24, _b25[0], _b25[1]);
-$__list(_a26, () => (this.state.groups), (group) => group.id, (group) => (() => {
+$__list(_a26, () => (this.state.groups), (group) => group.id, (group) => {
 const _r27 = $__cloneEl(_h0);
 const _n28 = _r27.firstChild!.firstChild!;
 const _n29 = _r27.firstChild!.nextSibling!.firstChild!;
@@ -104,7 +103,7 @@ $__effect(() => {
 $__setText(_n29, (group.tasks.length));
 });
 return _r27;
-})());
+});
 });
 }
 
@@ -222,7 +221,7 @@ $__event(_n14, 'click', this.addRowGrid);
 $__event(_n15, 'click', this.toggleTask);
 $__event(_n16, 'click', this.addTask);
 $__event(_n17, 'click', this.addGroup);
-$__list(_n18, () => (this.state.groups), (group) => group.id, (group) => (() => {
+$__list(_n18, () => (this.state.groups), (group) => group.id, (group) => {
 const _r19 = $__cloneEl(_t1);
 const _n20 = _r19.firstChild!.firstChild!;
 const _n21 = _r19.firstChild!.nextSibling!.firstChild!;
@@ -231,7 +230,7 @@ $__effect(() => {
 $__setText(_n21, (group.tasks.length));
 });
 return _r19;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.state.profile.address.city));
 });

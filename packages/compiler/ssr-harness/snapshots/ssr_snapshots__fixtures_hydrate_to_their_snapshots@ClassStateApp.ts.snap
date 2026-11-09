@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/ClassStateApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -112,7 +111,7 @@ const _n13 = root.firstChild!.nextSibling!.nextSibling!;
 const _b14 = $__bounds(_n13, 0, 0);
 $__fresh(() => {
 const _a15 = $__reanchor(_n13, _b14[0], _b14[1]);
-$__list(_a15, () => (this.state.cart.items), (item) => item.id, (item) => (() => {
+$__list(_a15, () => (this.state.cart.items), (item) => item.id, (item) => {
 const _r16 = $__cloneEl(_h0);
 const _n17 = _r16.firstChild!.firstChild!;
 const _n18 = _r16.firstChild!.nextSibling!.firstChild!;
@@ -127,7 +126,7 @@ $__effect(() => {
 $__setText(_n19, (item.lineTotal));
 });
 return _r16;
-})());
+});
 });
 }
 
@@ -172,7 +171,7 @@ $__event(_n6, 'click', this.bumpApple);
 $__event(_n7, 'click', this.applyCoupon);
 $__event(_n8, 'click', this.removeBanana);
 $__event(_n9, 'click', this.clearCart);
-$__list(_n10, () => (this.state.cart.items), (item) => item.id, (item) => (() => {
+$__list(_n10, () => (this.state.cart.items), (item) => item.id, (item) => {
 const _r11 = $__cloneEl(_t1);
 const _n12 = _r11.firstChild!.firstChild!;
 const _n13 = _r11.firstChild!.nextSibling!.firstChild!;
@@ -187,7 +186,7 @@ $__effect(() => {
 $__setText(_n14, (item.lineTotal));
 });
 return _r11;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.state.cart.count));
 });

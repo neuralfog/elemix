@@ -174,16 +174,15 @@ $__event(_n26, 'click', this.addSeen);
 $__event(_n27, 'click', this.deleteSeen);
 $__event(_n28, 'click', this.setMeta);
 $__event(_n29, 'click', this.deleteMeta);
-$__list(_n30, () => ([...this.state.tags]), (tag) => tag, (tag) => (() => {
+$__list(_n30, () => ([...this.state.tags]), (tag) => tag, (tag) => {
 const _r32 = $__cloneEl(_t1);
 const _n33 = _r32.firstChild!;
 $__effect(() => {
 $__setText(_n33, (tag));
 });
 return _r32;
-})());
-$__list(_n31, () => ([...this.state.scores.keys()]), (name) => name, (name) =>
-                    (() => {
+});
+$__list(_n31, () => ([...this.state.scores.keys()]), (name) => name, (name) => {
 const _r34 = $__cloneEl(_t2);
 const _n35 = _r34.firstChild!;
 const _n36 = _r34.firstChild!.nextSibling!.nextSibling!;
@@ -198,7 +197,7 @@ $__effect(() => {
 $__setText(_x38, (this.state.scores.get(name)));
 });
 return _r34;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.state.tags.size));
 });

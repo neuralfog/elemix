@@ -114,7 +114,7 @@ $__event(_n6, 'click', this.bumpApple);
 $__event(_n7, 'click', this.applyCoupon);
 $__event(_n8, 'click', this.removeBanana);
 $__event(_n9, 'click', this.clearCart);
-$__list(_n10, () => (this.state.cart.items), (item) => item.id, (item) => (() => {
+$__list(_n10, () => (this.state.cart.items), (item) => item.id, (item) => {
 const _r11 = $__cloneEl(_t1);
 const _n12 = _r11.firstChild!.firstChild!;
 const _n13 = _r11.firstChild!.nextSibling!.firstChild!;
@@ -129,7 +129,7 @@ $__effect(() => {
 $__setText(_n14, (item.lineTotal));
 });
 return _r11;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.state.cart.count));
 });

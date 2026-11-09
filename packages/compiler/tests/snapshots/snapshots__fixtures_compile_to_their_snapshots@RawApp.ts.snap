@@ -73,8 +73,7 @@ $__event(_n3, 'click', this.tickRaw);
 $__event(_n4, 'click', this.refresh);
 $__event(_n5, 'click', this.inc);
 $__event(_n6, 'click', this.addRow);
-$__list(_n7, () => (this.state.rows), (row) => row.id, (row) =>
-                    (() => {
+$__list(_n7, () => (this.state.rows), (row) => row.id, (row) => {
 const _r8 = $__cloneEl(_t1);
 const _n9 = _r8.firstChild!.firstChild!;
 const _n10 = _r8.firstChild!.nextSibling!.firstChild!;
@@ -83,7 +82,7 @@ $__effect(() => {
 $__setText(_n10, (row.label));
 });
 return _r8;
-})());
+});
 $__effect(() => {
 $__setText(_n1, (this.state.sw.ticks));
 });

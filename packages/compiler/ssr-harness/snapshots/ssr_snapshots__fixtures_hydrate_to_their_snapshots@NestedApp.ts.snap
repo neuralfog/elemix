@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/NestedApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
@@ -85,25 +84,25 @@ const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 0, 0);
 $__fresh(() => {
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
-$__list(_a2, () => (this.state.categories), (category) => category.id, (category) => (() => {
+$__list(_a2, () => (this.state.categories), (category) => category.id, (category) => {
 const _r3 = $__cloneEl(_h0);
 const _n4 = _r3.firstChild!.firstChild!.firstChild!;
 const _n5 = _r3.firstChild!.firstChild!.nextSibling!;
 const _n6 = _r3.firstChild!.nextSibling!.firstChild!;
 $__event(_n5, 'click', () => this.addItem(category));
-$__list(_n6, () => (category.items), (item) => item.id, (item) => (() => {
+$__list(_n6, () => (category.items), (item) => item.id, (item) => {
 const _r7 = $__cloneEl(_h1);
 const _n8 = _r7.firstChild!;
 $__effect(() => {
 $__setText(_n8, (item.name));
 });
 return _r7;
-})());
+});
 $__effect(() => {
 $__setText(_n4, (category.name));
 });
 return _r3;
-})());
+});
 });
 }
 
@@ -135,25 +134,25 @@ return _r3;
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-$__list(_n1, () => (this.state.categories), (category) => category.id, (category) => (() => {
+$__list(_n1, () => (this.state.categories), (category) => category.id, (category) => {
 const _r2 = $__cloneEl(_t1);
 const _n3 = _r2.firstChild!.firstChild!.firstChild!;
 const _n4 = _r2.firstChild!.firstChild!.nextSibling!;
 const _n5 = _r2.firstChild!.nextSibling!.firstChild!;
 $__event(_n4, 'click', () => this.addItem(category));
-$__list(_n5, () => (category.items), (item) => item.id, (item) => (() => {
+$__list(_n5, () => (category.items), (item) => item.id, (item) => {
 const _r6 = $__cloneEl(_t2);
 const _n7 = _r6.firstChild!;
 $__effect(() => {
 $__setText(_n7, (item.name));
 });
 return _r6;
-})());
+});
 $__effect(() => {
 $__setText(_n3, (category.name));
 });
 return _r2;
-})());
+});
 return _r0;
 }
 }
