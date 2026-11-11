@@ -1856,3 +1856,36 @@ fn collect_ssr_helpers(out: &[char]) -> Vec<String> {
     }
     order
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{class_uses_runtime, has_non_ssr_helper, to_chars};
+
+    #[test]
+    fn runtime_use_is_detected() {
+        assert!(class_uses_runtime(&to_chars("const x = $__state(y);")));
+        assert!(class_uses_runtime(&to_chars("$$__beforeMount(() => {})")));
+        assert!(class_uses_runtime(&to_chars("$$__client")));
+    }
+
+    #[test]
+    fn plain_body_has_no_runtime_use() {
+        assert!(!class_uses_runtime(&to_chars(
+            "const x = 1; return `<p>x</p>`;"
+        )));
+        assert!(!class_uses_runtime(&to_chars("const stateful = 1;")));
+    }
+
+    #[test]
+    fn non_ssr_helper_is_detected() {
+        assert!(has_non_ssr_helper(&to_chars("$__effect(() => {})")));
+        assert!(has_non_ssr_helper(&to_chars("const n = $__setText(a, b);")));
+    }
+
+    #[test]
+    fn ssr_helpers_are_allowed() {
+        assert!(!has_non_ssr_helper(&to_chars("$__ssrText('x')")));
+        assert!(!has_non_ssr_helper(&to_chars("$__ssrChild('t', p)")));
+        assert!(!has_non_ssr_helper(&to_chars("$$__client")));
+    }
+}
