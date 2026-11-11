@@ -35,6 +35,16 @@ struct Cli {
     json: bool,
 }
 
+fn color_enabled() -> bool {
+    if std::env::var_os("NO_COLOR").is_some() {
+        return false;
+    }
+    if let Some(v) = std::env::var_os("FORCE_COLOR") {
+        return !v.is_empty() && v != "0" && v != "false";
+    }
+    std::io::stdout().is_terminal()
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
 
@@ -72,8 +82,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let palette =
-        Palette::new(std::io::stdout().is_terminal() && std::env::var_os("NO_COLOR").is_none());
+    let palette = Palette::new(color_enabled());
 
     let sources = report::source_map(&files);
     let source_of = |f: &str| sources.get(f).cloned();

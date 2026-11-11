@@ -1,0 +1,11 @@
+<Project>
+
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Authors>neuralfog</Authors>
+    <Company>neuralfog</Company>
+    <Product>Hydris</Product>
+    <LangVersion>14.0</LangVersion>
+  </PropertyGroup>
+
+</Project>

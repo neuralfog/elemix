@@ -1,15 +1,9 @@
-.DEFAULT_GOAL := run
+.DEFAULT_GOAL := build
 
-.PHONY: run run-r test lint-fix lint build buildr builda aot run-aot restore clean bench build-native
-
-run:
-	dotnet run --project Example
-
-run-r:
-	dotnet run --project Example -c Release
+.PHONY: test lint-fix lint build buildr restore clean bench build-native
 
 test:
-	dotnet test Tests/Hydris.Tests.csproj --logger "console;verbosity=detailed"
+	dotnet test hydris.slnx --logger "console;verbosity=detailed"
 
 lint-fix:
 	dotnet format hydris.slnx
@@ -22,16 +16,6 @@ build:
 
 buildr:
 	dotnet build -c Release
-
-builda:
-	dotnet run --project Hydris.Build -- Example -O
-
-aot:
-	dotnet publish Example -c Release -r linux-x64 -o Example/bin/aot
-
-run-aot:
-	DOTNET_PROCESSOR_COUNT=1 taskset -c 0 ./Example/bin/aot/hydris-example
-# 	./Example/bin/aot/hydris-example	
 
 restore:
 	dotnet restore

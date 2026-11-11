@@ -62,7 +62,7 @@ build_one() {
     esac
     mkdir -p "$out"
     echo "building $rid ($triple) -> runtimes/$rid/native/$lib"
-    zig cc -target "$triple" -shared -fPIC -O2 -DNDEBUG -fno-semantic-interposition \
+    zig cc -target "$triple" -shared -fPIC -O2 -DNDEBUG -s -fno-semantic-interposition \
         -o "$out/$lib" \
         "$SHIM" "${QJS[@]}" \
         -I"$SRC" -I"$MI/include" "${libs[@]}"
