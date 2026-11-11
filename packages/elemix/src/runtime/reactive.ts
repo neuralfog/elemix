@@ -12,7 +12,7 @@ export type Scope = {
 
 export const $__dep = (): Dep => ({ subs: null, subSlots: 0 });
 
-export let activeScope: Scope | null = null;
+export let $__activeScope: Scope | null = null;
 let sink: Scope | null = null;
 let collecting = false;
 let lastScopes: Scope | null = null;
@@ -69,12 +69,12 @@ const cleanSources = (scope: Scope): void => {
 
 const runScope = (scope: Scope): void => {
     cleanSources(scope);
-    const prev = activeScope;
-    activeScope = scope;
+    const prev = $__activeScope;
+    $__activeScope = scope;
     try {
         scope.fn();
     } finally {
-        activeScope = prev;
+        $__activeScope = prev;
     }
 };
 
@@ -115,17 +115,17 @@ export const dispose = (head: Scope | null): void => {
 };
 
 export const $__untrack = <T>(fn: () => T): T => {
-    const prev = activeScope;
-    activeScope = null;
+    const prev = $__activeScope;
+    $__activeScope = null;
     try {
         return fn();
     } finally {
-        activeScope = prev;
+        $__activeScope = prev;
     }
 };
 
 export const $__track = (d: Dep): void => {
-    const scope = activeScope;
+    const scope = $__activeScope;
     if (scope === null) return;
     const subs = d.subs;
     if (subs === scope) return;
@@ -167,9 +167,9 @@ export const $__trigger = (d: Dep): void => {
     if (Array.isArray(subs)) {
         const copy = subs.slice();
         for (let i = 0; i < copy.length; i++) {
-            if (copy[i] !== activeScope) runScope(copy[i]);
+            if (copy[i] !== $__activeScope) runScope(copy[i]);
         }
-    } else if (subs !== activeScope) {
+    } else if (subs !== $__activeScope) {
         runScope(subs);
     }
 };
@@ -180,12 +180,12 @@ export const $__effect = (fn: () => void): void => {
         scope.next = sink;
         sink = scope;
     }
-    const prev = activeScope;
-    activeScope = scope;
+    const prev = $__activeScope;
+    $__activeScope = scope;
     try {
         fn();
     } finally {
-        activeScope = prev;
+        $__activeScope = prev;
     }
 };
 

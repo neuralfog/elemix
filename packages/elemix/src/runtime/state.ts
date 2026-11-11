@@ -1,4 +1,4 @@
-import { type Dep, $__track, $__trigger, activeScope } from './reactive';
+import { type Dep, $__track, $__trigger, $__activeScope } from './reactive';
 
 const RAW = Symbol();
 const ARRAY = Symbol();
@@ -51,7 +51,7 @@ const objectHandler: ProxyHandler<Target> = {
     get(target, key) {
         if (key === RAW) return target;
         const value = target[key];
-        const track = typeof key !== 'symbol' && activeScope !== null;
+        const track = typeof key !== 'symbol' && $__activeScope !== null;
         if (value === null || typeof value !== 'object') {
             if (track) $__track(depFor(target, key));
             return value;
@@ -77,7 +77,7 @@ const classHandler: ProxyHandler<Target> = {
         const value = hasOwn.call(target, key)
             ? target[key]
             : Reflect.get(target, key, receiver);
-        const track = typeof key !== 'symbol' && activeScope !== null;
+        const track = typeof key !== 'symbol' && $__activeScope !== null;
         if (value === null || typeof value !== 'object') {
             if (track) $__track(depFor(target, key));
             return value;
@@ -109,7 +109,7 @@ const arrayHandler: ProxyHandler<Target> = {
             };
         }
         const value = target[key];
-        if (activeScope !== null && Array.isArray(value))
+        if ($__activeScope !== null && Array.isArray(value))
             $__track(depFor($__toRaw(value), ARRAY));
         return $__reactive(value);
     },
