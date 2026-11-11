@@ -1,4 +1,5 @@
 import { $__island } from './island';
+import { $__isClient } from './state';
 
 let current: unknown;
 let picked = false;
@@ -9,7 +10,7 @@ export const $__setViewData = (data: unknown): void => {
 };
 
 export const $__viewData = <T = unknown>(): T => {
-    if (!picked && typeof window !== 'undefined') {
+    if (!picked && $__isClient()) {
         current = $__island('__elemix_vd');
         picked = true;
     }

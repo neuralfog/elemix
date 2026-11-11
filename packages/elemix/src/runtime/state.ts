@@ -5,6 +5,10 @@ const ARRAY = Symbol();
 const COLLECTION = Symbol();
 const RAW_SKIP = Symbol.for('elemix.raw');
 
+export const $__isClient = (): boolean =>
+    typeof window !== 'undefined' &&
+    !(globalThis as { __elemix_ssr?: boolean }).__elemix_ssr;
+
 const MUTATORS = new Set<string>([
     'push',
     'pop',

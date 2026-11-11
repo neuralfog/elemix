@@ -41,6 +41,14 @@ export const $__runStores = <T>(fn: () => T): T => {
 export const $__moduleState = <T extends object>(factory: () => T): T => {
     const id = {};
     const resolve = (): Record<PropertyKey, unknown> => {
+        if (
+            current === null &&
+            (globalThis as { __elemix_ssr?: boolean }).__elemix_ssr
+        ) {
+            throw new Error(
+                'elemix: module state resolved outside $__runStores; SSR render must run inside $__runStores so per-request state cannot leak across requests',
+            );
+        }
         const bag = current ?? fallback;
         let inst = bag.get(id);
         if (inst === undefined) {

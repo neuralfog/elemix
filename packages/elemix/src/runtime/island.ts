@@ -1,5 +1,7 @@
+import { $__isClient } from './state';
+
 export const $__island = <T = unknown>(id: string): T | undefined => {
-    if (typeof document === 'undefined') return undefined;
+    if (!$__isClient()) return undefined;
     const el = document.getElementById(id);
     const text = el?.textContent;
     if (!text) return undefined;

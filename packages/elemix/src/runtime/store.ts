@@ -1,7 +1,7 @@
 import { $__island } from './island';
 import { $__rootEffect } from './reactive';
 import { $__moduleState } from './ssr';
-import { $__reactive, $__toRaw } from './state';
+import { $__isClient, $__reactive, $__toRaw } from './state';
 
 let seed: Record<string, unknown> | undefined;
 let seedPicked = false;
@@ -57,7 +57,7 @@ export const $__setStorePersister = (
 };
 
 const seedFor = (name: string): unknown => {
-    if (!seedPicked && typeof window !== 'undefined') {
+    if (!seedPicked && $__isClient()) {
         seed = $__island<Record<string, unknown>>('__hydris_stores');
         seedPicked = true;
     }
@@ -83,7 +83,7 @@ export const $__store = <T extends object>(name: string, factory: () => T): T =>
                 ? { ...base, ...(override as Record<string, unknown>) }
                 : base;
         const store = $__reactive(initial) as T;
-        if (typeof window !== 'undefined') {
+        if ($__isClient()) {
             registry.set(name, store as object);
             let primed = false;
             $__rootEffect(() => {
