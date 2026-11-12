@@ -129,7 +129,7 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         var chain = "[" + string.Join(", ", uses) + "]";
 
         if (HasAction(method.GetAttributes()))
-            return EmitActionRoute(method, httpMethod, literal, chain);
+            return EmitActionRoute(method, httpMethod, literal, path, chain);
 
         var json = HasJson(method.ContainingType.GetAttributes()) || HasJson(method.GetAttributes())
             ? "true"
@@ -147,7 +147,7 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         return false;
     }
 
-    private static string EmitActionRoute(IMethodSymbol method, string httpMethod, string literal, string chain) {
+    private static string EmitActionRoute(IMethodSymbol method, string httpMethod, string literal, string path, string chain) {
         var controller = method.ContainingType.ToDisplayString(FullyQualified);
         var awaitable = method.ReturnType is INamedTypeSymbol named
             && named.TypeArguments.Length == 1
@@ -158,32 +158,118 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
             : method.ReturnType.ToDisplayString(FullyQualified);
         var call = awaitable ? "await handler." : "handler.";
 
+        var routeParams = RouteParamNames(path);
+        var hasBody = method.Parameters.Any(p => IsContract(p.Type));
+        var async = awaitable || hasBody;
+        var needsRequest = method.Parameters.Length > 0;
+
         var builder = new StringBuilder();
         builder.Append("router.Map(global::Hydris.Routing.Method.").Append(httpMethod).Append(", ").Append(literal).Append(", ").Append(chain).Append(", true, ");
-        if (method.Parameters.Length == 1) {
-            var parameter = method.Parameters[0].Type.ToDisplayString(FullyQualified);
-            builder.Append("static async scope => { ");
-            builder.Append("var handler = scope.Get<").Append(controller).Append(">(); ");
+        builder.Append(async ? "static async scope => { " : "static scope => { ");
+        builder.Append("var handler = scope.Get<").Append(controller).Append(">(); ");
+        if (needsRequest)
             builder.Append("var request = scope.Get<global::Hydris.Http.Request>(); ");
+        if (needsRequest)
             builder.Append("var errors = new global::Hydris.Contracts.ContractValidation(); ");
-            builder.Append("byte[] body = await request.ReadBodyAsync(); ");
-            builder.Append(parameter).Append("? dto = ").Append(parameter).Append(".Parse(body, errors); ");
-            builder.Append("if (dto is null || errors.Failed) return errors.ToReply(); ");
-            builder.Append(resultType).Append(" result = ").Append(call).Append(method.Name).Append("(dto); ");
-            builder.Append("return global::Hydris.Http.Reply.Action(result); });");
-        } else if (awaitable) {
-            builder.Append("static async scope => { ");
-            builder.Append("var handler = scope.Get<").Append(controller).Append(">(); ");
-            builder.Append(resultType).Append(" result = ").Append(call).Append(method.Name).Append("(); ");
-            builder.Append("return global::Hydris.Http.Reply.Action(result); });");
-        } else {
-            builder.Append("static scope => { ");
-            builder.Append("var handler = scope.Get<").Append(controller).Append(">(); ");
-            builder.Append(resultType).Append(" result = handler.").Append(method.Name).Append("(); ");
-            builder.Append("return global::System.Threading.Tasks.Task.FromResult(global::Hydris.Http.Reply.Action(result)); });");
+
+        var args = new List<string>();
+        foreach (var parameter in method.Parameters) {
+            var arg = "__arg_" + parameter.Name;
+            var type = parameter.Type.ToDisplayString(FullyQualified);
+            if (IsContract(parameter.Type)) {
+                builder.Append("byte[] __body = await request.ReadBodyAsync(); ");
+                builder.Append(type).Append("? ").Append(arg).Append(" = ").Append(type).Append(".Parse(__body, errors); ");
+                builder.Append("if (").Append(arg).Append(" is null) return errors.ToReply(); ");
+            } else {
+                var route = routeParams.Contains(parameter.Name);
+                var source = route
+                    ? $"request.Param(\"{parameter.Name}\")"
+                    : $"request.QueryValue(\"{parameter.Name}\")";
+                var nullable = UnwrapNullable(parameter.Type) is not null
+                    || parameter.NullableAnnotation == NullableAnnotation.Annotated;
+                EmitScalarBind(builder, arg, parameter.Type, source, parameter.Name, route || !nullable);
+            }
+
+            args.Add(arg);
         }
 
+        if (needsRequest)
+            builder.Append("if (errors.Failed) ").Append(Return("errors.ToReply()", async)).Append(' ');
+        builder.Append(resultType).Append(" result = ").Append(call).Append(method.Name).Append('(').Append(string.Join(", ", args)).Append("); ");
+        builder.Append(Return("global::Hydris.Http.Reply.Action(result)", async)).Append(" });");
+
         return builder.ToString();
+    }
+
+    private static string Return(string expr, bool async) =>
+        async ? "return " + expr + ";" : "return global::System.Threading.Tasks.Task.FromResult(" + expr + ");";
+
+    private static void EmitScalarBind(StringBuilder builder, string arg, ITypeSymbol type, string source, string name, bool required) {
+        var full = type.ToDisplayString(FullyQualified);
+        var underlying = UnwrapNullable(type);
+        var core = underlying ?? type;
+
+        if (core.SpecialType == SpecialType.System_String) {
+            if (required)
+                builder.Append("string ").Append(arg).Append(" = ").Append(source).Append(" ?? string.Empty; ");
+            else
+                builder.Append("string? ").Append(arg).Append(" = ").Append(source).Append("; ");
+            return;
+        }
+
+        var parse = TryParseExpr(core);
+        builder.Append(full).Append(' ').Append(arg).Append(" = default; ");
+        if (parse is null)
+            return;
+        builder.Append("{ var __raw = ").Append(source).Append("; if (__raw is null) { ");
+        if (required)
+            builder.Append("errors.Add(\"").Append(name).Append("\", \"required\", \"").Append(name).Append(" is required.\"); ");
+        builder.Append("} else if (").Append(parse).Append("(__raw, out var __v)) { ").Append(arg).Append(" = __v; } else { ");
+        builder.Append("errors.Add(\"").Append(name).Append("\", \"invalid\", \"").Append(name).Append(" is invalid.\"); } } ");
+    }
+
+    private static string? TryParseExpr(ITypeSymbol type) {
+        if (type.TypeKind == TypeKind.Enum)
+            return "global::System.Enum.TryParse<" + type.ToDisplayString(FullyQualified) + ">";
+        var full = type.ToDisplayString(FullyQualified);
+        return type.SpecialType switch {
+            SpecialType.System_Int32 => "int.TryParse",
+            SpecialType.System_Int64 => "long.TryParse",
+            SpecialType.System_Int16 => "short.TryParse",
+            SpecialType.System_Byte => "byte.TryParse",
+            SpecialType.System_SByte => "sbyte.TryParse",
+            SpecialType.System_UInt16 => "ushort.TryParse",
+            SpecialType.System_UInt32 => "uint.TryParse",
+            SpecialType.System_UInt64 => "ulong.TryParse",
+            SpecialType.System_Single => "float.TryParse",
+            SpecialType.System_Double => "double.TryParse",
+            SpecialType.System_Decimal => "decimal.TryParse",
+            SpecialType.System_Boolean => "bool.TryParse",
+            _ => full switch {
+                "global::System.Guid" => "global::System.Guid.TryParse",
+                "global::System.DateTime" => "global::System.DateTime.TryParse",
+                "global::System.DateTimeOffset" => "global::System.DateTimeOffset.TryParse",
+                _ => null,
+            },
+        };
+    }
+
+    private static ITypeSymbol? UnwrapNullable(ITypeSymbol type) =>
+        type is INamedTypeSymbol named && named.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
+            ? named.TypeArguments[0]
+            : null;
+
+    private static bool IsContract(ITypeSymbol type) =>
+        type.GetAttributes().Any(static a => a.AttributeClass?.ToDisplayString() == "Hydris.Contracts.ContractAttribute");
+
+    private static HashSet<string> RouteParamNames(string path) {
+        var names = new HashSet<string>(System.StringComparer.Ordinal);
+        foreach (var segment in path.Split('/')) {
+            if (segment.Length > 1 && segment[0] == ':')
+                names.Add(segment.Substring(1));
+        }
+
+        return names;
     }
 
     private static void CollectUse(ImmutableArray<AttributeData> attributes, List<string> into) {

@@ -1,10 +1,57 @@
 using System.Text;
 using Hydris.Container;
+using Hydris.Core;
+using Hydris.Http;
 using Hydris.Routing;
+using Microsoft.AspNetCore.Http;
 
 namespace Hydris.Tests;
 
 public sealed class GeneratorTests {
+    [Fact]
+    public async Task RouteParamBindsToHandlerArgument() {
+        var container = new DiContainer().AddServices();
+        var router = new Router();
+        router.MapRoutes();
+
+        var match = router.Match(Method.Get, "/gen-bind/user/42")!;
+        var request = new Request(Method.Get, match.Path, match.Params, new HeaderDictionary());
+        await using var scope = CoreServiceProvider.RequestScope(container, request);
+        var reply = await match.Handler(scope);
+
+        Assert.Contains("\"value\":\"42\"", Encoding.UTF8.GetString(reply.Content));
+    }
+
+    [Fact]
+    public async Task QueryParamsBindWithConversion() {
+        var container = new DiContainer().AddServices();
+        var router = new Router();
+        router.MapRoutes();
+
+        var match = router.Match(Method.Get, "/gen-bind/search")!;
+        var request = new Request(Method.Get, match.Path, match.Params, new HeaderDictionary()) {
+            Query = "?q=hi&page=7",
+        };
+        await using var scope = CoreServiceProvider.RequestScope(container, request);
+        var reply = await match.Handler(scope);
+
+        var json = Encoding.UTF8.GetString(reply.Content);
+        Assert.Contains("\"value\":\"hi\"", json);
+        Assert.Contains("\"number\":7", json);
+    }
+
+    [Fact]
+    public void QueryValueParsesPairsAndDecodes() {
+        var request = new Request(Method.Get, "/x", new Dictionary<string, string>(), new HeaderDictionary()) {
+            Query = "?a=1&b=hello+world&c",
+        };
+
+        Assert.Equal("1", request.QueryValue("a"));
+        Assert.Equal("hello world", request.QueryValue("b"));
+        Assert.Equal(string.Empty, request.QueryValue("c"));
+        Assert.Null(request.QueryValue("missing"));
+    }
+
     [Fact]
     public void MapsAttributeRoutes() {
         var router = new Router();
