@@ -20,7 +20,6 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-analyzer` | Static Analysis For Elemix. | [README](packages/analyzer/README.md) |
 | `@neuralfog/elemix-template-formatter` | Template Formatter For `tpl`. | [README](packages/formatter/README.md) |
 | `@neuralfog/elemix-vite` | Vite Compiler plugin. | [README](packages/vite/README.md) |
-| `@neuralfog/elemix-storybook` | Storybook Integration For Elemix. | [README](packages/storybook/README.md) |
 | `@neuralfog/elemix-testing-library` | Shadow-piercing queries and real DOM events for testing Elemix components. | [README](packages/testing-library/README.md) |
 | `@neuralfog/elemix-vscode` | VS Code Extension For Elemix. | [README](packages/vscode/README.md) |
 | `@neuralfog/elemix-nvim` | Neovim Plugin For Elemix. | [README](packages/nvim/README.md) |

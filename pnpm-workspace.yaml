@@ -2,32 +2,14 @@ packages:
   - 'packages/*'
   - 'packages/compiler/ssr-harness'
   - 'packages/compiler/csr-harness'
-# Storybook's bundled CLI resolves its framework preset via ESM from its own
-# location; pnpm's strict layout hides it. Hoist the storybook packages to the
-# root so `@storybook/web-components-vite/preset` resolves.
-publicHoistPattern:
-  - '*storybook*'
 overrides:
-  # CVE: esbuild >= 0.27.3, < 0.28.1 — force every (incl. transitive) copy to the patch.
   esbuild: 0.28.1
 allowBuilds:
   '@biomejs/biome': true
-  # storybook's HMR file-watcher; ships prebuilt binaries, so its node-gyp
-  # build script never needs to run — skip it.
   '@parcel/watcher': false
-  # @vscode/vsce's native auth deps - only needed for `vsce publish` login, not
-  # for building/packaging the extension, so skip their node-gyp builds.
   '@vscode/vsce-sign': false
   esbuild: true
   keytar: false
   wasm-pack: true
-# We publish the @neuralfog scope ourselves — exempt it from the release-age
-# cooldown so the vite plugin can depend on our own just-published builds.
 minimumReleaseAgeExclude:
   - '@neuralfog/*'
-  - '@storybook/addon-vitest@10.5.10'
-  - '@storybook/builder-vite@10.5.10'
-  - '@storybook/csf-plugin@10.5.10'
-  - '@storybook/html-vite@10.5.10'
-  - '@storybook/html@10.5.10'
-  - storybook@10.5.10
