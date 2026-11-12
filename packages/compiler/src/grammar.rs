@@ -33,7 +33,14 @@ pub fn classify(hole: &Hole) -> Binding {
             let (kind, name) = classify_attr(name);
             (kind, name, false)
         }
-        Slot::Content => (classify_content(&hole.expr), None, false),
+        Slot::Content => {
+            let kind = if hole.child {
+                BindingKind::Child
+            } else {
+                classify_content(&hole.expr)
+            };
+            (kind, None, false)
+        }
         Slot::Text => (BindingKind::Text, None, true),
     };
     Binding {

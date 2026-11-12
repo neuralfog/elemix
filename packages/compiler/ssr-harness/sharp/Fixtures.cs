@@ -44,6 +44,15 @@ public sealed class Fixtures {
     [Get("/nav-about-app")]
     public Reply NavAboutApp() => Reply.View("fixtures/NavAboutApp", new NavData("About", "about"));
 
+    [Get("/context/:id")]
+    public Reply ContextApp() => Reply.View("fixtures/ContextApp");
+
+    [Get("/actions-app")]
+    public Reply ActionsApp() => Reply.View("fixtures/ActionsApp");
+
+    [Get("/null-guard-app")]
+    public Reply NullGuardApp() => Reply.View("fixtures/NullGuardApp");
+
     [Get("/view-data-app")]
     public Reply ViewDataApp() =>
         Reply.View("fixtures/ViewDataApp", new VData("Hello viewData", new VUser("Ada"), 3));
@@ -87,6 +96,9 @@ public sealed class Fixtures {
 
     [Get("/attr-app")]
     public Reply AttrApp() => Reply.View("fixtures/AttrApp");
+
+    [Get("/verbs-panel-app")]
+    public Reply VerbsPanelApp() => Reply.View("fixtures/VerbsPanelApp");
 
     [Get("/bench-app")]
     public Reply BenchApp() => Reply.View("fixtures/BenchApp");

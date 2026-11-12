@@ -1,0 +1,21 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ContextDocument.ts
+---
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import '@neuralfog/elemix/navigation/NavLink';
+
+export class ContextDocument extends Component {
+    static $$__noShadow = true;
+$$__ssr(): unknown[] {
+return [`<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>Context</title></head><body><nav>`, $__ssrChild('nav-link', {}, `<a id="to-alpha" href="/context/alpha?q=one">Alpha</a>`, ` route="/context/alpha?q=one"`), $__ssrChild('nav-link', {}, `<a id="to-beta" href="/context/beta?q=two">Beta</a>`, ` route="/context/beta?q=two"`), `</nav><slot></slot></body></html>`];
+}
+
+    
+}
+$__defineComponent('context-document', ContextDocument);
+ContextDocument.prototype.$$__tag = 'context-document';
+ContextDocument.$$__propSafe = true;

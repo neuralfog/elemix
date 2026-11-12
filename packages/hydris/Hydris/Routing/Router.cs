@@ -32,6 +32,12 @@ public sealed class Router {
         Add(method, path, middlewares, json, scope => action(scope.Get<T>()));
     }
 
+    public void Map(Method method, string path, IReadOnlyList<Type> middlewares, bool json, Func<DiContainer, Task<Reply>> action) {
+        Debug.Assert(middlewares is not null);
+        Debug.Assert(action is not null);
+        Add(method, path, middlewares, json, action);
+    }
+
     public void Get(string path, Func<Reply> handler) => Map(Method.Get, path, handler);
     public void Get<T>(string path, Func<T, Reply> action) => Map(Method.Get, path, action);
     public void Head(string path, Func<Reply> handler) => Map(Method.Head, path, handler);

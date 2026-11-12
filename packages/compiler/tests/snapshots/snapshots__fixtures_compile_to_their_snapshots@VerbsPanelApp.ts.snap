@@ -1,0 +1,69 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/VerbsPanelApp.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__templateEl, $__cloneEl, $__event, $__child, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+const _ft0 = $__template('<pre class="cell"> </pre>');
+const _ft1 = $__template('<pre class="row"> </pre>');
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<main><h1>Panel</h1><button class="toggle">toggle</button> <!----> <!----> <!----> <h2>Verbs</h2><p>Status (<!---->).</p><button>DO</button> <!----> <!----></main>');
+const _t1 = $__templateEl('<p class="busy">busy</p>');
+
+export class VerbsPanelApp extends Component {
+    state = $__state({ open: false });
+
+    cell = (label: string): Template | string =>
+        this.state.open ? (() => {
+const _r0 = $__clone(_ft0);
+const _n1 = _r0.firstChild!.firstChild!;
+$__effect(() => {
+$__setText(_n1, (label));
+});
+return _r0;
+})() : '';
+
+    row(label: string): Template | string {
+        return this.state.open ? (() => {
+const _r2 = $__clone(_ft1);
+const _n3 = _r2.firstChild!.firstChild!;
+$__effect(() => {
+$__setText(_n3, (label));
+});
+return _r2;
+})() : '';
+    }
+
+    toggle = (): void => {
+        this.state.open = !this.state.open;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n1, 'click', this.toggle);
+$__child(_n2, () => (this.state.open ? (() => {
+const _r8 = $__cloneEl(_t1);
+return _r8;
+})() : ''));
+$__child(_n3, () => (this.cell('POST')));
+$__child(_n4, () => (this.row('GET')));
+const _x9 = document.createTextNode('');
+_n5.replaceWith(_x9);
+$__child(_n6, () => (this.cell('PUT')));
+$__child(_n7, () => (this.row('PATCH')));
+$__effect(() => {
+$__setText(_x9, (this.state.open ? 'open' : 'none'));
+});
+return _r0;
+}
+}
+$__defineComponent('verbs-panel-app', VerbsPanelApp);
+VerbsPanelApp.prototype.$$__tag = 'verbs-panel-app';

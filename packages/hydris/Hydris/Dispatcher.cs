@@ -14,7 +14,8 @@ internal sealed class Dispatcher(
     DiContainer services,
     bool trustProxy,
     IReadOnlyList<Type> middlewares,
-    IErrorRenderer errors)
+    IErrorRenderer errors,
+    long maxBodyBytes)
     : IHttpApplication<Dispatcher.Context> {
     public sealed class Context(IFeatureCollection features) {
         public IHttpRequestFeature Request { get; } = features.GetRequiredFeature<IHttpRequestFeature>();
@@ -36,6 +37,10 @@ internal sealed class Dispatcher(
         var request = new Request(method, match?.Path ?? PathOf(target), match?.Params ?? Empty, context.Request.Headers);
         request.Ip = ProxyResolver.ResolveIp(request, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, trustProxy);
         request.Protocol = ProxyResolver.ResolveProtocol(request, context.Request.Scheme, trustProxy);
+        request.Query = context.Request.QueryString;
+        request.BodyStream = context.Request.Body;
+        request.MaxBodyBytes = maxBodyBytes;
+        request.Aborted = context.Lifetime.RequestAborted;
 
         await using var scope = CoreServiceProvider.RequestScope(services, request);
         Reply reply;

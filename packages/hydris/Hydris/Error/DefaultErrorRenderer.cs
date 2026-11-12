@@ -14,10 +14,23 @@ public sealed class DefaultErrorRenderer : IErrorRenderer {
         return Reply.Html(Page(status, message)).Status(status);
     }
 
-    internal static int StatusOf(Exception error) => error is HttpException http ? http.Status : 500;
+    internal static int StatusOf(Exception error) => error switch {
+        HttpException http => http.Status,
+        Microsoft.AspNetCore.Http.BadHttpRequestException bad => bad.StatusCode,
+        _ => 500,
+    };
 
-    private static string MessageOf(Exception error) =>
-        error is HttpException http ? http.Message : "Internal Server Error";
+    private static string MessageOf(Exception error) => error switch {
+        HttpException http => http.Message,
+        Microsoft.AspNetCore.Http.BadHttpRequestException bad => Reason(bad.StatusCode),
+        _ => "Internal Server Error",
+    };
+
+    private static string Reason(int status) => status switch {
+        400 => "Bad Request",
+        413 => "Payload Too Large",
+        _ => "Request Error",
+    };
 
     private static bool WantsJson(Request request) =>
         (request.Header("Accept") ?? string.Empty).Contains("application/json", StringComparison.Ordinal);

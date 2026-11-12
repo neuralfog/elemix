@@ -63,7 +63,7 @@ const css = `
 
 export class NestedTemplateApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'nested-template-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section>`, ($__ssrTpl(`<h2>`, $__ssrText(this.state.title), `</h2>`)), ` <div class="chips">`, ($__ssrTpl(`<span class="chip">`, $__ssrText(this.state.tag), `</span>`)), ` and again `, ($__ssrTpl(`<span class="chip">`, $__ssrText(this.state.tag), `</span>`)), `</div><button>change title</button><button>change tag</button></section></template></${this.$$__tag ?? 'nested-template-app'}>`];
+return [`<${this.$$__tag ?? 'nested-template-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><section>`, ($__ssrTpl(`<h2>`, $__ssrText(this.state.title), `</h2>`)), ` <div class="chips">`, ($__ssrTpl(`<span class="chip">`, $__ssrText(this.state.tag), `</span>`)), `<!--$--> and again `, ($__ssrTpl(`<span class="chip">`, $__ssrText(this.state.tag), `</span>`)), `<!--$--></div><button>change title</button><button>change tag</button></section></template></${this.$$__tag ?? 'nested-template-app'}>`];
 }
 
 

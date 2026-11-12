@@ -6,13 +6,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Hydris.Build</RootNamespace>
-    <AssemblyName>hydris-build</AssemblyName>
+    <AssemblyName>Hydris.Build</AssemblyName>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>hydris-build</ToolCommandName>
     <PackageId>Hydris.Build</PackageId>
     <Description>View build tool for Hydris and elemix SSR.</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Hydris.QuickJs/Hydris.QuickJs.csproj" />

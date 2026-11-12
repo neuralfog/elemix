@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/FormApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
@@ -76,12 +75,12 @@ const _t1 = $__templateEl('<pre class="out"> </pre>');
 
 export class FormApp extends Component {
 $$__hydrate(root: Node): void {
-const _n0 = root.firstChild!;
-$__event(_n0, 'submit', this.submit);
-const _b1 = $__bounds(root, 2, 0);
+const _b0 = $__bounds(root, 2, 0);
+const _a1 = $__reanchor(root, _b0[0], _b0[1]);
+const _n2 = root.firstChild!;
+$__event(_n2, 'submit', this.submit);
 $__fresh(() => {
-const _a2 = $__reanchor(root, _b1[0], _b1[1]);
-$__child(_a2, () => (this.state.result
+$__child(_a1, () => (this.state.result
                 ? (() => {
 const _r3 = $__cloneEl(_h0);
 const _n4 = _r3.firstChild!;

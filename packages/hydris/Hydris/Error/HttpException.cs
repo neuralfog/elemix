@@ -14,6 +14,7 @@ public class HttpException : Exception {
         403 => "Forbidden",
         404 => "Not Found",
         405 => "Method Not Allowed",
+        413 => "Payload Too Large",
         422 => "Unprocessable Entity",
         500 => "Internal Server Error",
         _ => $"HTTP {status}",
@@ -27,6 +28,8 @@ public sealed class UnauthorizedException(string? message = null) : HttpExceptio
 public sealed class ForbiddenException(string? message = null) : HttpException(403, message);
 
 public sealed class NotFoundException(string? message = null) : HttpException(404, message);
+
+public sealed class PayloadTooLargeException(string? message = null) : HttpException(413, message);
 
 public sealed class ValidationException(string? message = null) : HttpException(422, message);
 

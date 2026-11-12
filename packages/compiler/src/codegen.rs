@@ -104,7 +104,7 @@ fn region_meta(holes: &[StructHole]) -> Vec<(bool, usize, usize)> {
     }
     let mut meta = vec![(false, 0usize, 0usize); holes.len()];
     for (_, idxs) in &groups {
-        let multi = idxs.len() >= 2 && idxs.iter().all(|&i| holes[i].list);
+        let multi = idxs.len() >= 2;
         for (ord, &i) in idxs.iter().enumerate() {
             let lead = if ord == 0 {
                 holes[i].before
@@ -161,6 +161,44 @@ fn hydrate_bind(
 
     let is_baked_text =
         |b: &crate::grammar::Binding| matches!(b.kind, BindingKind::Text) && b.baked;
+
+    let all_holes = structural_holes(statics, holes);
+    let region_meta = region_meta(&all_holes);
+    let mut prepared: Vec<(String, String, StructHole, bool)> = Vec::new();
+    for (i, sh) in all_holes.into_iter().enumerate() {
+        let parent = grab(
+            ctx,
+            emitter,
+            root,
+            &adj(&sh.parent),
+            &mut grabbed,
+            &mut lines,
+        );
+        let bounds = ctx.var("b");
+        let (multi, ordinal, lead) = region_meta[i];
+        if multi {
+            lines.push(emitter.span(&bounds, &parent, lead, ordinal));
+        } else {
+            lines.push(emitter.bounds(&bounds, &parent, sh.before, sh.after));
+        }
+        let resumable = !sh.list
+            && !sh.expr.contains("repeat(")
+            && branch_has_component(&sh.expr)
+            && branches_single_root(&sh.expr);
+        prepared.push((parent, bounds, sh, resumable));
+    }
+
+    let mut seated: Vec<(String, String, StructHole)> = Vec::new();
+    let mut mounts: Vec<(String, StructHole)> = Vec::new();
+    for (parent, bounds, sh, resumable) in prepared {
+        if resumable {
+            seated.push((parent, bounds, sh));
+        } else {
+            let anchor = ctx.var("a");
+            lines.push(emitter.reanchor(&anchor, &parent, &bounds));
+            mounts.push((anchor, sh));
+        }
+    }
 
     let mut node_for: Vec<String> = vec![String::new(); bindings.len()];
     for (i, b) in bindings.iter().enumerate() {
@@ -224,59 +262,29 @@ fn hydrate_bind(
         lines.push(emitter.bind_group(&group));
     }
 
-    let all_holes = structural_holes(statics, holes);
-    let region_meta = region_meta(&all_holes);
-    let mut prepared: Vec<(String, String, StructHole, bool)> = Vec::new();
-    for (i, sh) in all_holes.into_iter().enumerate() {
-        let parent = grab(
-            ctx,
-            emitter,
-            root,
-            &adj(&sh.parent),
-            &mut grabbed,
-            &mut lines,
-        );
-        let bounds = ctx.var("b");
-        let (multi, ordinal, lead) = region_meta[i];
-        if multi {
-            lines.push(emitter.span(&bounds, &parent, lead, ordinal));
-        } else {
-            lines.push(emitter.bounds(&bounds, &parent, sh.before, sh.after));
-        }
-        let resumable = !sh.list
-            && !sh.expr.contains("repeat(")
-            && branch_has_component(&sh.expr)
-            && branches_single_root(&sh.expr);
-        prepared.push((parent, bounds, sh, resumable));
+    for (parent, bounds, sh) in seated {
+        let seat = ctx.var("s");
+        lines.push(emitter.seat(&seat, &parent, &bounds));
+        let root_var = ctx.var("r");
+        let hydrate_getter = child_getter(&sh.expr, ctx, emitter, Some(&root_var));
+        let fresh_getter = child_getter(&sh.expr, ctx, emitter, None);
+        lines.push(emitter.child_resume(
+            &format!("{seat}[0]"),
+            &format!("{seat}[1]"),
+            &root_var,
+            &hydrate_getter,
+            &fresh_getter,
+        ));
     }
 
-    let mut resume: Vec<String> = Vec::new();
     let mut fresh: Vec<String> = Vec::new();
-    for (parent, bounds, sh, resumable) in prepared {
-        if resumable {
-            let seat = ctx.var("s");
-            resume.push(emitter.seat(&seat, &parent, &bounds));
-            let root_var = ctx.var("r");
-            let hydrate_getter = child_getter(&sh.expr, ctx, emitter, Some(&root_var));
-            let fresh_getter = child_getter(&sh.expr, ctx, emitter, None);
-            resume.push(emitter.child_resume(
-                &format!("{seat}[0]"),
-                &format!("{seat}[1]"),
-                &root_var,
-                &hydrate_getter,
-                &fresh_getter,
-            ));
+    for (anchor, sh) in mounts {
+        if sh.list {
+            fresh.push(lower_list(&sh.expr, &anchor, ctx, emitter));
         } else {
-            let anchor = ctx.var("a");
-            fresh.push(emitter.reanchor(&anchor, &parent, &bounds));
-            if sh.list {
-                fresh.push(lower_list(&sh.expr, &anchor, ctx, emitter));
-            } else {
-                fresh.extend(lower_child(&sh.expr, &anchor, ctx, emitter));
-            }
+            fresh.extend(lower_child(&sh.expr, &anchor, ctx, emitter));
         }
     }
-    lines.append(&mut resume);
     if !fresh.is_empty() {
         lines.push("$__fresh(() => {".to_string());
         lines.append(&mut fresh);
@@ -817,7 +825,7 @@ fn is_js_ident(p: &str) -> bool {
     chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '$')
 }
 
-fn is_simple_read(e: &str) -> bool {
+pub(crate) fn is_simple_read(e: &str) -> bool {
     let parts: Vec<&str> = e.split('.').collect();
     parts.len() >= 2 && parts.iter().all(|p| is_js_ident(p))
 }

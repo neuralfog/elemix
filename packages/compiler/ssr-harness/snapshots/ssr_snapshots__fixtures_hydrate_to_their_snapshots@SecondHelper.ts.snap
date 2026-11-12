@@ -30,8 +30,8 @@ export class TitledNote extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 0, 1);
-$__fresh(() => {
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
+$__fresh(() => {
 $__child(_a2, () => ((() => {
 const _r3 = $__cloneEl(_h0);
 return _r3;

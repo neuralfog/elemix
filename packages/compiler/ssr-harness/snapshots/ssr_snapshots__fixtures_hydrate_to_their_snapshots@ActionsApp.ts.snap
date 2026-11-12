@@ -1,0 +1,528 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/ActionsApp.ts
+---
+import { $__bounds, $__span, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__list, $__effect, $__setText, $__setAttr, $__setClass, $__event, $__model, $__child, $__defineComponent } from '@neuralfog/elemix/runtime';
+const _ft0 = $__template('<ul><!----></ul>');
+const _ft1 = $__templateEl('<li class="err"> </li>');
+const _ft2 = $__template('<p>http <!----></p>');
+const _ft3 = $__template('<p>network</p>');
+const _h0 = $__templateEl('<p class="create-loading">saving</p>');
+const _h1 = $__templateEl('<p class="create-data"><!----> <!----> <!----></p>');
+const _h2 = $__templateEl('<p class="get-data"><!----> <!----> <!----></p>');
+const _h3 = $__templateEl('<p class="update-data"><!----> <!----></p>');
+const _h4 = $__templateEl('<p class="delete-data"><!----> <!----></p>');
+const _h5 = $__templateEl('<p class="echo-loading">loading</p>');
+const _h6 = $__templateEl('<p class="echo-data"><!----> <!----></p>');
+
+import { Component, ref } from '@neuralfog/elemix';
+import type { Ref } from '@neuralfog/elemix/types';
+
+import type { ActionError } from '../Views/actions/index';
+import { ActionErrorKind } from '../Views/actions/index';
+import { conflict } from '../Views/actions/conflict';
+import { createUser } from '../Views/actions/createUser';
+import { deleteUser } from '../Views/actions/deleteUser';
+import { echo } from '../Views/actions/echo';
+import { getUser } from '../Views/actions/getUser';
+import { updateUser } from '../Views/actions/updateUser';
+import { ActionsDocument } from './ActionsDocument';
+
+type Status = {
+    data: unknown;
+    loading: boolean;
+    isError: boolean;
+    error: ActionError | null;
+};
+
+const _t0 = $__template('<main><section class="create"><h2>create</h2><label>name <input id="f-name" type="text"/></label><label>email <input id="f-email" type="text"/></label><label>handle <input id="f-handle" type="text"/></label><label>age <input id="f-age" type="text"/></label><button id="create">create</button><span class="create-state"> </span> <!----> <!----> <!----></section><section class="get"><h2>get</h2><label>id <input id="f-id" type="text"/></label><button id="get">get</button> <!----> <!----></section><section class="update"><h2>update</h2><button id="update">update</button> <!----> <!----></section><section class="delete"><h2>delete</h2><button id="delete">delete</button> <!----></section><section class="echo"><h2>echo</h2><label>value <input id="f-echo-value" type="text"/></label><label>page <input id="f-echo-page" type="text"/></label><button id="echo">echo</button><button id="echo-slow">slow</button><button id="echo-fast">fast</button><span class="echo-state"> </span> <!----> <!----></section><section class="conflict"><h2>conflict</h2><button id="conflict">conflict</button><span class="conflict-state"> </span> <!----></section></main>');
+const _t1 = $__templateEl('<p class="create-loading">saving</p>');
+const _t2 = $__templateEl('<p class="create-data"><!----> <!----> <!----></p>');
+const _t3 = $__templateEl('<p class="get-data"><!----> <!----> <!----></p>');
+const _t4 = $__templateEl('<p class="update-data"><!----> <!----></p>');
+const _t5 = $__templateEl('<p class="delete-data"><!----> <!----></p>');
+const _t6 = $__templateEl('<p class="echo-loading">loading</p>');
+const _t7 = $__templateEl('<p class="echo-data"><!----> <!----></p>');
+
+export class ActionsApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _b1 = $__span(_n0, 8, 0);
+const _b2 = $__span(_n0, 1, 1);
+const _b3 = $__span(_n0, 1, 2);
+const _n4 = root.firstChild!.firstChild!.nextSibling!;
+const _b5 = $__span(_n4, 4, 0);
+const _b6 = $__span(_n4, 1, 1);
+const _n7 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _b8 = $__span(_n7, 3, 0);
+const _b9 = $__span(_n7, 1, 1);
+const _n10 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _b11 = $__bounds(_n10, 3, 0);
+const _n12 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _b13 = $__span(_n12, 8, 0);
+const _b14 = $__span(_n12, 1, 1);
+const _n15 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _b16 = $__bounds(_n15, 4, 0);
+const _a17 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _a18 = $__reanchor(_n0, _b2[0], _b2[1]);
+const _a19 = $__reanchor(_n0, _b3[0], _b3[1]);
+const _a20 = $__reanchor(_n4, _b5[0], _b5[1]);
+const _a21 = $__reanchor(_n4, _b6[0], _b6[1]);
+const _a22 = $__reanchor(_n7, _b8[0], _b8[1]);
+const _a23 = $__reanchor(_n7, _b9[0], _b9[1]);
+const _a24 = $__reanchor(_n10, _b11[0], _b11[1]);
+const _a25 = $__reanchor(_n12, _b13[0], _b13[1]);
+const _a26 = $__reanchor(_n12, _b14[0], _b14[1]);
+const _a27 = $__reanchor(_n15, _b16[0], _b16[1]);
+const _n28 = _n0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n29 = _n0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n30 = _n0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n31 = _n0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n32 = _n0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n33 = _n0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n34 = $__text(_n33);
+const _n35 = _n4.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n36 = _n4.firstChild!.nextSibling!.nextSibling!;
+const _n37 = _n7.firstChild!.nextSibling!;
+const _n38 = _n10.firstChild!.nextSibling!;
+const _n39 = _n12.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n40 = _n12.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n41 = _n12.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n42 = _n12.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n43 = _n12.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n44 = _n12.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n45 = $__text(_n44);
+const _n46 = _n15.firstChild!.nextSibling!;
+const _n47 = _n15.firstChild!.nextSibling!.nextSibling!;
+const _n48 = $__text(_n47);
+$__model(_n28 as HTMLInputElement, () => (this.name));
+$__model(_n29 as HTMLInputElement, () => (this.email));
+$__model(_n30 as HTMLInputElement, () => (this.handle));
+$__model(_n31 as HTMLInputElement, () => (this.age));
+$__event(_n32, 'click', this.submitCreate);
+$__model(_n35 as HTMLInputElement, () => (this.userId));
+$__event(_n36, 'click', this.getById);
+$__event(_n37, 'click', this.submitUpdate);
+$__event(_n38, 'click', this.submitDelete);
+$__model(_n39 as HTMLInputElement, () => (this.echoValue));
+$__model(_n40 as HTMLInputElement, () => (this.echoPage));
+$__event(_n41, 'click', this.submitEcho);
+$__event(_n42, 'click', this.echoSlow);
+$__event(_n43, 'click', this.echoFast);
+$__event(_n46, 'click', this.submitConflict);
+$__effect(() => {
+$__setText(_n34, (this.stateOf(this.create)));
+});
+$__effect(() => {
+$__setText(_n45, (this.stateOf(this.runEcho)));
+});
+$__effect(() => {
+$__setText(_n48, (this.stateOf(this.runConflict)));
+});
+$__fresh(() => {
+$__child(_a17, () => (this.create.loading ? (() => {
+const _r49 = $__cloneEl(_h0);
+return _r49;
+})() : ''));
+$__child(_a18, () => (this.create.data
+                        ? (() => {
+const _r50 = $__cloneEl(_h1);
+const _n51 = _r50.firstChild!;
+const _n52 = _r50.firstChild!.nextSibling!.nextSibling!;
+const _n53 = _r50.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _x54 = document.createTextNode('');
+_n51.replaceWith(_x54);
+const _x55 = document.createTextNode('');
+_n52.replaceWith(_x55);
+const _x56 = document.createTextNode('');
+_n53.replaceWith(_x56);
+$__effect(() => {
+$__setText(_x54, (this.create.data.id));
+});
+$__effect(() => {
+$__setText(_x55, (this.create.data.name));
+});
+$__effect(() => {
+$__setText(_x56, (this.create.data.handle));
+});
+return _r50;
+})()
+                        : ''));
+$__child(_a19, () => (this.errors('create', this.create)));
+$__child(_a20, () => (this.fetchUser.data
+                        ? (() => {
+const _r57 = $__cloneEl(_h2);
+const _n58 = _r57.firstChild!;
+const _n59 = _r57.firstChild!.nextSibling!.nextSibling!;
+const _n60 = _r57.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _x61 = document.createTextNode('');
+_n58.replaceWith(_x61);
+const _x62 = document.createTextNode('');
+_n59.replaceWith(_x62);
+const _x63 = document.createTextNode('');
+_n60.replaceWith(_x63);
+$__effect(() => {
+$__setText(_x61, (this.fetchUser.data.id));
+});
+$__effect(() => {
+$__setText(_x62, (this.fetchUser.data.name));
+});
+$__effect(() => {
+$__setText(_x63, (this.fetchUser.data.handle));
+});
+return _r57;
+})()
+                        : ''));
+$__child(_a21, () => (this.errors('get', this.fetchUser)));
+$__child(_a22, () => (this.saveUser.data
+                        ? (() => {
+const _r64 = $__cloneEl(_h3);
+const _n65 = _r64.firstChild!;
+const _n66 = _r64.firstChild!.nextSibling!.nextSibling!;
+const _x67 = document.createTextNode('');
+_n65.replaceWith(_x67);
+const _x68 = document.createTextNode('');
+_n66.replaceWith(_x68);
+$__effect(() => {
+$__setText(_x67, (this.saveUser.data.id));
+});
+$__effect(() => {
+$__setText(_x68, (this.saveUser.data.name));
+});
+return _r64;
+})()
+                        : ''));
+$__child(_a23, () => (this.errors('update', this.saveUser)));
+$__child(_a24, () => (this.dropUser.data
+                        ? (() => {
+const _r69 = $__cloneEl(_h4);
+const _n70 = _r69.firstChild!;
+const _n71 = _r69.firstChild!.nextSibling!.nextSibling!;
+const _x72 = document.createTextNode('');
+_n70.replaceWith(_x72);
+const _x73 = document.createTextNode('');
+_n71.replaceWith(_x73);
+$__effect(() => {
+$__setText(_x72, (this.dropUser.data.id));
+});
+$__effect(() => {
+$__setText(_x73, (this.dropUser.data.name));
+});
+return _r69;
+})()
+                        : ''));
+$__child(_a25, () => (this.runEcho.loading ? (() => {
+const _r74 = $__cloneEl(_h5);
+return _r74;
+})() : ''));
+$__child(_a26, () => (this.runEcho.data
+                        ? (() => {
+const _r75 = $__cloneEl(_h6);
+const _n76 = _r75.firstChild!;
+const _n77 = _r75.firstChild!.nextSibling!.nextSibling!;
+const _x78 = document.createTextNode('');
+_n76.replaceWith(_x78);
+const _x79 = document.createTextNode('');
+_n77.replaceWith(_x79);
+$__effect(() => {
+$__setText(_x78, (this.runEcho.data.value));
+});
+$__effect(() => {
+$__setText(_x79, (this.runEcho.data.page));
+});
+return _r75;
+})()
+                        : ''));
+$__child(_a27, () => (this.errors('conflict', this.runConflict)));
+});
+}
+
+
+    name: Ref<string> = ref('Ada');
+    email: Ref<string> = ref('ada@example.com');
+    handle: Ref<string> = ref('ada-lovelace');
+    age: Ref<string> = ref('30');
+    userId: Ref<string> = ref('42');
+    echoValue: Ref<string> = ref('hello');
+    echoPage: Ref<string> = ref('3');
+
+    create = createUser();
+    fetchUser = getUser();
+    saveUser = updateUser();
+    dropUser = deleteUser();
+    runEcho = echo();
+    runConflict = conflict();
+
+    body = (): {
+        name: string;
+        email: string;
+        handle: string;
+        age: number;
+    } => ({
+        name: this.name.value,
+        email: this.email.value,
+        handle: this.handle.value,
+        age: Number(this.age.value),
+    });
+
+    submitCreate = (): void => void this.create.run(this.body());
+
+    getById = (): void => void this.fetchUser.run({ id: this.userId.value });
+
+    submitUpdate = (): void =>
+        void this.saveUser.run({ id: this.userId.value, body: this.body() });
+
+    submitDelete = (): void =>
+        void this.dropUser.run({ id: this.userId.value });
+
+    submitEcho = (): void =>
+        void this.runEcho.run({
+            value: this.echoValue.value,
+            page: Number(this.echoPage.value),
+            delay: 0,
+        });
+
+    echoSlow = (): void =>
+        void this.runEcho.run({ value: 'slow', page: 1, delay: 600 });
+
+    echoFast = (): void =>
+        void this.runEcho.run({ value: 'fast', page: 2, delay: 50 });
+
+    submitConflict = (): void => void this.runConflict.run();
+
+    errors = (prefix: string, status: Status): Template | string => {
+        const error = status.error;
+        if (!error) return '';
+        if (error.kind === ActionErrorKind.Validation)
+            return (() => {
+const _r0 = $__clone(_ft0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+$__list(_n2, () => (error.errors), (item) => `${item.field}:${item.code}`, (item) => {
+const _r3 = $__cloneEl(_ft1);
+const _n4 = _r3.firstChild!;
+$__effect(() => {
+$__setAttr(_r3, 'data-field', (item.field));
+});
+$__effect(() => {
+$__setAttr(_r3, 'data-code', (item.code));
+});
+$__effect(() => {
+$__setText(_n4, (item.message));
+});
+return _r3;
+});
+$__effect(() => {
+$__setClass(_n1, '', (`${prefix}-errors`));
+});
+return _r0;
+})();
+        if (error.kind === ActionErrorKind.Http)
+            return (() => {
+const _r5 = $__clone(_ft2);
+const _n6 = _r5.firstChild!;
+const _n7 = _n6.firstChild!.nextSibling!;
+const _x8 = document.createTextNode('');
+_n7.replaceWith(_x8);
+$__effect(() => {
+$__setClass(_n6, '', (`${prefix}-http`));
+});
+$__effect(() => {
+$__setText(_x8, (error.status));
+});
+return _r5;
+})();
+        return (() => {
+const _r9 = $__clone(_ft3);
+const _n10 = _r9.firstChild!;
+$__effect(() => {
+$__setClass(_n10, '', (`${prefix}-network`));
+});
+return _r9;
+})();
+    };
+
+    stateOf = (status: Status): string => {
+        if (status.loading) return 'loading';
+        if (status.isError) return 'error';
+        if (status.data) return 'ok';
+        return 'idle';
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n5 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n7 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n9 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n10 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n11 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n12 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n13 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n14 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n15 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n16 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n17 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n18 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n19 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n20 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n21 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n22 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n23 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n24 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n25 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n26 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n27 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n28 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n29 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__model(_n1 as HTMLInputElement, () => (this.name));
+$__model(_n2 as HTMLInputElement, () => (this.email));
+$__model(_n3 as HTMLInputElement, () => (this.handle));
+$__model(_n4 as HTMLInputElement, () => (this.age));
+$__event(_n5, 'click', this.submitCreate);
+$__child(_n7, () => (this.create.loading ? (() => {
+const _r30 = $__cloneEl(_t1);
+return _r30;
+})() : ''));
+$__child(_n8, () => (this.create.data
+                        ? (() => {
+const _r31 = $__cloneEl(_t2);
+const _n32 = _r31.firstChild!;
+const _n33 = _r31.firstChild!.nextSibling!.nextSibling!;
+const _n34 = _r31.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _x35 = document.createTextNode('');
+_n32.replaceWith(_x35);
+const _x36 = document.createTextNode('');
+_n33.replaceWith(_x36);
+const _x37 = document.createTextNode('');
+_n34.replaceWith(_x37);
+$__effect(() => {
+$__setText(_x35, (this.create.data.id));
+});
+$__effect(() => {
+$__setText(_x36, (this.create.data.name));
+});
+$__effect(() => {
+$__setText(_x37, (this.create.data.handle));
+});
+return _r31;
+})()
+                        : ''));
+$__child(_n9, () => (this.errors('create', this.create)));
+$__model(_n10 as HTMLInputElement, () => (this.userId));
+$__event(_n11, 'click', this.getById);
+$__child(_n12, () => (this.fetchUser.data
+                        ? (() => {
+const _r38 = $__cloneEl(_t3);
+const _n39 = _r38.firstChild!;
+const _n40 = _r38.firstChild!.nextSibling!.nextSibling!;
+const _n41 = _r38.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _x42 = document.createTextNode('');
+_n39.replaceWith(_x42);
+const _x43 = document.createTextNode('');
+_n40.replaceWith(_x43);
+const _x44 = document.createTextNode('');
+_n41.replaceWith(_x44);
+$__effect(() => {
+$__setText(_x42, (this.fetchUser.data.id));
+});
+$__effect(() => {
+$__setText(_x43, (this.fetchUser.data.name));
+});
+$__effect(() => {
+$__setText(_x44, (this.fetchUser.data.handle));
+});
+return _r38;
+})()
+                        : ''));
+$__child(_n13, () => (this.errors('get', this.fetchUser)));
+$__event(_n14, 'click', this.submitUpdate);
+$__child(_n15, () => (this.saveUser.data
+                        ? (() => {
+const _r45 = $__cloneEl(_t4);
+const _n46 = _r45.firstChild!;
+const _n47 = _r45.firstChild!.nextSibling!.nextSibling!;
+const _x48 = document.createTextNode('');
+_n46.replaceWith(_x48);
+const _x49 = document.createTextNode('');
+_n47.replaceWith(_x49);
+$__effect(() => {
+$__setText(_x48, (this.saveUser.data.id));
+});
+$__effect(() => {
+$__setText(_x49, (this.saveUser.data.name));
+});
+return _r45;
+})()
+                        : ''));
+$__child(_n16, () => (this.errors('update', this.saveUser)));
+$__event(_n17, 'click', this.submitDelete);
+$__child(_n18, () => (this.dropUser.data
+                        ? (() => {
+const _r50 = $__cloneEl(_t5);
+const _n51 = _r50.firstChild!;
+const _n52 = _r50.firstChild!.nextSibling!.nextSibling!;
+const _x53 = document.createTextNode('');
+_n51.replaceWith(_x53);
+const _x54 = document.createTextNode('');
+_n52.replaceWith(_x54);
+$__effect(() => {
+$__setText(_x53, (this.dropUser.data.id));
+});
+$__effect(() => {
+$__setText(_x54, (this.dropUser.data.name));
+});
+return _r50;
+})()
+                        : ''));
+$__model(_n19 as HTMLInputElement, () => (this.echoValue));
+$__model(_n20 as HTMLInputElement, () => (this.echoPage));
+$__event(_n21, 'click', this.submitEcho);
+$__event(_n22, 'click', this.echoSlow);
+$__event(_n23, 'click', this.echoFast);
+$__child(_n25, () => (this.runEcho.loading ? (() => {
+const _r55 = $__cloneEl(_t6);
+return _r55;
+})() : ''));
+$__child(_n26, () => (this.runEcho.data
+                        ? (() => {
+const _r56 = $__cloneEl(_t7);
+const _n57 = _r56.firstChild!;
+const _n58 = _r56.firstChild!.nextSibling!.nextSibling!;
+const _x59 = document.createTextNode('');
+_n57.replaceWith(_x59);
+const _x60 = document.createTextNode('');
+_n58.replaceWith(_x60);
+$__effect(() => {
+$__setText(_x59, (this.runEcho.data.value));
+});
+$__effect(() => {
+$__setText(_x60, (this.runEcho.data.page));
+});
+return _r56;
+})()
+                        : ''));
+$__event(_n27, 'click', this.submitConflict);
+$__child(_n29, () => (this.errors('conflict', this.runConflict)));
+$__effect(() => {
+$__setText(_n6, (this.stateOf(this.create)));
+});
+$__effect(() => {
+$__setText(_n24, (this.stateOf(this.runEcho)));
+});
+$__effect(() => {
+$__setText(_n28, (this.stateOf(this.runConflict)));
+});
+return _r0;
+}
+}
+$__defineComponent('actions-app', ActionsApp);
+ActionsApp.prototype.$$__tag = 'actions-app';
+ActionsApp.$$__document = ActionsDocument;

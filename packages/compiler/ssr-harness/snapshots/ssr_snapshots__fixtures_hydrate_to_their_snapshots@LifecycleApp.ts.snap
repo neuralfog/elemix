@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/LifecycleApp.ts
 ---
 import { $__bounds, $__seat, $__resume, $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -76,22 +75,22 @@ const _t2 = $__templateEl('<div class="empty">child unmounted</div>');
 
 export class LifecycleApp extends Component {
 $$__hydrate(root: Node): void {
-const _n0 = root.firstChild!.nextSibling!.firstChild!;
-const _n1 = $__text(_n0);
-const _n2 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
-const _n3 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n0, 'click', this.toggleMount);
-$__event(_n2, 'click', this.update);
-$__event(_n3, 'click', this.clear);
+const _n0 = root.firstChild!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _n2 = root.firstChild!.nextSibling!.firstChild!;
+const _n3 = $__text(_n2);
+const _n4 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n5 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n2, 'click', this.toggleMount);
+$__event(_n4, 'click', this.update);
+$__event(_n5, 'click', this.clear);
 $__effect(() => {
-$__setText(_n1, (this.state.mounted ? 'Unmount' : 'Mount'));
+$__setText(_n3, (this.state.mounted ? 'Unmount' : 'Mount'));
 });
 $__effect(() => {
-$__setAttr(_n2, 'disabled', (!this.state.mounted));
+$__setAttr(_n4, 'disabled', (!this.state.mounted));
 });
-const _n4 = root.firstChild!;
-const _b5 = $__bounds(_n4, 0, 0);
-const _s6 = $__seat(_n4, _b5[0], _b5[1]);
+const _s6 = $__seat(_n0, _b1[0], _b1[1]);
 $__child(_s6[0], $__resume(_s6[1], (_r7) => (this.state.mounted
                     ? (() => {
 $__effect(() => {

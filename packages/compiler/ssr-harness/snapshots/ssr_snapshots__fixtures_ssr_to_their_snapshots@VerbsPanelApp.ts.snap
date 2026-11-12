@@ -1,0 +1,32 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/VerbsPanelApp.ts
+---
+import { $__ssrText, $__ssrLen, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class VerbsPanelApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'verbs-panel-app'}><template shadowrootmode="open" shadowrootserializable=""><main><h1>Panel</h1><button class="toggle">toggle</button> `, (this.state.open ? $__ssrTpl(`<p class="busy">busy</p>`) : ''), `<!--$--> `, (this.cell('POST')), `<!--$--> `, (this.row('GET')), `<!--$--> <h2>Verbs</h2>${(() => {const _t0 = (this.state.open ? 'open' : 'none');return `<p data-t="${$__ssrLen(_t0)}">Status (${$__ssrText(_t0)}).</p>`;})()}<button>DO</button> `, (this.cell('PUT')), `<!--$--> `, (this.row('PATCH')), `<!--$--></main></template></${this.$$__tag ?? 'verbs-panel-app'}>`];
+}
+
+    state = $__state({ open: false });
+
+    cell = (label: string): Template | string =>
+        this.state.open ? $__ssrTpl(`<pre class="cell">`, $__ssrText(label), `</pre>`) : '';
+
+    row(label: string): Template | string {
+        return this.state.open ? $__ssrTpl(`<pre class="row">`, $__ssrText(label), `</pre>`) : '';
+    }
+
+    toggle = (): void => {
+        this.state.open = !this.state.open;
+    };
+
+    
+}
+$__defineComponent('verbs-panel-app', VerbsPanelApp);
+VerbsPanelApp.prototype.$$__tag = 'verbs-panel-app';
+VerbsPanelApp.$$__propSafe = true;

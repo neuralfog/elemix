@@ -10,6 +10,8 @@ export type Scope = {
     next: Scope | null;
 };
 
+const noop = (): void => {};
+
 export const $__dep = (): Dep => ({ subs: null, subSlots: 0 });
 
 export let $__activeScope: Scope | null = null;
@@ -108,6 +110,7 @@ export const dispose = (head: Scope | null): void => {
     let scope = head;
     while (scope) {
         cleanSources(scope);
+        scope.fn = noop;
         const next = scope.next;
         scope.next = null;
         scope = next;

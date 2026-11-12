@@ -2,6 +2,7 @@ import './env';
 import {
     $__render,
     $__runStores,
+    $__setContext,
     $__setStores,
     $__setViewData,
     type Rope,
@@ -20,7 +21,11 @@ type SsrView = {
 
 type ViewClass = (new () => SsrView) & { $$__document?: ViewClass };
 
-type RenderContext = { viewData?: unknown; stores?: Record<string, unknown> };
+type RenderContext = {
+    viewData?: unknown;
+    stores?: Record<string, unknown>;
+    context?: unknown;
+};
 
 const OUTLET = '<slot></slot>';
 
@@ -75,10 +80,13 @@ export const render = (View: ViewClass, ctx?: RenderContext): string =>
         const stores = ctx?.stores ?? {};
         $__setViewData(ctx?.viewData);
         $__setStores(stores);
+        $__setContext(ctx?.context);
         const page = renderOne(View);
         let inner = island('__hydris_stores', stores) + page;
         if (ctx?.viewData !== undefined)
             inner = island('__elemix_vd', ctx.viewData) + inner;
+        if (ctx?.context !== undefined)
+            inner = island('__hydris_context', ctx.context) + inner;
         inner = resetConfigScript() + resetDocumentStyle() + inner;
         const Document = View.$$__document;
         return applyResetToSsr(

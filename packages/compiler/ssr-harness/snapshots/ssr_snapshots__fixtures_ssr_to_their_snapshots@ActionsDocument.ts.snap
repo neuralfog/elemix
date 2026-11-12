@@ -1,0 +1,19 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ActionsDocument.ts
+---
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class ActionsDocument extends Component {
+    static $$__noShadow = true;
+$$__ssr(): unknown[] {
+return [`<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>Actions</title></head><body><slot></slot></body></html>`];
+}
+
+    
+}
+$__defineComponent('actions-document', ActionsDocument);
+ActionsDocument.prototype.$$__tag = 'actions-document';
+ActionsDocument.$$__propSafe = true;

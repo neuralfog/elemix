@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Hydris/Hydris.csproj" />
-    <InternalsVisibleTo Include="hydris-build" />
+    <InternalsVisibleTo Include="Hydris.Build" />
   </ItemGroup>
 
 </Project>

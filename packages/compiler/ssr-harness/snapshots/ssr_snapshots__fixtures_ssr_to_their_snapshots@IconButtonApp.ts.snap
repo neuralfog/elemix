@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/IconButtonApp.ts
 ---
-import { $__ssrText, $__ssrChild, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -29,7 +29,7 @@ const css = `
 
 export class IconButton extends Component<Props> {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'icon-button'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>`, (() => {const _t0 = (this.props.label ?? '');return [`<button data-t="${$__ssrLen(_t0)}">${$__ssrText(_t0)}<slot></slot></button>`];})(), `</template></${this.$$__tag ?? 'icon-button'}>`];
+return [`<${this.$$__tag ?? 'icon-button'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><button>`, (this.props.label ?? ''), `<slot></slot></button></template></${this.$$__tag ?? 'icon-button'}>`];
 }
 
 

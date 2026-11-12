@@ -36,9 +36,9 @@ export class AppCard extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'app-card'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card">`, (this.hasSlot('header')
                 ? $__ssrTpl(`<div class="header"><slot name="header"></slot></div>`)
-                : ''), ` <div class="body"><slot></slot></div> `, (this.hasSlot('footer')
+                : ''), `<!--$--> <div class="body"><slot></slot></div> `, (this.hasSlot('footer')
                 ? $__ssrTpl(`<div class="footer"><slot name="footer"></slot></div>`)
-                : ''), `</div></template></${this.$$__tag ?? 'app-card'}>`];
+                : ''), `<!--$--></div></template></${this.$$__tag ?? 'app-card'}>`];
 }
 
 

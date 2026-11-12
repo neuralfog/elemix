@@ -1,0 +1,23 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ContextApp.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component, csrf, param, query } from '@neuralfog/elemix';
+
+import { ContextDocument } from './ContextDocument';
+
+export class ContextApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'context-app'}><template shadowrootmode="open" shadowrootserializable=""><main><p class="id">`, $__ssrText(param('id') ?? '-'), `</p><p class="q">`, $__ssrText(query('q') ?? '-'), `</p><p class="csrf">`, $__ssrText(csrf()), `</p></main></template></${this.$$__tag ?? 'context-app'}>`];
+}
+
+
+    
+}
+$__defineComponent('context-app', ContextApp);
+ContextApp.prototype.$$__tag = 'context-app';
+ContextApp.$$__propSafe = true;
+ContextApp.$$__document = ContextDocument;

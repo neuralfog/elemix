@@ -1,9 +1,49 @@
 using Hydris.Container;
+using Hydris.Contracts;
 using Hydris.Http;
 using Hydris.Middleware;
 using Hydris.Routing;
 
 namespace Hydris.Tests;
+
+[Contract]
+internal sealed partial record GenEcho(string Value, int Number);
+
+internal enum Shade {
+    Light,
+    Dark,
+}
+
+[Contract]
+internal sealed partial record StrictReq([Hydris.Validation.Required] string Name);
+
+[Contract]
+internal sealed partial record Painted(string Shade, bool On, string Id);
+
+[Handler]
+internal sealed class GenBind {
+    [Get("/gen-bind/user/:id")]
+    [Action]
+    public Reply GetUser(string id) => Reply.Action<GenEcho>(new(id, 0));
+
+    [Get("/gen-bind/search")]
+    [Action]
+    public Reply Search(string? q, int page) => Reply.Action<GenEcho>(new(q ?? "none", page));
+
+    [Post("/gen-bind/make")]
+    [Action]
+    public Reply Make() =>
+        Reply.Action<GenEcho>(new("made", 1)).Status(201).Header("X-Made", "yes");
+
+    [Post("/gen-bind/strict")]
+    [Action]
+    public Reply Strict(StrictReq input) => Reply.Action<GenEcho>(new(input.Name, 1));
+
+    [Get("/gen-bind/paint")]
+    [Action]
+    public Reply Paint(Shade shade, bool on, Guid id) =>
+        Reply.Action<Painted>(new(shade.ToString(), on, id.ToString()));
+}
 
 [Middleware]
 internal sealed class GenMw : IMiddleware {

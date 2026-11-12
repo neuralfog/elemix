@@ -1,10 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/ConditionalApp.ts
 ---
-import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__span, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>');
 const _h1 = $__templateEl('<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>');
@@ -88,34 +87,34 @@ const _t3 = $__templateEl('<div class="tip">💡 Toggle the buttons to watch eac
 
 export class ConditionalApp extends Component {
 $$__hydrate(root: Node): void {
-const _n0 = root.firstChild!.nextSibling!.firstChild!;
-const _n1 = $__text(_n0);
-const _n2 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
-const _n3 = $__text(_n2);
-$__event(_n0, 'click', this.toggleLogin);
-$__event(_n2, 'click', this.toggleTip);
+const _n0 = root.firstChild!;
+const _b1 = $__span(_n0, 0, 0);
+const _b2 = $__span(_n0, 1, 1);
+const _a3 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _a4 = $__reanchor(_n0, _b2[0], _b2[1]);
+const _n5 = root.firstChild!.nextSibling!.firstChild!;
+const _n6 = $__text(_n5);
+const _n7 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n8 = $__text(_n7);
+$__event(_n5, 'click', this.toggleLogin);
+$__event(_n7, 'click', this.toggleTip);
 $__effect(() => {
-$__setText(_n1, (this.state.loggedIn ? 'Sign out' : 'Sign in'));
+$__setText(_n6, (this.state.loggedIn ? 'Sign out' : 'Sign in'));
 });
 $__effect(() => {
-$__setText(_n3, (this.state.showTip ? 'Hide tip' : 'Show tip'));
+$__setText(_n8, (this.state.showTip ? 'Hide tip' : 'Show tip'));
 });
-const _n4 = root.firstChild!;
-const _b5 = $__bounds(_n4, 0, 2);
-const _b6 = $__bounds(_n4, 2, 0);
 $__fresh(() => {
-const _a7 = $__reanchor(_n4, _b5[0], _b5[1]);
-$__child(_a7, () => (this.state.loggedIn
+$__child(_a3, () => (this.state.loggedIn
                     ? (() => {
-const _r8 = $__cloneEl(_h0);
-return _r8;
+const _r9 = $__cloneEl(_h0);
+return _r9;
 })()
                     : (() => {
-const _r9 = $__cloneEl(_h1);
-return _r9;
+const _r10 = $__cloneEl(_h1);
+return _r10;
 })()));
-const _a10 = $__reanchor(_n4, _b6[0], _b6[1]);
-$__child(_a10, () => (this.state.showTip
+$__child(_a4, () => (this.state.showTip
                     ? (() => {
 const _r11 = $__cloneEl(_h2);
 return _r11;

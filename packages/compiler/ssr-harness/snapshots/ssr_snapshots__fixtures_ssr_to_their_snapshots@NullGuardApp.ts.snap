@@ -1,0 +1,29 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/NullGuardApp.ts
+---
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Row = { id: string };
+
+export class NullGuardApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'null-guard-app'}><template shadowrootmode="open" shadowrootserializable=""><main><button id="toggle">toggle</button> `, (this.model.row
+                    ? $__ssrTpl(`<p class="val">`, $__ssrText(this.model.row.id), `</p>`)
+                    : $__ssrTpl(`<p class="empty">empty</p>`)), `</main></template></${this.$$__tag ?? 'null-guard-app'}>`];
+}
+
+    model = $__state<{ row: Row | null }>({ row: { id: 'first' } });
+
+    toggle = (): void => {
+        this.model.row = this.model.row ? null : { id: 'again' };
+    };
+
+    
+}
+$__defineComponent('null-guard-app', NullGuardApp);
+NullGuardApp.prototype.$$__tag = 'null-guard-app';
+NullGuardApp.$$__propSafe = true;

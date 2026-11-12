@@ -82,57 +82,57 @@ const _t6 = $__templateEl('<span class="mode">compact</span>');
 
 export class MatchApp extends Component {
 $$__hydrate(root: Node): void {
-const _n0 = root.firstChild!.firstChild!;
-const _n1 = root.firstChild!.firstChild!.nextSibling!;
-const _n2 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n3 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = root.firstChild!.nextSibling!.nextSibling!;
-$__event(_n0, 'click', this.idle);
-$__event(_n1, 'click', this.loading);
-$__event(_n2, 'click', this.ready);
-$__event(_n3, 'click', this.failed);
-$__event(_n4, 'click', this.toggleMode);
-const _n5 = root.firstChild!.nextSibling!;
-const _b6 = $__bounds(_n5, 0, 0);
-const _b7 = $__bounds(root, 4, 0);
+const _n0 = root.firstChild!.nextSibling!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _b2 = $__bounds(root, 4, 0);
+const _a3 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _a4 = $__reanchor(root, _b2[0], _b2[1]);
+const _n5 = root.firstChild!.firstChild!;
+const _n6 = root.firstChild!.firstChild!.nextSibling!;
+const _n7 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n8 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n9 = root.firstChild!.nextSibling!.nextSibling!;
+$__event(_n5, 'click', this.idle);
+$__event(_n6, 'click', this.loading);
+$__event(_n7, 'click', this.ready);
+$__event(_n8, 'click', this.failed);
+$__event(_n9, 'click', this.toggleMode);
 $__fresh(() => {
-const _a8 = $__reanchor(_n5, _b6[0], _b6[1]);
-$__child(_a8, () => ((this.state.load)['kind'] === 'idle' ? (() =>
+$__child(_a3, () => ((this.state.load)['kind'] === 'idle' ? (() =>
                     (() => {
-const _r18 = $__cloneEl(_h3);
-return _r18;
+const _r19 = $__cloneEl(_h3);
+return _r19;
 })())(this.state.load) : (this.state.load)['kind'] === 'loading' ? ((m) =>
                     (() => {
-const _r15 = $__cloneEl(_h2);
-const _n16 = _r15.firstChild!.nextSibling!.nextSibling!;
-const _x17 = document.createTextNode('');
-_n16.replaceWith(_x17);
+const _r16 = $__cloneEl(_h2);
+const _n17 = _r16.firstChild!.nextSibling!.nextSibling!;
+const _x18 = document.createTextNode('');
+_n17.replaceWith(_x18);
 $__effect(() => {
-$__setText(_x17, (m.pct));
+$__setText(_x18, (m.pct));
 });
-return _r15;
+return _r16;
 })())(this.state.load) : (this.state.load)['kind'] === 'ready' ? ((m) =>
                     (() => {
-const _r12 = $__cloneEl(_h1);
-const _n13 = _r12.firstChild!.nextSibling!;
-const _x14 = document.createTextNode('');
-_n13.replaceWith(_x14);
+const _r13 = $__cloneEl(_h1);
+const _n14 = _r13.firstChild!.nextSibling!;
+const _x15 = document.createTextNode('');
+_n14.replaceWith(_x15);
 $__effect(() => {
-$__setText(_x14, (m.url));
+$__setText(_x15, (m.url));
 });
-return _r12;
+return _r13;
 })())(this.state.load) : (this.state.load)['kind'] === 'failed' ? ((m) => (() => {
-const _r9 = $__cloneEl(_h0);
-const _n10 = _r9.firstChild!.nextSibling!;
-const _x11 = document.createTextNode('');
-_n10.replaceWith(_x11);
+const _r10 = $__cloneEl(_h0);
+const _n11 = _r10.firstChild!.nextSibling!;
+const _x12 = document.createTextNode('');
+_n11.replaceWith(_x12);
 $__effect(() => {
-$__setText(_x11, (m.error));
+$__setText(_x12, (m.error));
 });
-return _r9;
+return _r10;
 })())(this.state.load) : ''));
-const _a19 = $__reanchor(root, _b7[0], _b7[1]);
-$__child(_a19, () => (this.state.mode === 'compact' ? (() => {
+$__child(_a4, () => (this.state.mode === 'compact' ? (() => {
 const _r21 = $__cloneEl(_h5);
 return _r21;
 })() : this.state.mode === 'full' ? (() => {

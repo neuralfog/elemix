@@ -136,6 +136,10 @@
         "fixture": "NoShadowApp"
     },
     {
+        "tag": "null-guard-app",
+        "fixture": "NullGuardApp"
+    },
+    {
         "tag": "panel-app",
         "fixture": "PanelApp"
     },
@@ -222,6 +226,10 @@
     {
         "tag": "ui-stepper",
         "fixture": "StepperWidget"
+    },
+    {
+        "tag": "verbs-panel-app",
+        "fixture": "VerbsPanelApp"
     },
     {
         "tag": "view-data-app",

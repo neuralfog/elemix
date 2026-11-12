@@ -95,17 +95,18 @@ public sealed class Reply {
             return;
         Pending = null;
         var stores = new CookieAuthority(request).Stores();
+        var context = RequestContext.Build(request);
         if (pending.Cache == CacheMode.None) {
-            Payload = Views.Render(pending.View, Context(pending.ViewData, stores));
+            Payload = Views.Render(pending.View, Context(pending.ViewData, stores, context));
             return;
         }
-        var key = RenderCache<Renderer.CachedView>.Key(pending.View, pending.ViewData ?? string.Empty, stores);
+        var key = RenderCache<Renderer.CachedView>.Key(pending.View, pending.ViewData ?? string.Empty, stores, context);
         if (ViewCache.Instance.TryGet(key, out var hit)) {
             Payload = hit.Html;
             Cached = hit;
             return;
         }
-        Payload = Views.Render(pending.View, Context(pending.ViewData, stores));
+        Payload = Views.Render(pending.View, Context(pending.ViewData, stores, context));
         var view = new Renderer.CachedView(Payload);
         if (pending.Cache == CacheMode.Infinite)
             ViewCache.Instance.SetForever(key, view);
@@ -113,9 +114,10 @@ public sealed class Reply {
             ViewCache.Instance.Set(key, view);
     }
 
-    private static string Context(string? viewData, string stores) {
+    private static string Context(string? viewData, string stores, string context) {
         var builder = new StringBuilder("{\"stores\":");
         builder.Append(stores);
+        builder.Append(",\"context\":").Append(context);
         if (viewData is not null)
             builder.Append(",\"viewData\":").Append(viewData);
         return builder.Append('}').ToString();
@@ -123,6 +125,17 @@ public sealed class Reply {
 
     public static Reply Json<T>(T value, JsonTypeInfo<T> typeInfo) =>
         new(JsonSerializer.SerializeToUtf8Bytes(value, typeInfo), 200, "application/json; charset=utf-8");
+
+    public static Reply Json(ReadOnlySpan<byte> utf8Json) =>
+        new(utf8Json.ToArray(), 200, "application/json; charset=utf-8");
+
+    public static Reply Action<T>(T value) where T : IViewData {
+        Debug.Assert(value is not null);
+        var buffer = new ArrayBufferWriter<byte>();
+        using (var writer = new Utf8JsonWriter(buffer))
+            value.Write(writer);
+        return new Reply(buffer.WrittenSpan.ToArray(), 200, "application/json; charset=utf-8");
+    }
 
     public static Reply Binary(byte[] data) {
         Debug.Assert(data is not null);
