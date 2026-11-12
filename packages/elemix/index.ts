@@ -4,3 +4,4 @@ export { $__viewData as viewData } from './src/runtime/viewdata';
 export * from './src/utilities';
 export { tpl } from './src/tpl';
 export { createApp } from './src/createApp';
+export { reactive } from './src/runtime/state';

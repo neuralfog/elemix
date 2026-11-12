@@ -1,5 +1,7 @@
 export { ref, raw, viewData } from '@neuralfog/elemix';
 
+export const reactive = <T extends object>(value: T): T => value;
+
 import { $__viewData } from '@neuralfog/elemix/ssr-runtime';
 
 type SlotChild = { getAttribute(attr: string): string | null };
