@@ -123,7 +123,7 @@ public sealed class GeneratorTests {
     }
 
     [Fact]
-    public async Task ActionResultCarriesStatusAndHeaders() {
+    public async Task ActionReplyCarriesStatusAndHeaders() {
         var container = new DiContainer().AddServices();
         var router = new Router();
         router.MapRoutes();

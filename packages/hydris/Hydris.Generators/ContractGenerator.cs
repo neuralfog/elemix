@@ -54,20 +54,43 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         if (syntax.TargetSymbol is not IMethodSymbol method)
             return (null, null);
 
-        var request = method.Parameters.Length == 1
-            ? method.Parameters[0].Type.ToDisplayString(FullyQualified)
-            : null;
-        return (request, Unwrap(method.ReturnType).ToDisplayString(FullyQualified));
+        string? request = null;
+        foreach (var parameter in method.Parameters) {
+            if (IsContract(parameter.Type)) {
+                request = parameter.Type.ToDisplayString(FullyQualified);
+                break;
+            }
+        }
+
+        return (request, ResponseType(syntax));
     }
 
-    private static ITypeSymbol Unwrap(ITypeSymbol type) {
-        if (type is INamedTypeSymbol named
-            && named.TypeArguments.Length == 1
-            && (named.Name == "Task" || named.Name == "ValueTask")
-            && named.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks")
-            return named.TypeArguments[0];
+    private static bool IsContract(ITypeSymbol type) {
+        foreach (var attribute in type.GetAttributes()) {
+            if (attribute.AttributeClass?.Name == "ContractAttribute")
+                return true;
+        }
 
-        return type;
+        return false;
+    }
+
+    private static string? ResponseType(GeneratorAttributeSyntaxContext syntax) {
+        if (syntax.TargetNode is not MethodDeclarationSyntax method)
+            return null;
+
+        foreach (var node in method.DescendantNodes()) {
+            if (node is InvocationExpressionSyntax invocation
+                && invocation.Expression is MemberAccessExpressionSyntax access
+                && access.Name is GenericNameSyntax generic
+                && generic.Identifier.Text == "Action"
+                && generic.TypeArgumentList.Arguments.Count == 1) {
+                var symbol = syntax.SemanticModel.GetTypeInfo(generic.TypeArgumentList.Arguments[0]).Type;
+                if (symbol is not null)
+                    return symbol.ToDisplayString(FullyQualified);
+            }
+        }
+
+        return null;
     }
 
     private static void Emit(SourceProductionContext production, INamedTypeSymbol type, bool isRequest, bool isResponse) {

@@ -409,22 +409,20 @@ public static class ContractEmit {
             parameters.Add(new ParamDef(Camel(parameter.Identifier.Text), parameter.Type.ToString()));
         }
 
-        return new ActionDef(verb, path, Camel(method.Identifier.Text), parameters, Response(method.ReturnType));
+        return new ActionDef(verb, path, Camel(method.Identifier.Text), parameters, Response(method));
     }
 
-    private static string Response(TypeSyntax returnType) {
-        var type = returnType;
-        if (type is GenericNameSyntax task
-            && task.Identifier.Text is "Task" or "ValueTask"
-            && task.TypeArgumentList.Arguments.Count == 1)
-            type = task.TypeArgumentList.Arguments[0];
+    private static string Response(MethodDeclarationSyntax method) {
+        foreach (var node in method.DescendantNodes()) {
+            if (node is InvocationExpressionSyntax invocation
+                && invocation.Expression is MemberAccessExpressionSyntax access
+                && access.Name is GenericNameSyntax generic
+                && generic.Identifier.Text == "Action"
+                && generic.TypeArgumentList.Arguments.Count == 1)
+                return generic.TypeArgumentList.Arguments[0].ToString();
+        }
 
-        if (type is GenericNameSyntax action
-            && action.Identifier.Text == "ActionResult"
-            && action.TypeArgumentList.Arguments.Count == 1)
-            type = action.TypeArgumentList.Arguments[0];
-
-        return type.ToString();
+        return "void";
     }
 
     private static bool HasAttribute(SyntaxList<AttributeListSyntax> lists, string name) {

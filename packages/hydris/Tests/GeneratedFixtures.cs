@@ -24,25 +24,25 @@ internal sealed partial record Painted(string Shade, bool On, string Id);
 internal sealed class GenBind {
     [Get("/gen-bind/user/:id")]
     [Action]
-    public GenEcho GetUser(string id) => new(id, 0);
+    public Reply GetUser(string id) => Reply.Action<GenEcho>(new(id, 0));
 
     [Get("/gen-bind/search")]
     [Action]
-    public GenEcho Search(string? q, int page) => new(q ?? "none", page);
+    public Reply Search(string? q, int page) => Reply.Action<GenEcho>(new(q ?? "none", page));
 
     [Post("/gen-bind/make")]
     [Action]
-    public ActionResult<GenEcho> Make() =>
-        ActionResult.Of(new GenEcho("made", 1)).Status(201).Header("X-Made", "yes");
+    public Reply Make() =>
+        Reply.Action<GenEcho>(new("made", 1)).Status(201).Header("X-Made", "yes");
 
     [Post("/gen-bind/strict")]
     [Action]
-    public GenEcho Strict(StrictReq input) => new(input.Name, 1);
+    public Reply Strict(StrictReq input) => Reply.Action<GenEcho>(new(input.Name, 1));
 
     [Get("/gen-bind/paint")]
     [Action]
-    public Painted Paint(Shade shade, bool on, Guid id) =>
-        new(shade.ToString(), on, id.ToString());
+    public Reply Paint(Shade shade, bool on, Guid id) =>
+        Reply.Action<Painted>(new(shade.ToString(), on, id.ToString()));
 }
 
 [Middleware]

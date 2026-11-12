@@ -196,7 +196,7 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         if (needsRequest)
             builder.Append("if (errors.Failed) ").Append(Return("errors.ToReply()", async)).Append(' ');
         builder.Append(resultType).Append(" result = ").Append(call).Append(method.Name).Append('(').Append(string.Join(", ", args)).Append("); ");
-        builder.Append(Return("global::Hydris.Http.Reply.Action(result)", async)).Append(" });");
+        builder.Append(Return("result", async)).Append(" });");
 
         return builder.ToString();
     }

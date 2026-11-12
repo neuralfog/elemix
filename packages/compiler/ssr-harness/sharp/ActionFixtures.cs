@@ -38,34 +38,36 @@ public sealed partial record EchoResult(string Value, int Page);
 public sealed class ActionFixtures {
     [Post("/api/users")]
     [Action]
-    public ActionResult<UserResponse> CreateUser(CreateUserRequest input) =>
-        ActionResult.Of(new UserResponse("u1", input.Name, input.Handle))
+    public Reply CreateUser(CreateUserRequest input) =>
+        Reply.Action<UserResponse>(new("u1", input.Name, input.Handle))
             .Status(201)
             .Header("Location", "/api/users/u1");
 
     [Get("/api/users/:id")]
     [Action]
-    public UserResponse GetUser(string id) => new(id, "User " + id, "user-" + id);
+    public Reply GetUser(string id) =>
+        Reply.Action<UserResponse>(new(id, "User " + id, "user-" + id));
 
     [Put("/api/users/:id")]
     [Action]
-    public UserResponse UpdateUser(string id, CreateUserRequest input) =>
-        new(id, input.Name, input.Handle);
+    public Reply UpdateUser(string id, CreateUserRequest input) =>
+        Reply.Action<UserResponse>(new(id, input.Name, input.Handle));
 
     [Delete("/api/users/:id")]
     [Action]
-    public UserResponse DeleteUser(string id) => new(id, "deleted", "deleted");
+    public Reply DeleteUser(string id) =>
+        Reply.Action<UserResponse>(new(id, "deleted", "deleted"));
 
     [Get("/api/echo")]
     [Action]
-    public async Task<EchoResult> Echo(string? value, int page, int delay) {
+    public async Task<Reply> Echo(string? value, int page, int delay) {
         if (delay > 0)
             await Task.Delay(delay);
-        return new EchoResult(value ?? "none", page);
+        return Reply.Action<EchoResult>(new(value ?? "none", page));
     }
 
     [Get("/api/conflict")]
     [Action]
-    public ActionResult<UserResponse> Conflict() =>
-        ActionResult.Of(new UserResponse("x", "x", "x")).Status(409);
+    public Reply Conflict() =>
+        Reply.Action<UserResponse>(new("x", "x", "x")).Status(409);
 }
