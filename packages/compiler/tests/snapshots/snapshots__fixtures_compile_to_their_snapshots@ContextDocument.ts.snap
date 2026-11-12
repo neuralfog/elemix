@@ -1,0 +1,20 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/ContextDocument.ts
+---
+import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import '@neuralfog/elemix/navigation/NavLink';
+
+const _t0 = $__template('<html lang="en"><head><meta charset="utf-8"/><title>Context</title></head><body><nav><nav-link route="/context/alpha?q=one"><a id="to-alpha" href="/context/alpha?q=one">Alpha</a></nav-link><nav-link route="/context/beta?q=two"><a id="to-beta" href="/context/beta?q=two">Beta</a></nav-link></nav><slot></slot></body></html>');
+
+export class ContextDocument extends Component {
+    static $$__noShadow = true;
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('context-document', ContextDocument);
+ContextDocument.prototype.$$__tag = 'context-document';

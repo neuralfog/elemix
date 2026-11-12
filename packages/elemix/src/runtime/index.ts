@@ -9,3 +9,4 @@ export {
 } from './reactive';
 export { $__reactive, $__state, $__depOf, $__toRaw } from './state';
 export { $__setViewData, $__viewData } from './viewdata';
+export { $__setContext, $__resetContext } from './context';

@@ -28,11 +28,12 @@ internal sealed class RenderCache<TValue> : IDisposable {
 
     internal int Count => Entries.Count;
 
-    internal static UInt128 Key(string view, string viewData, string stores) {
+    internal static UInt128 Key(string view, string viewData, string stores, string context) {
         Debug.Assert(view is not null);
         Debug.Assert(viewData is not null);
         Debug.Assert(stores is not null);
-        var bytes = (view.Length + viewData.Length + stores.Length) * 2;
+        Debug.Assert(context is not null);
+        var bytes = (view.Length + viewData.Length + stores.Length + context.Length) * 2;
         var rented = bytes > StackLimit ? ArrayPool<byte>.Shared.Rent(bytes) : null;
         try {
             var span = (rented is null ? stackalloc byte[StackLimit] : rented)[..bytes];
@@ -41,6 +42,8 @@ internal sealed class RenderCache<TValue> : IDisposable {
             MemoryMarshal.AsBytes(viewData.AsSpan()).CopyTo(span[pos..]);
             pos += viewData.Length * 2;
             MemoryMarshal.AsBytes(stores.AsSpan()).CopyTo(span[pos..]);
+            pos += stores.Length * 2;
+            MemoryMarshal.AsBytes(context.AsSpan()).CopyTo(span[pos..]);
             return XxHash128.HashToUInt128(span);
         } finally {
             if (rented is not null) {

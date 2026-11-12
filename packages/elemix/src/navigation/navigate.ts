@@ -1,3 +1,4 @@
+import { $__resetContext } from '../runtime/context';
 import { $__resetModuleStates } from '../runtime/hydrate';
 import { navSanitizerConfig } from './NavSanitizer';
 
@@ -100,6 +101,7 @@ let inflight: AbortController | undefined;
 
 const swap = async (html: string): Promise<void> => {
     $__resetModuleStates();
+    $__resetContext();
     const incoming = new DOMParser().parseFromString(html, 'text/html');
     mergeHead(incoming.head);
 

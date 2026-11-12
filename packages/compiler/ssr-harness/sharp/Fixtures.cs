@@ -44,6 +44,9 @@ public sealed class Fixtures {
     [Get("/nav-about-app")]
     public Reply NavAboutApp() => Reply.View("fixtures/NavAboutApp", new NavData("About", "about"));
 
+    [Get("/context/:id")]
+    public Reply ContextApp() => Reply.View("fixtures/ContextApp");
+
     [Get("/view-data-app")]
     public Reply ViewDataApp() =>
         Reply.View("fixtures/ViewDataApp", new VData("Hello viewData", new VUser("Ada"), 3));

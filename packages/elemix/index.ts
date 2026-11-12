@@ -1,6 +1,7 @@
 export * from './src/component/Component';
 export { $__defineComponent as defineComponent } from './src/runtime/dom';
 export { $__viewData as viewData } from './src/runtime/viewdata';
+export { param, query, csrf } from './src/runtime/context';
 export * from './src/utilities';
 export { tpl } from './src/tpl';
 export { createApp } from './src/createApp';

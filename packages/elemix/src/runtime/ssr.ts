@@ -2,6 +2,7 @@ import type { Template } from '../types';
 import { $__toRaw } from './state';
 
 export { $__setViewData, $__viewData } from './viewdata';
+export { $__setContext } from './context';
 
 const TEXT: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
 
