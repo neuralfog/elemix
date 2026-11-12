@@ -1,0 +1,304 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/ActionsApp.ts
+---
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__list, $__effect, $__setText, $__setAttr, $__setClass, $__event, $__model, $__child, $__defineComponent } from '@neuralfog/elemix/runtime';
+const _ft0 = $__template('<ul><!----></ul>');
+const _ft1 = $__templateEl('<li class="err"> </li>');
+const _ft2 = $__template('<p>http <!----></p>');
+const _ft3 = $__template('<p>network</p>');
+const _ft4 = $__template('<p><!----> <!----> <!----></p>');
+const _ft5 = $__template('<p><!----> <!----></p>');
+const _ft6 = $__template('<p class="echo-data"><!----> <!----></p>');
+import { Component, ref } from '@neuralfog/elemix';
+import type { Ref } from '@neuralfog/elemix/types';
+
+import type { ActionError } from '../Views/actions/index';
+import { ActionErrorKind } from '../Views/actions/index';
+import { conflict } from '../Views/actions/conflict';
+import { createUser } from '../Views/actions/createUser';
+import { deleteUser } from '../Views/actions/deleteUser';
+import { echo } from '../Views/actions/echo';
+import { getUser } from '../Views/actions/getUser';
+import { updateUser } from '../Views/actions/updateUser';
+import { ActionsDocument } from './ActionsDocument';
+
+type Status = {
+    data: unknown;
+    loading: boolean;
+    isError: boolean;
+    error: ActionError | null;
+};
+
+const _t0 = $__template('<main><section class="create"><h2>create</h2><label>name <input id="f-name" type="text"/></label><label>email <input id="f-email" type="text"/></label><label>handle <input id="f-handle" type="text"/></label><label>age <input id="f-age" type="text"/></label><button id="create">create</button><span class="create-state"> </span> <!----> <!----> <!----></section><section class="get"><h2>get</h2><label>id <input id="f-id" type="text"/></label><button id="get">get</button> <!----> <!----></section><section class="update"><h2>update</h2><button id="update">update</button> <!----> <!----></section><section class="delete"><h2>delete</h2><button id="delete">delete</button> <!----></section><section class="echo"><h2>echo</h2><label>value <input id="f-echo-value" type="text"/></label><label>page <input id="f-echo-page" type="text"/></label><button id="echo">echo</button><button id="echo-slow">slow</button><button id="echo-fast">fast</button><span class="echo-state"> </span> <!----> <!----></section><section class="conflict"><h2>conflict</h2><button id="conflict">conflict</button><span class="conflict-state"> </span> <!----></section></main>');
+const _t1 = $__templateEl('<p class="create-loading">saving</p>');
+const _t2 = $__templateEl('<p class="echo-loading">loading</p>');
+
+export class ActionsApp extends Component {
+
+    name: Ref<string> = ref('Ada');
+    email: Ref<string> = ref('ada@example.com');
+    handle: Ref<string> = ref('ada-lovelace');
+    age: Ref<string> = ref('30');
+    userId: Ref<string> = ref('42');
+    echoValue: Ref<string> = ref('hello');
+    echoPage: Ref<string> = ref('3');
+
+    create = createUser();
+    fetchUser = getUser();
+    saveUser = updateUser();
+    dropUser = deleteUser();
+    runEcho = echo();
+    runConflict = conflict();
+
+    body = (): {
+        name: string;
+        email: string;
+        handle: string;
+        age: number;
+    } => ({
+        name: this.name.value,
+        email: this.email.value,
+        handle: this.handle.value,
+        age: Number(this.age.value),
+    });
+
+    submitCreate = (): void => void this.create.run(this.body());
+
+    getById = (): void => void this.fetchUser.run({ id: this.userId.value });
+
+    submitUpdate = (): void =>
+        void this.saveUser.run({ id: this.userId.value, body: this.body() });
+
+    submitDelete = (): void =>
+        void this.dropUser.run({ id: this.userId.value });
+
+    submitEcho = (): void =>
+        void this.runEcho.run({
+            value: this.echoValue.value,
+            page: Number(this.echoPage.value),
+            delay: 0,
+        });
+
+    echoSlow = (): void =>
+        void this.runEcho.run({ value: 'slow', page: 1, delay: 600 });
+
+    echoFast = (): void =>
+        void this.runEcho.run({ value: 'fast', page: 2, delay: 50 });
+
+    submitConflict = (): void => void this.runConflict.run();
+
+    errors = (prefix: string, status: Status): Template | string => {
+        const error = status.error;
+        if (!error) return '';
+        if (error.kind === ActionErrorKind.Validation)
+            return (() => {
+const _r0 = $__clone(_ft0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+$__list(_n2, () => (error.errors), (item) => `${item.field}:${item.code}`, (item) => {
+const _r3 = $__cloneEl(_ft1);
+const _n4 = _r3.firstChild!;
+$__effect(() => {
+$__setAttr(_r3, 'data-field', (item.field));
+});
+$__effect(() => {
+$__setAttr(_r3, 'data-code', (item.code));
+});
+$__effect(() => {
+$__setText(_n4, (item.message));
+});
+return _r3;
+});
+$__effect(() => {
+$__setClass(_n1, '', (`${prefix}-errors`));
+});
+return _r0;
+})();
+        if (error.kind === ActionErrorKind.Http)
+            return (() => {
+const _r5 = $__clone(_ft2);
+const _n6 = _r5.firstChild!;
+const _n7 = _n6.firstChild!.nextSibling!;
+const _x8 = document.createTextNode('');
+_n7.replaceWith(_x8);
+$__effect(() => {
+$__setClass(_n6, '', (`${prefix}-http`));
+});
+$__effect(() => {
+$__setText(_x8, (error.status));
+});
+return _r5;
+})();
+        return (() => {
+const _r9 = $__clone(_ft3);
+const _n10 = _r9.firstChild!;
+$__effect(() => {
+$__setClass(_n10, '', (`${prefix}-network`));
+});
+return _r9;
+})();
+    };
+
+    stateOf = (status: Status): string => {
+        if (status.loading) return 'loading';
+        if (status.isError) return 'error';
+        if (status.data) return 'ok';
+        return 'idle';
+    };
+
+    userRow = (
+        prefix: string,
+        data: { id: string; name: string; handle: string } | null,
+    ): Template | string =>
+        data
+            ? (() => {
+const _r11 = $__clone(_ft4);
+const _n12 = _r11.firstChild!;
+const _n13 = _n12.firstChild!;
+const _n14 = _n12.firstChild!.nextSibling!.nextSibling!;
+const _n15 = _n12.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _x16 = document.createTextNode('');
+_n13.replaceWith(_x16);
+const _x17 = document.createTextNode('');
+_n14.replaceWith(_x17);
+const _x18 = document.createTextNode('');
+_n15.replaceWith(_x18);
+$__effect(() => {
+$__setClass(_n12, '', (`${prefix}-data`));
+});
+$__effect(() => {
+$__setText(_x16, (data.id));
+});
+$__effect(() => {
+$__setText(_x17, (data.name));
+});
+$__effect(() => {
+$__setText(_x18, (data.handle));
+});
+return _r11;
+})()
+            : '';
+
+    shortRow = (
+        prefix: string,
+        data: { id: string; name: string } | null,
+    ): Template | string =>
+        data ? (() => {
+const _r19 = $__clone(_ft5);
+const _n20 = _r19.firstChild!;
+const _n21 = _n20.firstChild!;
+const _n22 = _n20.firstChild!.nextSibling!.nextSibling!;
+const _x23 = document.createTextNode('');
+_n21.replaceWith(_x23);
+const _x24 = document.createTextNode('');
+_n22.replaceWith(_x24);
+$__effect(() => {
+$__setClass(_n20, '', (`${prefix}-data`));
+});
+$__effect(() => {
+$__setText(_x23, (data.id));
+});
+$__effect(() => {
+$__setText(_x24, (data.name));
+});
+return _r19;
+})() : '';
+
+    echoRow = (data: { value: string; page: number } | null): Template | string =>
+        data ? (() => {
+const _r25 = $__clone(_ft6);
+const _n26 = _r25.firstChild!.firstChild!;
+const _n27 = _r25.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _x28 = document.createTextNode('');
+_n26.replaceWith(_x28);
+const _x29 = document.createTextNode('');
+_n27.replaceWith(_x29);
+$__effect(() => {
+$__setText(_x28, (data.value));
+});
+$__effect(() => {
+$__setText(_x29, (data.page));
+});
+return _r25;
+})() : '';
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n5 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n7 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n9 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n10 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n11 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n12 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n13 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n14 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n15 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n16 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n17 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n18 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n19 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n20 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n21 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n22 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n23 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n24 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n25 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n26 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n27 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n28 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n29 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__model(_n1 as HTMLInputElement, () => (this.name));
+$__model(_n2 as HTMLInputElement, () => (this.email));
+$__model(_n3 as HTMLInputElement, () => (this.handle));
+$__model(_n4 as HTMLInputElement, () => (this.age));
+$__event(_n5, 'click', this.submitCreate);
+$__child(_n7, () => (this.create.loading ? (() => {
+const _r30 = $__cloneEl(_t1);
+return _r30;
+})() : ''));
+$__child(_n8, () => (this.userRow('create', this.create.data)));
+$__child(_n9, () => (this.errors('create', this.create)));
+$__model(_n10 as HTMLInputElement, () => (this.userId));
+$__event(_n11, 'click', this.getById);
+$__child(_n12, () => (this.userRow('get', this.fetchUser.data)));
+$__child(_n13, () => (this.errors('get', this.fetchUser)));
+$__event(_n14, 'click', this.submitUpdate);
+$__child(_n15, () => (this.shortRow('update', this.saveUser.data)));
+$__child(_n16, () => (this.errors('update', this.saveUser)));
+$__event(_n17, 'click', this.submitDelete);
+$__child(_n18, () => (this.shortRow('delete', this.dropUser.data)));
+$__model(_n19 as HTMLInputElement, () => (this.echoValue));
+$__model(_n20 as HTMLInputElement, () => (this.echoPage));
+$__event(_n21, 'click', this.submitEcho);
+$__event(_n22, 'click', this.echoSlow);
+$__event(_n23, 'click', this.echoFast);
+$__child(_n25, () => (this.runEcho.loading ? (() => {
+const _r31 = $__cloneEl(_t2);
+return _r31;
+})() : ''));
+$__child(_n26, () => (this.echoRow(this.runEcho.data)));
+$__event(_n27, 'click', this.submitConflict);
+$__child(_n29, () => (this.errors('conflict', this.runConflict)));
+$__effect(() => {
+$__setText(_n6, (this.stateOf(this.create)));
+});
+$__effect(() => {
+$__setText(_n24, (this.stateOf(this.runEcho)));
+});
+$__effect(() => {
+$__setText(_n28, (this.stateOf(this.runConflict)));
+});
+return _r0;
+}
+}
+$__defineComponent('actions-app', ActionsApp);
+ActionsApp.prototype.$$__tag = 'actions-app';
+ActionsApp.$$__document = ActionsDocument;

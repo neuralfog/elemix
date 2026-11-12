@@ -125,13 +125,21 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         var typeName = type.Name;
         sb.Append("        public static ").Append(typeName).AppendLine("? Parse(global::System.ReadOnlySpan<byte> utf8, global::Hydris.Contracts.ContractValidation errors)");
         sb.AppendLine("        {");
-        sb.AppendLine("            var reader = new global::System.Text.Json.Utf8JsonReader(utf8);");
-        sb.AppendLine("            if (!reader.Read() || reader.TokenType != global::System.Text.Json.JsonTokenType.StartObject)");
+        sb.AppendLine("            try");
         sb.AppendLine("            {");
-        sb.AppendLine("                errors.Add(\"\", \"invalid\", \"Expected a JSON object.\");");
+        sb.AppendLine("                var reader = new global::System.Text.Json.Utf8JsonReader(utf8);");
+        sb.AppendLine("                if (!reader.Read() || reader.TokenType != global::System.Text.Json.JsonTokenType.StartObject)");
+        sb.AppendLine("                {");
+        sb.AppendLine("                    errors.Add(\"\", \"invalid\", \"Expected a JSON object.\");");
+        sb.AppendLine("                    return null;");
+        sb.AppendLine("                }");
+        sb.AppendLine("                return ReadFrom(ref reader, errors);");
+        sb.AppendLine("            }");
+        sb.AppendLine("            catch (global::System.Text.Json.JsonException)");
+        sb.AppendLine("            {");
+        sb.AppendLine("                errors.Add(\"\", \"invalid\", \"The request body is not valid JSON.\");");
         sb.AppendLine("                return null;");
         sb.AppendLine("            }");
-        sb.AppendLine("            return ReadFrom(ref reader, errors);");
         sb.AppendLine("        }");
     }
 

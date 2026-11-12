@@ -9,6 +9,17 @@ namespace Hydris.Tests;
 [Contract]
 internal sealed partial record GenEcho(string Value, int Number);
 
+internal enum Shade {
+    Light,
+    Dark,
+}
+
+[Contract]
+internal sealed partial record StrictReq([Hydris.Validation.Required] string Name);
+
+[Contract]
+internal sealed partial record Painted(string Shade, bool On, string Id);
+
 [Handler]
 internal sealed class GenBind {
     [Get("/gen-bind/user/:id")]
@@ -23,6 +34,15 @@ internal sealed class GenBind {
     [Action]
     public ActionResult<GenEcho> Make() =>
         ActionResult.Of(new GenEcho("made", 1)).Status(201).Header("X-Made", "yes");
+
+    [Post("/gen-bind/strict")]
+    [Action]
+    public GenEcho Strict(StrictReq input) => new(input.Name, 1);
+
+    [Get("/gen-bind/paint")]
+    [Action]
+    public Painted Paint(Shade shade, bool on, Guid id) =>
+        new(shade.ToString(), on, id.ToString());
 }
 
 [Middleware]
