@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -163,34 +165,27 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         sb.Append("        private static void Validate(").Append(type.Name).AppendLine(" value, global::Hydris.Contracts.ContractValidation errors)");
         sb.AppendLine("        {");
         foreach (var member in members) {
-            var kind = Classify(member.Type);
-            if (kind == Kind.Unsupported)
-                continue;
-            var access = "value." + member.Name;
             foreach (var rule in member.Rules) {
-                switch (rule.Name) {
-                    case "Required":
-                        if (kind == Kind.String)
-                            sb.Append("            if (string.IsNullOrEmpty(").Append(access).Append(")) errors.Add(\"").Append(member.Wire).Append("\", \"required\", \"").Append(member.Label).AppendLine(" is required.\");");
-                        break;
-                    case "Length":
-                        if (kind == Kind.String) {
-                            sb.Append("            if (").Append(access).Append(" is not null && (").Append(access).Append(".Length < ").Append(rule.Min).Append(" || ").Append(access).Append(".Length > ").Append(rule.Max).Append(")) errors.Add(\"").Append(member.Wire).Append("\", \"length\", \"").Append(member.Label).Append(" must be between ").Append(rule.Min).Append(" and ").Append(rule.Max).AppendLine(" characters.\");");
-                        }
-                        break;
-                    case "Range":
-                        if (kind == Kind.Number)
-                            sb.Append("            if (").Append(access).Append(" < ").Append(rule.Min).Append(" || ").Append(access).Append(" > ").Append(rule.Max).Append(") errors.Add(\"").Append(member.Wire).Append("\", \"range\", \"").Append(member.Label).Append(" must be between ").Append(rule.Min).Append(" and ").Append(rule.Max).AppendLine(".\");");
-                        break;
-                    case "Email":
-                        if (kind == Kind.String)
-                            sb.Append("            if (!string.IsNullOrEmpty(").Append(access).Append(") && !").Append(access).Append(".Contains(\"@\")) errors.Add(\"").Append(member.Wire).Append("\", \"email\", \"").Append(member.Label).AppendLine(" must be a valid email address.\");");
-                        break;
+                sb.Append("            { var message = global::Hydris.Validation.Rules.Check(").Append(Literal(rule.Name)).Append(", new global::Hydris.Validation.Value { Field = ").Append(Literal(member.Wire)).Append(", Raw = value.").Append(member.Name);
+                if (rule.Args.Count > 0) {
+                    sb.Append(", Args = [");
+                    for (var i = 0; i < rule.Args.Count; i++) {
+                        if (i > 0)
+                            sb.Append(", ");
+                        sb.Append(Literal(rule.Args[i]));
+                    }
+
+                    sb.Append(']');
                 }
+
+                sb.Append(" }); if (message is not null) errors.Add(").Append(Literal(member.Wire)).Append(", ").Append(Literal(rule.Name)).AppendLine(", message); }");
             }
         }
         sb.AppendLine("        }");
     }
+
+    private static string Literal(string value) =>
+        Microsoft.CodeAnalysis.CSharp.SymbolDisplay.FormatLiteral(value, true);
 
     private static IReadOnlyList<Member> Members(INamedTypeSymbol type) {
         var parameterAttributes = new Dictionary<string, ImmutableArray<AttributeData>>();
@@ -220,31 +215,88 @@ public sealed class ContractGenerator : IIncrementalGenerator {
     private static IReadOnlyList<Rule> Rules(ImmutableArray<AttributeData> attributes) {
         var rules = new List<Rule>();
         foreach (var attribute in attributes) {
-            var name = attribute.AttributeClass?.ToDisplayString();
-            switch (name) {
-                case "Hydris.Contracts.RequiredAttribute":
-                    rules.Add(new Rule("Required", null, null));
-                    break;
-                case "Hydris.Contracts.LengthAttribute":
-                    rules.Add(new Rule("Length", Arg(attribute, 0), Arg(attribute, 1)));
-                    break;
-                case "Hydris.Contracts.RangeAttribute":
-                    rules.Add(new Rule("Range", Arg(attribute, 0), Arg(attribute, 1)));
-                    break;
-                case "Hydris.Contracts.PatternAttribute":
-                    rules.Add(new Rule("Pattern", null, null));
-                    break;
-                case "Hydris.Contracts.EmailAttribute":
-                    rules.Add(new Rule("Email", null, null));
-                    break;
+            var attributeClass = attribute.AttributeClass;
+            if (attributeClass is null || !IsValidationAttribute(attributeClass))
+                continue;
+
+            var args = new List<string>();
+            if (attributeClass.IsGenericType && attributeClass.ConstructedFrom?.ToDisplayString() == "Hydris.Validation.RuleAttribute<T>") {
+                if (attributeClass.TypeArguments.Length == 0 || attributeClass.TypeArguments[0] is not INamedTypeSymbol ruleType)
+                    continue;
+                foreach (var argument in attribute.ConstructorArguments)
+                    AppendArgs(args, argument);
+                rules.Add(new Rule(RuleName(ruleType), args));
+            } else if (attributeClass.ToDisplayString() == "Hydris.Validation.RuleAttribute") {
+                if (attribute.ConstructorArguments.Length == 0 || attribute.ConstructorArguments[0].Value is not string ruleName)
+                    continue;
+                for (var i = 1; i < attribute.ConstructorArguments.Length; i++)
+                    AppendArgs(args, attribute.ConstructorArguments[i]);
+                rules.Add(new Rule(ruleName, args));
+            } else {
+                foreach (var argument in attribute.ConstructorArguments)
+                    AppendArgs(args, argument);
+                rules.Add(new Rule(Snake(Strip(attributeClass.Name)), args));
             }
         }
 
         return rules;
     }
 
-    private static string? Arg(AttributeData attribute, int index) =>
-        attribute.ConstructorArguments.Length > index ? attribute.ConstructorArguments[index].Value?.ToString() : null;
+    private static string RuleName(INamedTypeSymbol ruleType) {
+        foreach (var attribute in ruleType.GetAttributes()) {
+            if (attribute.AttributeClass?.ToDisplayString() == "Hydris.Validation.ValidationRuleAttribute"
+                && attribute.ConstructorArguments.Length > 0
+                && attribute.ConstructorArguments[0].Value is string explicitName) {
+                return explicitName;
+            }
+        }
+
+        return Snake(ruleType.Name);
+    }
+
+    private static bool IsValidationAttribute(INamedTypeSymbol attributeClass) {
+        for (var baseType = attributeClass.BaseType; baseType is not null; baseType = baseType.BaseType) {
+            if (baseType.ToDisplayString() == "Hydris.Validation.ValidationAttribute")
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void AppendArgs(List<string> args, TypedConstant argument) {
+        if (argument.Kind == TypedConstantKind.Array) {
+            foreach (var element in argument.Values)
+                args.Add(ArgText(element));
+        } else {
+            args.Add(ArgText(argument));
+        }
+    }
+
+    private static string ArgText(TypedConstant argument) => argument.Value switch {
+        null => string.Empty,
+        double d => d.ToString(CultureInfo.InvariantCulture),
+        float f => f.ToString(CultureInfo.InvariantCulture),
+        var value => value.ToString() ?? string.Empty,
+    };
+
+    private static string Strip(string name) =>
+        name.EndsWith("Attribute", StringComparison.Ordinal) ? name.Substring(0, name.Length - "Attribute".Length) : name;
+
+    private static string Snake(string name) {
+        var builder = new StringBuilder();
+        for (var i = 0; i < name.Length; i++) {
+            var c = name[i];
+            if (char.IsUpper(c)) {
+                if (i > 0)
+                    builder.Append('_');
+                builder.Append(char.ToLowerInvariant(c));
+            } else {
+                builder.Append(c);
+            }
+        }
+
+        return builder.ToString();
+    }
 
     private static Kind Classify(ITypeSymbol type) {
         if (type.SpecialType == SpecialType.System_String)
@@ -327,14 +379,12 @@ public sealed class ContractGenerator : IIncrementalGenerator {
     }
 
     private sealed class Rule {
-        public Rule(string name, string? min, string? max) {
+        public Rule(string name, IReadOnlyList<string> args) {
             Name = name;
-            Min = min;
-            Max = max;
+            Args = args;
         }
 
         public string Name { get; }
-        public string? Min { get; }
-        public string? Max { get; }
+        public IReadOnlyList<string> Args { get; }
     }
 }
