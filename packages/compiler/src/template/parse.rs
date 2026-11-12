@@ -423,6 +423,25 @@ fn collapse_ws(s: &str) -> String {
     out
 }
 
+fn nonws_text(child: Option<&Child>) -> bool {
+    matches!(child, Some(Child::Text(t)) if t.chars().any(|c| !c.is_whitespace()))
+}
+
+fn text_hole(children: &[Child], idx: usize, expr: &str) -> bool {
+    if !crate::grammar::is_text_content(expr) {
+        return false;
+    }
+    if children.len() == 1 {
+        return true;
+    }
+    if nonws_text(idx.checked_sub(1).and_then(|i| children.get(i)))
+        || nonws_text(children.get(idx + 1))
+    {
+        return true;
+    }
+    crate::codegen::is_simple_read(expr.trim())
+}
+
 fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &mut Vec<Hole>) {
     let sole = children.len() == 1;
     let mut node_count = 0usize;
@@ -446,7 +465,8 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                     Some(Child::Text(t)) => t.chars().count(),
                     _ => 0,
                 };
-                let run_index = if crate::grammar::is_text_content(expr) {
+                let is_text = text_hole(children, idx, expr);
+                let run_index = if is_text {
                     if !run_open {
                         run_open = true;
                         run_start = server_count;
@@ -461,7 +481,7 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                     server_count += 1;
                     own
                 };
-                if sole && crate::grammar::is_text_content(expr) {
+                if sole && is_text {
                     markup.push(' ');
                     holes.push(Hole {
                         path: p,
@@ -471,6 +491,7 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                         tag: None,
                         prefix,
                         run_index,
+                        child: false,
                     });
                 } else {
                     markup.push_str("<!---->");
@@ -482,6 +503,7 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                         tag: None,
                         prefix,
                         run_index,
+                        child: !is_text && crate::grammar::is_text_content(expr),
                     });
                 }
                 node_count += 1;
@@ -503,6 +525,7 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                         tag: Some(el.tag.clone()),
                         prefix: 0,
                         run_index: 0,
+                        child: false,
                     });
                 }
                 markup.push('<');
@@ -644,21 +667,18 @@ fn emit_child(tag: &str, props: &str, slot: &[Chunk], attrs: &str, names: &[Stri
 fn serialize_ssr(children: &[Child], r: &mut Rope, counter: &mut usize, hydratable: bool) {
     let regions: Vec<&String> = children
         .iter()
-        .filter_map(|c| match c {
-            Child::Anchor(e, _) if !crate::grammar::is_text_content(e) => Some(e),
+        .enumerate()
+        .filter_map(|(idx, c)| match c {
+            Child::Anchor(e, _) if !text_hole(children, idx, e) => Some(e),
             _ => None,
         })
         .collect();
-    let multi_region = hydratable
-        && regions.len() >= 2
-        && regions
-            .iter()
-            .all(|e| e.trim_start().starts_with("repeat("));
-    for child in children {
+    let multi_region = hydratable && regions.len() >= 2;
+    for (idx, child) in children.iter().enumerate() {
         match child {
             Child::Text(t) => r.static_str(&esc_tpl(t)),
             Child::Anchor(expr, _) => {
-                if crate::grammar::is_text_content(expr) {
+                if text_hole(children, idx, expr) {
                     r.content(format!("$__ssrText({expr})"));
                 } else {
                     r.content(crate::ssr_expr::rewrite_content_expr(expr));
@@ -712,13 +732,14 @@ fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: boo
     }
 
     let sole_baked = el.children.len() == 1
-        && matches!(&el.children[0], Child::Anchor(e, _) if crate::grammar::is_text_content(e));
+        && matches!(&el.children[0], Child::Anchor(e, _) if text_hole(&el.children, 0, e));
     let text_count = if !hydratable || sole_baked {
         0
     } else {
         el.children
             .iter()
-            .filter(|c| matches!(c, Child::Anchor(e, _) if crate::grammar::is_text_content(e)))
+            .enumerate()
+            .filter(|(idx, c)| matches!(c, Child::Anchor(e, _) if text_hole(&el.children, *idx, e)))
             .count()
     };
 
@@ -737,17 +758,17 @@ fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: boo
 
     let base = *counter;
     *counter += text_count;
-    let has_content = el.children.iter().any(|c| match c {
-        Child::Anchor(e, _) => !crate::grammar::is_text_content(e),
+    let has_content = el.children.iter().enumerate().any(|(idx, c)| match c {
+        Child::Anchor(e, _) => !text_hole(&el.children, idx, e),
         Child::Elem(_) => true,
         _ => false,
     });
 
     let mut decls = String::new();
     let mut ti = 0;
-    for child in &el.children {
+    for (idx, child) in el.children.iter().enumerate() {
         if let Child::Anchor(e, _) = child {
-            if crate::grammar::is_text_content(e) {
+            if text_hole(&el.children, idx, e) {
                 decls.push_str(&format!("const _t{} = ({e});", base + ti));
                 ti += 1;
             }
@@ -772,10 +793,10 @@ fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: boo
     if !has_content {
         let mut body = String::new();
         let mut tj = 0;
-        for child in &el.children {
+        for (idx, child) in el.children.iter().enumerate() {
             match child {
                 Child::Text(t) => body.push_str(&esc_tpl(t)),
-                Child::Anchor(e, _) if crate::grammar::is_text_content(e) => {
+                Child::Anchor(e, _) if text_hole(&el.children, idx, e) => {
                     body.push_str(&format!("${{$__ssrText(_t{})}}", base + tj));
                     tj += 1;
                 }
@@ -791,10 +812,10 @@ fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: boo
     let mut inner = Rope::new();
     inner.static_str(&open);
     let mut tj = 0;
-    for child in &el.children {
+    for (idx, child) in el.children.iter().enumerate() {
         match child {
             Child::Text(t) => inner.static_str(&esc_tpl(t)),
-            Child::Anchor(e, _) if crate::grammar::is_text_content(e) => {
+            Child::Anchor(e, _) if text_hole(&el.children, idx, e) => {
                 inner.static_str(&format!("${{$__ssrText(_t{})}}", base + tj));
                 tj += 1;
             }
@@ -901,7 +922,7 @@ fn collect_struct(children: &[Child], path: &NodePath, out: &mut Vec<StructHole>
     let total = children.len();
     for (idx, child) in children.iter().enumerate() {
         match child {
-            Child::Anchor(expr, _) if !crate::grammar::is_text_content(expr) => {
+            Child::Anchor(expr, _) if !text_hole(children, idx, expr) => {
                 out.push(StructHole {
                     parent: path.clone(),
                     before: idx,

@@ -11,6 +11,7 @@ fn attr(name: &str, expr: &str) -> Hole {
         tag: None,
         prefix: 0,
         run_index: 0,
+        child: false,
     }
 }
 
@@ -23,6 +24,7 @@ fn content(expr: &str) -> Hole {
         tag: None,
         prefix: 0,
         run_index: 0,
+        child: false,
     }
 }
 

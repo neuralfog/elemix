@@ -107,23 +107,23 @@ const _t1 = $__templateEl('<tr><td class="col-id"> </td><td><a class="lbl"> </a>
 
 export class BenchApp extends Component {
 $$__hydrate(root: Node): void {
-const _n0 = root.firstChild!.firstChild!;
-const _n1 = root.firstChild!.firstChild!.nextSibling!;
-const _n2 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n3 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n0, 'click', this.run);
-$__event(_n1, 'click', this.runLots);
-$__event(_n2, 'click', this.add);
-$__event(_n3, 'click', this.update);
-$__event(_n4, 'click', this.clear);
-$__event(_n5, 'click', this.swapRows);
-const _n6 = root.firstChild!.nextSibling!.firstChild!;
-const _b7 = $__bounds(_n6, 0, 0);
+const _n0 = root.firstChild!.nextSibling!.firstChild!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _n3 = root.firstChild!.firstChild!;
+const _n4 = root.firstChild!.firstChild!.nextSibling!;
+const _n5 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n6 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n3, 'click', this.run);
+$__event(_n4, 'click', this.runLots);
+$__event(_n5, 'click', this.add);
+$__event(_n6, 'click', this.update);
+$__event(_n7, 'click', this.clear);
+$__event(_n8, 'click', this.swapRows);
 $__fresh(() => {
-const _a8 = $__reanchor(_n6, _b7[0], _b7[1]);
-$__list(_a8, () => (this.state.rows), (row) => row.id, (
+$__list(_a2, () => (this.state.rows), (row) => row.id, (
                         row,
                     ) => {
 const _r9 = $__cloneEl(_h0);

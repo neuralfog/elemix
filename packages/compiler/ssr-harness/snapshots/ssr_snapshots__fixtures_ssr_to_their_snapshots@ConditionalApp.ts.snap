@@ -79,9 +79,9 @@ export class ConditionalApp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'conditional-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel">`, (this.state.loggedIn
                     ? $__ssrTpl(`<div class="card welcome"><strong>Welcome back! 🎉</strong><span>You are signed in.</span></div>`)
-                    : $__ssrTpl(`<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>`)), ` `, (this.state.showTip
+                    : $__ssrTpl(`<div class="card guest"><strong>You are signed out</strong><span>Sign in to see your dashboard.</span></div>`)), `<!--$--> `, (this.state.showTip
                     ? $__ssrTpl(`<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>`)
-                    : ''), `</div><div class="buttons"><button>`, $__ssrText(this.state.loggedIn ? 'Sign out' : 'Sign in'), `</button><button class="ghost">`, $__ssrText(this.state.showTip ? 'Hide tip' : 'Show tip'), `</button></div></template></${this.$$__tag ?? 'conditional-app'}>`];
+                    : ''), `<!--$--></div><div class="buttons"><button>`, $__ssrText(this.state.loggedIn ? 'Sign out' : 'Sign in'), `</button><button class="ghost">`, $__ssrText(this.state.showTip ? 'Hide tip' : 'Show tip'), `</button></div></template></${this.$$__tag ?? 'conditional-app'}>`];
 }
 
 

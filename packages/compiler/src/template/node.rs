@@ -24,4 +24,5 @@ pub struct Hole {
     pub tag: Option<String>,
     pub prefix: usize,
     pub run_index: usize,
+    pub child: bool,
 }

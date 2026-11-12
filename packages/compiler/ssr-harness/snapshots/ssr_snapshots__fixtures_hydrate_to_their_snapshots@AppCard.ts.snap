@@ -1,10 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/AppCard.ts
 ---
-import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__span, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
 import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<div class="header"><slot name="header"></slot></div>');
 const _h1 = $__templateEl('<div class="footer"><slot name="footer"></slot></div>');
@@ -44,18 +43,18 @@ const _t2 = $__templateEl('<div class="footer"><slot name="footer"></slot></div>
 export class AppCard extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
-const _b1 = $__bounds(_n0, 0, 4);
-const _b2 = $__bounds(_n0, 4, 0);
-$__fresh(() => {
+const _b1 = $__span(_n0, 0, 0);
+const _b2 = $__span(_n0, 3, 1);
 const _a3 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _a4 = $__reanchor(_n0, _b2[0], _b2[1]);
+$__fresh(() => {
 $__child(_a3, () => (this.hasSlot('header')
                 ? (() => {
-const _r4 = $__cloneEl(_h0);
-return _r4;
+const _r5 = $__cloneEl(_h0);
+return _r5;
 })()
                 : ''));
-const _a5 = $__reanchor(_n0, _b2[0], _b2[1]);
-$__child(_a5, () => (this.hasSlot('footer')
+$__child(_a4, () => (this.hasSlot('footer')
                 ? (() => {
 const _r6 = $__cloneEl(_h1);
 return _r6;

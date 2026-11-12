@@ -8,6 +8,10 @@
         "fixture": "AttrApp"
     },
     {
+        "tag": "verbs-panel-app",
+        "fixture": "VerbsPanelApp"
+    },
+    {
         "tag": "before-mount-app",
         "fixture": "BeforeMountApp"
     },

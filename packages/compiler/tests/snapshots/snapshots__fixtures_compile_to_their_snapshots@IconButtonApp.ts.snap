@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/IconButtonApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__event, $__child, $__effect, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Props = {
@@ -35,11 +35,7 @@ export class IconButton extends Component<Props> {
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _x2 = document.createTextNode('');
-_n1.replaceWith(_x2);
-$__effect(() => {
-$__setText(_x2, (this.props.label ?? ''));
-});
+$__child(_n1, () => (this.props.label ?? ''));
 return _r0;
 }
 }
@@ -69,16 +65,16 @@ export class IconButtonApp extends Component {
     };
 
     $$__view(): DocumentFragment {
-const _r3 = $__clone(_t1);
-const _n4 = _r3.firstChild!;
-const _n5 = _r3.firstChild!.nextSibling!;
-const _n6 = _r3.firstChild!.nextSibling!.nextSibling!;
-$__event(_n5, 'click', this.setLabel);
-$__event(_n6, 'click', this.clearLabel);
+const _r2 = $__clone(_t1);
+const _n3 = _r2.firstChild!;
+const _n4 = _r2.firstChild!.nextSibling!;
+const _n5 = _r2.firstChild!.nextSibling!.nextSibling!;
+$__event(_n4, 'click', this.setLabel);
+$__event(_n5, 'click', this.clearLabel);
 $__effect(() => {
-$__setProp(_n4, 'label', (this.state.label));
+$__setProp(_n3, 'label', (this.state.label));
 });
-return _r3;
+return _r2;
 }
 }
 IconButtonApp.$$__sheets = [..._s1];

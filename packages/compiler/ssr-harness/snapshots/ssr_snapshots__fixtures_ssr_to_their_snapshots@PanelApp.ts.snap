@@ -60,7 +60,7 @@ const css = `
 
 export class PanelApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'panel-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel">`, ($__ssrTpl(`<h2>`, $__ssrText(this.state.title), `</h2>`)), ` `, ($__ssrTpl(`<p class="stat">`, $__ssrText(this.state.count), ` open</p>`)), ` <button>add</button><button>rename</button></div></template></${this.$$__tag ?? 'panel-app'}>`];
+return [`<${this.$$__tag ?? 'panel-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="panel">`, ($__ssrTpl(`<h2>`, $__ssrText(this.state.title), `</h2>`)), `<!--$--> `, ($__ssrTpl(`<p class="stat">`, $__ssrText(this.state.count), ` open</p>`)), `<!--$--> <button>add</button><button>rename</button></div></template></${this.$$__tag ?? 'panel-app'}>`];
 }
 
 

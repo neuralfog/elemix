@@ -30,134 +30,134 @@ const _t2 = $__templateEl('<li class="score"><!---->: <!----></li>');
 
 export class CollectionApp extends Component {
 $$__hydrate(root: Node): void {
-const _n0 = root.firstChild!.firstChild!;
-const _n1 = $__text(_n0);
-const _n2 = root.firstChild!.firstChild!.nextSibling!;
-const _n3 = $__text(_n2);
-const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n5 = $__text(_n4);
-const _n6 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n0 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _n2 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _b3 = $__bounds(_n2, 0, 0);
+const _a4 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _a5 = $__reanchor(_n2, _b3[0], _b3[1]);
+const _n6 = root.firstChild!.firstChild!;
 const _n7 = $__text(_n6);
-const _n8 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = root.firstChild!.firstChild!.nextSibling!;
 const _n9 = $__text(_n8);
-const _n10 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n10 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
 const _n11 = $__text(_n10);
-const _n12 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n12 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n13 = $__text(_n12);
-const _n14 = root.firstChild!.nextSibling!.firstChild!;
+const _n14 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n15 = $__text(_n14);
-const _n16 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n16 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n17 = $__text(_n16);
-const _n18 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n18 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n19 = $__text(_n18);
-const _n20 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n20 = root.firstChild!.nextSibling!.firstChild!;
 const _n21 = $__text(_n20);
-const _n22 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n22 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
 const _n23 = $__text(_n22);
-const _n24 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n24 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
 const _n25 = $__text(_n24);
-const _n26 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n26 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 const _n27 = $__text(_n26);
-const _n28 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n28 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n29 = $__text(_n28);
-const _n30 = root.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n30 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n31 = $__text(_n30);
-const _n32 = root.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n32 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n33 = $__text(_n32);
-const _n34 = root.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n34 = root.firstChild!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 const _n35 = $__text(_n34);
-const _n36 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n37 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-const _n38 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n39 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n40 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n41 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n42 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n43 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n44 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n45 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n46 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n36, 'click', this.addTag);
-$__event(_n37, 'click', this.removeTag);
-$__event(_n38, 'click', this.clearTags);
-$__event(_n39, 'click', this.bumpAlice);
-$__event(_n40, 'click', this.setBob);
-$__event(_n41, 'click', this.deleteAlice);
-$__event(_n42, 'click', this.clearScores);
-$__event(_n43, 'click', this.addSeen);
-$__event(_n44, 'click', this.deleteSeen);
-$__event(_n45, 'click', this.setMeta);
-$__event(_n46, 'click', this.deleteMeta);
+const _n36 = root.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n37 = $__text(_n36);
+const _n38 = root.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n39 = $__text(_n38);
+const _n40 = root.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n41 = $__text(_n40);
+const _n42 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
+const _n43 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+const _n44 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n45 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n46 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n47 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n48 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n49 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n50 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n51 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n52 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n42, 'click', this.addTag);
+$__event(_n43, 'click', this.removeTag);
+$__event(_n44, 'click', this.clearTags);
+$__event(_n45, 'click', this.bumpAlice);
+$__event(_n46, 'click', this.setBob);
+$__event(_n47, 'click', this.deleteAlice);
+$__event(_n48, 'click', this.clearScores);
+$__event(_n49, 'click', this.addSeen);
+$__event(_n50, 'click', this.deleteSeen);
+$__event(_n51, 'click', this.setMeta);
+$__event(_n52, 'click', this.deleteMeta);
 $__effect(() => {
-$__setText(_n1, (this.state.tags.size));
+$__setText(_n7, (this.state.tags.size));
 });
 $__effect(() => {
-$__setText(_n3, (this.state.tags.has('vip')));
+$__setText(_n9, (this.state.tags.has('vip')));
 });
 $__effect(() => {
-$__setText(_n5, (this.setKeys));
+$__setText(_n11, (this.setKeys));
 });
 $__effect(() => {
-$__setText(_n7, (this.setValues));
+$__setText(_n13, (this.setValues));
 });
 $__effect(() => {
-$__setText(_n9, (this.setEntries));
+$__setText(_n15, (this.setEntries));
 });
 $__effect(() => {
-$__setText(_n11, (this.setIter));
+$__setText(_n17, (this.setIter));
 });
 $__effect(() => {
-$__setText(_n13, (this.setForEach));
+$__setText(_n19, (this.setForEach));
 });
 $__effect(() => {
-$__setText(_n15, (this.state.scores.size));
+$__setText(_n21, (this.state.scores.size));
 });
 $__effect(() => {
-$__setText(_n17, (this.state.scores.get('alice')));
+$__setText(_n23, (this.state.scores.get('alice')));
 });
 $__effect(() => {
-$__setText(_n19, (this.state.scores.has('alice')));
+$__setText(_n25, (this.state.scores.has('alice')));
 });
 $__effect(() => {
-$__setText(_n21, (this.mapKeys));
+$__setText(_n27, (this.mapKeys));
 });
 $__effect(() => {
-$__setText(_n23, (this.mapValues));
+$__setText(_n29, (this.mapValues));
 });
 $__effect(() => {
-$__setText(_n25, (this.mapEntries));
+$__setText(_n31, (this.mapEntries));
 });
 $__effect(() => {
-$__setText(_n27, (this.mapIter));
+$__setText(_n33, (this.mapIter));
 });
 $__effect(() => {
-$__setText(_n29, (this.total));
+$__setText(_n35, (this.total));
 });
 $__effect(() => {
-$__setText(_n31, (this.state.seen.has(this.token)));
+$__setText(_n37, (this.state.seen.has(this.token)));
 });
 $__effect(() => {
-$__setText(_n33, (this.state.meta.has(this.token)));
+$__setText(_n39, (this.state.meta.has(this.token)));
 });
 $__effect(() => {
-$__setText(_n35, (this.state.meta.get(this.token)));
+$__setText(_n41, (this.state.meta.get(this.token)));
 });
-const _n47 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _b48 = $__bounds(_n47, 0, 0);
-const _n49 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _b50 = $__bounds(_n49, 0, 0);
 $__fresh(() => {
-const _a51 = $__reanchor(_n47, _b48[0], _b48[1]);
-$__list(_a51, () => ([...this.state.tags]), (tag) => tag, (tag) => {
-const _r52 = $__cloneEl(_h0);
-const _n53 = _r52.firstChild!;
+$__list(_a4, () => ([...this.state.tags]), (tag) => tag, (tag) => {
+const _r53 = $__cloneEl(_h0);
+const _n54 = _r53.firstChild!;
 $__effect(() => {
-$__setText(_n53, (tag));
+$__setText(_n54, (tag));
 });
-return _r52;
+return _r53;
 });
-const _a54 = $__reanchor(_n49, _b50[0], _b50[1]);
-$__list(_a54, () => ([...this.state.scores.keys()]), (name) => name, (name) => {
+$__list(_a5, () => ([...this.state.scores.keys()]), (name) => name, (name) => {
 const _r55 = $__cloneEl(_h1);
 const _n56 = _r55.firstChild!;
 const _n57 = _r55.firstChild!.nextSibling!.nextSibling!;

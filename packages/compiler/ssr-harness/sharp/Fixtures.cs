@@ -88,6 +88,9 @@ public sealed class Fixtures {
     [Get("/attr-app")]
     public Reply AttrApp() => Reply.View("fixtures/AttrApp");
 
+    [Get("/verbs-panel-app")]
+    public Reply VerbsPanelApp() => Reply.View("fixtures/VerbsPanelApp");
+
     [Get("/bench-app")]
     public Reply BenchApp() => Reply.View("fixtures/BenchApp");
 
