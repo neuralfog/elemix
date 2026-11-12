@@ -18,6 +18,11 @@ internal sealed class GenBind {
     [Get("/gen-bind/search")]
     [Action]
     public GenEcho Search(string? q, int page) => new(q ?? "none", page);
+
+    [Post("/gen-bind/make")]
+    [Action]
+    public ActionResult<GenEcho> Make() =>
+        ActionResult.Of(new GenEcho("made", 1)).Status(201).Header("X-Made", "yes");
 }
 
 [Middleware]

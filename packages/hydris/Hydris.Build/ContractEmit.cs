@@ -207,13 +207,17 @@ public static class ContractEmit {
         sb.Append("    run(").Append(runParam).AppendLine("): Promise<void>;");
         sb.AppendLine("};");
         sb.AppendLine();
-        sb.Append("export const ").Append(SafeIdent(action.Name)).Append(" = (): ").Append(handle).AppendLine(" =>");
-        sb.Append("    reactive<").Append(handle).AppendLine(">({");
+        sb.Append("export const ").Append(SafeIdent(action.Name)).Append(" = (): ").Append(handle).AppendLine(" => {");
+        sb.AppendLine("    let controller: AbortController | null = null;");
+        sb.Append("    return reactive<").Append(handle).AppendLine(">({");
         sb.AppendLine("        data: null,");
         sb.AppendLine("        loading: false,");
         sb.AppendLine("        isError: false,");
         sb.AppendLine("        error: null,");
         sb.Append("        async run(").Append(runParam).AppendLine("): Promise<void> {");
+        sb.AppendLine("            controller?.abort();");
+        sb.AppendLine("            controller = new AbortController();");
+        sb.AppendLine("            const signal = controller.signal;");
         sb.AppendLine("            this.data = null;");
         sb.AppendLine("            this.error = null;");
         sb.AppendLine("            this.isError = false;");
@@ -242,6 +246,7 @@ public static class ContractEmit {
             sb.AppendLine("                    headers: { 'Content-Type': 'application/json' },");
             sb.Append("                    body: JSON.stringify(").Append(hasParams ? "args.body" : "body").AppendLine("),");
         }
+        sb.AppendLine("                    signal,");
         sb.AppendLine("                });");
         sb.AppendLine("                if (response.ok) {");
         sb.Append("                    this.data = (await response.json()) as ").Append(responseType).AppendLine(";");
@@ -262,13 +267,15 @@ public static class ContractEmit {
         sb.AppendLine("                    this.isError = true;");
         sb.AppendLine("                }");
         sb.AppendLine("            } catch {");
+        sb.AppendLine("                if (signal.aborted) return;");
         sb.AppendLine("                this.error = { kind: ActionErrorKind.Network };");
         sb.AppendLine("                this.isError = true;");
         sb.AppendLine("            } finally {");
-        sb.AppendLine("                this.loading = false;");
+        sb.AppendLine("                if (!signal.aborted) this.loading = false;");
         sb.AppendLine("            }");
         sb.AppendLine("        },");
         sb.AppendLine("    });");
+        sb.AppendLine("};");
     }
 
     private static string MapType(
@@ -406,12 +413,18 @@ public static class ContractEmit {
     }
 
     private static string Response(TypeSyntax returnType) {
-        if (returnType is GenericNameSyntax generic
-            && generic.Identifier.Text is "Task" or "ValueTask"
-            && generic.TypeArgumentList.Arguments.Count == 1)
-            return generic.TypeArgumentList.Arguments[0].ToString();
+        var type = returnType;
+        if (type is GenericNameSyntax task
+            && task.Identifier.Text is "Task" or "ValueTask"
+            && task.TypeArgumentList.Arguments.Count == 1)
+            type = task.TypeArgumentList.Arguments[0];
 
-        return returnType.ToString();
+        if (type is GenericNameSyntax action
+            && action.Identifier.Text == "ActionResult"
+            && action.TypeArgumentList.Arguments.Count == 1)
+            type = action.TypeArgumentList.Arguments[0];
+
+        return type.ToString();
     }
 
     private static bool HasAttribute(SyntaxList<AttributeListSyntax> lists, string name) {

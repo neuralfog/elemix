@@ -137,6 +137,14 @@ public sealed class Reply {
         return new Reply(buffer.WrittenSpan.ToArray(), 200, "application/json; charset=utf-8");
     }
 
+    public static Reply Action<T>(ActionResult<T> result) where T : IViewData {
+        ArgumentNullException.ThrowIfNull(result);
+        var reply = Action(result.Value).Status(result.StatusCode);
+        foreach (var (name, value) in result.Headers)
+            reply.Header(name, value);
+        return reply;
+    }
+
     public static Reply Binary(byte[] data) {
         Debug.Assert(data is not null);
         return new Reply(data, 200, "application/octet-stream");

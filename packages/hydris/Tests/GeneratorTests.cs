@@ -41,6 +41,22 @@ public sealed class GeneratorTests {
     }
 
     [Fact]
+    public async Task ActionResultCarriesStatusAndHeaders() {
+        var container = new DiContainer().AddServices();
+        var router = new Router();
+        router.MapRoutes();
+
+        var match = router.Match(Method.Post, "/gen-bind/make")!;
+        var request = new Request(Method.Post, match.Path, match.Params, new HeaderDictionary());
+        await using var scope = CoreServiceProvider.RequestScope(container, request);
+        var reply = await match.Handler(scope);
+
+        Assert.Equal(201, reply.StatusCode);
+        Assert.Equal("yes", reply.HeaderValue("X-Made"));
+        Assert.Contains("\"value\":\"made\"", Encoding.UTF8.GetString(reply.Content));
+    }
+
+    [Fact]
     public void QueryValueParsesPairsAndDecodes() {
         var request = new Request(Method.Get, "/x", new Dictionary<string, string>(), new HeaderDictionary()) {
             Query = "?a=1&b=hello+world&c",
