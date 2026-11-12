@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Hydris.Build</RootNamespace>
-    <AssemblyName>hydris-build</AssemblyName>
+    <AssemblyName>Hydris.Build</AssemblyName>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>hydris-build</ToolCommandName>
