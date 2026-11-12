@@ -36,6 +36,9 @@ internal sealed class Dispatcher(
         var request = new Request(method, match?.Path ?? PathOf(target), match?.Params ?? Empty, context.Request.Headers);
         request.Ip = ProxyResolver.ResolveIp(request, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, trustProxy);
         request.Protocol = ProxyResolver.ResolveProtocol(request, context.Request.Scheme, trustProxy);
+        request.Query = context.Request.QueryString;
+        request.BodyStream = context.Request.Body;
+        request.Aborted = context.Lifetime.RequestAborted;
 
         await using var scope = CoreServiceProvider.RequestScope(services, request);
         Reply reply;

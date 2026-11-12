@@ -9,6 +9,7 @@ var positional = args.Where(a => !a.StartsWith('-')).ToArray();
 var root = Path.GetFullPath(positional.Length > 0 ? positional[0] : Directory.GetCurrentDirectory());
 var viewsRoot = positional.Length > 1 ? Path.GetFullPath(positional[1]) : root;
 Brand.Banner();
+ContractEmit.Run(root, viewsRoot);
 var views = ViewDiscovery.Scan(root, viewsRoot);
 
 if (views.Count == 0) {

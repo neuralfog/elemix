@@ -128,11 +128,62 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         CollectUse(method.GetAttributes(), uses);
         var chain = "[" + string.Join(", ", uses) + "]";
 
+        if (HasAction(method.GetAttributes()))
+            return EmitActionRoute(method, httpMethod, literal, chain);
+
         var json = HasJson(method.ContainingType.GetAttributes()) || HasJson(method.GetAttributes())
             ? "true"
             : "false";
 
         return $"router.Map<{controller}>(global::Hydris.Routing.Method.{httpMethod}, {literal}, {chain}, {json}, static c => c.{method.Name}());";
+    }
+
+    private static bool HasAction(ImmutableArray<AttributeData> attributes) {
+        foreach (var attribute in attributes) {
+            if (attribute.AttributeClass?.ToDisplayString() == "Hydris.Routing.ActionAttribute")
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string EmitActionRoute(IMethodSymbol method, string httpMethod, string literal, string chain) {
+        var controller = method.ContainingType.ToDisplayString(FullyQualified);
+        var awaitable = method.ReturnType is INamedTypeSymbol named
+            && named.TypeArguments.Length == 1
+            && (named.Name == "Task" || named.Name == "ValueTask")
+            && named.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks";
+        var resultType = awaitable
+            ? ((INamedTypeSymbol)method.ReturnType).TypeArguments[0].ToDisplayString(FullyQualified)
+            : method.ReturnType.ToDisplayString(FullyQualified);
+        var call = awaitable ? "await handler." : "handler.";
+
+        var builder = new StringBuilder();
+        builder.Append("router.Map(global::Hydris.Routing.Method.").Append(httpMethod).Append(", ").Append(literal).Append(", ").Append(chain).Append(", true, ");
+        if (method.Parameters.Length == 1) {
+            var parameter = method.Parameters[0].Type.ToDisplayString(FullyQualified);
+            builder.Append("static async scope => { ");
+            builder.Append("var handler = scope.Get<").Append(controller).Append(">(); ");
+            builder.Append("var request = scope.Get<global::Hydris.Http.Request>(); ");
+            builder.Append("var errors = new global::Hydris.Contracts.ContractValidation(); ");
+            builder.Append("byte[] body = await request.ReadBodyAsync(); ");
+            builder.Append(parameter).Append("? dto = ").Append(parameter).Append(".Parse(body, errors); ");
+            builder.Append("if (dto is null || errors.Failed) return errors.ToReply(); ");
+            builder.Append(resultType).Append(" result = ").Append(call).Append(method.Name).Append("(dto); ");
+            builder.Append("return global::Hydris.Http.Reply.Action(result); });");
+        } else if (awaitable) {
+            builder.Append("static async scope => { ");
+            builder.Append("var handler = scope.Get<").Append(controller).Append(">(); ");
+            builder.Append(resultType).Append(" result = ").Append(call).Append(method.Name).Append("(); ");
+            builder.Append("return global::Hydris.Http.Reply.Action(result); });");
+        } else {
+            builder.Append("static scope => { ");
+            builder.Append("var handler = scope.Get<").Append(controller).Append(">(); ");
+            builder.Append(resultType).Append(" result = handler.").Append(method.Name).Append("(); ");
+            builder.Append("return global::System.Threading.Tasks.Task.FromResult(global::Hydris.Http.Reply.Action(result)); });");
+        }
+
+        return builder.ToString();
     }
 
     private static void CollectUse(ImmutableArray<AttributeData> attributes, List<string> into) {

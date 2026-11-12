@@ -21,6 +21,18 @@ public sealed class Request(
     public IReadOnlyDictionary<string, string> Cookies => CookieJar ??= CookieAuthority.Parse(Header("Cookie"));
     public string Ip { get; internal set; } = string.Empty;
     public string Protocol { get; internal set; } = string.Empty;
+    public string Query { get; internal set; } = string.Empty;
+
+    internal Stream? BodyStream { get; set; }
+    internal CancellationToken Aborted { get; set; }
+
+    public async ValueTask<byte[]> ReadBodyAsync() {
+        if (BodyStream is null)
+            return [];
+        using var buffer = new MemoryStream();
+        await BodyStream.CopyToAsync(buffer, Aborted);
+        return buffer.ToArray();
+    }
 
     public string? Param(string name) => Params.TryGetValue(name, out var value) ? value : null;
 
