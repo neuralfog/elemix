@@ -1,3 +1,5 @@
+using System.Buffers;
+using Hydris.Error;
 using Hydris.Routing;
 using Microsoft.AspNetCore.Http;
 
@@ -31,12 +33,43 @@ public sealed class Request(
     internal Stream? BodyStream { get; set; }
     internal CancellationToken Aborted { get; set; }
 
+    public const long DefaultMaxBodyBytes = 1024 * 1024;
+
+    internal long MaxBodyBytes { get; set; } = DefaultMaxBodyBytes;
+
     public async ValueTask<byte[]> ReadBodyAsync() {
         if (BodyStream is null)
             return [];
-        using var buffer = new MemoryStream();
-        await BodyStream.CopyToAsync(buffer, Aborted);
-        return buffer.ToArray();
+
+        var declared = Headers.ContentLength;
+        if (declared is 0)
+            return [];
+        if (declared > MaxBodyBytes)
+            throw new PayloadTooLargeException();
+        if (declared is > 0) {
+            var exact = new byte[declared.Value];
+            await BodyStream.ReadExactlyAsync(exact, Aborted);
+            return exact;
+        }
+
+        return await ReadBoundedAsync(BodyStream, Aborted, MaxBodyBytes);
+    }
+
+    private static async ValueTask<byte[]> ReadBoundedAsync(Stream stream, CancellationToken token, long maxBytes) {
+        var rented = ArrayPool<byte>.Shared.Rent(8192);
+        try {
+            using var buffer = new MemoryStream();
+            int read;
+            while ((read = await stream.ReadAsync(rented, token)) > 0) {
+                if (buffer.Length + read > maxBytes)
+                    throw new PayloadTooLargeException();
+                buffer.Write(rented, 0, read);
+            }
+
+            return buffer.ToArray();
+        } finally {
+            ArrayPool<byte>.Shared.Return(rented);
+        }
     }
 
     public string? Param(string name) => Params.TryGetValue(name, out var value) ? value : null;

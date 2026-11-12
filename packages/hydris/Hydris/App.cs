@@ -23,6 +23,7 @@ public sealed class App {
 
     private readonly List<Type> Middlewares = [];
     private IErrorRenderer Errors = new DefaultErrorRenderer();
+    private long MaxBody = Request.DefaultMaxBodyBytes;
 
     public App() {
         new CoreServiceProvider().Register(Container);
@@ -60,6 +61,12 @@ public sealed class App {
         return this;
     }
 
+    public App MaxBodySize(long bytes) {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(bytes);
+        MaxBody = bytes;
+        return this;
+    }
+
     public async Task Serve(int port = 5000) {
         var stopwatch = Stopwatch.StartNew();
 
@@ -74,6 +81,7 @@ public sealed class App {
         Compressor.Lock();
 
         var kestrel = new KestrelServerOptions();
+        kestrel.Limits.MaxRequestBodySize = MaxBody;
         kestrel.Listen(BindAddress(), port);
 
         var transport = new SocketTransportFactory(
@@ -82,7 +90,7 @@ public sealed class App {
 
         using var server = new KestrelServer(Options.Create(kestrel), transport, loggerFactory);
 
-        await server.StartAsync(new Dispatcher(Routes, Container, TrustProxy, Middlewares, Errors), CancellationToken.None);
+        await server.StartAsync(new Dispatcher(Routes, Container, TrustProxy, Middlewares, Errors, MaxBody), CancellationToken.None);
 
         Console.Write(Banner.Serve(new BannerInfo {
             Port = port,

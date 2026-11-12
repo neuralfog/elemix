@@ -27,6 +27,15 @@ public sealed class DefaultErrorRendererTests {
     }
 
     [Fact]
+    public void PayloadTooLargeRendersAs413() {
+        var reply = new DefaultErrorRenderer().Render(new PayloadTooLargeException(), Req("text/html"), false);
+
+        Assert.Equal(413, reply.StatusCode);
+        Assert.Contains("413", Body(reply));
+        Assert.Contains("Payload Too Large", Body(reply));
+    }
+
+    [Fact]
     public void RepliesJsonWhenAccepted() {
         var reply = new DefaultErrorRenderer().Render(new BadRequestException("bad input"), Req("application/json"), false);
 
