@@ -8,10 +8,6 @@
         "fixture": "AttrApp"
     },
     {
-        "tag": "verbs-panel-app",
-        "fixture": "VerbsPanelApp"
-    },
-    {
         "tag": "before-mount-app",
         "fixture": "BeforeMountApp"
     },
@@ -140,6 +136,10 @@
         "fixture": "NoShadowApp"
     },
     {
+        "tag": "null-guard-app",
+        "fixture": "NullGuardApp"
+    },
+    {
         "tag": "panel-app",
         "fixture": "PanelApp"
     },
@@ -226,6 +226,10 @@
     {
         "tag": "ui-stepper",
         "fixture": "StepperWidget"
+    },
+    {
+        "tag": "verbs-panel-app",
+        "fixture": "VerbsPanelApp"
     },
     {
         "tag": "view-data-app",

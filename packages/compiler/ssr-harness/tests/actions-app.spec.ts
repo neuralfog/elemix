@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const hydrate = async (page: Page): Promise<Locator> => {
     await page.goto('/actions-app');
@@ -178,7 +178,9 @@ test.describe('ActionsApp (actions end to end)', () => {
 
         await root.locator('#create').click();
         await expect(state).toHaveText('ok');
-        await expect(root.locator('.create-data')).toHaveText('u1 Ada ada-lovelace');
+        await expect(root.locator('.create-data')).toHaveText(
+            'u1 Ada ada-lovelace',
+        );
 
         await fill(page, { 'f-email': 'nope' });
         await root.locator('#create').click();
@@ -192,14 +194,18 @@ test.describe('ActionsApp (actions end to end)', () => {
         await expect(root.locator('.create-errors')).toHaveCount(0);
     });
 
-    test('isError flips and loading clears after an http error', async ({ page }) => {
+    test('isError flips and loading clears after an http error', async ({
+        page,
+    }) => {
         const root = await hydrate(page);
         await expect(root.locator('.conflict-state')).toHaveText('idle');
         await root.locator('#conflict').click();
         await expect(root.locator('.conflict-state')).toHaveText('error');
     });
 
-    test('loading badge settles back to ok after a slow success', async ({ page }) => {
+    test('loading badge settles back to ok after a slow success', async ({
+        page,
+    }) => {
         const root = await hydrate(page);
         await expect(root.locator('.echo-state')).toHaveText('idle');
         await root.locator('#echo-slow').click();

@@ -27,17 +27,17 @@ type Status = {
 
 export class ActionsApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'actions-app'}><template shadowrootmode="open" shadowrootserializable=""><main><section class="create"><h2>create</h2><label>name <input type="text"${$__ssrAttr('value', (this.name).value)}/></label><label>email <input type="text"${$__ssrAttr('value', (this.email).value)}/></label><label>handle <input type="text"${$__ssrAttr('value', (this.handle).value)}/></label><label>age <input type="text"${$__ssrAttr('value', (this.age).value)}/></label><button id="create">create</button> `, (this.create.loading ? $__ssrTpl(`<p class="create-loading">saving</p>`) : ''), `<!--$--> `, (this.create.data
+return [`<${this.$$__tag ?? 'actions-app'}><template shadowrootmode="open" shadowrootserializable=""><main><section class="create"><h2>create</h2><label>name <input id="f-name" type="text"${$__ssrAttr('value', (this.name).value)}/></label><label>email <input id="f-email" type="text"${$__ssrAttr('value', (this.email).value)}/></label><label>handle <input id="f-handle" type="text"${$__ssrAttr('value', (this.handle).value)}/></label><label>age <input id="f-age" type="text"${$__ssrAttr('value', (this.age).value)}/></label><button id="create">create</button><span class="create-state">`, $__ssrText(this.stateOf(this.create)), `</span> `, (this.create.loading ? $__ssrTpl(`<p class="create-loading">saving</p>`) : ''), `<!--$--> `, (this.create.data
                         ? $__ssrTpl(`<p class="create-data">`, $__ssrText(this.create.data.id), ` `, $__ssrText(this.create.data.name), ` `, $__ssrText(this.create.data.handle), `</p>`)
-                        : ''), `<!--$--> `, (this.errors('create', this.create)), `<!--$--></section><section class="get"><h2>get</h2><label>id <input type="text"${$__ssrAttr('value', (this.userId).value)}/></label><button id="get">get</button> `, (this.fetchUser.data
+                        : ''), `<!--$--> `, (this.errors('create', this.create)), `<!--$--></section><section class="get"><h2>get</h2><label>id <input id="f-id" type="text"${$__ssrAttr('value', (this.userId).value)}/></label><button id="get">get</button> `, (this.fetchUser.data
                         ? $__ssrTpl(`<p class="get-data">`, $__ssrText(this.fetchUser.data.id), ` `, $__ssrText(this.fetchUser.data.name), ` `, $__ssrText(this.fetchUser.data.handle), `</p>`)
                         : ''), `<!--$--> `, (this.errors('get', this.fetchUser)), `<!--$--></section><section class="update"><h2>update</h2><button id="update">update</button> `, (this.saveUser.data
                         ? $__ssrTpl(`<p class="update-data">`, $__ssrText(this.saveUser.data.id), ` `, $__ssrText(this.saveUser.data.name), `</p>`)
                         : ''), `<!--$--> `, (this.errors('update', this.saveUser)), `<!--$--></section><section class="delete"><h2>delete</h2><button id="delete">delete</button> `, (this.dropUser.data
                         ? $__ssrTpl(`<p class="delete-data">`, $__ssrText(this.dropUser.data.id), ` `, $__ssrText(this.dropUser.data.name), `</p>`)
-                        : ''), `</section><section class="echo"><h2>echo</h2><label>value <input type="text"${$__ssrAttr('value', (this.echoValue).value)}/></label><label>page <input type="text"${$__ssrAttr('value', (this.echoPage).value)}/></label><button id="echo">echo</button><button id="echo-slow">slow</button><button id="echo-fast">fast</button> `, (this.runEcho.loading ? $__ssrTpl(`<p class="echo-loading">loading</p>`) : ''), `<!--$--> `, (this.runEcho.data
+                        : ''), `</section><section class="echo"><h2>echo</h2><label>value <input id="f-echo-value" type="text"${$__ssrAttr('value', (this.echoValue).value)}/></label><label>page <input id="f-echo-page" type="text"${$__ssrAttr('value', (this.echoPage).value)}/></label><button id="echo">echo</button><button id="echo-slow">slow</button><button id="echo-fast">fast</button><span class="echo-state">`, $__ssrText(this.stateOf(this.runEcho)), `</span> `, (this.runEcho.loading ? $__ssrTpl(`<p class="echo-loading">loading</p>`) : ''), `<!--$--> `, (this.runEcho.data
                         ? $__ssrTpl(`<p class="echo-data">`, $__ssrText(this.runEcho.data.value), ` `, $__ssrText(this.runEcho.data.page), `</p>`)
-                        : ''), `<!--$--></section><section class="conflict"><h2>conflict</h2><button id="conflict">conflict</button> `, (this.errors('conflict', this.runConflict)), `</section></main></template></${this.$$__tag ?? 'actions-app'}>`];
+                        : ''), `<!--$--></section><section class="conflict"><h2>conflict</h2><button id="conflict">conflict</button><span class="conflict-state">`, $__ssrText(this.stateOf(this.runConflict)), `</span> `, (this.errors('conflict', this.runConflict)), `</section></main></template></${this.$$__tag ?? 'actions-app'}>`];
 }
 
 
@@ -105,6 +105,13 @@ return [`<${this.$$__tag ?? 'actions-app'}><template shadowrootmode="open" shado
         if (error.kind === ActionErrorKind.Http)
             return $__ssrTpl(`<p${$__ssrClass(`${prefix}-http`)}>http `, $__ssrText(error.status), `</p>`);
         return $__ssrTpl(`<p${$__ssrClass(`${prefix}-network`)}>network</p>`);
+    };
+
+    stateOf = (status: Status): string => {
+        if (status.loading) return 'loading';
+        if (status.isError) return 'error';
+        if (status.data) return 'ok';
+        return 'idle';
     };
 
     

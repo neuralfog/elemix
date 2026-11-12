@@ -107,23 +107,6 @@ export class ActionsApp extends Component {
         return 'idle';
     };
 
-    userRow = (
-        prefix: string,
-        data: { id: string; name: string; handle: string } | null,
-    ): Template | string =>
-        data
-            ? tpl`<p class="${prefix}-data">${data.id} ${data.name} ${data.handle}</p>`
-            : '';
-
-    shortRow = (
-        prefix: string,
-        data: { id: string; name: string } | null,
-    ): Template | string =>
-        data ? tpl`<p class="${prefix}-data">${data.id} ${data.name}</p>` : '';
-
-    echoRow = (data: { value: string; page: number } | null): Template | string =>
-        data ? tpl`<p class="echo-data">${data.value} ${data.page}</p>` : '';
-
     template = (): Template => tpl`
         <main>
             <section class="create">
@@ -135,7 +118,11 @@ export class ActionsApp extends Component {
                 <button id="create" @click=${this.submitCreate}>create</button>
                 <span class="create-state">${this.stateOf(this.create)}</span>
                 ${this.create.loading ? tpl`<p class="create-loading">saving</p>` : ''}
-                ${this.userRow('create', this.create.data)}
+                ${
+                    this.create.data
+                        ? tpl`<p class="create-data">${this.create.data.id} ${this.create.data.name} ${this.create.data.handle}</p>`
+                        : ''
+                }
                 ${this.errors('create', this.create)}
             </section>
 
@@ -143,21 +130,33 @@ export class ActionsApp extends Component {
                 <h2>get</h2>
                 <label>id <input id="f-id" type="text" ~model=${this.userId} /></label>
                 <button id="get" @click=${this.getById}>get</button>
-                ${this.userRow('get', this.fetchUser.data)}
+                ${
+                    this.fetchUser.data
+                        ? tpl`<p class="get-data">${this.fetchUser.data.id} ${this.fetchUser.data.name} ${this.fetchUser.data.handle}</p>`
+                        : ''
+                }
                 ${this.errors('get', this.fetchUser)}
             </section>
 
             <section class="update">
                 <h2>update</h2>
                 <button id="update" @click=${this.submitUpdate}>update</button>
-                ${this.shortRow('update', this.saveUser.data)}
+                ${
+                    this.saveUser.data
+                        ? tpl`<p class="update-data">${this.saveUser.data.id} ${this.saveUser.data.name}</p>`
+                        : ''
+                }
                 ${this.errors('update', this.saveUser)}
             </section>
 
             <section class="delete">
                 <h2>delete</h2>
                 <button id="delete" @click=${this.submitDelete}>delete</button>
-                ${this.shortRow('delete', this.dropUser.data)}
+                ${
+                    this.dropUser.data
+                        ? tpl`<p class="delete-data">${this.dropUser.data.id} ${this.dropUser.data.name}</p>`
+                        : ''
+                }
             </section>
 
             <section class="echo">
@@ -169,7 +168,11 @@ export class ActionsApp extends Component {
                 <button id="echo-fast" @click=${this.echoFast}>fast</button>
                 <span class="echo-state">${this.stateOf(this.runEcho)}</span>
                 ${this.runEcho.loading ? tpl`<p class="echo-loading">loading</p>` : ''}
-                ${this.echoRow(this.runEcho.data)}
+                ${
+                    this.runEcho.data
+                        ? tpl`<p class="echo-data">${this.runEcho.data.value} ${this.runEcho.data.page}</p>`
+                        : ''
+                }
             </section>
 
             <section class="conflict">

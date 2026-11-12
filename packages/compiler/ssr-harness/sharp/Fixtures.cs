@@ -50,6 +50,9 @@ public sealed class Fixtures {
     [Get("/actions-app")]
     public Reply ActionsApp() => Reply.View("fixtures/ActionsApp");
 
+    [Get("/null-guard-app")]
+    public Reply NullGuardApp() => Reply.View("fixtures/NullGuardApp");
+
     [Get("/view-data-app")]
     public Reply ViewDataApp() =>
         Reply.View("fixtures/ViewDataApp", new VData("Hello viewData", new VUser("Ada"), 3));
