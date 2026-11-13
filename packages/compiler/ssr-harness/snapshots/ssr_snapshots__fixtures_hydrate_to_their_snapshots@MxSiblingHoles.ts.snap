@@ -1,0 +1,104 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/MxSiblingHoles.ts
+---
+import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+const _ft0 = $__template('<i class="hole a">A</i>');
+const _ft1 = $__template('<i class="hole b">B</i>');
+const _ft2 = $__template('<i class="hole c">C</i>');
+import { Component } from '@neuralfog/elemix';
+
+type State = { a: boolean; b: boolean; c: boolean };
+
+const _t0 = $__template('<div class="row"><button id="toggle-a">a</button><button id="toggle-b">b</button><button id="toggle-c">c</button><section class="holes"><span class="start">[</span> <!----> <!----> <!----> <span class="end">]</span></section></div>');
+
+export class MxSiblingHoles extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _n1 = root.firstChild!.firstChild!.nextSibling!;
+const _n2 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n3 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _d4 = $__dynLens(_n3);
+const _v5 = $__splitRun(_n3.firstChild!.nextSibling as Text, [1, 1, 1], _d4);
+$__event(_n0, 'click', this.toggleA);
+$__event(_n1, 'click', this.toggleB);
+$__event(_n2, 'click', this.toggleC);
+$__effect(() => {
+$__setText(_v5[0], (this.holeA));
+});
+$__effect(() => {
+$__setText(_v5[1], (this.holeB));
+});
+$__effect(() => {
+$__setText(_v5[2], (this.holeC));
+});
+}
+
+    state = $__state<State>({ a: true, b: true, c: true });
+
+    toggleA = (): void => {
+        this.state.a = !this.state.a;
+    };
+
+    toggleB = (): void => {
+        this.state.b = !this.state.b;
+    };
+
+    toggleC = (): void => {
+        this.state.c = !this.state.c;
+    };
+
+    private get holeA(): Template | null {
+        return this.state.a ? (() => {
+const _r0 = $__clone(_ft0);
+return _r0;
+})() : null;
+    }
+
+    private get holeB(): Template | null {
+        return this.state.b ? (() => {
+const _r1 = $__clone(_ft1);
+return _r1;
+})() : null;
+    }
+
+    private get holeC(): Template | null {
+        return this.state.c ? (() => {
+const _r2 = $__clone(_ft2);
+return _r2;
+})() : null;
+    }
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n1, 'click', this.toggleA);
+$__event(_n2, 'click', this.toggleB);
+$__event(_n3, 'click', this.toggleC);
+const _x7 = document.createTextNode('');
+_n4.replaceWith(_x7);
+const _x8 = document.createTextNode('');
+_n5.replaceWith(_x8);
+const _x9 = document.createTextNode('');
+_n6.replaceWith(_x9);
+$__effect(() => {
+$__setText(_x7, (this.holeA));
+});
+$__effect(() => {
+$__setText(_x8, (this.holeB));
+});
+$__effect(() => {
+$__setText(_x9, (this.holeC));
+});
+return _r0;
+}
+}
+$__defineComponent('mx-sibling-holes', MxSiblingHoles);
+MxSiblingHoles.prototype.$$__tag = 'mx-sibling-holes';

@@ -246,5 +246,21 @@
     {
         "tag": "when-else-app",
         "fixture": "WhenElseApp"
+    },
+    {
+        "tag": "mx-sibling-holes",
+        "fixture": "MxSiblingHoles"
+    },
+    {
+        "tag": "mx-nested-conditional",
+        "fixture": "MxNestedConditional"
+    },
+    {
+        "tag": "mx-conditional-churn",
+        "fixture": "MxConditionalChurn"
+    },
+    {
+        "tag": "mx-live-child-teardown",
+        "fixture": "MxLiveChildTeardown"
     }
 ]

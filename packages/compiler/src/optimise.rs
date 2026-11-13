@@ -1698,7 +1698,7 @@ fn strip_ssr_tpl(src: &[char]) -> Vec<char> {
         };
         let args = top_level_args(src, paren, close);
         if args.len() == 1 && !args[0].is_empty() {
-            edits.push((at, close + 1, args[0].clone()));
+            edits.push((at, close + 1, format!("[{}]", args[0])));
             pos = close + 1;
         } else {
             pos = at + 1;

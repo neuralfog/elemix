@@ -1,0 +1,53 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/MxCounterChild.ts
+---
+import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__event, $__effect, $__setText, $__setAttr, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = { label: string };
+
+const _t0 = $__template('<div class="child"><span class="child-label"> </span><span class="child-count"> </span><button class="child-bump">bump</button></div>');
+
+export class MxCounterChild extends Component<Props> {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _n1 = _n0.firstChild!;
+const _n2 = $__text(_n1);
+const _n3 = _n0.firstChild!.nextSibling!;
+const _n4 = $__text(_n3);
+const _n5 = _n0.firstChild!.nextSibling!.nextSibling!;
+$__event(_n5, 'click', this.bump);
+$__effect(() => {
+$__setAttr(_n0, 'data-label', (this.props.label));
+$__setText(_n2, (this.props.label));
+$__setText(_n4, (this.local.count));
+});
+}
+
+    local = $__state<{ count: number }>({ count: 0 });
+
+    bump = (): void => {
+        this.local.count += 1;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.firstChild!;
+const _n3 = _n1.firstChild!.nextSibling!.firstChild!;
+const _n4 = _n1.firstChild!.nextSibling!.nextSibling!;
+$__event(_n4, 'click', this.bump);
+$__effect(() => {
+const _v5 = (this.props.label);
+$__setAttr(_n1, 'data-label', (_v5));
+$__setText(_n2, (_v5));
+$__setText(_n3, (this.local.count));
+});
+return _r0;
+}
+}
+$__defineComponent('mx-counter-child', MxCounterChild);
+MxCounterChild.prototype.$$__tag = 'mx-counter-child';

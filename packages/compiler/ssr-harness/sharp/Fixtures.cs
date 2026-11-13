@@ -53,6 +53,18 @@ public sealed class Fixtures {
     [Get("/null-guard-app")]
     public Reply NullGuardApp() => Reply.View("fixtures/NullGuardApp");
 
+    [Get("/mx-sibling-holes")]
+    public Reply MxSiblingHoles() => Reply.View("fixtures/MxSiblingHoles");
+
+    [Get("/mx-nested-conditional")]
+    public Reply MxNestedConditional() => Reply.View("fixtures/MxNestedConditional");
+
+    [Get("/mx-conditional-churn")]
+    public Reply MxConditionalChurn() => Reply.View("fixtures/MxConditionalChurn");
+
+    [Get("/mx-live-child-teardown")]
+    public Reply MxLiveChildTeardown() => Reply.View("fixtures/MxLiveChildTeardown");
+
     [Get("/view-data-app")]
     public Reply ViewDataApp() =>
         Reply.View("fixtures/ViewDataApp", new VData("Hello viewData", new VUser("Ada"), 3));

@@ -1,0 +1,27 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxCounterChild.ts
+---
+import { $__ssrText, $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = { label: string };
+
+export class MxCounterChild extends Component<Props> {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-counter-child'}><template shadowrootmode="open" shadowrootserializable=""><div class="child"${$__ssrAttr('data-label', this.props.label)}><span class="child-label">`, $__ssrText(this.props.label), `</span><span class="child-count">`, $__ssrText(this.local.count), `</span><button class="child-bump">bump</button></div></template></${this.$$__tag ?? 'mx-counter-child'}>`];
+}
+
+    local = $__state<{ count: number }>({ count: 0 });
+
+    bump = (): void => {
+        this.local.count += 1;
+    };
+
+    
+}
+$__defineComponent('mx-counter-child', MxCounterChild);
+MxCounterChild.prototype.$$__tag = 'mx-counter-child';
+MxCounterChild.$$__propSafe = true;

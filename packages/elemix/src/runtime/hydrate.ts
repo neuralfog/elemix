@@ -50,17 +50,39 @@ export const $__splitRun = (
     dyns: number[],
 ): Text[] => {
     const out: Text[] = [];
-    let n = node;
-    if (n.nodeType !== 3) {
-        const anchor = n as unknown as Node;
+    let n: Node | null = node;
+    if (n.nodeType !== 3 && dyns[0] !== -1) {
         const text = document.createTextNode('');
-        anchor.parentNode?.insertBefore(text, anchor);
+        n.parentNode?.insertBefore(text, n);
         n = text;
     }
     for (let i = 0; i < dyns.length; i++) {
-        const value = statics[i] > 0 ? n.splitText(statics[i]) : n;
-        n = value.splitText(dyns[i]);
-        out.push(value);
+        const parent = n ? n.parentNode : null;
+        if (statics[i] > 0 && n && n.nodeType === 3) {
+            const t = n as Text;
+            n = t.length > statics[i] ? t.splitText(statics[i]) : n.nextSibling;
+        }
+        if (dyns[i] === -1) {
+            const mounted: Node[] = [];
+            let m: Node | null = n;
+            while (m && !(m.nodeType === 8 && (m as Comment).data === '$')) {
+                const next: Node | null = m.nextSibling;
+                mounted.push(m);
+                m = next;
+            }
+            const anchor = document.createTextNode('') as Text & {
+                __r?: Node[] | null;
+            };
+            parent?.insertBefore(anchor, m);
+            if (m) parent?.removeChild(m);
+            anchor.__r = mounted.length ? mounted : null;
+            out.push(anchor);
+            n = anchor.nextSibling;
+        } else {
+            const value = n as Text;
+            n = value.splitText(dyns[i]);
+            out.push(value);
+        }
     }
     return out;
 };

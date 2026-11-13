@@ -1,0 +1,35 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxNestedConditional.ts
+---
+import { $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { outer: boolean; inner: boolean };
+
+export class MxNestedConditional extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-nested-conditional'}><template shadowrootmode="open" shadowrootserializable=""><div class="nest"><button id="toggle-outer">outer</button><button id="toggle-inner">inner</button> `, (this.state.outer
+                    ? $__ssrTpl(`<section class="outer-on"><span class="outer-label">outer</span> `, (this.state.inner
+                                  ? $__ssrTpl(`<span class="inner-on">inner-on</span>`)
+                                  : $__ssrTpl(`<span class="inner-off">inner-off</span>`)), `</section>`)
+                    : $__ssrTpl(`<p class="outer-off">outer-off</p>`)), `</div></template></${this.$$__tag ?? 'mx-nested-conditional'}>`];
+}
+
+    state = $__state<State>({ outer: true, inner: true });
+
+    toggleOuter = (): void => {
+        this.state.outer = !this.state.outer;
+    };
+
+    toggleInner = (): void => {
+        this.state.inner = !this.state.inner;
+    };
+
+    
+}
+$__defineComponent('mx-nested-conditional', MxNestedConditional);
+MxNestedConditional.prototype.$$__tag = 'mx-nested-conditional';
+MxNestedConditional.$$__propSafe = true;

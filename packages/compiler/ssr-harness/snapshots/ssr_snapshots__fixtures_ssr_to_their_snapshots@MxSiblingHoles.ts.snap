@@ -1,0 +1,47 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxSiblingHoles.ts
+---
+import { $__ssrText, $__ssrLen, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { a: boolean; b: boolean; c: boolean };
+
+export class MxSiblingHoles extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-sibling-holes'}><template shadowrootmode="open" shadowrootserializable=""><div class="row"><button id="toggle-a">a</button><button id="toggle-b">b</button><button id="toggle-c">c</button>`, (() => {const _t0 = (this.holeA);const _t1 = (this.holeB);const _t2 = (this.holeC);return [`<section class="holes" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)},${$__ssrLen(_t2)}"><span class="start">[</span> ${$__ssrText(_t0)} ${$__ssrText(_t1)} ${$__ssrText(_t2)} <span class="end">]</span></section>`];})(), `</div></template></${this.$$__tag ?? 'mx-sibling-holes'}>`];
+}
+
+    state = $__state<State>({ a: true, b: true, c: true });
+
+    toggleA = (): void => {
+        this.state.a = !this.state.a;
+    };
+
+    toggleB = (): void => {
+        this.state.b = !this.state.b;
+    };
+
+    toggleC = (): void => {
+        this.state.c = !this.state.c;
+    };
+
+    private get holeA(): Template | null {
+        return this.state.a ? $__ssrTpl(`<i class="hole a">A</i>`) : null;
+    }
+
+    private get holeB(): Template | null {
+        return this.state.b ? $__ssrTpl(`<i class="hole b">B</i>`) : null;
+    }
+
+    private get holeC(): Template | null {
+        return this.state.c ? $__ssrTpl(`<i class="hole c">C</i>`) : null;
+    }
+
+    
+}
+$__defineComponent('mx-sibling-holes', MxSiblingHoles);
+MxSiblingHoles.prototype.$$__tag = 'mx-sibling-holes';
+MxSiblingHoles.$$__propSafe = true;

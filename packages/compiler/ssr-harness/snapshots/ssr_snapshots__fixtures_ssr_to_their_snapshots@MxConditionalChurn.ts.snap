@@ -1,0 +1,39 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxConditionalChurn.ts
+---
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { showEmpty: boolean; showNull: boolean; tick: number };
+
+export class MxConditionalChurn extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-conditional-churn'}><template shadowrootmode="open" shadowrootserializable=""><div class="churn"><button id="toggle-empty">empty</button><button id="toggle-null">null</button><button id="tick">tick</button><span class="count">`, $__ssrText(this.state.tick), `</span> `, (this.state.showEmpty
+                    ? $__ssrTpl(`<span class="e-on">e`, $__ssrText(this.state.tick), `</span>`)
+                    : ''), `<!--$--> `, (this.state.showNull
+                    ? $__ssrTpl(`<span class="n-on">n`, $__ssrText(this.state.tick), `</span>`)
+                    : null), `<!--$--></div></template></${this.$$__tag ?? 'mx-conditional-churn'}>`];
+}
+
+    state = $__state<State>({ showEmpty: true, showNull: true, tick: 0 });
+
+    toggleEmpty = (): void => {
+        this.state.showEmpty = !this.state.showEmpty;
+    };
+
+    toggleNull = (): void => {
+        this.state.showNull = !this.state.showNull;
+    };
+
+    bump = (): void => {
+        this.state.tick += 1;
+    };
+
+    
+}
+$__defineComponent('mx-conditional-churn', MxConditionalChurn);
+MxConditionalChurn.prototype.$$__tag = 'mx-conditional-churn';
+MxConditionalChurn.$$__propSafe = true;

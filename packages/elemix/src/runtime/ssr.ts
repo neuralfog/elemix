@@ -77,8 +77,10 @@ export const $__moduleState = <T extends object>(factory: () => T): T => {
 
 export type Rope = string | Rope[];
 
+const HYDRATE_MARK = '<!--$-->';
+
 export const $__ssrTpl = (...parts: unknown[]): Template =>
-    (parts.length === 1 ? parts[0] : parts) as unknown as Template;
+    parts as unknown as Template;
 
 export const $__render = (rope: Rope): string => {
     if (typeof rope === 'string') return rope;
@@ -95,8 +97,8 @@ export const $__render = (rope: Rope): string => {
     return parts.join('');
 };
 
-export const $__ssrText = (value: unknown): Rope => {
-    if (Array.isArray(value)) return value as Rope;
+export const $__ssrText = (value: unknown): string => {
+    if (Array.isArray(value)) return $__render(value as Rope) + HYDRATE_MARK;
     if (value == null) return '';
     const s = String(value);
     return s.indexOf('&') === -1 &&
@@ -150,7 +152,7 @@ export const $__ssrStyle = (value: unknown): string => {
 };
 
 export const $__ssrLen = (value: unknown): number =>
-    value == null ? 0 : String(value).length;
+    Array.isArray(value) ? -1 : value == null ? 0 : String(value).length;
 
 export const $__ssrRepeat = <T>(
     list: T[],

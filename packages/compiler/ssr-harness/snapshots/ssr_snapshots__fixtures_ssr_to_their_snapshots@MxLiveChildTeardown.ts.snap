@@ -1,0 +1,30 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxLiveChildTeardown.ts
+---
+import { $__ssrChild, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import './MxCounterChild';
+
+type State = { mounted: boolean };
+
+export class MxLiveChildTeardown extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-live-child-teardown'}><template shadowrootmode="open" shadowrootserializable=""><div class="host"><button id="toggle-child">toggle</button> `, (this.state.mounted
+                    ? $__ssrTpl($__ssrChild('mx-counter-child', {label: ('live')}))
+                    : $__ssrTpl(`<span class="gone">gone</span>`)), `</div></template></${this.$$__tag ?? 'mx-live-child-teardown'}>`];
+}
+
+    state = $__state<State>({ mounted: true });
+
+    toggle = (): void => {
+        this.state.mounted = !this.state.mounted;
+    };
+
+    
+}
+$__defineComponent('mx-live-child-teardown', MxLiveChildTeardown);
+MxLiveChildTeardown.prototype.$$__tag = 'mx-live-child-teardown';
+MxLiveChildTeardown.$$__propSafe = true;

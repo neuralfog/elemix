@@ -1,0 +1,58 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/MxNestedConditional.ts
+---
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { outer: boolean; inner: boolean };
+
+const _t0 = $__template('<div class="nest"><button id="toggle-outer">outer</button><button id="toggle-inner">inner</button> <!----></div>');
+const _t1 = $__templateEl('<section class="outer-on"><span class="outer-label">outer</span> <!----></section>');
+const _t2 = $__templateEl('<span class="inner-on">inner-on</span>');
+const _t3 = $__templateEl('<span class="inner-off">inner-off</span>');
+const _t4 = $__templateEl('<p class="outer-off">outer-off</p>');
+
+export class MxNestedConditional extends Component {
+    state = $__state<State>({ outer: true, inner: true });
+
+    toggleOuter = (): void => {
+        this.state.outer = !this.state.outer;
+    };
+
+    toggleInner = (): void => {
+        this.state.inner = !this.state.inner;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n1, 'click', this.toggleOuter);
+$__event(_n2, 'click', this.toggleInner);
+$__child(_n3, () => (this.state.outer
+                    ? (() => {
+const _r4 = $__cloneEl(_t1);
+const _n5 = _r4.firstChild!.nextSibling!.nextSibling!;
+$__child(_n5, () => (this.state.inner
+                                  ? (() => {
+const _r6 = $__cloneEl(_t2);
+return _r6;
+})()
+                                  : (() => {
+const _r7 = $__cloneEl(_t3);
+return _r7;
+})()));
+return _r4;
+})()
+                    : (() => {
+const _r8 = $__cloneEl(_t4);
+return _r8;
+})()));
+return _r0;
+}
+}
+$__defineComponent('mx-nested-conditional', MxNestedConditional);
+MxNestedConditional.prototype.$$__tag = 'mx-nested-conditional';
