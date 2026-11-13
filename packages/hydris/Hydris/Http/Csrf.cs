@@ -11,14 +11,8 @@ public sealed class Csrf(Request request, CookieAuthority authority) : ICsrf {
 
     internal static bool Enabled { get; private set; }
     internal static bool Secure { get; private set; } = true;
-    internal static bool AllowSameSite { get; private set; }
-    internal static bool OriginOnly { get; private set; }
 
-    internal static void Configure(bool secure, bool allowSameSite, bool originOnly) {
-        Secure = secure;
-        AllowSameSite = allowSameSite;
-        OriginOnly = originOnly;
-    }
+    internal static void Configure(bool secure) => Secure = secure;
 
     internal static void Enable() => Enabled = true;
 
@@ -40,11 +34,6 @@ public sealed class Csrf(Request request, CookieAuthority authority) : ICsrf {
     }
 
     public bool Verify() {
-        if (HasTrustedOrigin())
-            return true;
-        if (OriginOnly)
-            return false;
-
         var cookie = authority.Get(CookieName);
         var submitted = request.Header(HeaderName);
         return cookie is not null &&
@@ -52,28 +41,5 @@ public sealed class Csrf(Request request, CookieAuthority authority) : ICsrf {
                CryptographicOperations.FixedTimeEquals(
                    Encoding.UTF8.GetBytes(cookie),
                    Encoding.UTF8.GetBytes(submitted));
-    }
-
-    private bool HasTrustedOrigin() {
-        var site = request.Header("Sec-Fetch-Site");
-        if (site == "same-origin")
-            return true;
-        if (site == "same-site")
-            return AllowSameSite;
-        if (site is not null)
-            return false;
-
-        return OriginMatchesHost();
-    }
-
-    private bool OriginMatchesHost() {
-        var host = request.Header("Host");
-        if (string.IsNullOrEmpty(host))
-            return false;
-
-        var source = request.Header("Origin") ?? request.Header("Referer");
-        return source is not null &&
-               Uri.TryCreate(source, UriKind.Absolute, out var uri) &&
-               string.Equals(uri.Authority, host, StringComparison.OrdinalIgnoreCase);
     }
 }

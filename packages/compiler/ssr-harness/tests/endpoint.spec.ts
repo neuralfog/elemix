@@ -7,9 +7,16 @@ test.describe('Endpoint (manual route + contract, no action client)', () => {
         await page.goto('/mx-text-hole');
 
         const ok = await page.evaluate(async () => {
+            const token = JSON.parse(
+                document.getElementById('__hydris_context')?.textContent ??
+                    '{}',
+            ).csrf;
             const res = await fetch('/api/greet', {
                 method: 'POST',
-                headers: { 'content-type': 'application/json' },
+                headers: {
+                    'content-type': 'application/json',
+                    'x-hydris-csrf': token,
+                },
                 body: JSON.stringify({ name: 'ada' }),
             });
             return { status: res.status, body: await res.json() };
@@ -25,9 +32,16 @@ test.describe('Endpoint (manual route + contract, no action client)', () => {
         await page.goto('/mx-text-hole');
 
         const short = await page.evaluate(async () => {
+            const token = JSON.parse(
+                document.getElementById('__hydris_context')?.textContent ??
+                    '{}',
+            ).csrf;
             const res = await fetch('/api/greet', {
                 method: 'POST',
-                headers: { 'content-type': 'application/json' },
+                headers: {
+                    'content-type': 'application/json',
+                    'x-hydris-csrf': token,
+                },
                 body: JSON.stringify({ name: 'a' }),
             });
             return { status: res.status, body: await res.text() };
@@ -38,9 +52,16 @@ test.describe('Endpoint (manual route + contract, no action client)', () => {
         expect(short.body).toContain('"code":"between"');
 
         const missing = await page.evaluate(async () => {
+            const token = JSON.parse(
+                document.getElementById('__hydris_context')?.textContent ??
+                    '{}',
+            ).csrf;
             const res = await fetch('/api/greet', {
                 method: 'POST',
-                headers: { 'content-type': 'application/json' },
+                headers: {
+                    'content-type': 'application/json',
+                    'x-hydris-csrf': token,
+                },
                 body: '{}',
             });
             return { status: res.status, body: await res.text() };
