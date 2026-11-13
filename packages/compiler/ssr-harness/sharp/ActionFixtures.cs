@@ -34,6 +34,12 @@ public sealed partial record UserResponse(string Id, string Name, string Handle)
 [Contract]
 public sealed partial record EchoResult(string Value, int Page);
 
+[Contract]
+public sealed partial record GreetRequest([Between(2, 40)] string Name);
+
+[Contract]
+public sealed partial record GreetResponse(string Message, int Length);
+
 [Handler]
 public sealed class ActionFixtures {
     [Post("/api/users")]
@@ -70,4 +76,8 @@ public sealed class ActionFixtures {
     [Action]
     public Reply Conflict() =>
         Reply.Action<UserResponse>(new("x", "x", "x")).Status(409);
+
+    [Post("/api/greet")]
+    public Reply Greet(GreetRequest input) =>
+        Reply.Json(new GreetResponse("hello " + input.Name, input.Name.Length));
 }

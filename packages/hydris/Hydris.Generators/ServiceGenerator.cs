@@ -132,8 +132,8 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
             ? "true"
             : "false";
 
-        if (HasAction(method.GetAttributes()))
-            return EmitActionRoute(method, httpMethod, literal, path, chain, noCsrf);
+        if (HasAction(method.GetAttributes()) || method.Parameters.Length > 0)
+            return EmitBoundRoute(method, httpMethod, literal, path, chain, noCsrf);
 
         var json = HasJson(method.ContainingType.GetAttributes()) || HasJson(method.GetAttributes())
             ? "true"
@@ -151,7 +151,7 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         return false;
     }
 
-    private static string EmitActionRoute(IMethodSymbol method, string httpMethod, string literal, string path, string chain, string noCsrf) {
+    private static string EmitBoundRoute(IMethodSymbol method, string httpMethod, string literal, string path, string chain, string noCsrf) {
         var controller = method.ContainingType.ToDisplayString(FullyQualified);
         var awaitable = method.ReturnType is INamedTypeSymbol named
             && named.TypeArguments.Length == 1

@@ -39,6 +39,9 @@ internal sealed class GenBind {
     [Action]
     public Reply Strict(StrictReq input) => Reply.Action<GenEcho>(new(input.Name, 1));
 
+    [Post("/gen-bind/endpoint")]
+    public Reply Endpoint(StrictReq input) => Reply.Json(new GenEcho(input.Name, 7));
+
     [Get("/gen-bind/paint")]
     [Action]
     public Reply Paint(Shade shade, bool on, Guid id) =>

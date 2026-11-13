@@ -47,6 +47,26 @@ public sealed class GeneratorTests {
     }
 
     [Fact]
+    public async Task EndpointBindsContractAndReturnsJson() {
+        var reply = await Dispatch(Method.Post, "/gen-bind/endpoint", body: "{\"name\":\"ada\"}");
+
+        Assert.Equal(200, reply.StatusCode);
+        var json = Encoding.UTF8.GetString(reply.Content);
+        Assert.Contains("\"value\":\"ada\"", json);
+        Assert.Contains("\"number\":7", json);
+    }
+
+    [Fact]
+    public async Task EndpointValidatesContractAndReturns400() {
+        var reply = await Dispatch(Method.Post, "/gen-bind/endpoint", body: "{}");
+
+        Assert.Equal(400, reply.StatusCode);
+        var json = Encoding.UTF8.GetString(reply.Content);
+        Assert.Contains("\"field\":\"name\"", json);
+        Assert.Contains("\"code\":\"required\"", json);
+    }
+
+    [Fact]
     public async Task MissingRequiredQueryReturns400() {
         var reply = await Dispatch(Method.Get, "/gen-bind/search", query: "?q=hi");
 
