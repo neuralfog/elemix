@@ -44,6 +44,13 @@ public sealed class App {
         return this;
     }
 
+    public App EnableCsrf(CsrfOptions? options = null) {
+        var config = options ?? new CsrfOptions();
+        Csrf.Configure(config.Secure, config.AllowSameSite, config.OriginOnly);
+        Csrf.Enable();
+        return this;
+    }
+
     public App Assets(string prefix, string dir, AssetOptions? options = null) {
         ArgumentException.ThrowIfNullOrEmpty(prefix);
         ArgumentException.ThrowIfNullOrEmpty(dir);

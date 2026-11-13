@@ -12,30 +12,30 @@ public sealed class Router {
 
     public void Map(Method method, string path, Func<Reply> handler) {
         Debug.Assert(handler is not null);
-        Add(method, path, [], false, _ => Task.FromResult(handler()));
+        Add(method, path, [], false, false, _ => Task.FromResult(handler()));
     }
 
     public void Map<T>(Method method, string path, Func<T, Reply> action) {
         Debug.Assert(action is not null);
-        Add(method, path, [], false, scope => Task.FromResult(action(scope.Get<T>())));
+        Add(method, path, [], false, false, scope => Task.FromResult(action(scope.Get<T>())));
     }
 
-    public void Map<T>(Method method, string path, IReadOnlyList<Type> middlewares, bool json, Func<T, Reply> action) {
+    public void Map<T>(Method method, string path, IReadOnlyList<Type> middlewares, bool json, bool noCsrf, Func<T, Reply> action) {
         Debug.Assert(middlewares is not null);
         Debug.Assert(action is not null);
-        Add(method, path, middlewares, json, scope => Task.FromResult(action(scope.Get<T>())));
+        Add(method, path, middlewares, json, noCsrf, scope => Task.FromResult(action(scope.Get<T>())));
     }
 
-    public void Map<T>(Method method, string path, IReadOnlyList<Type> middlewares, bool json, Func<T, Task<Reply>> action) {
+    public void Map<T>(Method method, string path, IReadOnlyList<Type> middlewares, bool json, bool noCsrf, Func<T, Task<Reply>> action) {
         Debug.Assert(middlewares is not null);
         Debug.Assert(action is not null);
-        Add(method, path, middlewares, json, scope => action(scope.Get<T>()));
+        Add(method, path, middlewares, json, noCsrf, scope => action(scope.Get<T>()));
     }
 
-    public void Map(Method method, string path, IReadOnlyList<Type> middlewares, bool json, Func<DiContainer, Task<Reply>> action) {
+    public void Map(Method method, string path, IReadOnlyList<Type> middlewares, bool json, bool noCsrf, Func<DiContainer, Task<Reply>> action) {
         Debug.Assert(middlewares is not null);
         Debug.Assert(action is not null);
-        Add(method, path, middlewares, json, action);
+        Add(method, path, middlewares, json, noCsrf, action);
     }
 
     public void Get(string path, Func<Reply> handler) => Map(Method.Get, path, handler);
@@ -138,9 +138,9 @@ public sealed class Router {
         return count;
     }
 
-    private void Add(Method method, string path, IReadOnlyList<Type> middlewares, bool json, Func<DiContainer, Task<Reply>> handler) {
+    private void Add(Method method, string path, IReadOnlyList<Type> middlewares, bool json, bool noCsrf, Func<DiContainer, Task<Reply>> handler) {
         Debug.Assert(path is not null);
-        var route = new Route(method, path, handler, middlewares, json);
+        var route = new Route(method, path, handler, middlewares, json, noCsrf);
         Routes.Add(route);
         Tree.Insert(route);
     }

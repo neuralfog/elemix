@@ -11,12 +11,14 @@ public sealed class RouteMatch {
 
     internal Func<DiContainer, Task<Reply>> Handler { get; }
     internal IReadOnlyList<Type> Middlewares { get; }
+    internal bool NoCsrf { get; }
 
     internal RouteMatch(Route route, IReadOnlyDictionary<string, string> parameters) {
         Method = route.Method;
         Path = route.Path;
         Params = parameters;
         Json = route.Json;
+        NoCsrf = route.NoCsrf;
         Handler = route.Handler;
         Middlewares = route.Middlewares;
     }

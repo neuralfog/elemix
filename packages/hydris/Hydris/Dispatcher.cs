@@ -52,13 +52,17 @@ internal sealed class Dispatcher(
                     : new NotFoundException();
             }
 
-            var chain = Chain(middlewares, match.Middlewares);
-            reply = await Pipeline.Run(scope, chain, () => match.Handler(scope));
+            if (Csrf.Enabled && IsUnsafe(method) && !match.NoCsrf && !scope.Get<ICsrf>().Verify()) {
+                reply = Reply.Text("CSRF token mismatch.").Status(419);
+            } else {
+                var chain = Chain(middlewares, match.Middlewares);
+                reply = await Pipeline.Run(scope, chain, () => match.Handler(scope));
+            }
         } catch (Exception error) {
             reply = Fail(error, request, match?.Json ?? false);
         }
 
-        reply.Materialize(request);
+        reply.Materialize(request, scope);
         if (Compressor.Enabled)
             Compressor.ApplyDynamic(reply, request);
         await reply.WriteTo(context.Response, context.Body, method == Method.Head, context.Lifetime.RequestAborted);
@@ -110,6 +114,9 @@ internal sealed class Dispatcher(
             combined[global.Count + i] = route[i];
         return combined;
     }
+
+    private static bool IsUnsafe(Method method) =>
+        method is not (Method.Get or Method.Head or Method.Options);
 
     private static bool TryParseMethod(string method, out Method result) {
         result = method switch {

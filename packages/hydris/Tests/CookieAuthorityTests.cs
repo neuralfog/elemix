@@ -6,6 +6,7 @@ using SameSiteMode = Hydris.Http.SameSiteMode;
 
 namespace Hydris.Tests;
 
+[Collection("CookieSecret")]
 public sealed class CookieAuthorityTests {
     private static CookieAuthority AuthWith(string cookieHeader) {
         var headers = new HeaderDictionary();

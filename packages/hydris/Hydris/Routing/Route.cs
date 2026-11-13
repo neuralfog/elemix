@@ -16,12 +16,14 @@ internal sealed class Route(
     string path,
     Func<DiContainer, Task<Reply>> handler,
     IReadOnlyList<Type> middlewares,
-    bool json) {
+    bool json,
+    bool noCsrf) {
     public Method Method { get; } = method;
     public string Path { get; } = path;
     public Func<DiContainer, Task<Reply>> Handler { get; } = handler;
     public IReadOnlyList<Type> Middlewares { get; } = middlewares;
     public bool Json { get; } = json;
+    public bool NoCsrf { get; } = noCsrf;
 
     internal Segment[] Segments { get; } = Compile(path);
 

@@ -128,14 +128,18 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         CollectUse(method.GetAttributes(), uses);
         var chain = "[" + string.Join(", ", uses) + "]";
 
+        var noCsrf = HasNoCsrf(method.ContainingType.GetAttributes()) || HasNoCsrf(method.GetAttributes())
+            ? "true"
+            : "false";
+
         if (HasAction(method.GetAttributes()))
-            return EmitActionRoute(method, httpMethod, literal, path, chain);
+            return EmitActionRoute(method, httpMethod, literal, path, chain, noCsrf);
 
         var json = HasJson(method.ContainingType.GetAttributes()) || HasJson(method.GetAttributes())
             ? "true"
             : "false";
 
-        return $"router.Map<{controller}>(global::Hydris.Routing.Method.{httpMethod}, {literal}, {chain}, {json}, static c => c.{method.Name}());";
+        return $"router.Map<{controller}>(global::Hydris.Routing.Method.{httpMethod}, {literal}, {chain}, {json}, {noCsrf}, static c => c.{method.Name}());";
     }
 
     private static bool HasAction(ImmutableArray<AttributeData> attributes) {
@@ -147,7 +151,7 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         return false;
     }
 
-    private static string EmitActionRoute(IMethodSymbol method, string httpMethod, string literal, string path, string chain) {
+    private static string EmitActionRoute(IMethodSymbol method, string httpMethod, string literal, string path, string chain, string noCsrf) {
         var controller = method.ContainingType.ToDisplayString(FullyQualified);
         var awaitable = method.ReturnType is INamedTypeSymbol named
             && named.TypeArguments.Length == 1
@@ -164,7 +168,7 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         var needsRequest = method.Parameters.Length > 0;
 
         var builder = new StringBuilder();
-        builder.Append("router.Map(global::Hydris.Routing.Method.").Append(httpMethod).Append(", ").Append(literal).Append(", ").Append(chain).Append(", true, ");
+        builder.Append("router.Map(global::Hydris.Routing.Method.").Append(httpMethod).Append(", ").Append(literal).Append(", ").Append(chain).Append(", true, ").Append(noCsrf).Append(", ");
         builder.Append(async ? "static async scope => { " : "static scope => { ");
         builder.Append("var handler = scope.Get<").Append(controller).Append(">(); ");
         if (needsRequest)
@@ -288,6 +292,15 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
     private static bool HasJson(ImmutableArray<AttributeData> attributes) {
         foreach (var attribute in attributes) {
             if (attribute.AttributeClass?.ToDisplayString() == "Hydris.Http.JsonAttribute")
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool HasNoCsrf(ImmutableArray<AttributeData> attributes) {
+        foreach (var attribute in attributes) {
+            if (attribute.AttributeClass?.ToDisplayString() == "Hydris.Http.NoCsrfAttribute")
                 return true;
         }
 

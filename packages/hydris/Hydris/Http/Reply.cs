@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using Hydris.Container;
 using Hydris.Error;
 using Microsoft.AspNetCore.Http.Features;
 
@@ -90,12 +91,13 @@ public sealed class Reply {
         };
     }
 
-    internal void Materialize(Request request) {
+    internal void Materialize(Request request, DiContainer scope) {
         if (Pending is not { } pending)
             return;
         Pending = null;
         var stores = new CookieAuthority(request).Stores();
-        var context = RequestContext.Build(request);
+        var csrf = Csrf.Enabled ? scope.Get<ICsrf>().Issue(this) : string.Empty;
+        var context = RequestContext.Build(request, csrf);
         if (pending.Cache == CacheMode.None) {
             Payload = Views.Render(pending.View, Context(pending.ViewData, stores, context));
             return;
@@ -215,6 +217,8 @@ public sealed class Reply {
         (CookieList ??= []).Add(CookieAuthority.Serialize(name, string.Empty, cleared));
         return this;
     }
+
+    internal IReadOnlyList<string> CookieHeaders => CookieList ?? [];
 
     internal int StatusCode => Code;
 
