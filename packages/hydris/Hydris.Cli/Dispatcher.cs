@@ -57,6 +57,8 @@ public static class Dispatcher {
                 return List();
             case "init":
                 return Init();
+            case "routes":
+                return RoutesCommand.Run();
         }
 
         if (!ShouldRunTask(command, rest.Length, HasTask(config, command))) {
@@ -97,6 +99,12 @@ public static class Dispatcher {
 
     private static int List() {
         Brand.Banner();
+
+        Console.WriteLine("  commands:");
+        foreach (var builtin in BuiltinCatalog.All)
+            Brand.CommandLine(builtin.Usage, builtin.Description);
+        Brand.Blank();
+
         var config = ConfigLoader.Find(Directory.GetCurrentDirectory());
         if (config is null) {
             Brand.Info("no hydris.yml found in this directory or any parent");
@@ -106,6 +114,8 @@ public static class Dispatcher {
             Brand.Info("no tasks defined");
             return 0;
         }
+
+        Console.WriteLine("  tasks:");
         foreach (var (name, task) in config.File.Tasks)
             Brand.TaskLine(name, task.Desc);
         Brand.Blank();
@@ -132,12 +142,9 @@ public static class Dispatcher {
         Console.WriteLine("  usage: hydris [options] <task|command> [args]");
         Console.WriteLine();
         Console.WriteLine("  commands:");
-        Console.WriteLine("    <task>              run a task from hydris.yml");
-        Console.WriteLine("    list, ls           list tasks");
-        Console.WriteLine("    build [args]       run the hydris build");
-        Console.WriteLine("    watch <glob>... -- <cmd>  re-run <cmd> when matching files change");
-        Console.WriteLine("    init               write a starter hydris.yml");
-        Console.WriteLine("    rm cp mkdir mv env cross-platform helpers");
+        Console.WriteLine($"    {"<task>".PadRight(26)}run a task from hydris.yml");
+        foreach (var builtin in BuiltinCatalog.All)
+            Brand.CommandLine(builtin.Usage, builtin.Description);
         Console.WriteLine();
         Console.WriteLine("  options:");
         Console.WriteLine("    --env-file <path>  load env vars from a file");

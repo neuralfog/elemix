@@ -36,6 +36,19 @@ public static class Brand {
             Console.WriteLine($"  {Arrow}  {Bold(name.PadRight(16))}{Dim(desc)}");
     }
 
+    public static void CommandLine(string usage, string desc) =>
+        Console.WriteLine($"    {Bold(usage.PadRight(26))}{Dim(desc.PadRight(40))}{Dim("built-in")}");
+
+    public static void RouteHeader(int methodWidth, int pathWidth, int handlerWidth) =>
+        Console.WriteLine(
+            $"  {Dim("METHOD".PadRight(methodWidth))}  {Dim("PATH".PadRight(pathWidth))}  {Dim("HANDLER".PadRight(handlerWidth))}  {Dim("STATUS")}");
+
+    public static void RouteRow(string method, string path, string handler, bool duplicate, int methodWidth, int pathWidth, int handlerWidth) {
+        var status = duplicate ? $"{Red("✗")} {Dim("duplicate")}" : Green("✓");
+        Console.WriteLine(
+            $"  {Cyan(method.PadRight(methodWidth))}  {path.PadRight(pathWidth)}  {Bold(handler.PadRight(handlerWidth))}  {status}");
+    }
+
     public static void Running(string name) => Console.WriteLine($"  {Arrow}  {Dim("run")} {Bold(name)}");
 
     public static void TaskBlockStart(string name, string command) {
@@ -74,6 +87,8 @@ public static class Brand {
     public static string Green(string text) => Paint("38;2;74;222;128", text);
 
     public static string Amber(string text) => Paint("38;2;251;146;60", text);
+
+    public static string Red(string text) => Paint("38;2;248;113;113", text);
 
     private static string Paint(string code, string text) =>
         NoColor ? text : $"\x1b[{code}m{text}\x1b[0m";
