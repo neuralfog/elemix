@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/VerbsPanelApp.ts
 ---
-import { $__template, $__clone, $__effect, $__setText, $__templateEl, $__cloneEl, $__event, $__child, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__templateEl, $__cloneEl, $__child, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _ft0 = $__template('<pre class="cell"> </pre>');
 const _ft1 = $__template('<pre class="row"> </pre>');
 import { Component } from '@neuralfog/elemix';
@@ -19,7 +19,7 @@ export class VerbsPanelApp extends Component {
 const _r0 = $__clone(_ft0);
 const _n1 = _r0.firstChild!.firstChild!;
 $__effect(() => {
-$__setText(_n1, (label));
+$__setText(_n1, label);
 });
 return _r0;
 })() : '';
@@ -29,7 +29,7 @@ return _r0;
 const _r2 = $__clone(_ft1);
 const _n3 = _r2.firstChild!.firstChild!;
 $__effect(() => {
-$__setText(_n3, (label));
+$__setText(_n3, label);
 });
 return _r2;
 })() : '';
@@ -41,26 +41,27 @@ return _r2;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.toggle);
-$__child(_n2, () => (this.state.open ? (() => {
-const _r8 = $__cloneEl(_t1);
-return _r8;
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _n2.nextSibling!.nextSibling!;
+const _n4 = _n3.nextSibling!.nextSibling!;
+const _n5 = _n4.nextSibling!.nextSibling!;
+const _n6 = _n1.firstChild!.nextSibling!;
+const _n7 = _n1.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = _n7.nextSibling!.nextSibling!;
+(_n2 as HTMLElement).onclick = (this.toggle);
+$__child(_n3, () => (this.state.open ? (() => {
+const _r9 = $__cloneEl(_t1);
+return _r9;
 })() : ''));
-$__child(_n3, () => (this.cell('POST')));
-$__child(_n4, () => (this.row('GET')));
-const _x9 = document.createTextNode('');
-_n5.replaceWith(_x9);
-$__child(_n6, () => (this.cell('PUT')));
-$__child(_n7, () => (this.row('PATCH')));
+$__child(_n4, () => (this.cell('POST')));
+$__child(_n5, () => (this.row('GET')));
+const _x10 = document.createTextNode('');
+_n6.replaceWith(_x10);
+$__child(_n7, () => (this.cell('PUT')));
+$__child(_n8, () => (this.row('PATCH')));
 $__effect(() => {
-$__setText(_x9, (this.state.open ? 'open' : 'none'));
+$__setText(_x10, (this.state.open ? 'open' : 'none'));
 });
 return _r0;
 }

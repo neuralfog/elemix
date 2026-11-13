@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/AttrApp.ts
 ---
-import { $__ssrText, $__ssrAttr, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrText, $__ssrHole, $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -69,7 +69,7 @@ const css = `
 
 export class AttrApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'attr-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.state.userId);return `<a class="link"${$__ssrAttr('href', `/users/${this.state.userId}`)}${$__ssrAttr('title', this.state.label)} data-t="${$__ssrLen(_t0)}">Open profile #${$__ssrText(_t0)}</a>`;})()}<span class="badge"${$__ssrAttr('data-count', this.state.userId)}${$__ssrAttr('aria-label', this.state.label)}>`, $__ssrText(this.state.label), `</span><div class="secret"${$__ssrAttr('hidden', this.state.collapsed)}>Secret content</div><button>next user</button><button>rename</button><button>toggle secret</button></template></${this.$$__tag ?? 'attr-app'}>`];
+return [`<${this.$$__tag ?? 'attr-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _h0 = $__ssrHole((this.state.userId));return `<a class="link"${$__ssrAttr('href', `/users/${this.state.userId}`)}${$__ssrAttr('title', this.state.label)} data-t="${_h0[1]}">Open profile #${_h0[0]}</a>`;})()}<span class="badge"${$__ssrAttr('data-count', this.state.userId)}${$__ssrAttr('aria-label', this.state.label)}>`, $__ssrText(this.state.label), `</span><div class="secret"${$__ssrAttr('hidden', this.state.collapsed)}>Secret content</div><button>next user</button><button>rename</button><button>toggle secret</button></template></${this.$$__tag ?? 'attr-app'}>`];
 }
 
 

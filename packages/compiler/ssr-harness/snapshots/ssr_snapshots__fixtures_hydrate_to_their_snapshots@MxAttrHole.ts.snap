@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxAttrHole.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setAttr, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setAttr, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { tag: string | null; flag: boolean; n: number };
@@ -13,22 +13,22 @@ const _t0 = $__template('<div class="wrap"><div class="box" data-static="s"><spa
 export class MxAttrHole extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!;
-const _n1 = root.firstChild!.firstChild!.nextSibling!;
-const _n2 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n3 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.clearTag);
-$__event(_n2, 'click', this.setTag);
-$__event(_n3, 'click', this.toggleFlag);
-$__event(_n4, 'click', this.bump);
+const _n1 = _n0.nextSibling!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.clearTag);
+(_n2 as HTMLElement).onclick = (this.setTag);
+(_n3 as HTMLElement).onclick = (this.toggleFlag);
+(_n4 as HTMLElement).onclick = (this.bump);
 $__effect(() => {
-$__setAttr(_n0, 'data-tag', (this.state.tag));
+$__setAttr(_n0, 'data-tag', this.state.tag);
 });
 $__effect(() => {
-$__setAttr(_n0, 'data-n', (this.state.n));
+$__setAttr(_n0, 'data-n', this.state.n);
 });
 $__effect(() => {
-$__setAttr(_n0, 'aria-hidden', (this.state.flag));
+$__setAttr(_n0, 'aria-hidden', this.state.flag);
 });
 }
 
@@ -53,22 +53,22 @@ $__setAttr(_n0, 'aria-hidden', (this.state.flag));
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n2, 'click', this.clearTag);
-$__event(_n3, 'click', this.setTag);
-$__event(_n4, 'click', this.toggleFlag);
-$__event(_n5, 'click', this.bump);
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n4.nextSibling!;
+(_n2 as HTMLElement).onclick = (this.clearTag);
+(_n3 as HTMLElement).onclick = (this.setTag);
+(_n4 as HTMLElement).onclick = (this.toggleFlag);
+(_n5 as HTMLElement).onclick = (this.bump);
 $__effect(() => {
-$__setAttr(_n1, 'data-tag', (this.state.tag));
+$__setAttr(_n1, 'data-tag', this.state.tag);
 });
 $__effect(() => {
-$__setAttr(_n1, 'data-n', (this.state.n));
+$__setAttr(_n1, 'data-n', this.state.n);
 });
 $__effect(() => {
-$__setAttr(_n1, 'aria-hidden', (this.state.flag));
+$__setAttr(_n1, 'aria-hidden', this.state.flag);
 });
 return _r0;
 }

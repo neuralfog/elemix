@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/NullGuardApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<p class="val"> </p>');
 const _h1 = $__templateEl('<p class="empty">empty</p>');
 
@@ -22,14 +22,14 @@ const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 2, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
 const _n3 = _n0.firstChild!;
-$__event(_n3, 'click', this.toggle);
+(_n3 as HTMLElement).onclick = (this.toggle);
 $__fresh(() => {
 $__child(_a2, () => (this.model.row
                     ? (() => {
 const _r4 = $__cloneEl(_h0);
 const _n5 = _r4.firstChild!;
 $__effect(() => {
-$__setText(_n5, (this.model.row.id));
+$__setText(_n5, this.model.row.id);
 });
 return _r4;
 })()
@@ -49,14 +49,14 @@ return _r6;
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.toggle);
+const _n2 = _n1.nextSibling!.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.toggle);
 $__child(_n2, () => (this.model.row
                     ? (() => {
 const _r3 = $__cloneEl(_t1);
 const _n4 = _r3.firstChild!;
 $__effect(() => {
-$__setText(_n4, (this.model.row.id));
+$__setText(_n4, this.model.row.id);
 });
 return _r3;
 })()

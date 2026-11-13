@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/NavStoreAApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, $__setAttr, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__setAttr, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { StoreDocument } from './StoreDocument';
@@ -23,16 +23,17 @@ export class NavStoreAApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!;
-const _n2 = _n1.firstChild!.firstChild!;
-const _n3 = _n1.firstChild!.nextSibling!;
-const _n4 = _n1.firstChild!.nextSibling!.nextSibling!;
-$__event(_n3, 'click', this.inc);
-$__event(_n4, 'click', this.bloat);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n1.nextSibling!;
+const _n5 = _n4.nextSibling!;
+(_n4 as HTMLElement).onclick = (this.inc);
+(_n5 as HTMLElement).onclick = (this.bloat);
 $__effect(() => {
-const _v5 = (prefs.count);
-$__setAttr(_n1, 'data-count', (_v5));
-$__setText(_n2, (_v5));
+const _v6 = prefs.count;
+$__setAttr(_n2, 'data-count', _v6);
+$__setText(_n3, _v6);
 });
 return _r0;
 }

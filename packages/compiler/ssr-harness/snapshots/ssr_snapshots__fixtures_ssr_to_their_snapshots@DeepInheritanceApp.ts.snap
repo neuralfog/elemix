@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/DeepInheritanceApp.ts
 ---
-import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -15,7 +15,7 @@ const leafCss = '.btn { text-decoration-line: underline; }';
 
 export class DeepBase extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'deep-base'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${baseCss}</style>${(() => {const _t0 = (this.state.count);return `<button class="btn" data-t="${$__ssrLen(_t0)}">count ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'deep-base'}>`];
+return [`<${this.$$__tag ?? 'deep-base'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${baseCss}</style>${(() => {const _h0 = $__ssrHole((this.state.count));return `<button class="btn" data-t="${_h0[1]}">count ${_h0[0]}</button>`;})()}</template></${this.$$__tag ?? 'deep-base'}>`];
 }
 
 

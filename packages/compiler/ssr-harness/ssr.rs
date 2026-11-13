@@ -189,7 +189,7 @@ fn hydrate_takes_over_a_when_via_reanchor_and_child() {
         "when must hydrate via reanchor + child: {method}"
     );
     assert!(
-        method.contains("$__event(") && method.contains("this.toggle"),
+        method.contains(".onclick = (this.toggle)"),
         "sibling toggle @click must still bind: {method}"
     );
     insta::assert_snapshot!("hydrate_when", method);

@@ -1,6 +1,5 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: fixtures/LoremNested1k.ts
 ---
@@ -38,13 +37,13 @@ const _r1 = $__clone(_ft1);
 const _n2 = _r1.firstChild!;
 const _n3 = _n2.firstChild!;
 $__effect(() => {
-$__setProp(_n2, 'index', (i));
+$__setProp(_n2, 'index', i);
 });
 $__effect(() => {
-$__setProp(_n2, 'text', (LOREM));
+$__setProp(_n2, 'text', LOREM);
 });
 $__effect(() => {
-$__setText(_n3, (inner));
+$__setText(_n3, inner);
 });
 return _r1;
 })();

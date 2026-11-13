@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/DerivedApp.ts
 ---
 import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { qty: number; price: number };
@@ -42,28 +42,28 @@ const _t0 = $__template('<div><div class="row"><button class="add-qty">qty +1</b
 export class DerivedApp extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!.firstChild!;
-const _n1 = root.firstChild!.firstChild!.firstChild!.nextSibling!;
+const _n1 = _n0.nextSibling!;
 const _n2 = $__text(_n1);
 const _n3 = root.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n4 = root.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n4 = _n3.nextSibling!;
 const _n5 = $__text(_n4);
 const _n6 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
 const _n7 = $__text(_n6);
 const _n8 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
 const _n9 = $__text(_n8);
-$__event(_n0, 'click', this.addQty);
-$__event(_n3, 'click', this.bumpPrice);
+(_n0 as HTMLElement).onclick = (this.addQty);
+(_n3 as HTMLElement).onclick = (this.bumpPrice);
 $__effect(() => {
-$__setText(_n2, (this.state.qty));
+$__setText(_n2, this.state.qty);
 });
 $__effect(() => {
-$__setText(_n5, (this.state.price));
+$__setText(_n5, this.state.price);
 });
 $__effect(() => {
-$__setText(_n7, (this.subtotal));
+$__setText(_n7, this.subtotal);
 });
 $__effect(() => {
-$__setText(_n9, (this.total));
+$__setText(_n9, this.total);
 });
 }
 
@@ -87,25 +87,28 @@ $__setText(_n9, (this.total));
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!;
-const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.firstChild!;
-$__event(_n1, 'click', this.addQty);
-$__event(_n3, 'click', this.bumpPrice);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n1.firstChild!;
+const _n5 = _n4.nextSibling!.firstChild!;
+const _n6 = _n2.firstChild!;
+const _n7 = _n6.nextSibling!.firstChild!;
+const _n8 = _n3.firstChild!.nextSibling!.firstChild!;
+const _n9 = _n3.nextSibling!.firstChild!.nextSibling!.firstChild!;
+(_n4 as HTMLElement).onclick = (this.addQty);
+(_n6 as HTMLElement).onclick = (this.bumpPrice);
 $__effect(() => {
-$__setText(_n2, (this.state.qty));
+$__setText(_n5, this.state.qty);
 });
 $__effect(() => {
-$__setText(_n4, (this.state.price));
+$__setText(_n7, this.state.price);
 });
 $__effect(() => {
-$__setText(_n5, (this.subtotal));
+$__setText(_n8, this.subtotal);
 });
 $__effect(() => {
-$__setText(_n6, (this.total));
+$__setText(_n9, this.total);
 });
 return _r0;
 }

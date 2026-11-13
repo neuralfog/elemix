@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/MethodHelperApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { open: boolean; count: number };
@@ -27,51 +27,52 @@ export class MethodHelperApp extends Component {
     
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__child(_n1, () => ((() => {
-const _r6 = $__cloneEl(_t1);
-const _n7 = _r6.firstChild!;
-$__effect(() => {
-$__setText(_n7, ('a'));
-});
-return _r6;
-})()));
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n1.nextSibling!.nextSibling!;
+const _n5 = _n4.nextSibling!.nextSibling!;
+const _n6 = _n5.nextSibling!;
 $__child(_n2, () => ((() => {
-const _r8 = $__cloneEl(_t1);
-const _n9 = _r8.firstChild!;
+const _r7 = $__cloneEl(_t1);
+const _n8 = _r7.firstChild!;
 $__effect(() => {
-$__setText(_n9, ('b'));
+$__setText(_n8, ('a'));
 });
-return _r8;
+return _r7;
 })()));
-$__child(_n3, () => (this.state.open
+$__child(_n3, () => ((() => {
+const _r9 = $__cloneEl(_t1);
+const _n10 = _r9.firstChild!;
+$__effect(() => {
+$__setText(_n10, ('b'));
+});
+return _r9;
+})()));
+$__child(_n4, () => (this.state.open
                         ? (() => {
-const _r10 = $__cloneEl(_t2);
-const _n11 = _r10.firstChild!;
-const _n12 = _r10.firstChild!.nextSibling!.firstChild!;
-$__child(_n11, () => ((() => {
-const _r13 = $__cloneEl(_t1);
-const _n14 = _r13.firstChild!;
+const _r11 = $__cloneEl(_t2);
+const _n12 = _r11.firstChild!;
+const _n13 = _n12.nextSibling!.firstChild!;
+$__child(_n12, () => ((() => {
+const _r14 = $__cloneEl(_t1);
+const _n15 = _r14.firstChild!;
 $__effect(() => {
-$__setText(_n14, ('open'));
+$__setText(_n15, ('open'));
 });
-return _r13;
+return _r14;
 })()));
 $__effect(() => {
-$__setText(_n12, (this.state.count));
+$__setText(_n13, this.state.count);
 });
-return _r10;
+return _r11;
 })()
                         : (() => {
-const _r15 = $__cloneEl(_t3);
-return _r15;
+const _r16 = $__cloneEl(_t3);
+return _r16;
 })()));
-$__event(_n4, 'click', this.toggle);
-$__event(_n5, 'click', this.inc);
+(_n5 as HTMLElement).onclick = (this.toggle);
+(_n6 as HTMLElement).onclick = (this.inc);
 return _r0;
 }
 }

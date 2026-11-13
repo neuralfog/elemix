@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxTypeFlip.ts
 ---
 import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _ft0 = $__template('<b class="bL">mL</b>');
 const _ft1 = $__template('<i class="bR">mR</i>');
 import { Component } from '@neuralfog/elemix';
@@ -18,25 +18,25 @@ const _t0 = $__template('<div class="wrap"><section class="mix"><span class="sta
 export class MxTypeFlip extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!.nextSibling!;
-const _n1 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n2 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n3 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n1 = _n0.nextSibling!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n4.nextSibling!;
 const _n6 = root.firstChild!.firstChild!;
 const _d7 = $__dynLens(_n6);
 const _v8 = $__splitRun(_n6.firstChild!.nextSibling as Text, [1, 1], _d7);
-$__event(_n0, 'click', this.leftText);
-$__event(_n1, 'click', this.leftMarkup);
-$__event(_n2, 'click', this.leftNull);
-$__event(_n3, 'click', this.rightText);
-$__event(_n4, 'click', this.rightMarkup);
-$__event(_n5, 'click', this.rightNull);
+(_n0 as HTMLElement).onclick = (this.leftText);
+(_n1 as HTMLElement).onclick = (this.leftMarkup);
+(_n2 as HTMLElement).onclick = (this.leftNull);
+(_n3 as HTMLElement).onclick = (this.rightText);
+(_n4 as HTMLElement).onclick = (this.rightMarkup);
+(_n5 as HTMLElement).onclick = (this.rightNull);
 $__effect(() => {
-$__setText(_v8[0], (this.left));
+$__setText(_v8[0], this.left);
 });
 $__effect(() => {
-$__setText(_v8[1], (this.right));
+$__setText(_v8[1], this.right);
 });
 }
 
@@ -88,29 +88,30 @@ return _r1;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n8 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _x9 = document.createTextNode('');
-_n1.replaceWith(_x9);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!.nextSibling!.nextSibling!;
+const _n3 = _n2.nextSibling!.nextSibling!;
+const _n4 = _n1.nextSibling!;
+const _n5 = _n4.nextSibling!;
+const _n6 = _n5.nextSibling!;
+const _n7 = _n6.nextSibling!;
+const _n8 = _n7.nextSibling!;
+const _n9 = _n8.nextSibling!;
 const _x10 = document.createTextNode('');
 _n2.replaceWith(_x10);
-$__event(_n3, 'click', this.leftText);
-$__event(_n4, 'click', this.leftMarkup);
-$__event(_n5, 'click', this.leftNull);
-$__event(_n6, 'click', this.rightText);
-$__event(_n7, 'click', this.rightMarkup);
-$__event(_n8, 'click', this.rightNull);
+const _x11 = document.createTextNode('');
+_n3.replaceWith(_x11);
+(_n4 as HTMLElement).onclick = (this.leftText);
+(_n5 as HTMLElement).onclick = (this.leftMarkup);
+(_n6 as HTMLElement).onclick = (this.leftNull);
+(_n7 as HTMLElement).onclick = (this.rightText);
+(_n8 as HTMLElement).onclick = (this.rightMarkup);
+(_n9 as HTMLElement).onclick = (this.rightNull);
 $__effect(() => {
-$__setText(_x9, (this.left));
+$__setText(_x10, this.left);
 });
 $__effect(() => {
-$__setText(_x10, (this.right));
+$__setText(_x11, this.right);
 });
 return _r0;
 }

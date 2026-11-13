@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ModelForwardApp.ts
 ---
-import { $__ssrText, $__ssrChild, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole, $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
@@ -16,7 +16,7 @@ type State = {
 
 export class ModelForwardApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'model-forward-app'}><template shadowrootmode="open" shadowrootserializable="">`, $__ssrChild('model-forward-input', {model: (this.state.name)}), `${(() => {const _t0 = (this.state.name.value);return `<div class="out" data-t="${$__ssrLen(_t0)}">Hello, ${$__ssrText(_t0)}</div>`;})()}</template></${this.$$__tag ?? 'model-forward-app'}>`];
+return [`<${this.$$__tag ?? 'model-forward-app'}><template shadowrootmode="open" shadowrootserializable="">`, $__ssrChild('model-forward-input', {model: (this.state.name)}), `${(() => {const _h0 = $__ssrHole((this.state.name.value));return `<div class="out" data-t="${_h0[1]}">Hello, ${_h0[0]}</div>`;})()}</template></${this.$$__tag ?? 'model-forward-app'}>`];
 }
 
     state = $__state<State>({

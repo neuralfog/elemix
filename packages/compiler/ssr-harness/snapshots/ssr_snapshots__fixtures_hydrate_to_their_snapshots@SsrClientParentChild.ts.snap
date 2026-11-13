@@ -1,11 +1,10 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/SsrClientParentChild.ts
 ---
 import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Props = {
@@ -18,15 +17,15 @@ export class SsrClientParentChild extends Component<Props> {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!;
 const _n1 = $__text(_n0);
-const _n2 = root.firstChild!.firstChild!.nextSibling!;
+const _n2 = _n0.nextSibling!;
 const _n3 = $__text(_n2);
-const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n4, 'click', this.tick);
+const _n4 = _n2.nextSibling!;
+(_n4 as HTMLElement).onclick = (this.tick);
 $__effect(() => {
-$__setText(_n1, (this.props.value));
+$__setText(_n1, this.props.value);
 });
 $__effect(() => {
-$__setText(_n3, (this.state.local));
+$__setText(_n3, this.state.local);
 });
 }
 
@@ -40,15 +39,17 @@ $__setText(_n3, (this.state.local));
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n3, 'click', this.tick);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n2.firstChild!;
+const _n5 = _n2.nextSibling!;
+(_n5 as HTMLElement).onclick = (this.tick);
 $__effect(() => {
-$__setText(_n1, (this.props.value));
+$__setText(_n3, this.props.value);
 });
 $__effect(() => {
-$__setText(_n2, (this.state.local));
+$__setText(_n4, this.state.local);
 });
 return _r0;
 }

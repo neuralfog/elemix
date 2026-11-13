@@ -31,29 +31,29 @@ const _b1 = $__bounds(_n0, 0, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
 const _n3 = root.firstChild!.firstChild!;
 const _n4 = $__text(_n3);
-const _n5 = root.firstChild!.firstChild!.nextSibling!;
+const _n5 = _n3.nextSibling!;
 const _n6 = $__text(_n5);
-const _n7 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n7 = _n5.nextSibling!;
 const _n8 = $__text(_n7);
-const _n9 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n9 = _n7.nextSibling!;
 const _n10 = $__text(_n9);
-const _n11 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n11 = _n9.nextSibling!;
 const _n12 = $__text(_n11);
-const _n13 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n13 = _n11.nextSibling!;
 const _n14 = $__text(_n13);
-const _n15 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n15 = _n13.nextSibling!;
 const _n16 = $__text(_n15);
-const _n17 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n17 = _n15.nextSibling!;
 const _n18 = $__text(_n17);
-const _n19 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n19 = _n17.nextSibling!;
 const _n20 = $__text(_n19);
-const _n21 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n21 = _n19.nextSibling!;
 const _n22 = $__text(_n21);
 $__effect(() => {
-$__setText(_n4, (this.viewData.str));
+$__setText(_n4, this.viewData.str);
 });
 $__effect(() => {
-$__setText(_n6, (this.viewData.num));
+$__setText(_n6, this.viewData.num);
 });
 $__effect(() => {
 $__setText(_n8, (this.viewData.bool ? 'yes' : 'no'));
@@ -65,7 +65,7 @@ $__effect(() => {
 $__setText(_n12, (this.viewData.tags.join(',')));
 });
 $__effect(() => {
-$__setText(_n14, (this.viewData.scores.length));
+$__setText(_n14, this.viewData.scores.length);
 });
 $__effect(() => {
 $__setText(_n16, (this.viewData.scores.reduce(
@@ -74,26 +74,26 @@ $__setText(_n16, (this.viewData.scores.reduce(
             )));
 });
 $__effect(() => {
-$__setText(_n18, (this.viewData.obj.a));
+$__setText(_n18, this.viewData.obj.a);
 });
 $__effect(() => {
-$__setText(_n20, (this.viewData.obj.b));
+$__setText(_n20, this.viewData.obj.b);
 });
 $__effect(() => {
-$__setText(_n22, (this.viewData.nested.deep.value));
+$__setText(_n22, this.viewData.nested.deep.value);
 });
 $__fresh(() => {
 $__list(_a2, () => (this.viewData.rows), (row) => row.id, (row) => {
 const _r23 = $__cloneEl(_h0);
 const _n24 = _r23.firstChild!;
-const _n25 = _r23.firstChild!.nextSibling!.nextSibling!;
+const _n25 = _n24.nextSibling!.nextSibling!;
 const _x26 = document.createTextNode('');
 _n24.replaceWith(_x26);
 const _x27 = document.createTextNode('');
 _n25.replaceWith(_x27);
 _x26.data = ($__toRaw(row).id);
 $__effect(() => {
-$__setText(_x27, (row.label));
+$__setText(_x27, row.label);
 });
 return _r23;
 });
@@ -102,63 +102,73 @@ return _r23;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n8 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n9 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n10 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n11 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-$__list(_n11, () => (this.viewData.rows), (row) => row.id, (row) => {
-const _r12 = $__cloneEl(_t1);
-const _n13 = _r12.firstChild!;
-const _n14 = _r12.firstChild!.nextSibling!.nextSibling!;
-const _x15 = document.createTextNode('');
-_n13.replaceWith(_x15);
-const _x16 = document.createTextNode('');
-_n14.replaceWith(_x16);
-_x15.data = ($__toRaw(row).id);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n4.nextSibling!;
+const _n6 = _n5.nextSibling!;
+const _n7 = _n6.nextSibling!;
+const _n8 = _n7.nextSibling!;
+const _n9 = _n8.nextSibling!;
+const _n10 = _n9.nextSibling!;
+const _n11 = _n1.firstChild!;
+const _n12 = _n2.firstChild!;
+const _n13 = _n3.firstChild!;
+const _n14 = _n4.firstChild!;
+const _n15 = _n5.firstChild!;
+const _n16 = _n6.firstChild!;
+const _n17 = _n7.firstChild!;
+const _n18 = _n8.firstChild!;
+const _n19 = _n9.firstChild!;
+const _n20 = _n10.firstChild!;
+const _n21 = _n10.nextSibling!.firstChild!;
+$__list(_n21, () => (this.viewData.rows), (row) => row.id, (row) => {
+const _r22 = $__cloneEl(_t1);
+const _n23 = _r22.firstChild!;
+const _n24 = _n23.nextSibling!.nextSibling!;
+const _x25 = document.createTextNode('');
+_n23.replaceWith(_x25);
+const _x26 = document.createTextNode('');
+_n24.replaceWith(_x26);
+_x25.data = ($__toRaw(row).id);
 $__effect(() => {
-$__setText(_x16, (row.label));
+$__setText(_x26, row.label);
 });
-return _r12;
-});
-$__effect(() => {
-$__setText(_n1, (this.viewData.str));
-});
-$__effect(() => {
-$__setText(_n2, (this.viewData.num));
-});
-$__effect(() => {
-$__setText(_n3, (this.viewData.bool ? 'yes' : 'no'));
-});
-$__effect(() => {
-$__setText(_n4, (this.viewData.nil ?? 'none'));
+return _r22;
 });
 $__effect(() => {
-$__setText(_n5, (this.viewData.tags.join(',')));
+$__setText(_n11, this.viewData.str);
 });
 $__effect(() => {
-$__setText(_n6, (this.viewData.scores.length));
+$__setText(_n12, this.viewData.num);
 });
 $__effect(() => {
-$__setText(_n7, (this.viewData.scores.reduce(
+$__setText(_n13, (this.viewData.bool ? 'yes' : 'no'));
+});
+$__effect(() => {
+$__setText(_n14, (this.viewData.nil ?? 'none'));
+});
+$__effect(() => {
+$__setText(_n15, (this.viewData.tags.join(',')));
+});
+$__effect(() => {
+$__setText(_n16, this.viewData.scores.length);
+});
+$__effect(() => {
+$__setText(_n17, (this.viewData.scores.reduce(
                 (a, b) => a + b,
                 0,
             )));
 });
 $__effect(() => {
-$__setText(_n8, (this.viewData.obj.a));
+$__setText(_n18, this.viewData.obj.a);
 });
 $__effect(() => {
-$__setText(_n9, (this.viewData.obj.b));
+$__setText(_n19, this.viewData.obj.b);
 });
 $__effect(() => {
-$__setText(_n10, (this.viewData.nested.deep.value));
+$__setText(_n20, this.viewData.nested.deep.value);
 });
 return _r0;
 }

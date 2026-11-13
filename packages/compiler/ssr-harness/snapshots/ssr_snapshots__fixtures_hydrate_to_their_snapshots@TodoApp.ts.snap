@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/TodoApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__model, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__model, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<li><span> </span><button class="remove">×</button></li>');
 
 import { Component, ref } from '@neuralfog/elemix';
@@ -83,20 +83,21 @@ const _n0 = root.firstChild!.nextSibling!.nextSibling!;
 const _b1 = $__bounds(_n0, 0, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
 const _n3 = root.firstChild!.nextSibling!.firstChild!;
-const _n4 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n4 = _n3.nextSibling!;
 $__model(_n3 as HTMLInputElement, () => (this.state.draft));
-$__event(_n3, 'keydown', (e: KeyboardEvent) => {
+(_n3 as HTMLElement).onkeydown = ((e: KeyboardEvent) => {
                     if (e.key === 'Enter') this.addItem();
                 });
-$__event(_n4, 'click', this.addItem);
+(_n4 as HTMLElement).onclick = (this.addItem);
 $__fresh(() => {
 $__list(_a2, () => (this.state.todos), (todo) => todo.id, (todo) => {
 const _r5 = $__cloneEl(_h0);
-const _n6 = _r5.firstChild!.firstChild!;
-const _n7 = _r5.firstChild!.nextSibling!;
-$__event(_n7, 'click', () => this.removeItem(todo.id));
+const _n6 = _r5.firstChild!;
+const _n7 = _n6.firstChild!;
+const _n8 = _n6.nextSibling!;
+(_n8 as HTMLElement).onclick = (() => this.removeItem(todo.id));
 $__effect(() => {
-$__setText(_n6, (todo.text));
+$__setText(_n7, todo.text);
 });
 return _r5;
 });
@@ -125,23 +126,25 @@ return _r5;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.nextSibling!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
-$__model(_n1 as HTMLInputElement, () => (this.state.draft));
-$__event(_n1, 'keydown', (e: KeyboardEvent) => {
+const _n1 = _r0.firstChild!.nextSibling!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n1.nextSibling!.firstChild!;
+$__model(_n2 as HTMLInputElement, () => (this.state.draft));
+(_n2 as HTMLElement).onkeydown = ((e: KeyboardEvent) => {
                     if (e.key === 'Enter') this.addItem();
                 });
-$__event(_n2, 'click', this.addItem);
-$__list(_n3, () => (this.state.todos), (todo) => todo.id, (todo) => {
-const _r4 = $__cloneEl(_t1);
-const _n5 = _r4.firstChild!.firstChild!;
-const _n6 = _r4.firstChild!.nextSibling!;
-$__event(_n6, 'click', () => this.removeItem(todo.id));
+(_n3 as HTMLElement).onclick = (this.addItem);
+$__list(_n4, () => (this.state.todos), (todo) => todo.id, (todo) => {
+const _r5 = $__cloneEl(_t1);
+const _n6 = _r5.firstChild!;
+const _n7 = _n6.firstChild!;
+const _n8 = _n6.nextSibling!;
+(_n8 as HTMLElement).onclick = (() => this.removeItem(todo.id));
 $__effect(() => {
-$__setText(_n5, (todo.text));
+$__setText(_n7, todo.text);
 });
-return _r4;
+return _r5;
 });
 return _r0;
 }

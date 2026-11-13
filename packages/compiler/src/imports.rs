@@ -21,6 +21,7 @@ pub fn add_ssr_runtime_import(code: &str) -> String {
         code,
         &[
             "$__ssrText",
+            "$__ssrHole",
             "$__ssrAttr",
             "$__ssrClass",
             "$__ssrStyle",

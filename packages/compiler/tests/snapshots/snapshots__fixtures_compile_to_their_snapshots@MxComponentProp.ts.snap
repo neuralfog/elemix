@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/MxComponentProp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './MxCounterChild';
@@ -27,26 +27,27 @@ export class MxComponentProp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__child(_n1, () => (this.state.which === 'a'
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+const _n4 = _n3.nextSibling!;
+$__child(_n2, () => (this.state.which === 'a'
                 ? (() => {
-const _r4 = $__cloneEl(_t1);
+const _r5 = $__cloneEl(_t1);
 $__effect(() => {
-$__setProp(_r4, 'label', (this.state.label));
-});
-return _r4;
-})()
-                : (() => {
-const _r5 = $__cloneEl(_t2);
-$__effect(() => {
-$__setProp(_r5, 'label', (`b-${this.state.label}`));
+$__setProp(_r5, 'label', this.state.label);
 });
 return _r5;
+})()
+                : (() => {
+const _r6 = $__cloneEl(_t2);
+$__effect(() => {
+$__setProp(_r6, 'label', (`b-${this.state.label}`));
+});
+return _r6;
 })()));
-$__event(_n2, 'click', this.rename);
-$__event(_n3, 'click', this.swap);
+(_n3 as HTMLElement).onclick = (this.rename);
+(_n4 as HTMLElement).onclick = (this.swap);
 return _r0;
 }
 }

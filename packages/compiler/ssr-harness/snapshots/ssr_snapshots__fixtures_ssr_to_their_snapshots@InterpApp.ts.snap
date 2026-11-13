@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/InterpApp.ts
 ---
-import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -41,7 +41,7 @@ const css = `
 
 export class InterpApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'interp-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>`, (() => {const _t0 = (this.state.first);const _t1 = (this.state.last);return [`<p class="full" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}"><span class="k">full:</span> ${$__ssrText(_t0)}${$__ssrText(_t1)}</p>`];})(), (() => {const _t2 = (this.state.first);const _t3 = (this.state.last);return [`<p class="dash" data-t="${$__ssrLen(_t2)},${$__ssrLen(_t3)}"><span class="k">dash:</span> ${$__ssrText(_t2)}-${$__ssrText(_t3)}</p>`];})(), (() => {const _t4 = (this.state.middle);return [`<p class="middle" data-t="${$__ssrLen(_t4)}"><span class="k">middle:</span> [${$__ssrText(_t4)}]</p>`];})(), (() => {const _t5 = (this.state.n);return [`<p class="num" data-t="${$__ssrLen(_t5)}"><span class="k">num:</span> ${$__ssrText(_t5)}</p>`];})(), `<button>swap</button><button>set middle</button><button>inc</button></template></${this.$$__tag ?? 'interp-app'}>`];
+return [`<${this.$$__tag ?? 'interp-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>`, (() => {const _h0 = $__ssrHole((this.state.first));const _h1 = $__ssrHole((this.state.last));return [`<p class="full" data-t="${_h0[1]},${_h1[1]}"><span class="k">full:</span> ${_h0[0]}${_h1[0]}</p>`];})(), (() => {const _h2 = $__ssrHole((this.state.first));const _h3 = $__ssrHole((this.state.last));return [`<p class="dash" data-t="${_h2[1]},${_h3[1]}"><span class="k">dash:</span> ${_h2[0]}-${_h3[0]}</p>`];})(), (() => {const _h4 = $__ssrHole((this.state.middle));return [`<p class="middle" data-t="${_h4[1]}"><span class="k">middle:</span> [${_h4[0]}]</p>`];})(), (() => {const _h5 = $__ssrHole((this.state.n));return [`<p class="num" data-t="${_h5[1]}"><span class="k">num:</span> ${_h5[0]}</p>`];})(), `<button>swap</button><button>set middle</button><button>inc</button></template></${this.$$__tag ?? 'interp-app'}>`];
 }
 
 

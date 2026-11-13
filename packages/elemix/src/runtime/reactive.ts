@@ -132,9 +132,10 @@ export const $__track = (d: Dep): void => {
     if (scope === null) return;
     const subs = d.subs;
     if (subs === scope) return;
-    if (Array.isArray(subs) && subs[subs.length - 1] === scope) return;
+    const subsList = Array.isArray(subs) ? subs : null;
+    if (subsList && subsList[subsList.length - 1] === scope) return;
 
-    const dslot = subs === null ? 0 : Array.isArray(subs) ? subs.length : 1;
+    const dslot = subs === null ? 0 : subsList ? subsList.length : 1;
 
     const deps = scope.deps;
     let sslot: number;
@@ -155,11 +156,11 @@ export const $__track = (d: Dep): void => {
     if (subs === null) {
         d.subs = scope;
         d.subSlots = sslot;
-    } else if (Array.isArray(subs)) {
-        subs.push(scope);
+    } else if (subsList) {
+        subsList.push(scope);
         (d.subSlots as number[]).push(sslot);
     } else {
-        d.subs = [subs, scope];
+        d.subs = [subs as Scope, scope];
         d.subSlots = [d.subSlots as number, sslot];
     }
 };

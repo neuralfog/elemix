@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/NestedApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<div class="category"><div class="head"><strong> </strong><button>+ item</button></div><ul><!----></ul></div>');
 const _h1 = $__templateEl('<li> </li>');
 
@@ -86,20 +86,22 @@ const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
 $__fresh(() => {
 $__list(_a2, () => (this.state.categories), (category) => category.id, (category) => {
 const _r3 = $__cloneEl(_h0);
-const _n4 = _r3.firstChild!.firstChild!.firstChild!;
-const _n5 = _r3.firstChild!.firstChild!.nextSibling!;
-const _n6 = _r3.firstChild!.nextSibling!.firstChild!;
-$__event(_n5, 'click', () => this.addItem(category));
-$__list(_n6, () => (category.items), (item) => item.id, (item) => {
-const _r7 = $__cloneEl(_h1);
-const _n8 = _r7.firstChild!;
+const _n4 = _r3.firstChild!;
+const _n5 = _n4.firstChild!;
+const _n6 = _n5.firstChild!;
+const _n7 = _n5.nextSibling!;
+const _n8 = _n4.nextSibling!.firstChild!;
+(_n7 as HTMLElement).onclick = (() => this.addItem(category));
+$__list(_n8, () => (category.items), (item) => item.id, (item) => {
+const _r9 = $__cloneEl(_h1);
+const _n10 = _r9.firstChild!;
 $__effect(() => {
-$__setText(_n8, (item.name));
+$__setText(_n10, item.name);
 });
-return _r7;
+return _r9;
 });
 $__effect(() => {
-$__setText(_n4, (category.name));
+$__setText(_n6, category.name);
 });
 return _r3;
 });
@@ -136,20 +138,22 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 $__list(_n1, () => (this.state.categories), (category) => category.id, (category) => {
 const _r2 = $__cloneEl(_t1);
-const _n3 = _r2.firstChild!.firstChild!.firstChild!;
-const _n4 = _r2.firstChild!.firstChild!.nextSibling!;
-const _n5 = _r2.firstChild!.nextSibling!.firstChild!;
-$__event(_n4, 'click', () => this.addItem(category));
-$__list(_n5, () => (category.items), (item) => item.id, (item) => {
-const _r6 = $__cloneEl(_t2);
-const _n7 = _r6.firstChild!;
+const _n3 = _r2.firstChild!;
+const _n4 = _n3.firstChild!;
+const _n5 = _n4.firstChild!;
+const _n6 = _n4.nextSibling!;
+const _n7 = _n3.nextSibling!.firstChild!;
+(_n6 as HTMLElement).onclick = (() => this.addItem(category));
+$__list(_n7, () => (category.items), (item) => item.id, (item) => {
+const _r8 = $__cloneEl(_t2);
+const _n9 = _r8.firstChild!;
 $__effect(() => {
-$__setText(_n7, (item.name));
+$__setText(_n9, item.name);
 });
-return _r6;
+return _r8;
 });
 $__effect(() => {
-$__setText(_n3, (category.name));
+$__setText(_n5, category.name);
 });
 return _r2;
 });

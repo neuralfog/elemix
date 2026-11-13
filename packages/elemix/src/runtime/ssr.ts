@@ -12,10 +12,11 @@ const DATA_H: Record<string, string> = {
     '<': '&lt;',
 };
 
-export const $__ssrData = (props: Record<string, unknown>): string =>
-    Object.keys(props).length === 0
-        ? ''
-        : ` data-h='${JSON.stringify(props).replace(/[&'<]/g, (c) => DATA_H[c] ?? c)}'`;
+export const $__ssrData = (props: Record<string, unknown>): string => {
+    for (const _ in props)
+        return ` data-h='${JSON.stringify(props).replace(/[&'<]/g, (c) => DATA_H[c] ?? c)}'`;
+    return '';
+};
 
 const ATTR: Record<string, string> = {
     '&': '&amp;',
@@ -41,6 +42,8 @@ export const $__runStores = <T>(fn: () => T): T => {
 
 export const $__moduleState = <T extends object>(factory: () => T): T => {
     const id = {};
+    let cachedBag: StoreBag | null = null;
+    let cachedInst: Record<PropertyKey, unknown> | null = null;
     const resolve = (): Record<PropertyKey, unknown> => {
         if (
             current === null &&
@@ -51,10 +54,17 @@ export const $__moduleState = <T extends object>(factory: () => T): T => {
             );
         }
         const bag = current ?? fallback;
+        if (current !== null && bag === cachedBag && cachedInst !== null) {
+            return cachedInst;
+        }
         let inst = bag.get(id);
         if (inst === undefined) {
             inst = factory() as Record<PropertyKey, unknown>;
             bag.set(id, inst);
+        }
+        if (current !== null) {
+            cachedBag = bag;
+            cachedInst = inst;
         }
         return inst;
     };
@@ -153,6 +163,19 @@ export const $__ssrStyle = (value: unknown): string => {
 
 export const $__ssrLen = (value: unknown): number =>
     Array.isArray(value) ? -1 : value == null ? 0 : String(value).length;
+
+export const $__ssrHole = (value: unknown): [string, number] => {
+    if (Array.isArray(value))
+        return [$__render(value as Rope) + HYDRATE_MARK, -1];
+    if (value == null) return ['', 0];
+    const s = String(value);
+    return [
+        s.indexOf('&') === -1 && s.indexOf('<') === -1 && s.indexOf('>') === -1
+            ? s
+            : s.replace(/[&<>]/g, (c) => TEXT[c] ?? c),
+        s.length,
+    ];
+};
 
 export const $__ssrRepeat = <T>(
     list: T[],

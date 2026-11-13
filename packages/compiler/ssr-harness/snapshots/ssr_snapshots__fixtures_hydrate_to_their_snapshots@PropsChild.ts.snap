@@ -1,11 +1,10 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/PropsChild.ts
 ---
 import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Props = {
@@ -23,23 +22,23 @@ export class PropsChild extends Component<Props> {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!;
 const _n1 = $__text(_n0);
-const _n2 = root.firstChild!.firstChild!.nextSibling!;
+const _n2 = _n0.nextSibling!;
 const _n3 = $__text(_n2);
-const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _n2.nextSibling!;
 const _n5 = $__text(_n4);
-const _n6 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _n4.nextSibling!;
 const _n7 = $__text(_n6);
-const _n8 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n9 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n10 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n8, 'click', () => this.props.onBump());
-$__event(_n9, 'click', () => this.props.onAdd('x'));
-$__event(_n10, 'click', () => this.props.tags.push('y'));
+const _n8 = _n6.nextSibling!;
+const _n9 = _n8.nextSibling!;
+const _n10 = _n9.nextSibling!;
+(_n8 as HTMLElement).onclick = (() => this.props.onBump());
+(_n9 as HTMLElement).onclick = (() => this.props.onAdd('x'));
+(_n10 as HTMLElement).onclick = (() => this.props.tags.push('y'));
 $__effect(() => {
-$__setText(_n1, (this.props.label));
+$__setText(_n1, this.props.label);
 });
 $__effect(() => {
-$__setText(_n3, (this.props.count));
+$__setText(_n3, this.props.count);
 });
 $__effect(() => {
 $__setText(_n5, (this.props.flag ? 'yes' : 'no'));
@@ -51,27 +50,31 @@ $__setText(_n7, (this.props.tags.join(',')));
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n5, 'click', () => this.props.onBump());
-$__event(_n6, 'click', () => this.props.onAdd('x'));
-$__event(_n7, 'click', () => this.props.tags.push('y'));
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n1.firstChild!;
+const _n6 = _n2.firstChild!;
+const _n7 = _n3.firstChild!;
+const _n8 = _n4.firstChild!;
+const _n9 = _n4.nextSibling!;
+const _n10 = _n9.nextSibling!;
+const _n11 = _n10.nextSibling!;
+(_n9 as HTMLElement).onclick = (() => this.props.onBump());
+(_n10 as HTMLElement).onclick = (() => this.props.onAdd('x'));
+(_n11 as HTMLElement).onclick = (() => this.props.tags.push('y'));
 $__effect(() => {
-$__setText(_n1, (this.props.label));
+$__setText(_n5, this.props.label);
 });
 $__effect(() => {
-$__setText(_n2, (this.props.count));
+$__setText(_n6, this.props.count);
 });
 $__effect(() => {
-$__setText(_n3, (this.props.flag ? 'yes' : 'no'));
+$__setText(_n7, (this.props.flag ? 'yes' : 'no'));
 });
 $__effect(() => {
-$__setText(_n4, (this.props.tags.join(',')));
+$__setText(_n8, (this.props.tags.join(',')));
 });
 return _r0;
 }

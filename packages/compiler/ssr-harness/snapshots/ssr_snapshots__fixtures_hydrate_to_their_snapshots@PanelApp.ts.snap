@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/PanelApp.ts
 ---
 import { $__span, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<h2> </h2>');
 const _h1 = $__templateEl('<p class="stat"><!----> open</p>');
 
@@ -74,15 +74,15 @@ const _b2 = $__span(_n0, 1, 1);
 const _a3 = $__reanchor(_n0, _b1[0], _b1[1]);
 const _a4 = $__reanchor(_n0, _b2[0], _b2[1]);
 const _n5 = _n0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n6 = _n0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n5, 'click', this.add);
-$__event(_n6, 'click', this.rename);
+const _n6 = _n5.nextSibling!;
+(_n5 as HTMLElement).onclick = (this.add);
+(_n6 as HTMLElement).onclick = (this.rename);
 $__fresh(() => {
 $__child(_a3, () => ((() => {
 const _r7 = $__cloneEl(_h0);
 const _n8 = _r7.firstChild!;
 $__effect(() => {
-$__setText(_n8, (this.state.title));
+$__setText(_n8, this.state.title);
 });
 return _r7;
 })()));
@@ -92,7 +92,7 @@ const _n10 = _r9.firstChild!;
 const _x11 = document.createTextNode('');
 _n10.replaceWith(_x11);
 $__effect(() => {
-$__setText(_x11, (this.state.count));
+$__setText(_x11, this.state.count);
 });
 return _r9;
 })()));
@@ -118,14 +118,14 @@ return _r9;
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n2 = _n1.nextSibling!.nextSibling!;
+const _n3 = _n2.nextSibling!.nextSibling!;
+const _n4 = _n3.nextSibling!;
 $__child(_n1, () => ((() => {
 const _r5 = $__cloneEl(_t1);
 const _n6 = _r5.firstChild!;
 $__effect(() => {
-$__setText(_n6, (this.state.title));
+$__setText(_n6, this.state.title);
 });
 return _r5;
 })()));
@@ -135,12 +135,12 @@ const _n8 = _r7.firstChild!;
 const _x9 = document.createTextNode('');
 _n8.replaceWith(_x9);
 $__effect(() => {
-$__setText(_x9, (this.state.count));
+$__setText(_x9, this.state.count);
 });
 return _r7;
 })()));
-$__event(_n3, 'click', this.add);
-$__event(_n4, 'click', this.rename);
+(_n3 as HTMLElement).onclick = (this.add);
+(_n4 as HTMLElement).onclick = (this.rename);
 return _r0;
 }
 }

@@ -1,6 +1,5 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: fixtures/SsrStoreApp.ts
 ---
@@ -22,13 +21,14 @@ export class SsrStoreApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!;
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.nextSibling!.firstChild!;
+const _n3 = _n1.nextSibling!;
 $__effect(() => {
-$__setText(_n1, (this.state.counter.value));
+$__setText(_n2, this.state.counter.value);
 });
 $__effect(() => {
-$__setProp(_n2, 'counter', (this.state.counter));
+$__setProp(_n3, 'counter', this.state.counter);
 });
 return _r0;
 }

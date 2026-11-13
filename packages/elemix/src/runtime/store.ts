@@ -34,9 +34,11 @@ let flushScheduled = false;
 
 const flushCookies = (): void => {
     flushScheduled = false;
-    const entries = [...flushQueue];
-    flushQueue.clear();
-    for (const [name, value] of entries) writeCookie(name, value);
+    try {
+        for (const [name, value] of flushQueue) writeCookie(name, value);
+    } finally {
+        flushQueue.clear();
+    }
 };
 
 const cookiePersist = (name: string, value: string): void => {

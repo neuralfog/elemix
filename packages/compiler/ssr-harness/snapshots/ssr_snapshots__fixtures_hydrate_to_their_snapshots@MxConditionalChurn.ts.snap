@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxConditionalChurn.ts
 ---
 import { $__span, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<span class="e-on">e<!----></span>');
 const _h1 = $__templateEl('<span class="n-on">n<!----></span>');
 
@@ -24,15 +24,15 @@ const _b2 = $__span(_n0, 1, 1);
 const _a3 = $__reanchor(_n0, _b1[0], _b1[1]);
 const _a4 = $__reanchor(_n0, _b2[0], _b2[1]);
 const _n5 = _n0.firstChild!;
-const _n6 = _n0.firstChild!.nextSibling!;
-const _n7 = _n0.firstChild!.nextSibling!.nextSibling!;
-const _n8 = _n0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _n5.nextSibling!;
+const _n7 = _n6.nextSibling!;
+const _n8 = _n7.nextSibling!;
 const _n9 = $__text(_n8);
-$__event(_n5, 'click', this.toggleEmpty);
-$__event(_n6, 'click', this.toggleNull);
-$__event(_n7, 'click', this.bump);
+(_n5 as HTMLElement).onclick = (this.toggleEmpty);
+(_n6 as HTMLElement).onclick = (this.toggleNull);
+(_n7 as HTMLElement).onclick = (this.bump);
 $__effect(() => {
-$__setText(_n9, (this.state.tick));
+$__setText(_n9, this.state.tick);
 });
 $__fresh(() => {
 $__child(_a3, () => (this.state.showEmpty
@@ -42,7 +42,7 @@ const _n11 = _r10.firstChild!.nextSibling!;
 const _x12 = document.createTextNode('');
 _n11.replaceWith(_x12);
 $__effect(() => {
-$__setText(_x12, (this.state.tick));
+$__setText(_x12, this.state.tick);
 });
 return _r10;
 })()
@@ -54,7 +54,7 @@ const _n14 = _r13.firstChild!.nextSibling!;
 const _x15 = document.createTextNode('');
 _n14.replaceWith(_x15);
 $__effect(() => {
-$__setText(_x15, (this.state.tick));
+$__setText(_x15, this.state.tick);
 });
 return _r13;
 })()
@@ -78,41 +78,42 @@ return _r13;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.toggleEmpty);
-$__event(_n2, 'click', this.toggleNull);
-$__event(_n3, 'click', this.bump);
-$__child(_n5, () => (this.state.showEmpty
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n1.firstChild!;
+const _n6 = _n1.nextSibling!.nextSibling!;
+const _n7 = _n6.nextSibling!.nextSibling!;
+(_n2 as HTMLElement).onclick = (this.toggleEmpty);
+(_n3 as HTMLElement).onclick = (this.toggleNull);
+(_n4 as HTMLElement).onclick = (this.bump);
+$__child(_n6, () => (this.state.showEmpty
                     ? (() => {
-const _r7 = $__cloneEl(_t1);
-const _n8 = _r7.firstChild!.nextSibling!;
-const _x9 = document.createTextNode('');
-_n8.replaceWith(_x9);
+const _r8 = $__cloneEl(_t1);
+const _n9 = _r8.firstChild!.nextSibling!;
+const _x10 = document.createTextNode('');
+_n9.replaceWith(_x10);
 $__effect(() => {
-$__setText(_x9, (this.state.tick));
+$__setText(_x10, this.state.tick);
 });
-return _r7;
+return _r8;
 })()
                     : ''));
-$__child(_n6, () => (this.state.showNull
+$__child(_n7, () => (this.state.showNull
                     ? (() => {
-const _r10 = $__cloneEl(_t2);
-const _n11 = _r10.firstChild!.nextSibling!;
-const _x12 = document.createTextNode('');
-_n11.replaceWith(_x12);
+const _r11 = $__cloneEl(_t2);
+const _n12 = _r11.firstChild!.nextSibling!;
+const _x13 = document.createTextNode('');
+_n12.replaceWith(_x13);
 $__effect(() => {
-$__setText(_x12, (this.state.tick));
+$__setText(_x13, this.state.tick);
 });
-return _r10;
+return _r11;
 })()
                     : null));
 $__effect(() => {
-$__setText(_n4, (this.state.tick));
+$__setText(_n5, this.state.tick);
 });
 return _r0;
 }

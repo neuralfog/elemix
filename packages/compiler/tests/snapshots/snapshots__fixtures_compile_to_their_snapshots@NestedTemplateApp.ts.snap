@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/NestedTemplateApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -83,37 +83,38 @@ export class NestedTemplateApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__child(_n1, () => ((() => {
-const _r6 = $__cloneEl(_t1);
-const _n7 = _r6.firstChild!;
-$__effect(() => {
-$__setText(_n7, (this.state.title));
-});
-return _r6;
-})()));
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n3.nextSibling!.nextSibling!;
+const _n5 = _n1.nextSibling!;
+const _n6 = _n5.nextSibling!;
 $__child(_n2, () => ((() => {
-const _r8 = $__cloneEl(_t2);
-const _n9 = _r8.firstChild!;
+const _r7 = $__cloneEl(_t1);
+const _n8 = _r7.firstChild!;
 $__effect(() => {
-$__setText(_n9, (this.state.tag));
+$__setText(_n8, this.state.title);
 });
-return _r8;
+return _r7;
 })()));
 $__child(_n3, () => ((() => {
-const _r10 = $__cloneEl(_t2);
-const _n11 = _r10.firstChild!;
+const _r9 = $__cloneEl(_t2);
+const _n10 = _r9.firstChild!;
 $__effect(() => {
-$__setText(_n11, (this.state.tag));
+$__setText(_n10, this.state.tag);
 });
-return _r10;
+return _r9;
 })()));
-$__event(_n4, 'click', this.changeTitle);
-$__event(_n5, 'click', this.changeTag);
+$__child(_n4, () => ((() => {
+const _r11 = $__cloneEl(_t2);
+const _n12 = _r11.firstChild!;
+$__effect(() => {
+$__setText(_n12, this.state.tag);
+});
+return _r11;
+})()));
+(_n5 as HTMLElement).onclick = (this.changeTitle);
+(_n6 as HTMLElement).onclick = (this.changeTag);
 return _r0;
 }
 }

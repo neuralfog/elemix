@@ -19,7 +19,7 @@ export class ModelDeepOuter extends Component<Props> {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
 $__effect(() => {
-$__setProp(_n0, 'model', (this.props.model));
+$__setProp(_n0, 'model', this.props.model);
 });
 }
 
@@ -27,7 +27,7 @@ $__setProp(_n0, 'model', (this.props.model));
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
 $__effect(() => {
-$__setProp(_n1, 'model', (this.props.model));
+$__setProp(_n1, 'model', this.props.model);
 });
 return _r0;
 }

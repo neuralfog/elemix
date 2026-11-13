@@ -33,9 +33,8 @@ const buildRow = (item: Item): HTMLElement => {
     const a = (tr.children[1] as HTMLElement).firstChild as HTMLElement;
     const idText = td0.appendChild(document.createTextNode(''));
     const labelText = a.appendChild(document.createTextNode(''));
-    const ci = tr.getAttribute('class') ?? '';
     effect(() => {
-        _setClass(tr, ci, item.selected ? 'danger' : '');
+        _setClass(tr, item.selected ? 'danger' : '');
         _setText(idText, item.id);
         _setAttr(a, 'data-id', item.id);
         _setText(labelText, item.label);

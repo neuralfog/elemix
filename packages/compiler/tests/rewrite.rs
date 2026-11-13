@@ -137,7 +137,7 @@ fn method_form_template_lowers() {
     assert_eq!(out.matches("$$__view(): DocumentFragment").count(), 1);
     assert!(!out.contains("template(): Template"));
     assert!(!out.contains("tpl`"));
-    assert!(out.contains("$__event("));
+    assert!(out.contains("onclick = (this.inc)"));
 }
 
 #[test]

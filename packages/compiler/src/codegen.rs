@@ -4,7 +4,7 @@ use crate::lower::{
     find_html_spans, slice, split_call_args, split_commas, split_object_entries,
     split_template_literal, split_ternary,
 };
-use crate::template::node::NodePath;
+use crate::template::node::{NodePath, Step};
 use crate::template::parse::{parse, structural_holes, StructHole};
 use std::collections::HashMap;
 
@@ -128,7 +128,7 @@ fn hydrate_bind(
     let parsed = parse(statics, holes);
     let bindings: Vec<_> = parsed.holes.iter().map(classify).collect();
     let mut lines: Vec<String> = Vec::new();
-    let mut grabbed: Vec<(NodePath, String)> = Vec::new();
+    let mut grabbed: Vec<(Vec<bool>, String)> = Vec::new();
 
     let adj = |p: &NodePath| -> NodePath {
         if el && !p.is_empty() {
@@ -229,38 +229,56 @@ fn hydrate_bind(
         }
     }
 
-    let mut group: Vec<String> = Vec::new();
+    let mut cse: HashMap<String, String> = HashMap::new();
+    let mut reactive_hoist: HashMap<String, String> = HashMap::new();
+    {
+        let mut counts: HashMap<&str, usize> = HashMap::new();
+        for b in &bindings {
+            if is_grouped(&b.kind) && is_simple_read(b.expr.trim()) {
+                *counts.entry(b.expr.trim()).or_insert(0) += 1;
+            }
+        }
+        for b in &bindings {
+            if !is_grouped(&b.kind) {
+                continue;
+            }
+            let e = b.expr.trim();
+            if counts.get(e).copied().unwrap_or(0) >= 2 && !cse.contains_key(e) {
+                let v = ctx.var("v");
+                reactive_hoist.insert(v.clone(), emitter.local(&v, e));
+                cse.insert(e.to_string(), v);
+            }
+        }
+    }
+
+    let mut group: Vec<(Option<String>, String)> = Vec::new();
     for (b, node) in bindings.iter().zip(&node_for) {
         let name = b.name.as_deref().unwrap_or("");
-        let g = b.expr.trim();
+        let read: String = match cse.get(b.expr.trim()) {
+            Some(v) => v.clone(),
+            None => b.expr.trim().to_string(),
+        };
+        let tag = if reactive_hoist.contains_key(&read) {
+            Some(read.clone())
+        } else {
+            None
+        };
+        let g = read.as_str();
         match b.kind {
             BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
             BindingKind::Model => lines.push(emitter.model(node, &b.expr)),
             BindingKind::OnModel => lines.push(emitter.onmodel(node, &b.expr)),
             BindingKind::Ref => lines.push(emitter.reference(node, &b.expr)),
-            BindingKind::Text => group.push(emitter.set_text(node, g)),
-            BindingKind::Attr => group.push(emitter.set_attr(node, name, g)),
-            BindingKind::Class => group.push(emitter.set_class(node, "''", g)),
-            BindingKind::Style => group.push(emitter.set_style(node, g)),
-            BindingKind::Prop => group.push(emitter.set_prop(node, name, g)),
+            BindingKind::Text => group.push((tag, emitter.set_text(node, g))),
+            BindingKind::Attr => group.push((tag, emitter.set_attr(node, name, g))),
+            BindingKind::Class => group.push((tag, emitter.set_class(node, g))),
+            BindingKind::Style => group.push((tag, emitter.set_style(node, g))),
+            BindingKind::Prop => group.push((tag, emitter.set_prop(node, name, g))),
             BindingKind::List | BindingKind::Child | BindingKind::Splice => {}
         }
     }
 
-    let mut counts: std::collections::HashMap<&str, usize> = std::collections::HashMap::new();
-    for b in &bindings {
-        if is_grouped(&b.kind) && is_simple_read(b.expr.trim()) {
-            *counts.entry(b.expr.trim()).or_insert(0) += 1;
-        }
-    }
-    let split = !counts.values().any(|&c| c >= 2);
-    if split && group.len() > 1 {
-        for w in &group {
-            lines.push(emitter.bind_group(std::slice::from_ref(w)));
-        }
-    } else if !group.is_empty() {
-        lines.push(emitter.bind_group(&group));
-    }
+    emit_effects(&group, &reactive_hoist, &mut lines, emitter);
 
     for (parent, bounds, sh) in seated {
         let seat = ctx.var("s");
@@ -385,9 +403,9 @@ fn gen_template(
     } else {
         emitter.clone_root(&root, &tpl)
     }];
-    let mut grabbed: Vec<(NodePath, String)> = Vec::new();
+    let mut grabbed: Vec<(Vec<bool>, String)> = Vec::new();
 
-    let nodes: Vec<String> = bindings
+    let target_atoms: Vec<Vec<bool>> = bindings
         .iter()
         .map(|b| {
             let path: NodePath = if el && !b.path.is_empty() {
@@ -395,12 +413,40 @@ fn gen_template(
             } else {
                 b.path.clone()
             };
-            grab(ctx, emitter, &root, &path, &mut grabbed, &mut lines)
+            atomize(&path)
         })
+        .collect();
+    {
+        let mut children: HashMap<Vec<bool>, (bool, bool)> = HashMap::new();
+        for t in &target_atoms {
+            for k in 0..t.len() {
+                let entry = children.entry(t[..k].to_vec()).or_insert((false, false));
+                if t[k] {
+                    entry.0 = true;
+                } else {
+                    entry.1 = true;
+                }
+            }
+        }
+        let mut forks: Vec<Vec<bool>> = children
+            .into_iter()
+            .filter(|(p, (f, n))| !p.is_empty() && *f && *n)
+            .map(|(p, _)| p)
+            .collect();
+        forks.sort_by(|a, b| a.len().cmp(&b.len()).then_with(|| a.cmp(b)));
+        for fork in &forks {
+            grab_atoms(ctx, emitter, &root, fork, &mut grabbed, &mut lines);
+        }
+    }
+
+    let nodes: Vec<String> = bindings
+        .iter()
+        .zip(&target_atoms)
+        .map(|(_, atoms)| grab_atoms(ctx, emitter, &root, atoms, &mut grabbed, &mut lines))
         .collect();
 
     let mut cse: HashMap<String, String> = HashMap::new();
-    let mut hoists: Vec<String> = Vec::new();
+    let mut reactive_hoist: HashMap<String, String> = HashMap::new();
     let mut static_hoists: Vec<String> = Vec::new();
     {
         let mut counts: HashMap<&str, usize> = HashMap::new();
@@ -419,15 +465,14 @@ fn gen_template(
                 if is_static_key(e, ctx) {
                     static_hoists.push(emitter.local(&v, &static_raw(e)));
                 } else {
-                    hoists.push(emitter.local(&v, e));
+                    reactive_hoist.insert(v.clone(), emitter.local(&v, e));
                 }
                 cse.insert(e.to_string(), v);
             }
         }
     }
 
-    let split = hoists.is_empty();
-    let mut group: Vec<String> = hoists;
+    let mut group: Vec<(Option<String>, String)> = Vec::new();
     let mut statics: Vec<String> = static_hoists;
     for (b, node) in bindings.iter().zip(&nodes) {
         let name = b.name.as_deref().unwrap_or("");
@@ -436,6 +481,11 @@ fn gen_template(
             Some(v) => v.clone(),
             None if stat => static_raw(b.expr.trim()),
             None => b.expr.trim().to_string(),
+        };
+        let tag = if reactive_hoist.contains_key(&read) {
+            Some(read.clone())
+        } else {
+            None
         };
         let g = read.as_str();
         match b.kind {
@@ -448,7 +498,7 @@ fn gen_template(
                 if stat {
                     statics.push(emitter.set_text_direct(node, g));
                 } else {
-                    group.push(emitter.set_text(node, g));
+                    group.push((tag, emitter.set_text(node, g)));
                 }
             }
             BindingKind::Text => {
@@ -457,22 +507,22 @@ fn gen_template(
                 if stat {
                     statics.push(emitter.set_text_direct(&tnode, g));
                 } else {
-                    group.push(emitter.set_text(&tnode, g));
+                    group.push((tag, emitter.set_text(&tnode, g)));
                 }
             }
             BindingKind::Attr => {
                 if stat {
                     statics.push(emitter.set_attr_direct(node, name, g));
                 } else {
-                    group.push(emitter.set_attr(node, name, g));
+                    group.push((tag, emitter.set_attr(node, name, g)));
                 }
             }
             BindingKind::Class => {
-                let w = emitter.set_class(node, "''", g);
+                let w = emitter.set_class(node, g);
                 if stat {
                     statics.push(w);
                 } else {
-                    group.push(w);
+                    group.push((tag, w));
                 }
             }
             BindingKind::Style => {
@@ -480,7 +530,7 @@ fn gen_template(
                 if stat {
                     statics.push(w);
                 } else {
-                    group.push(w);
+                    group.push((tag, w));
                 }
             }
             BindingKind::Prop => {
@@ -488,7 +538,7 @@ fn gen_template(
                 if stat {
                     statics.push(w);
                 } else {
-                    group.push(w);
+                    group.push((tag, w));
                 }
             }
             BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
@@ -499,15 +549,7 @@ fn gen_template(
     }
 
     lines.append(&mut statics);
-    if !group.is_empty() {
-        if split && group.len() > 1 {
-            for w in &group {
-                lines.push(emitter.bind_group(std::slice::from_ref(w)));
-            }
-        } else {
-            lines.push(emitter.bind_group(&group));
-        }
-    }
+    emit_effects(&group, &reactive_hoist, &mut lines, emitter);
 
     lines.push(emitter.ret(&root, builder, el, multi_root));
     let mut body = lines.join("\n");
@@ -515,34 +557,79 @@ fn gen_template(
     body
 }
 
+fn emit_effects(
+    group: &[(Option<String>, String)],
+    reactive_hoist: &HashMap<String, String>,
+    lines: &mut Vec<String>,
+    emitter: &dyn Emitter,
+) {
+    let mut emitted: std::collections::HashSet<&str> = std::collections::HashSet::new();
+    for (tag, write) in group {
+        match tag {
+            None => lines.push(emitter.bind_group(std::slice::from_ref(write))),
+            Some(var) => {
+                if emitted.insert(var.as_str()) {
+                    let mut effect = vec![reactive_hoist[var].clone()];
+                    for (t, w) in group {
+                        if t.as_deref() == Some(var.as_str()) {
+                            effect.push(w.clone());
+                        }
+                    }
+                    lines.push(emitter.bind_group(&effect));
+                }
+            }
+        }
+    }
+}
+
+fn atomize(path: &NodePath) -> Vec<bool> {
+    let mut out = Vec::new();
+    for step in path {
+        let i = match step {
+            Step::Child(i) | Step::ChildNode(i) => *i,
+        };
+        out.push(true);
+        out.resize(out.len() + i, false);
+    }
+    out
+}
+
 fn grab(
     ctx: &mut Ctx,
     emitter: &dyn Emitter,
     root: &str,
     path: &NodePath,
-    grabbed: &mut Vec<(NodePath, String)>,
+    grabbed: &mut Vec<(Vec<bool>, String)>,
     lines: &mut Vec<String>,
 ) -> String {
-    if path.is_empty() {
+    grab_atoms(ctx, emitter, root, &atomize(path), grabbed, lines)
+}
+
+fn grab_atoms(
+    ctx: &mut Ctx,
+    emitter: &dyn Emitter,
+    root: &str,
+    atoms: &[bool],
+    grabbed: &mut Vec<(Vec<bool>, String)>,
+    lines: &mut Vec<String>,
+) -> String {
+    if atoms.is_empty() {
         return root.to_string();
     }
-    if let Some((_, var)) = grabbed.iter().find(|(p, _)| p == path) {
+    if let Some((_, var)) = grabbed.iter().find(|(p, _)| p.as_slice() == atoms) {
         return var.clone();
     }
     let from = grabbed
         .iter()
-        .filter(|(p, _)| p.len() < path.len() && path.starts_with(p))
+        .filter(|(p, _)| p.len() < atoms.len() && atoms.starts_with(p.as_slice()))
         .max_by_key(|(p, _)| p.len())
         .map(|(p, base)| (p.len(), base.clone()));
     let var = ctx.var("n");
     match from {
-        Some((plen, base)) => {
-            let remaining: NodePath = path[plen..].to_vec();
-            lines.push(emitter.grab(&var, &base, &remaining));
-        }
-        None => lines.push(emitter.grab(&var, root, path)),
+        Some((plen, base)) => lines.push(emitter.grab_atoms(&var, &base, &atoms[plen..])),
+        None => lines.push(emitter.grab_atoms(&var, root, atoms)),
     }
-    grabbed.push((path.clone(), var.clone()));
+    grabbed.push((atoms.to_vec(), var.clone()));
     var
 }
 

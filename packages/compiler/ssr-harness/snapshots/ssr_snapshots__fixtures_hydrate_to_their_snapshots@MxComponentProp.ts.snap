@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxComponentProp.ts
 ---
 import { $__bounds, $__seat, $__resume } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<mx-counter-child class="slot-a"></mx-counter-child>');
 const _h1 = $__templateEl('<mx-counter-child class="slot-b"></mx-counter-child>');
 
@@ -22,15 +22,15 @@ export class MxComponentProp extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!;
 const _b1 = $__bounds(_n0, 0, 0);
-const _n2 = root.firstChild!.firstChild!.nextSibling!;
-const _n3 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n2, 'click', this.rename);
-$__event(_n3, 'click', this.swap);
+const _n2 = _n0.nextSibling!;
+const _n3 = _n2.nextSibling!;
+(_n2 as HTMLElement).onclick = (this.rename);
+(_n3 as HTMLElement).onclick = (this.swap);
 const _s4 = $__seat(_n0, _b1[0], _b1[1]);
 $__child(_s4[0], $__resume(_s4[1], (_r5) => (this.state.which === 'a'
                 ? (() => {
 $__effect(() => {
-$__setProp(_r5, 'label', (this.state.label));
+$__setProp(_r5, 'label', this.state.label);
 });
 return _r5;
 })()
@@ -43,7 +43,7 @@ return _r5;
                 ? (() => {
 const _r6 = $__cloneEl(_h0);
 $__effect(() => {
-$__setProp(_r6, 'label', (this.state.label));
+$__setProp(_r6, 'label', this.state.label);
 });
 return _r6;
 })()
@@ -68,26 +68,27 @@ return _r7;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__child(_n1, () => (this.state.which === 'a'
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+const _n4 = _n3.nextSibling!;
+$__child(_n2, () => (this.state.which === 'a'
                 ? (() => {
-const _r4 = $__cloneEl(_t1);
+const _r5 = $__cloneEl(_t1);
 $__effect(() => {
-$__setProp(_r4, 'label', (this.state.label));
-});
-return _r4;
-})()
-                : (() => {
-const _r5 = $__cloneEl(_t2);
-$__effect(() => {
-$__setProp(_r5, 'label', (`b-${this.state.label}`));
+$__setProp(_r5, 'label', this.state.label);
 });
 return _r5;
+})()
+                : (() => {
+const _r6 = $__cloneEl(_t2);
+$__effect(() => {
+$__setProp(_r6, 'label', (`b-${this.state.label}`));
+});
+return _r6;
 })()));
-$__event(_n2, 'click', this.rename);
-$__event(_n3, 'click', this.swap);
+(_n3 as HTMLElement).onclick = (this.rename);
+(_n4 as HTMLElement).onclick = (this.swap);
 return _r0;
 }
 }

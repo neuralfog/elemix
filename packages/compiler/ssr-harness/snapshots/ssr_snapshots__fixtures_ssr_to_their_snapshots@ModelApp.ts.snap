@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ModelApp.ts
 ---
-import { $__ssrText, $__ssrAttr, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole, $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
@@ -71,7 +71,7 @@ const css = `
 
 export class ModelApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'model-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><label>Name (<code>~model</code>) <input type="text"${$__ssrAttr('value', (this.state.name).value)}/></label>${(() => {const _t0 = (this.state.name.value || '…');return `<div class="out" data-t="${$__ssrLen(_t0)}">Hello, ${$__ssrText(_t0)}</div>`;})()}<label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"${$__ssrAttr('value', (this.state.volume).value)}/></label>${(() => {const _t1 = (this.state.volume.value);return `<div class="out" data-t="${$__ssrLen(_t1)}">Volume: ${$__ssrText(_t1)}</div>`;})()}</template></${this.$$__tag ?? 'model-app'}>`];
+return [`<${this.$$__tag ?? 'model-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><label>Name (<code>~model</code>) <input type="text"${$__ssrAttr('value', (this.state.name).value)}/></label>${(() => {const _h0 = $__ssrHole((this.state.name.value || '…'));return `<div class="out" data-t="${_h0[1]}">Hello, ${_h0[0]}</div>`;})()}<label>Volume (<code>~model</code> + <code>~onmodel</code>, clamped 0–100) <input type="text"${$__ssrAttr('value', (this.state.volume).value)}/></label>${(() => {const _h1 = $__ssrHole((this.state.volume.value));return `<div class="out" data-t="${_h1[1]}">Volume: ${_h1[0]}</div>`;})()}</template></${this.$$__tag ?? 'model-app'}>`];
 }
 
 

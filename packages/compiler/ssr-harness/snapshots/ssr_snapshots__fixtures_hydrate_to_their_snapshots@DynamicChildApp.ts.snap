@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/DynamicChildApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _ft0 = $__template('<i class="icon icon-a"></i>');
 const _ft1 = $__template('<i class="icon icon-b"></i>');
 const _ft2 = $__template('<b class="badge">NEW</b>');
@@ -40,12 +40,12 @@ $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 0, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
-const _n3 = root.firstChild!.nextSibling!;
+const _n3 = _n0.nextSibling!;
 const _n4 = $__text(_n3);
-const _n5 = root.firstChild!.nextSibling!.nextSibling!;
-$__event(_n5, 'click', this.toggle);
+const _n5 = _n3.nextSibling!;
+(_n5 as HTMLElement).onclick = (this.toggle);
 $__effect(() => {
-$__setText(_n4, (this.pick));
+$__setText(_n4, this.pick);
 });
 $__fresh(() => {
 $__list(_a2, () => (items), (it) => it.id, (it) => {
@@ -72,21 +72,23 @@ return _r6;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!;
-$__list(_n1, () => (items), (it) => it.id, (it) => {
-const _r4 = $__cloneEl(_t1);
-const _n5 = _r4.firstChild!;
-_r4.setAttribute('data-id', ($__toRaw(it).id));
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n2.firstChild!;
+const _n5 = _n2.nextSibling!;
+$__list(_n3, () => (items), (it) => it.id, (it) => {
+const _r6 = $__cloneEl(_t1);
+const _n7 = _r6.firstChild!;
+_r6.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
-$__setText(_n5, (it.icon()));
+$__setText(_n7, (it.icon()));
 });
-return _r4;
+return _r6;
 });
-$__event(_n3, 'click', this.toggle);
+(_n5 as HTMLElement).onclick = (this.toggle);
 $__effect(() => {
-$__setText(_n2, (this.pick));
+$__setText(_n4, this.pick);
 });
 return _r0;
 }

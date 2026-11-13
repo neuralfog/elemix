@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxDeepNest.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__child, $__list, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__child, $__list, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<ul class="list"><!----></ul>');
 const _h1 = $__templateEl('<li class="row"><mx-counter-child></mx-counter-child> <!----> <button class="flag">f</button><button class="x-bump">x</button></li>');
 const _h2 = $__templateEl('<em class="x"> </em>');
@@ -26,12 +26,12 @@ $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!;
 const _b1 = $__bounds(_n0, 0, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
-const _n3 = root.firstChild!.firstChild!.nextSibling!;
-const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n5 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n3, 'click', this.toggleShow);
-$__event(_n4, 'click', this.addOne);
-$__event(_n5, 'click', this.reverse);
+const _n3 = _n0.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n4.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.toggleShow);
+(_n4 as HTMLElement).onclick = (this.addOne);
+(_n5 as HTMLElement).onclick = (this.reverse);
 $__fresh(() => {
 $__child(_a2, () => (this.state.show
                 ? (() => {
@@ -40,22 +40,22 @@ const _n7 = _r6.firstChild!;
 $__list(_n7, () => (this.state.items), (it) => it.id, (it) => {
 const _r8 = $__cloneEl(_h1);
 const _n9 = _r8.firstChild!;
-const _n10 = _r8.firstChild!.nextSibling!.nextSibling!;
-const _n11 = _r8.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n12 = _r8.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n10 = _n9.nextSibling!.nextSibling!;
+const _n11 = _n10.nextSibling!.nextSibling!;
+const _n12 = _n11.nextSibling!;
 $__child(_n10, () => (it.flag ? (() => {
 const _r13 = $__cloneEl(_h2);
 const _n14 = _r13.firstChild!;
 $__effect(() => {
-$__setText(_n14, (it.x));
+$__setText(_n14, it.x);
 });
 return _r13;
 })() : ''));
-$__event(_n11, 'click', () => this.toggleFlag(it.id));
-$__event(_n12, 'click', () => this.bumpX(it.id));
+(_n11 as HTMLElement).onclick = (() => this.toggleFlag(it.id));
+(_n12 as HTMLElement).onclick = (() => this.bumpX(it.id));
 _r8.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
-$__setProp(_n9, 'label', (it.label));
+$__setProp(_n9, 'label', it.label);
 });
 return _r8;
 });
@@ -100,42 +100,43 @@ return _r6;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-$__child(_n1, () => (this.state.show
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n4.nextSibling!;
+$__child(_n2, () => (this.state.show
                 ? (() => {
-const _r5 = $__cloneEl(_t1);
-const _n6 = _r5.firstChild!;
-$__list(_n6, () => (this.state.items), (it) => it.id, (it) => {
-const _r7 = $__cloneEl(_t2);
-const _n8 = _r7.firstChild!;
-const _n9 = _r7.firstChild!.nextSibling!.nextSibling!;
-const _n10 = _r7.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n11 = _r7.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__child(_n9, () => (it.flag ? (() => {
-const _r12 = $__cloneEl(_t3);
-const _n13 = _r12.firstChild!;
+const _r6 = $__cloneEl(_t1);
+const _n7 = _r6.firstChild!;
+$__list(_n7, () => (this.state.items), (it) => it.id, (it) => {
+const _r8 = $__cloneEl(_t2);
+const _n9 = _r8.firstChild!;
+const _n10 = _n9.nextSibling!.nextSibling!;
+const _n11 = _n10.nextSibling!.nextSibling!;
+const _n12 = _n11.nextSibling!;
+$__child(_n10, () => (it.flag ? (() => {
+const _r13 = $__cloneEl(_t3);
+const _n14 = _r13.firstChild!;
 $__effect(() => {
-$__setText(_n13, (it.x));
+$__setText(_n14, it.x);
 });
-return _r12;
+return _r13;
 })() : ''));
-$__event(_n10, 'click', () => this.toggleFlag(it.id));
-$__event(_n11, 'click', () => this.bumpX(it.id));
-_r7.setAttribute('data-id', ($__toRaw(it).id));
+(_n11 as HTMLElement).onclick = (() => this.toggleFlag(it.id));
+(_n12 as HTMLElement).onclick = (() => this.bumpX(it.id));
+_r8.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
-$__setProp(_n8, 'label', (it.label));
+$__setProp(_n9, 'label', it.label);
 });
-return _r7;
+return _r8;
 });
-return _r5;
+return _r6;
 })()
                 : ''));
-$__event(_n2, 'click', this.toggleShow);
-$__event(_n3, 'click', this.addOne);
-$__event(_n4, 'click', this.reverse);
+(_n3 as HTMLElement).onclick = (this.toggleShow);
+(_n4 as HTMLElement).onclick = (this.addOne);
+(_n5 as HTMLElement).onclick = (this.reverse);
 return _r0;
 }
 }

@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/ModelApp.ts
 ---
 import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
@@ -80,7 +79,7 @@ const _n1 = root.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.
 const _n2 = root.firstChild!.nextSibling!;
 const _d3 = $__dynLens(_n2);
 const _v4 = $__splitRun(_n2.firstChild as Text, [7], _d3);
-const _n5 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _n2.nextSibling!.nextSibling!;
 const _d6 = $__dynLens(_n5);
 const _v7 = $__splitRun(_n5.firstChild as Text, [8], _d6);
 $__model(_n0 as HTMLInputElement, () => (this.state.name));
@@ -90,7 +89,7 @@ $__effect(() => {
 $__setText(_v4[0], (this.state.name.value || '…'));
 });
 $__effect(() => {
-$__setText(_v7[0], (this.state.volume.value));
+$__setText(_v7[0], this.state.volume.value);
 });
 }
 
@@ -102,22 +101,25 @@ $__setText(_v7[0], (this.state.volume.value));
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-$__model(_n1 as HTMLInputElement, () => (this.state.name));
-const _x5 = document.createTextNode('');
-_n2.replaceWith(_x5);
-$__model(_n3 as HTMLInputElement, () => (this.state.volume));
-$__onmodel(_n3 as HTMLInputElement, clamp);
-const _x6 = document.createTextNode('');
-_n4.replaceWith(_x6);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n1.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _n2.firstChild!.nextSibling!;
+const _n6 = _n3.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = _n3.nextSibling!.firstChild!.nextSibling!;
+$__model(_n4 as HTMLInputElement, () => (this.state.name));
+const _x8 = document.createTextNode('');
+_n5.replaceWith(_x8);
+$__model(_n6 as HTMLInputElement, () => (this.state.volume));
+$__onmodel(_n6 as HTMLInputElement, clamp);
+const _x9 = document.createTextNode('');
+_n7.replaceWith(_x9);
 $__effect(() => {
-$__setText(_x5, (this.state.name.value || '…'));
+$__setText(_x8, (this.state.name.value || '…'));
 });
 $__effect(() => {
-$__setText(_x6, (this.state.volume.value));
+$__setText(_x9, this.state.volume.value);
 });
 return _r0;
 }

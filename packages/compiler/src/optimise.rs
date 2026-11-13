@@ -1273,14 +1273,18 @@ fn apply_edits(src: &[char], edits: &mut [(usize, usize, String)]) -> Vec<char> 
     if edits.is_empty() {
         return src.to_vec();
     }
-    let mut out = src.to_vec();
-    for i in (0..edits.len()).rev() {
-        let (start, end, ref text) = edits[i];
-        let mut new_out = out[..start].to_vec();
-        new_out.extend_from_slice(&to_chars(text));
-        new_out.extend_from_slice(&out[end..]);
-        out = new_out;
+    edits.sort_by_key(|e| e.0);
+    let mut out: Vec<char> = Vec::with_capacity(src.len());
+    let mut cursor = 0usize;
+    for (start, end, text) in edits.iter() {
+        if *start < cursor {
+            continue;
+        }
+        out.extend_from_slice(&src[cursor..*start]);
+        out.extend_from_slice(&to_chars(text));
+        cursor = *end;
     }
+    out.extend_from_slice(&src[cursor..]);
     out
 }
 
@@ -1697,8 +1701,8 @@ fn strip_ssr_tpl(src: &[char]) -> Vec<char> {
             }
         };
         let args = top_level_args(src, paren, close);
-        if args.len() == 1 && !args[0].is_empty() {
-            edits.push((at, close + 1, format!("[{}]", args[0])));
+        if args.iter().any(|a| !a.is_empty()) {
+            edits.push((at, close + 1, format!("[{}]", args.join(", "))));
             pos = close + 1;
         } else {
             pos = at + 1;
@@ -1787,7 +1791,13 @@ pub fn optimise(src_str: &str, registry: &[ChildMeta]) -> (String, usize) {
         }
         out = next;
     }
-    out = strip_ssr_tpl(&out);
+    loop {
+        let next = strip_ssr_tpl(&out);
+        if next == out {
+            break;
+        }
+        out = next;
+    }
     loop {
         let next = flatten_template_holes(&out);
         if next == out {

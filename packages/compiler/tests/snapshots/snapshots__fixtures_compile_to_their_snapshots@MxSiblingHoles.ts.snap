@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/MxSiblingHoles.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _ft0 = $__template('<i class="hole a">A</i>');
 const _ft1 = $__template('<i class="hole b">B</i>');
 const _ft2 = $__template('<i class="hole c">C</i>');
@@ -52,14 +52,14 @@ return _r2;
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.toggleA);
-$__event(_n2, 'click', this.toggleB);
-$__event(_n3, 'click', this.toggleC);
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!.firstChild!.nextSibling!.nextSibling!;
+const _n5 = _n4.nextSibling!.nextSibling!;
+const _n6 = _n5.nextSibling!.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.toggleA);
+(_n2 as HTMLElement).onclick = (this.toggleB);
+(_n3 as HTMLElement).onclick = (this.toggleC);
 const _x7 = document.createTextNode('');
 _n4.replaceWith(_x7);
 const _x8 = document.createTextNode('');
@@ -67,13 +67,13 @@ _n5.replaceWith(_x8);
 const _x9 = document.createTextNode('');
 _n6.replaceWith(_x9);
 $__effect(() => {
-$__setText(_x7, (this.holeA));
+$__setText(_x7, this.holeA);
 });
 $__effect(() => {
-$__setText(_x8, (this.holeB));
+$__setText(_x8, this.holeB);
 });
 $__effect(() => {
-$__setText(_x9, (this.holeC));
+$__setText(_x9, this.holeC);
 });
 return _r0;
 }

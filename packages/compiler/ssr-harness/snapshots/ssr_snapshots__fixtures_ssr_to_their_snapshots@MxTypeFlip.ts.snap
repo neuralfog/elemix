@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/MxTypeFlip.ts
 ---
-import { $__ssrText, $__ssrLen, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -13,7 +13,7 @@ type State = { left: Mode; right: Mode };
 
 export class MxTypeFlip extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'mx-type-flip'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap">`, (() => {const _t0 = (this.left);const _t1 = (this.right);return [`<section class="mix" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}"><span class="start">[</span> ${$__ssrText(_t0)} ${$__ssrText(_t1)} <span class="end">]</span></section>`];})(), `<button id="l-text">l-text</button><button id="l-markup">l-markup</button><button id="l-null">l-null</button><button id="r-text">r-text</button><button id="r-markup">r-markup</button><button id="r-null">r-null</button></div></template></${this.$$__tag ?? 'mx-type-flip'}>`];
+return [`<${this.$$__tag ?? 'mx-type-flip'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap">`, (() => {const _h0 = $__ssrHole((this.left));const _h1 = $__ssrHole((this.right));return [`<section class="mix" data-t="${_h0[1]},${_h1[1]}"><span class="start">[</span> ${_h0[0]} ${_h1[0]} <span class="end">]</span></section>`];})(), `<button id="l-text">l-text</button><button id="l-markup">l-markup</button><button id="l-null">l-null</button><button id="r-text">r-text</button><button id="r-markup">r-markup</button><button id="r-null">r-null</button></div></template></${this.$$__tag ?? 'mx-type-flip'}>`];
 }
 
     state = $__state<State>({ left: 'text', right: 'markup' });

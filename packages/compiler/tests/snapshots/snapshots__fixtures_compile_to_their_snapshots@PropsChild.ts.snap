@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: fixtures/PropsChild.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Props = {
@@ -21,27 +20,31 @@ const _t0 = $__template('<div class="child"><span class="label"> </span><span cl
 export class PropsChild extends Component<Props> {
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n5, 'click', () => this.props.onBump());
-$__event(_n6, 'click', () => this.props.onAdd('x'));
-$__event(_n7, 'click', () => this.props.tags.push('y'));
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n1.firstChild!;
+const _n6 = _n2.firstChild!;
+const _n7 = _n3.firstChild!;
+const _n8 = _n4.firstChild!;
+const _n9 = _n4.nextSibling!;
+const _n10 = _n9.nextSibling!;
+const _n11 = _n10.nextSibling!;
+(_n9 as HTMLElement).onclick = (() => this.props.onBump());
+(_n10 as HTMLElement).onclick = (() => this.props.onAdd('x'));
+(_n11 as HTMLElement).onclick = (() => this.props.tags.push('y'));
 $__effect(() => {
-$__setText(_n1, (this.props.label));
+$__setText(_n5, this.props.label);
 });
 $__effect(() => {
-$__setText(_n2, (this.props.count));
+$__setText(_n6, this.props.count);
 });
 $__effect(() => {
-$__setText(_n3, (this.props.flag ? 'yes' : 'no'));
+$__setText(_n7, (this.props.flag ? 'yes' : 'no'));
 });
 $__effect(() => {
-$__setText(_n4, (this.props.tags.join(',')));
+$__setText(_n8, (this.props.tags.join(',')));
 });
 return _r0;
 }

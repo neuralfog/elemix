@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/ChatApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__model, $__list, $__effect, $__setText, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__model, $__list, $__effect, $__setText, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component, ref } from '@neuralfog/elemix';
 import type { Ref } from '@neuralfog/elemix/types';
 
@@ -117,25 +117,26 @@ export class ChatApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
-$__list(_n1, () => (this.state.messages), (m) => m.id, (m) => {
-const _r4 = $__cloneEl(_t1);
-const _n5 = _r4.firstChild!;
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!.firstChild!;
+const _n4 = _n3.nextSibling!;
+$__list(_n2, () => (this.state.messages), (m) => m.id, (m) => {
+const _r5 = $__cloneEl(_t1);
+const _n6 = _r5.firstChild!;
 $__effect(() => {
-$__setClass(_r4, '', ({ msg: true, me: m.me }));
+$__setClass(_r5, ({ msg: true, me: m.me }));
 });
 $__effect(() => {
-$__setText(_n5, (m.text));
+$__setText(_n6, m.text);
 });
-return _r4;
+return _r5;
 });
-$__model(_n2 as HTMLInputElement, () => (this.state.draft));
-$__event(_n2, 'keydown', (e: KeyboardEvent) => {
+$__model(_n3 as HTMLInputElement, () => (this.state.draft));
+(_n3 as HTMLElement).onkeydown = ((e: KeyboardEvent) => {
                     if (e.key === 'Enter') this.send();
                 });
-$__event(_n3, 'click', this.send);
+(_n4 as HTMLElement).onclick = (this.send);
 return _r0;
 }
 }

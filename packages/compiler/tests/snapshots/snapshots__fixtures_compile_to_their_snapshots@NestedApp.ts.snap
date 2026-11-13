@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/NestedApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Item = { id: string; name: string };
@@ -105,20 +105,22 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 $__list(_n1, () => (this.state.categories), (category) => category.id, (category) => {
 const _r2 = $__cloneEl(_t1);
-const _n3 = _r2.firstChild!.firstChild!.firstChild!;
-const _n4 = _r2.firstChild!.firstChild!.nextSibling!;
-const _n5 = _r2.firstChild!.nextSibling!.firstChild!;
-$__event(_n4, 'click', () => this.addItem(category));
-$__list(_n5, () => (category.items), (item) => item.id, (item) => {
-const _r6 = $__cloneEl(_t2);
-const _n7 = _r6.firstChild!;
+const _n3 = _r2.firstChild!;
+const _n4 = _n3.firstChild!;
+const _n5 = _n4.firstChild!;
+const _n6 = _n4.nextSibling!;
+const _n7 = _n3.nextSibling!.firstChild!;
+(_n6 as HTMLElement).onclick = (() => this.addItem(category));
+$__list(_n7, () => (category.items), (item) => item.id, (item) => {
+const _r8 = $__cloneEl(_t2);
+const _n9 = _r8.firstChild!;
 $__effect(() => {
-$__setText(_n7, (item.name));
+$__setText(_n9, item.name);
 });
-return _r6;
+return _r8;
 });
 $__effect(() => {
-$__setText(_n3, (category.name));
+$__setText(_n5, category.name);
 });
 return _r2;
 });

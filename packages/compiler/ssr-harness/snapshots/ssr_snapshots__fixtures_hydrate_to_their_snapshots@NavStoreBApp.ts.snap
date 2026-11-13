@@ -18,8 +18,9 @@ const _n0 = root.firstChild!;
 const _n1 = _n0.firstChild!;
 const _n2 = $__text(_n1);
 $__effect(() => {
-$__setAttr(_n0, 'data-count', (prefs.count));
-$__setText(_n2, (prefs.count));
+const _v3 = prefs.count;
+$__setAttr(_n0, 'data-count', _v3);
+$__setText(_n2, _v3);
 });
 }
 
@@ -29,9 +30,9 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
 const _n2 = _n1.firstChild!.firstChild!;
 $__effect(() => {
-const _v3 = (prefs.count);
-$__setAttr(_n1, 'data-count', (_v3));
-$__setText(_n2, (_v3));
+const _v3 = prefs.count;
+$__setAttr(_n1, 'data-count', _v3);
+$__setText(_n2, _v3);
 });
 return _r0;
 }

@@ -70,7 +70,10 @@ const objectHandler: ProxyHandler<Target> = {
         const prev = target[key];
         if (prev === value) return true;
         target[key] = value;
-        if (typeof key !== 'symbol') $__trigger(depFor(target, key));
+        if (typeof key !== 'symbol') {
+            const d = deps.get(target)?.[key];
+            if (d !== undefined) $__trigger(d);
+        }
         return true;
     },
 };
@@ -96,7 +99,10 @@ const classHandler: ProxyHandler<Target> = {
         const prev = target[key];
         if (prev === value) return true;
         target[key] = value;
-        if (typeof key !== 'symbol') $__trigger(depFor(target, key));
+        if (typeof key !== 'symbol') {
+            const d = deps.get(target)?.[key];
+            if (d !== undefined) $__trigger(d);
+        }
         return true;
     },
 };
@@ -104,18 +110,24 @@ const classHandler: ProxyHandler<Target> = {
 const arrayHandler: ProxyHandler<Target> = {
     get(target, key) {
         if (key === RAW) return target;
-        if (typeof key === 'string' && MUTATORS.has(key)) {
-            return (...args: unknown[]): unknown => {
-                const fn = target[key] as (...a: unknown[]) => unknown;
-                const result = fn.apply(target, args);
-                $__trigger(depFor(target, ARRAY));
-                return result;
-            };
-        }
         const value = target[key];
+        if (typeof value === 'function') {
+            if (typeof key === 'string' && MUTATORS.has(key)) {
+                return (...args: unknown[]): unknown => {
+                    const result = (
+                        value as (...a: unknown[]) => unknown
+                    ).apply(target, args);
+                    $__trigger(depFor(target, ARRAY));
+                    return result;
+                };
+            }
+            return value;
+        }
         if ($__activeScope !== null && Array.isArray(value))
             $__track(depFor($__toRaw(value), ARRAY));
-        return $__reactive(value);
+        return value === null || typeof value !== 'object'
+            ? value
+            : $__reactive(value);
     },
     set(target, key, value) {
         const prev = target[key];
@@ -251,9 +263,9 @@ const isPlain = (obj: object): boolean => {
 export const $__reactive = (value: unknown): unknown => {
     if (value === null || typeof value !== 'object') return value;
     const obj = value as Target;
-    if (obj[RAW] !== undefined) return obj;
     const cached = proxies.get(obj);
     if (cached) return cached;
+    if (obj[RAW] !== undefined) return obj;
     if (obj[RAW_SKIP] === true) return obj;
     const handler = isPlain(obj)
         ? objectHandler

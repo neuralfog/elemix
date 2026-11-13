@@ -1,9 +1,9 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/SubmitButton.ts
 ---
-import { $__template, $__clone, $__event, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 const css = `
@@ -27,7 +27,7 @@ export class SubmitButton extends Component {
     static formAssociated = true;
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
-$__event(_n0, 'click', this.submit);
+(_n0 as HTMLElement).onclick = (this.submit);
 }
 
 
@@ -38,7 +38,7 @@ $__event(_n0, 'click', this.submit);
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
-$__event(_n1, 'click', this.submit);
+(_n1 as HTMLElement).onclick = (this.submit);
 return _r0;
 }
 }

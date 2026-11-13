@@ -23,14 +23,14 @@ export class ModelForwardApp extends Component {
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n2 = _n1.nextSibling!.firstChild!.nextSibling!;
 const _x3 = document.createTextNode('');
 _n2.replaceWith(_x3);
 $__effect(() => {
-$__setProp(_n1, 'model', (this.state.name));
+$__setProp(_n1, 'model', this.state.name);
 });
 $__effect(() => {
-$__setText(_x3, (this.state.name.value));
+$__setText(_x3, this.state.name.value);
 });
 return _r0;
 }

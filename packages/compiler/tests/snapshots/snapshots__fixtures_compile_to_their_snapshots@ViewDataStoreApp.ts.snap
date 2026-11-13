@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: fixtures/ViewDataStoreApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { counter, type Seed } from './ViewDataStore';
@@ -18,11 +17,12 @@ export class ViewDataStoreApp extends Component<unknown, Seed> {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-$__event(_n2, 'click', this.inc);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.inc);
 $__effect(() => {
-$__setText(_n1, (counter.count));
+$__setText(_n2, counter.count);
 });
 return _r0;
 }

@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/MxLiveChildTeardown.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 import './MxCounterChild';
 
@@ -23,8 +23,8 @@ export class MxLiveChildTeardown extends Component {
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.toggle);
+const _n2 = _n1.nextSibling!.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.toggle);
 $__child(_n2, () => (this.state.mounted
                     ? (() => {
 const _r3 = $__cloneEl(_t1);

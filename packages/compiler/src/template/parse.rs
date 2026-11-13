@@ -769,7 +769,7 @@ fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: boo
     for (idx, child) in el.children.iter().enumerate() {
         if let Child::Anchor(e, _) = child {
             if text_hole(&el.children, idx, e) {
-                decls.push_str(&format!("const _t{} = ({e});", base + ti));
+                decls.push_str(&format!("const _h{} = $__ssrHole(({e}));", base + ti));
                 ti += 1;
             }
         }
@@ -785,7 +785,7 @@ fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: boo
         if i > 0 {
             open.push(',');
         }
-        open.push_str(&format!("${{$__ssrLen(_t{})}}", base + i));
+        open.push_str(&format!("${{_h{}[1]}}", base + i));
     }
     open.push_str("\">");
     let close = format!("</{}>", el.tag);
@@ -797,7 +797,7 @@ fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: boo
             match child {
                 Child::Text(t) => body.push_str(&esc_tpl(t)),
                 Child::Anchor(e, _) if text_hole(&el.children, idx, e) => {
-                    body.push_str(&format!("${{$__ssrText(_t{})}}", base + tj));
+                    body.push_str(&format!("${{_h{}[0]}}", base + tj));
                     tj += 1;
                 }
                 _ => {}
@@ -816,7 +816,7 @@ fn serialize_element(el: &El, r: &mut Rope, counter: &mut usize, hydratable: boo
         match child {
             Child::Text(t) => inner.static_str(&esc_tpl(t)),
             Child::Anchor(e, _) if text_hole(&el.children, idx, e) => {
-                inner.static_str(&format!("${{$__ssrText(_t{})}}", base + tj));
+                inner.static_str(&format!("${{_h{}[0]}}", base + tj));
                 tj += 1;
             }
             Child::Anchor(e, _) => {

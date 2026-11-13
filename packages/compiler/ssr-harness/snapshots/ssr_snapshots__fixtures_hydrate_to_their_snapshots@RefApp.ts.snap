@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/RefApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__ref, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<div class="out">Input is <!---->px wide</div>');
 
 import { Component, ref } from '@neuralfog/elemix';
@@ -75,11 +75,11 @@ $$__hydrate(root: Node): void {
 const _b0 = $__bounds(root, 3, 0);
 const _a1 = $__reanchor(root, _b0[0], _b0[1]);
 const _n2 = root.firstChild!;
-const _n3 = root.firstChild!.nextSibling!.firstChild!;
-const _n4 = root.firstChild!.nextSibling!.firstChild!.nextSibling!;
-$__ref(_n2, this.input);
-$__event(_n3, 'click', this.focusInput);
-$__event(_n4, 'click', this.measure);
+const _n3 = _n2.nextSibling!.firstChild!;
+const _n4 = _n3.nextSibling!;
+(this.input).value = _n2;
+(_n3 as HTMLElement).onclick = (this.focusInput);
+(_n4 as HTMLElement).onclick = (this.measure);
 $__fresh(() => {
 $__child(_a1, () => (this.state.width
                 ? (() => {
@@ -88,7 +88,7 @@ const _n6 = _r5.firstChild!.nextSibling!;
 const _x7 = document.createTextNode('');
 _n6.replaceWith(_x7);
 $__effect(() => {
-$__setText(_x7, (this.state.width));
+$__setText(_x7, this.state.width);
 });
 return _r5;
 })()
@@ -111,23 +111,24 @@ return _r5;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-$__ref(_n1, this.input);
-$__event(_n2, 'click', this.focusInput);
-$__event(_n3, 'click', this.measure);
-$__child(_n4, () => (this.state.width
+const _n1 = _r0.firstChild!.nextSibling!;
+const _n2 = _r0.firstChild!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n1.nextSibling!.nextSibling!;
+(this.input).value = _n2;
+(_n3 as HTMLElement).onclick = (this.focusInput);
+(_n4 as HTMLElement).onclick = (this.measure);
+$__child(_n5, () => (this.state.width
                 ? (() => {
-const _r5 = $__cloneEl(_t1);
-const _n6 = _r5.firstChild!.nextSibling!;
-const _x7 = document.createTextNode('');
-_n6.replaceWith(_x7);
+const _r6 = $__cloneEl(_t1);
+const _n7 = _r6.firstChild!.nextSibling!;
+const _x8 = document.createTextNode('');
+_n7.replaceWith(_x8);
 $__effect(() => {
-$__setText(_x7, (this.state.width));
+$__setText(_x8, this.state.width);
 });
-return _r5;
+return _r6;
 })()
                 : ''));
 return _r0;

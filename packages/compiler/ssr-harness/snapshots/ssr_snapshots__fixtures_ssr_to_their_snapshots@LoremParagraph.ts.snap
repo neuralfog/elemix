@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/LoremParagraph.ts
 ---
-import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -14,7 +14,7 @@ type Props = {
 
 export class LoremParagraph extends Component<Props> {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'lorem-paragraph'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _t0 = (this.props.index);const _t1 = (this.props.text);return `<p class="para" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}">${$__ssrText(_t0)}: ${$__ssrText(_t1)}</p>`;})()}</template></${this.$$__tag ?? 'lorem-paragraph'}>`];
+return [`<${this.$$__tag ?? 'lorem-paragraph'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _h0 = $__ssrHole((this.props.index));const _h1 = $__ssrHole((this.props.text));return `<p class="para" data-t="${_h0[1]},${_h1[1]}">${_h0[0]}: ${_h1[0]}</p>`;})()}</template></${this.$$__tag ?? 'lorem-paragraph'}>`];
 }
 
     

@@ -1,6 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/LoremParagraphStyled.ts
 ---
 import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
@@ -34,10 +34,10 @@ const _n0 = root.firstChild!;
 const _d1 = $__dynLens(_n0);
 const _v2 = $__splitRun(_n0.firstChild as Text, [0, 2], _d1);
 $__effect(() => {
-$__setText(_v2[0], (this.props.index));
+$__setText(_v2[0], this.props.index);
 });
 $__effect(() => {
-$__setText(_v2[1], (this.props.text));
+$__setText(_v2[1], this.props.text);
 });
 }
 
@@ -45,16 +45,16 @@ $__setText(_v2[1], (this.props.text));
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n2 = _n1.nextSibling!.nextSibling!;
 const _x3 = document.createTextNode('');
 _n1.replaceWith(_x3);
 const _x4 = document.createTextNode('');
 _n2.replaceWith(_x4);
 $__effect(() => {
-$__setText(_x3, (this.props.index));
+$__setText(_x3, this.props.index);
 });
 $__effect(() => {
-$__setText(_x4, (this.props.text));
+$__setText(_x4, this.props.text);
 });
 return _r0;
 }

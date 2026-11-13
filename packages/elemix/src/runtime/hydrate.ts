@@ -128,26 +128,24 @@ export const $__bounds = (
     parent.childNodes.length - before - after,
 ];
 
-const $__markerAt = (parent: Node, ordinal: number): Node | null => {
-    let seen = -1;
-    for (let n = parent.firstChild; n; n = n.nextSibling) {
-        if (
-            n.nodeType === 8 &&
-            (n as Comment).data === '$' &&
-            ++seen === ordinal
-        )
-            return n;
-    }
-    return null;
-};
-
 export const $__span = (
     parent: Node,
     lead: number,
     ordinal: number,
 ): [Node | null, number] => {
-    const marker = $__markerAt(parent, ordinal);
-    const prev = ordinal > 0 ? $__markerAt(parent, ordinal - 1) : null;
+    let marker: Node | null = null;
+    let prev: Node | null = null;
+    let seen = -1;
+    for (let n = parent.firstChild; n; n = n.nextSibling) {
+        if (n.nodeType === 8 && (n as Comment).data === '$') {
+            seen++;
+            if (seen === ordinal - 1) prev = n;
+            if (seen === ordinal) {
+                marker = n;
+                break;
+            }
+        }
+    }
     let start: Node | null = prev ? prev.nextSibling : parent.firstChild;
     for (let i = 0; i < lead && start; i++) start = start.nextSibling;
     let count = 0;

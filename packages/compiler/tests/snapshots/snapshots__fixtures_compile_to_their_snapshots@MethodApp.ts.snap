@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/MethodApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = { count: number };
@@ -20,15 +20,17 @@ export class MethodApp extends Component {
     $$__view(): DocumentFragment {
 const label = 'count';
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n3, 'click', this.inc);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n2.firstChild!;
+const _n5 = _n2.nextSibling!;
+(_n5 as HTMLElement).onclick = (this.inc);
 $__effect(() => {
-$__setText(_n1, (label));
+$__setText(_n3, label);
 });
 $__effect(() => {
-$__setText(_n2, (this.state.count));
+$__setText(_n4, this.state.count);
 });
 return _r0;
 }

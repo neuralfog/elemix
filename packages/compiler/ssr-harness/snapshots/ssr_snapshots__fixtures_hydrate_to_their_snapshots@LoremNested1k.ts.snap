@@ -1,6 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/LoremNested1k.ts
 ---
 import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -38,13 +38,13 @@ const _r1 = $__clone(_ft1);
 const _n2 = _r1.firstChild!;
 const _n3 = _n2.firstChild!;
 $__effect(() => {
-$__setProp(_n2, 'index', (i));
+$__setProp(_n2, 'index', i);
 });
 $__effect(() => {
-$__setProp(_n2, 'text', (LOREM));
+$__setProp(_n2, 'text', LOREM);
 });
 $__effect(() => {
-$__setText(_n3, (inner));
+$__setText(_n3, inner);
 });
 return _r1;
 })();

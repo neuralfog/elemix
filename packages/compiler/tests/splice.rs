@@ -83,7 +83,7 @@ fn parameterized_helper_is_inlined_with_arg_substituted() {
     assert!(!out.contains("this.row("));
     assert!(!out.contains("tpl`"));
     assert!(out.contains("($__toRaw(r).id)"));
-    assert!(out.contains("(r.name)"));
+    assert!(out.contains("r.name)"));
     assert!(!out.contains("item.id"));
     assert!(out.contains("$__list("));
 }

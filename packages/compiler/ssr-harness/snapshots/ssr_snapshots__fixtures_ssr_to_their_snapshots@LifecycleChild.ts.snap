@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/LifecycleChild.ts
 ---
-import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -29,7 +29,7 @@ export class LifecycleChild extends Component<ChildProps> {
         this.prepareB();
     }
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'lifecycle-child'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _t0 = (this.props.tick);return `<div class="child" data-t="${$__ssrLen(_t0)}">Child · tick ${$__ssrText(_t0)}</div>`;})()}</template></${this.$$__tag ?? 'lifecycle-child'}>`];
+return [`<${this.$$__tag ?? 'lifecycle-child'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style>${(() => {const _h0 = $__ssrHole((this.props.tick));return `<div class="child" data-t="${_h0[1]}">Child · tick ${_h0[0]}</div>`;})()}</template></${this.$$__tag ?? 'lifecycle-child'}>`];
 }
 
 

@@ -10,6 +10,8 @@ import { $__toRaw } from './state';
 
 type Getter<T> = () => T;
 
+type Rowed = Node & { __sc?: Scope | null };
+
 const toText = (value: unknown): string =>
     typeof value === 'string'
         ? value
@@ -162,7 +164,7 @@ export const $__child = (anchor: Node, get: Getter<unknown>): void => {
     $__effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
-        const value = collect(() => get());
+        const value = collect(get);
         const fresh = takeScopes();
         const next =
             value instanceof Node
@@ -261,23 +263,25 @@ export const $__list = <T>(
 ): void => {
     const nodes = new Map<unknown, Node>();
     let tails: Map<unknown, Node> | null = null;
-    const rowScopes = new Map<unknown, Scope | null>();
     let order: unknown[] = [];
     const tailOf = (key: unknown): Node =>
         (tails !== null ? tails.get(key) : nodes.get(key)) as Node;
-    const place = (key: unknown, node: Node): void => {
+    const place = (key: unknown, node: Node, scope: Scope | null): void => {
         if (node.nodeType === 11) {
             if (tails === null) tails = new Map();
-            nodes.set(key, node.firstChild as Node);
+            const first = node.firstChild as Rowed;
+            first.__sc = scope;
+            nodes.set(key, first);
             tails.set(key, node.lastChild as Node);
         } else {
+            (node as Rowed).__sc = scope;
             nodes.set(key, node);
             if (tails !== null) tails.set(key, node);
         }
     };
     const drop = (key: unknown): void => {
-        dispose(rowScopes.get(key) ?? null);
-        rowScopes.delete(key);
+        const row = nodes.get(key) as Rowed | undefined;
+        if (row !== undefined) dispose(row.__sc ?? null);
         nodes.delete(key);
         if (tails !== null) tails.delete(key);
     };
@@ -304,9 +308,9 @@ export const $__list = <T>(
                     anchor,
                 );
                 $__untrack(() => {
-                    for (const sc of rowScopes.values()) dispose(sc);
+                    for (const row of nodes.values())
+                        dispose((row as Rowed).__sc ?? null);
                 });
-                rowScopes.clear();
                 nodes.clear();
                 tails?.clear();
             }
@@ -330,8 +334,7 @@ export const $__list = <T>(
                 $__untrack(() => {
                     for (let i = s; i <= ne; i++) {
                         const node = collect(render, list[i], i);
-                        rowScopes.set(keys[i], takeScopes());
-                        place(keys[i], node);
+                        place(keys[i], node, takeScopes());
                         frag.appendChild(node);
                     }
                 });
@@ -420,8 +423,7 @@ export const $__list = <T>(
             $__untrack(() => {
                 for (let i = s; i <= ne; i++) {
                     const node = collect(render, list[i], i);
-                    rowScopes.set(keys[i], takeScopes());
-                    place(keys[i], node);
+                    place(keys[i], node, takeScopes());
                     frag.appendChild(node);
                 }
             });
@@ -462,8 +464,7 @@ export const $__list = <T>(
                     ni + 1 < len ? (nodes.get(keys[ni + 1]) as Node) : anchor;
                 if (isFresh) {
                     const node = collect(render, list[ni], ni);
-                    rowScopes.set(key, takeScopes());
-                    place(key, node);
+                    place(key, node, takeScopes());
                     parent.insertBefore(node, r);
                 } else {
                     moveRow(parent, nodes.get(key) as Node, tailOf(key), r);
@@ -499,8 +500,8 @@ export const $__setText = (node: Text, value: unknown): void => {
     const n = node as Text & Cache;
     if (hydrating && n.__h && !(value instanceof Node)) return;
     if (typeof value === 'string') {
-        if (n.__r) clearMounted(n);
         if (n.__t === value) return;
+        if (n.__r) clearMounted(n);
         n.__t = value;
         node.data = value;
         return;
@@ -553,11 +554,7 @@ const dedupeClasses = (value: string): string => {
     return out;
 };
 
-export const $__setClass = (
-    el: Element,
-    _initial: string,
-    value: unknown,
-): void => {
+export const $__setClass = (el: Element, value: unknown): void => {
     if (hydrating) return;
     let next: string;
     if (typeof value === 'string') {

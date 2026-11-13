@@ -10,6 +10,7 @@ pub trait Emitter {
     fn clone_root(&self, root: &str, tpl: &str) -> String;
     fn clone_el(&self, root: &str, tpl: &str) -> String;
     fn grab(&self, var: &str, parent: &str, path: &NodePath) -> String;
+    fn grab_atoms(&self, var: &str, parent: &str, atoms: &[bool]) -> String;
     fn text_anchor(&self, var: &str, anchor: &str) -> String;
     fn dyn_lens(&self, var: &str, el: &str) -> String;
     fn split_run(&self, var: &str, el: &str, run: usize, statics: &[usize], lens: &str) -> String;
@@ -46,7 +47,7 @@ pub trait Emitter {
     fn set_attr(&self, node: &str, name: &str, expr: &str) -> String;
     fn set_text_direct(&self, node: &str, expr: &str) -> String;
     fn set_attr_direct(&self, node: &str, name: &str, expr: &str) -> String;
-    fn set_class(&self, node: &str, initial: &str, expr: &str) -> String;
+    fn set_class(&self, node: &str, expr: &str) -> String;
     fn set_style(&self, node: &str, expr: &str) -> String;
     fn set_prop(&self, node: &str, name: &str, expr: &str) -> String;
     fn local(&self, var: &str, expr: &str) -> String;

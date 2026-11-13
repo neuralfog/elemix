@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/SignalButtons.ts
 ---
-import { $__template, $__clone, $__event, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import { counter } from './SignalStore';
@@ -45,11 +45,11 @@ export class SignalButtons extends Component {
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.dec);
-$__event(_n2, 'click', this.reset);
-$__event(_n3, 'click', this.inc);
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.dec);
+(_n2 as HTMLElement).onclick = (this.reset);
+(_n3 as HTMLElement).onclick = (this.inc);
 return _r0;
 }
 }

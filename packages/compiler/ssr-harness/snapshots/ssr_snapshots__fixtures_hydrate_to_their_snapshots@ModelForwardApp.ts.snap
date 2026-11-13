@@ -19,14 +19,14 @@ const _t0 = $__template('<model-forward-input></model-forward-input><div class="
 export class ModelForwardApp extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
-const _n1 = root.firstChild!.nextSibling!;
+const _n1 = _n0.nextSibling!;
 const _d2 = $__dynLens(_n1);
 const _v3 = $__splitRun(_n1.firstChild as Text, [7], _d2);
 $__effect(() => {
-$__setProp(_n0, 'model', (this.state.name));
+$__setProp(_n0, 'model', this.state.name);
 });
 $__effect(() => {
-$__setText(_v3[0], (this.state.name.value));
+$__setText(_v3[0], this.state.name.value);
 });
 }
 
@@ -37,14 +37,14 @@ $__setText(_v3[0], (this.state.name.value));
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n2 = _n1.nextSibling!.firstChild!.nextSibling!;
 const _x3 = document.createTextNode('');
 _n2.replaceWith(_x3);
 $__effect(() => {
-$__setProp(_n1, 'model', (this.state.name));
+$__setProp(_n1, 'model', this.state.name);
 });
 $__effect(() => {
-$__setText(_x3, (this.state.name.value));
+$__setText(_x3, this.state.name.value);
 });
 return _r0;
 }

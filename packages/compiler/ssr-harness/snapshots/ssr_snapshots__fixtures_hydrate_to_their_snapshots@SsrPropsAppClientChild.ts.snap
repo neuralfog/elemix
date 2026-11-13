@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/SsrPropsAppClientChild.ts
 ---
 import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -21,18 +20,31 @@ export class SsrPropsAppClientChild extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!.nextSibling!;
 const _n1 = $__text(_n0);
-const _n2 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n2 = _n0.nextSibling!.nextSibling!;
 const _n3 = $__text(_n2);
 const _n4 = root.firstChild!.nextSibling!;
 $__effect(() => {
-$__setText(_n1, (this.state.count));
+const _v5 = this.state.count;
+$__setText(_n1, _v5);
+$__setProp(_n4, 'count', _v5);
+});
+$__effect(() => {
 $__setText(_n3, (this.state.tags.join(',')));
+});
+$__effect(() => {
 $__setProp(_n4, 'label', ('hello'));
-$__setProp(_n4, 'count', (this.state.count));
-$__setProp(_n4, 'flag', (true));
-$__setProp(_n4, 'tags', (this.state.tags));
-$__setProp(_n4, 'onBump', (this.bump));
-$__setProp(_n4, 'onAdd', (this.add));
+});
+$__effect(() => {
+$__setProp(_n4, 'flag', true);
+});
+$__effect(() => {
+$__setProp(_n4, 'tags', this.state.tags);
+});
+$__effect(() => {
+$__setProp(_n4, 'onBump', this.bump);
+});
+$__effect(() => {
+$__setProp(_n4, 'onAdd', this.add);
 });
 }
 
@@ -51,19 +63,33 @@ $__setProp(_n4, 'onAdd', (this.add));
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.nextSibling!;
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.nextSibling!;
+const _n3 = _n2.firstChild!;
+const _n4 = _n2.nextSibling!.nextSibling!.firstChild!;
+const _n5 = _n1.nextSibling!;
 $__effect(() => {
-const _v4 = (this.state.count);
-$__setText(_n1, (_v4));
-$__setText(_n2, (this.state.tags.join(',')));
-$__setProp(_n3, 'label', ('hello'));
-$__setProp(_n3, 'count', (_v4));
-$__setProp(_n3, 'flag', (true));
-$__setProp(_n3, 'tags', (this.state.tags));
-$__setProp(_n3, 'onBump', (this.bump));
-$__setProp(_n3, 'onAdd', (this.add));
+const _v6 = this.state.count;
+$__setText(_n3, _v6);
+$__setProp(_n5, 'count', _v6);
+});
+$__effect(() => {
+$__setText(_n4, (this.state.tags.join(',')));
+});
+$__effect(() => {
+$__setProp(_n5, 'label', ('hello'));
+});
+$__effect(() => {
+$__setProp(_n5, 'flag', true);
+});
+$__effect(() => {
+$__setProp(_n5, 'tags', this.state.tags);
+});
+$__effect(() => {
+$__setProp(_n5, 'onBump', this.bump);
+});
+$__effect(() => {
+$__setProp(_n5, 'onAdd', this.add);
 });
 return _r0;
 }

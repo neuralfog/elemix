@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxNestedConditional.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<section class="outer-on"><span class="outer-label">outer</span> <!----></section>');
 const _h1 = $__templateEl('<span class="inner-on">inner-on</span>');
 const _h2 = $__templateEl('<span class="inner-off">inner-off</span>');
@@ -26,9 +26,9 @@ const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 3, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
 const _n3 = _n0.firstChild!;
-const _n4 = _n0.firstChild!.nextSibling!;
-$__event(_n3, 'click', this.toggleOuter);
-$__event(_n4, 'click', this.toggleInner);
+const _n4 = _n3.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.toggleOuter);
+(_n4 as HTMLElement).onclick = (this.toggleInner);
 $__fresh(() => {
 $__child(_a2, () => (this.state.outer
                     ? (() => {
@@ -65,10 +65,10 @@ return _r9;
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.toggleOuter);
-$__event(_n2, 'click', this.toggleInner);
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.toggleOuter);
+(_n2 as HTMLElement).onclick = (this.toggleInner);
 $__child(_n3, () => (this.state.outer
                     ? (() => {
 const _r4 = $__cloneEl(_t1);

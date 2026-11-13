@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxLiveChildTeardown.ts
 ---
 import { $__bounds, $__seat, $__resume } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<mx-counter-child></mx-counter-child>');
 const _h1 = $__templateEl('<span class="gone">gone</span>');
 
@@ -22,7 +22,7 @@ $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 2, 0);
 const _n2 = _n0.firstChild!;
-$__event(_n2, 'click', this.toggle);
+(_n2 as HTMLElement).onclick = (this.toggle);
 const _s3 = $__seat(_n0, _b1[0], _b1[1]);
 $__child(_s3[0], $__resume(_s3[1], (_r4) => (this.state.mounted
                     ? (() => {
@@ -57,8 +57,8 @@ return _r6;
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.toggle);
+const _n2 = _n1.nextSibling!.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.toggle);
 $__child(_n2, () => (this.state.mounted
                     ? (() => {
 const _r3 = $__cloneEl(_t1);

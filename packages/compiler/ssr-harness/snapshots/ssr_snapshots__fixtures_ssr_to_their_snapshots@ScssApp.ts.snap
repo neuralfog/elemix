@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/ScssApp.ts
 ---
-import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 import css from './ScssApp.scss?inline';
@@ -14,7 +14,7 @@ type State = {
 
 export class ScssApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'scss-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card"><h2>SCSS styles</h2><p>Imported from a <code>.scss</code> file as <code>?inline</code> and adopted via <code>#styles</code>.</p>${(() => {const _t0 = (this.state.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</div></template></${this.$$__tag ?? 'scss-app'}>`];
+return [`<${this.$$__tag ?? 'scss-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="card"><h2>SCSS styles</h2><p>Imported from a <code>.scss</code> file as <code>?inline</code> and adopted via <code>#styles</code>.</p>${(() => {const _h0 = $__ssrHole((this.state.count));return `<button data-t="${_h0[1]}">count is ${_h0[0]}</button>`;})()}</div></template></${this.$$__tag ?? 'scss-app'}>`];
 }
 
 

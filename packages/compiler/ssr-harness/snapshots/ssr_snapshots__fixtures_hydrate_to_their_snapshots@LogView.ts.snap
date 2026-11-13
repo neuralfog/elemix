@@ -49,28 +49,29 @@ const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 0, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
 $__fresh(() => {
-const _a8 = document.createComment('');
-_a2.before(_a8);
-$__list(_a8, () => (log.entries.length ? log.entries : []), (e) => String(e.id), (e) => {
+const _a9 = document.createComment('');
+_a2.before(_a9);
+$__list(_a9, () => (log.entries.length ? log.entries : []), (e) => String(e.id), (e) => {
 const _r3 = $__cloneEl(_h0);
-const _n4 = _r3.firstChild!.firstChild!;
-const _n5 = _r3.firstChild!.nextSibling!;
-const _x6 = document.createTextNode('');
-_n5.replaceWith(_x6);
+const _n4 = _r3.firstChild!;
+const _n5 = _n4.firstChild!;
+const _n6 = _n4.nextSibling!;
+const _x7 = document.createTextNode('');
+_n6.replaceWith(_x7);
 $__effect(() => {
-$__setClass(_r3, '', ({ entry: true, [e.event]: true }));
+$__setClass(_r3, ({ entry: true, [e.event]: true }));
 });
 $__effect(() => {
-$__setText(_n4, (e.id));
+$__setText(_n5, e.id);
 });
 $__effect(() => {
-$__setText(_x6, (e.event));
+$__setText(_x7, e.event);
 });
 return _r3;
 });
 $__child(_a2, () => (log.entries.length ? '' : (() => {
-const _r7 = $__cloneEl(_h1);
-return _r7;
+const _r8 = $__cloneEl(_h1);
+return _r8;
 })()));
 });
 }
@@ -79,28 +80,29 @@ return _r7;
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _a7 = document.createComment('');
-_n1.before(_a7);
-$__list(_a7, () => (log.entries.length ? log.entries : []), (e) => String(e.id), (e) => {
+const _a8 = document.createComment('');
+_n1.before(_a8);
+$__list(_a8, () => (log.entries.length ? log.entries : []), (e) => String(e.id), (e) => {
 const _r2 = $__cloneEl(_t1);
-const _n3 = _r2.firstChild!.firstChild!;
-const _n4 = _r2.firstChild!.nextSibling!;
-const _x5 = document.createTextNode('');
-_n4.replaceWith(_x5);
+const _n3 = _r2.firstChild!;
+const _n4 = _n3.firstChild!;
+const _n5 = _n3.nextSibling!;
+const _x6 = document.createTextNode('');
+_n5.replaceWith(_x6);
 $__effect(() => {
-$__setClass(_r2, '', ({ entry: true, [e.event]: true }));
+$__setClass(_r2, ({ entry: true, [e.event]: true }));
 });
 $__effect(() => {
-$__setText(_n3, (e.id));
+$__setText(_n4, e.id);
 });
 $__effect(() => {
-$__setText(_x5, (e.event));
+$__setText(_x6, e.event);
 });
 return _r2;
 });
 $__child(_n1, () => (log.entries.length ? '' : (() => {
-const _r6 = $__cloneEl(_t2);
-return _r6;
+const _r7 = $__cloneEl(_t2);
+return _r7;
 })()));
 return _r0;
 }

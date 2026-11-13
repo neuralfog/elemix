@@ -6,8 +6,8 @@ $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 0, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
-const _n3 = root.firstChild!.nextSibling!;
-$__event(_n3, 'click', this.toggle);
+const _n3 = _n0.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.toggle);
 $__fresh(() => {
 $__child(_a2, () => (this.state.loggedIn ? (() => {
 const _r4 = $__cloneEl(_h0);

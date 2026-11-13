@@ -37,7 +37,7 @@ fn text_bakes_a_node_for_a_sole_content_hole() {
     assert!(!out.contains("document.createTextNode('');"));
     assert!(!out.contains(".replaceWith("));
     assert!(out.contains("$__setText("));
-    assert!(out.contains("(this.state.count));"));
+    assert!(out.contains("this.state.count);"));
 }
 
 #[test]
@@ -47,6 +47,57 @@ fn text_swaps_anchor_when_not_a_sole_hole() {
     assert!(out.contains("document.createTextNode('');"));
     assert!(out.contains(".replaceWith("));
     assert!(out.contains("$__setText("));
+}
+
+#[test]
+fn cse_group_does_not_swallow_independent_writes() {
+    let out = gen(
+        &["<div class=", " title=", " data-x=", "></div>"],
+        &["user.name", "user.name", "other"],
+    );
+    assert!(
+        out.contains("= user.name;"),
+        "CSE read is hoisted once:\n{out}"
+    );
+    assert_eq!(
+        out.matches("$__effect(() => {").count(),
+        2,
+        "the independent write must get its own effect, not merge into the CSE group:\n{out}"
+    );
+    let independent = out
+        .split("$__effect(() => {")
+        .find(|block| block.contains(", other)"))
+        .expect("an effect holding the independent write");
+    assert!(
+        !independent.contains("user.name"),
+        "the independent write must not share the CSE group's effect:\n{out}"
+    );
+}
+
+#[test]
+fn standard_events_inline_to_the_on_handler() {
+    let out = gen(&["<button @click=", ">x</button>"], &["this.run"]);
+    assert!(
+        out.contains(".onclick = (this.run);"),
+        "standard events assign the on-handler directly:\n{out}"
+    );
+    assert!(
+        !out.contains("$__event("),
+        "no delegating call for a standard event:\n{out}"
+    );
+}
+
+#[test]
+fn custom_events_keep_the_delegating_call() {
+    let out = gen(&["<x-el @my-event=", "></x-el>"], &["this.run"]);
+    assert!(
+        out.contains("$__event(") && out.contains("'my-event'"),
+        "non-standard events keep $__event:\n{out}"
+    );
+    assert!(
+        !out.contains(".onmy-event"),
+        "must not invent an on-property for a custom event:\n{out}"
+    );
 }
 
 #[test]
@@ -71,7 +122,7 @@ fn style_casts_to_html_element() {
 #[test]
 fn prop_keeps_name_and_thunk() {
     let out = gen(&["<x :counter=", " />"], &["this.c"]);
-    assert!(out.contains("$__setProp(_n1, 'counter', (this.c));"));
+    assert!(out.contains("$__setProp(_n1, 'counter', this.c);"));
 }
 
 #[test]
@@ -83,7 +134,7 @@ fn model_casts_and_thunks() {
 #[test]
 fn event_handler_is_raw() {
     let out = gen(&["<button @click=", ">go</button>"], &["this.go"]);
-    assert!(out.contains("$__event(_n1, 'click', this.go);"));
+    assert!(out.contains("(_n1 as HTMLElement).onclick = (this.go);"));
     assert!(!out.contains("() => this.go"));
 }
 
@@ -99,15 +150,15 @@ fn onmodel_is_raw_and_cast() {
 #[test]
 fn ref_is_raw() {
     let out = gen(&["<input :ref=", " />"], &["this.input"]);
-    assert!(out.contains("$__ref(_n1, this.input);"));
+    assert!(out.contains("(this.input).value = _n1;"));
 }
 
 #[test]
 fn bindings_on_one_element_grab_it_once() {
     let out = gen(&["<a href=", " @click=", ">x</a>"], &["u", "this.go"]);
     assert_eq!(out.matches("= _r0.firstChild!;").count(), 1);
-    assert!(out.contains("$__setAttr(_n1, 'href', (u));"));
-    assert!(out.contains("$__event(_n1, 'click', this.go);"));
+    assert!(out.contains("$__setAttr(_n1, 'href', u);"));
+    assert!(out.contains("(_n1 as HTMLElement).onclick = (this.go);"));
 }
 
 #[test]
@@ -120,7 +171,7 @@ fn repeat_lowers_to_list_with_a_flattened_builder() {
     assert!(out.contains("$__list(_n1, () => (this.rows), (r) => r.id, (r) => {"));
     assert!(out.contains("$__cloneEl(_t1)"));
     assert!(out.contains("$__setText("));
-    assert!(out.contains("(r.t));"));
+    assert!(out.contains("r.t);"));
 }
 
 #[test]

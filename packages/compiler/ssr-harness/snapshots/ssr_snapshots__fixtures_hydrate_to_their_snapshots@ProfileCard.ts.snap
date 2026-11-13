@@ -1,7 +1,6 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-assertion_line: 23
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/ProfileCard.ts
 ---
 import { $__dynLens, $__splitRun, $__text } from '@neuralfog/elemix/ssr-runtime/client';
@@ -40,47 +39,50 @@ export class ProfileCard extends Component<Props> {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!;
 const _n1 = $__text(_n0);
-const _n2 = root.firstChild!.firstChild!.nextSibling!.firstChild!;
+const _n2 = _n0.nextSibling!.firstChild!;
 const _n3 = $__text(_n2);
-const _n4 = root.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n4 = _n2.nextSibling!;
 const _n5 = $__text(_n4);
-const _n6 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n6 = _n0.nextSibling!.nextSibling!;
 const _d7 = $__dynLens(_n6);
 const _v8 = $__splitRun(_n6.firstChild as Text, [3], _d7);
 $__effect(() => {
 $__setText(_n1, (this.props.name.charAt(0)));
 });
 $__effect(() => {
-$__setText(_n3, (this.props.name));
+$__setText(_n3, this.props.name);
 });
 $__effect(() => {
-$__setText(_n5, (this.props.role));
+$__setText(_n5, this.props.role);
 });
 $__effect(() => {
-$__setText(_v8[0], (this.props.likes));
+$__setText(_v8[0], this.props.likes);
 });
 }
 
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-const _x5 = document.createTextNode('');
-_n4.replaceWith(_x5);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.firstChild!;
+const _n4 = _n1.firstChild!;
+const _n5 = _n3.firstChild!;
+const _n6 = _n3.nextSibling!.firstChild!;
+const _n7 = _n2.nextSibling!.firstChild!.nextSibling!;
+const _x8 = document.createTextNode('');
+_n7.replaceWith(_x8);
 $__effect(() => {
-$__setText(_n1, (this.props.name.charAt(0)));
+$__setText(_n4, (this.props.name.charAt(0)));
 });
 $__effect(() => {
-$__setText(_n2, (this.props.name));
+$__setText(_n5, this.props.name);
 });
 $__effect(() => {
-$__setText(_n3, (this.props.role));
+$__setText(_n6, this.props.role);
 });
 $__effect(() => {
-$__setText(_x5, (this.props.likes));
+$__setText(_x8, this.props.likes);
 });
 return _r0;
 }

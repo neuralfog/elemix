@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/BeforeMountStoreApp.ts
 ---
-import { $__ssrText, $__ssrLen, $__moduleState } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole, $__moduleState } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -18,7 +18,7 @@ export class BeforeMountStoreApp extends Component {
         this.seed();
     }
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'before-mount-store-app'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _t0 = (counter.count);return `<button data-t="${$__ssrLen(_t0)}">count is ${$__ssrText(_t0)}</button>`;})()}</template></${this.$$__tag ?? 'before-mount-store-app'}>`];
+return [`<${this.$$__tag ?? 'before-mount-store-app'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _h0 = $__ssrHole((counter.count));return `<button data-t="${_h0[1]}">count is ${_h0[0]}</button>`;})()}</template></${this.$$__tag ?? 'before-mount-store-app'}>`];
 }
 
     seed(): void {

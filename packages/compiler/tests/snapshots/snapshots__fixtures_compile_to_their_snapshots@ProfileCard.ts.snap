@@ -38,23 +38,26 @@ export class ProfileCard extends Component<Props> {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!.nextSibling!.firstChild!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-const _x5 = document.createTextNode('');
-_n4.replaceWith(_x5);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.firstChild!;
+const _n4 = _n1.firstChild!;
+const _n5 = _n3.firstChild!;
+const _n6 = _n3.nextSibling!.firstChild!;
+const _n7 = _n2.nextSibling!.firstChild!.nextSibling!;
+const _x8 = document.createTextNode('');
+_n7.replaceWith(_x8);
 $__effect(() => {
-$__setText(_n1, (this.props.name.charAt(0)));
+$__setText(_n4, (this.props.name.charAt(0)));
 });
 $__effect(() => {
-$__setText(_n2, (this.props.name));
+$__setText(_n5, this.props.name);
 });
 $__effect(() => {
-$__setText(_n3, (this.props.role));
+$__setText(_n6, this.props.role);
 });
 $__effect(() => {
-$__setText(_x5, (this.props.likes));
+$__setText(_x8, this.props.likes);
 });
 return _r0;
 }

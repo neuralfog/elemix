@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/MultiRootRowApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Group = {
@@ -36,26 +36,27 @@ export class MultiRootRowApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!;
-$__list(_n1, () => (this.state.groups), (group) => group.id, (group) => {
-const _r3 = $__clone(_t1);
-const _n4 = _r3.firstChild!;
-const _n5 = _r3.firstChild!.nextSibling!.nextSibling!.firstChild!.nextSibling!;
-$__list(_n4, () => (group.items), (item) => item, (item) => {
-const _r6 = $__cloneEl(_t2);
-const _n7 = _r6.firstChild!;
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+$__list(_n2, () => (this.state.groups), (group) => group.id, (group) => {
+const _r4 = $__clone(_t1);
+const _n5 = _r4.firstChild!;
+const _n6 = _n5.nextSibling!.nextSibling!.firstChild!.nextSibling!;
+$__list(_n5, () => (group.items), (item) => item, (item) => {
+const _r7 = $__cloneEl(_t2);
+const _n8 = _r7.firstChild!;
 $__effect(() => {
-$__setText(_n7, (item));
+$__setText(_n8, item);
 });
-return _r6;
+return _r7;
 });
-const _x8 = document.createTextNode('');
-_n5.replaceWith(_x8);
-_x8.data = ($__toRaw(group).id);
-return _r3;
+const _x9 = document.createTextNode('');
+_n6.replaceWith(_x9);
+_x9.data = ($__toRaw(group).id);
+return _r4;
 });
-$__event(_n2, 'click', this.addGroup);
+(_n3 as HTMLElement).onclick = (this.addGroup);
 return _r0;
 }
 }

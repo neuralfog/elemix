@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/FormApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './RatingInput';
@@ -83,14 +83,14 @@ export class FormApp extends Component {
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!.nextSibling!;
-$__event(_n1, 'submit', this.submit);
+const _n2 = _n1.nextSibling!.nextSibling!;
+(_n1 as HTMLElement).onsubmit = (this.submit);
 $__child(_n2, () => (this.state.result
                 ? (() => {
 const _r3 = $__cloneEl(_t1);
 const _n4 = _r3.firstChild!;
 $__effect(() => {
-$__setText(_n4, (this.state.result));
+$__setText(_n4, this.state.result);
 });
 return _r3;
 })()

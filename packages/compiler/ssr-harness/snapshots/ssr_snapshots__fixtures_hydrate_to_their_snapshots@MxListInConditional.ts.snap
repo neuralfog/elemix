@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxListInConditional.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<ul class="list"><!----></ul>');
 const _h1 = $__templateEl('<li class="row"> </li>');
 
@@ -22,10 +22,10 @@ $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!.firstChild!;
 const _b1 = $__bounds(_n0, 0, 0);
 const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
-const _n3 = root.firstChild!.firstChild!.nextSibling!;
-const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n3, 'click', this.toggle);
-$__event(_n4, 'click', this.addOne);
+const _n3 = _n0.nextSibling!;
+const _n4 = _n3.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.toggle);
+(_n4 as HTMLElement).onclick = (this.addOne);
 $__fresh(() => {
 $__child(_a2, () => (this.state.show
                 ? (() => {
@@ -36,7 +36,7 @@ const _r7 = $__cloneEl(_h1);
 const _n8 = _r7.firstChild!;
 _r7.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
-$__setText(_n8, (it.label));
+$__setText(_n8, it.label);
 });
 return _r7;
 });
@@ -67,27 +67,28 @@ return _r5;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__child(_n1, () => (this.state.show
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+const _n4 = _n3.nextSibling!;
+$__child(_n2, () => (this.state.show
                 ? (() => {
-const _r4 = $__cloneEl(_t1);
-const _n5 = _r4.firstChild!;
-$__list(_n5, () => (this.state.items), (it) => it.id, (it) => {
-const _r6 = $__cloneEl(_t2);
-const _n7 = _r6.firstChild!;
-_r6.setAttribute('data-id', ($__toRaw(it).id));
+const _r5 = $__cloneEl(_t1);
+const _n6 = _r5.firstChild!;
+$__list(_n6, () => (this.state.items), (it) => it.id, (it) => {
+const _r7 = $__cloneEl(_t2);
+const _n8 = _r7.firstChild!;
+_r7.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
-$__setText(_n7, (it.label));
+$__setText(_n8, it.label);
 });
-return _r6;
+return _r7;
 });
-return _r4;
+return _r5;
 })()
                 : ''));
-$__event(_n2, 'click', this.toggle);
-$__event(_n3, 'click', this.addOne);
+(_n3 as HTMLElement).onclick = (this.toggle);
+(_n4 as HTMLElement).onclick = (this.addOne);
 return _r0;
 }
 }

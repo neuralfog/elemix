@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MethodHelperApp.ts
 ---
 import { $__bounds, $__span, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<span class="chip"> </span>');
 const _h1 = $__templateEl('<div class="open"><!----><span class="count"> </span></div>');
 const _h2 = $__templateEl('<div class="closed">closed</div>');
@@ -28,10 +28,10 @@ const _b4 = $__bounds(_n3, 2, 3);
 const _a5 = $__reanchor(_n0, _b1[0], _b1[1]);
 const _a6 = $__reanchor(_n0, _b2[0], _b2[1]);
 const _a7 = $__reanchor(_n3, _b4[0], _b4[1]);
-const _n8 = _n3.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n9 = _n3.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n8, 'click', this.toggle);
-$__event(_n9, 'click', this.inc);
+const _n8 = _n0.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n9 = _n8.nextSibling!;
+(_n8 as HTMLElement).onclick = (this.toggle);
+(_n9 as HTMLElement).onclick = (this.inc);
 $__fresh(() => {
 $__child(_a5, () => ((() => {
 const _r10 = $__cloneEl(_h0);
@@ -53,7 +53,7 @@ $__child(_a7, () => (this.state.open
                         ? (() => {
 const _r14 = $__cloneEl(_h1);
 const _n15 = _r14.firstChild!;
-const _n16 = _r14.firstChild!.nextSibling!.firstChild!;
+const _n16 = _n15.nextSibling!.firstChild!;
 $__child(_n15, () => ((() => {
 const _r17 = $__cloneEl(_h0);
 const _n18 = _r17.firstChild!;
@@ -63,7 +63,7 @@ $__setText(_n18, ('open'));
 return _r17;
 })()));
 $__effect(() => {
-$__setText(_n16, (this.state.count));
+$__setText(_n16, this.state.count);
 });
 return _r14;
 })()
@@ -87,51 +87,52 @@ return _r19;
     
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__child(_n1, () => ((() => {
-const _r6 = $__cloneEl(_t1);
-const _n7 = _r6.firstChild!;
-$__effect(() => {
-$__setText(_n7, ('a'));
-});
-return _r6;
-})()));
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n1.nextSibling!.nextSibling!;
+const _n5 = _n4.nextSibling!.nextSibling!;
+const _n6 = _n5.nextSibling!;
 $__child(_n2, () => ((() => {
-const _r8 = $__cloneEl(_t1);
-const _n9 = _r8.firstChild!;
+const _r7 = $__cloneEl(_t1);
+const _n8 = _r7.firstChild!;
 $__effect(() => {
-$__setText(_n9, ('b'));
+$__setText(_n8, ('a'));
 });
-return _r8;
+return _r7;
 })()));
-$__child(_n3, () => (this.state.open
+$__child(_n3, () => ((() => {
+const _r9 = $__cloneEl(_t1);
+const _n10 = _r9.firstChild!;
+$__effect(() => {
+$__setText(_n10, ('b'));
+});
+return _r9;
+})()));
+$__child(_n4, () => (this.state.open
                         ? (() => {
-const _r10 = $__cloneEl(_t2);
-const _n11 = _r10.firstChild!;
-const _n12 = _r10.firstChild!.nextSibling!.firstChild!;
-$__child(_n11, () => ((() => {
-const _r13 = $__cloneEl(_t1);
-const _n14 = _r13.firstChild!;
+const _r11 = $__cloneEl(_t2);
+const _n12 = _r11.firstChild!;
+const _n13 = _n12.nextSibling!.firstChild!;
+$__child(_n12, () => ((() => {
+const _r14 = $__cloneEl(_t1);
+const _n15 = _r14.firstChild!;
 $__effect(() => {
-$__setText(_n14, ('open'));
+$__setText(_n15, ('open'));
 });
-return _r13;
+return _r14;
 })()));
 $__effect(() => {
-$__setText(_n12, (this.state.count));
+$__setText(_n13, this.state.count);
 });
-return _r10;
+return _r11;
 })()
                         : (() => {
-const _r15 = $__cloneEl(_t3);
-return _r15;
+const _r16 = $__cloneEl(_t3);
+return _r16;
 })()));
-$__event(_n4, 'click', this.toggle);
-$__event(_n5, 'click', this.inc);
+(_n5 as HTMLElement).onclick = (this.toggle);
+(_n6 as HTMLElement).onclick = (this.inc);
 return _r0;
 }
 }

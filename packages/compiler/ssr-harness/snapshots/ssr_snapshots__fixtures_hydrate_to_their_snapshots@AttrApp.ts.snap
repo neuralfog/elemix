@@ -1,10 +1,10 @@
 ---
 source: ssr-harness/ssr_snapshots.rs
-expression: compile_hydrate(&source).0
+expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/AttrApp.ts
 ---
 import { $__dynLens, $__splitRun, $__text } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__event, $__effect, $__setText, $__setAttr, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__setAttr, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -73,25 +73,33 @@ const _t0 = $__template('<a class="link">Open profile #<!----></a><span class="b
 export class AttrApp extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
-const _n1 = root.firstChild!.nextSibling!;
+const _n1 = _n0.nextSibling!;
 const _n2 = $__text(_n1);
-const _n3 = root.firstChild!.nextSibling!.nextSibling!;
-const _n4 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n6 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n3 = _n1.nextSibling!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n4.nextSibling!;
+const _n6 = _n5.nextSibling!;
 const _d7 = $__dynLens(_n0);
 const _v8 = $__splitRun(_n0.firstChild as Text, [14], _d7);
-$__event(_n4, 'click', this.next);
-$__event(_n5, 'click', this.rename);
-$__event(_n6, 'click', this.toggle);
+(_n4 as HTMLElement).onclick = (this.next);
+(_n5 as HTMLElement).onclick = (this.rename);
+(_n6 as HTMLElement).onclick = (this.toggle);
 $__effect(() => {
 $__setAttr(_n0, 'href', (`/users/${this.state.userId}`));
-$__setAttr(_n0, 'title', (this.state.label));
-$__setText(_v8[0], (this.state.userId));
-$__setAttr(_n1, 'data-count', (this.state.userId));
-$__setAttr(_n1, 'aria-label', (this.state.label));
-$__setText(_n2, (this.state.label));
-$__setAttr(_n3, 'hidden', (this.state.collapsed));
+});
+$__effect(() => {
+const _v9 = this.state.label;
+$__setAttr(_n0, 'title', _v9);
+$__setAttr(_n1, 'aria-label', _v9);
+$__setText(_n2, _v9);
+});
+$__effect(() => {
+const _v10 = this.state.userId;
+$__setText(_v8[0], _v10);
+$__setAttr(_n1, 'data-count', _v10);
+});
+$__effect(() => {
+$__setAttr(_n3, 'hidden', this.state.collapsed);
 });
 }
 
@@ -117,28 +125,34 @@ $__setAttr(_n3, 'hidden', (this.state.collapsed));
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
-const _n2 = _n1.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!;
-const _n4 = _n3.firstChild!;
-const _n5 = _r0.firstChild!.nextSibling!.nextSibling!;
-const _n6 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-const _n8 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n1.firstChild!.nextSibling!;
+const _n4 = _n2.firstChild!;
+const _n5 = _n2.nextSibling!;
+const _n6 = _n5.nextSibling!;
+const _n7 = _n6.nextSibling!;
+const _n8 = _n7.nextSibling!;
 const _x11 = document.createTextNode('');
-_n2.replaceWith(_x11);
-$__event(_n6, 'click', this.next);
-$__event(_n7, 'click', this.rename);
-$__event(_n8, 'click', this.toggle);
+_n3.replaceWith(_x11);
+(_n6 as HTMLElement).onclick = (this.next);
+(_n7 as HTMLElement).onclick = (this.rename);
+(_n8 as HTMLElement).onclick = (this.toggle);
 $__effect(() => {
-const _v9 = (this.state.label);
-const _v10 = (this.state.userId);
 $__setAttr(_n1, 'href', (`/users/${this.state.userId}`));
-$__setAttr(_n1, 'title', (_v9));
-$__setText(_x11, (_v10));
-$__setAttr(_n3, 'data-count', (_v10));
-$__setAttr(_n3, 'aria-label', (_v9));
-$__setText(_n4, (_v9));
-$__setAttr(_n5, 'hidden', (this.state.collapsed));
+});
+$__effect(() => {
+const _v9 = this.state.label;
+$__setAttr(_n1, 'title', _v9);
+$__setAttr(_n2, 'aria-label', _v9);
+$__setText(_n4, _v9);
+});
+$__effect(() => {
+const _v10 = this.state.userId;
+$__setText(_x11, _v10);
+$__setAttr(_n2, 'data-count', _v10);
+});
+$__effect(() => {
+$__setAttr(_n5, 'hidden', this.state.collapsed);
 });
 return _r0;
 }

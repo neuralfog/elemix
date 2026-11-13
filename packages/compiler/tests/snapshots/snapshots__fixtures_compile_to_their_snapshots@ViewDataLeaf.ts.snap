@@ -1,6 +1,5 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: fixtures/ViewDataLeaf.ts
 ---
@@ -16,7 +15,7 @@ export class ViewDataLeaf extends Component<unknown, VData> {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 $__effect(() => {
-$__setText(_n1, (this.viewData.user.name));
+$__setText(_n1, this.viewData.user.name);
 });
 return _r0;
 }

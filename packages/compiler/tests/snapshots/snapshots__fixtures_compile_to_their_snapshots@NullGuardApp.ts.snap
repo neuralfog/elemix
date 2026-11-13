@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/NullGuardApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Row = { id: string };
@@ -22,14 +22,14 @@ export class NullGuardApp extends Component {
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.toggle);
+const _n2 = _n1.nextSibling!.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.toggle);
 $__child(_n2, () => (this.model.row
                     ? (() => {
 const _r3 = $__cloneEl(_t1);
 const _n4 = _r3.firstChild!;
 $__effect(() => {
-$__setText(_n4, (this.model.row.id));
+$__setText(_n4, this.model.row.id);
 });
 return _r3;
 })()

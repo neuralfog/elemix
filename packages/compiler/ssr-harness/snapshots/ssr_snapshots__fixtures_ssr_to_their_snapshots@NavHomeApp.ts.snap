@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_ssr(&source, false).0"
 input_file: fixtures/NavHomeApp.ts
 ---
-import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__ssrHole } from '@neuralfog/elemix/ssr-runtime';
 import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
@@ -11,7 +11,7 @@ import { NavDocument } from './NavDocument';
 
 export class NavHomeApp extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'nav-home-app'}><template shadowrootmode="open" shadowrootserializable=""><main id="page" data-page="home"><h1>Home</h1>${(() => {const _t0 = (this.state.count);return `<button id="counter" data-t="${$__ssrLen(_t0)}">count ${$__ssrText(_t0)}</button>`;})()}</main></template></${this.$$__tag ?? 'nav-home-app'}>`];
+return [`<${this.$$__tag ?? 'nav-home-app'}><template shadowrootmode="open" shadowrootserializable=""><main id="page" data-page="home"><h1>Home</h1>${(() => {const _h0 = $__ssrHole((this.state.count));return `<button id="counter" data-t="${_h0[1]}">count ${_h0[0]}</button>`;})()}</main></template></${this.$$__tag ?? 'nav-home-app'}>`];
 }
 
 

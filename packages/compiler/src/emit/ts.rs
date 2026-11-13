@@ -31,6 +31,18 @@ impl Emitter for TsEmitter {
         format!("const {var} = {parent}{};", accessor(path))
     }
 
+    fn grab_atoms(&self, var: &str, parent: &str, atoms: &[bool]) -> String {
+        let mut s = String::with_capacity(atoms.len() * 13);
+        for &first in atoms {
+            s.push_str(if first {
+                ".firstChild!"
+            } else {
+                ".nextSibling!"
+            });
+        }
+        format!("const {var} = {parent}{s};")
+    }
+
     fn text_anchor(&self, var: &str, anchor: &str) -> String {
         format!("const {var} = document.createTextNode('');\n{anchor}.replaceWith({var});")
     }
@@ -73,7 +85,11 @@ impl Emitter for TsEmitter {
     }
 
     fn event(&self, node: &str, name: &str, handler: &str) -> String {
-        format!("$__event({node}, '{name}', {handler});")
+        if is_global_event(name) {
+            format!("({node} as HTMLElement).on{name} = ({handler});")
+        } else {
+            format!("$__event({node}, '{name}', {handler});")
+        }
     }
 
     fn model(&self, node: &str, expr: &str) -> String {
@@ -85,7 +101,7 @@ impl Emitter for TsEmitter {
     }
 
     fn reference(&self, node: &str, target: &str) -> String {
-        format!("$__ref({node}, {target});")
+        format!("({target}).value = {node};")
     }
 
     fn child(&self, anchor: &str, getter: &str) -> String {
@@ -126,35 +142,35 @@ impl Emitter for TsEmitter {
     }
 
     fn set_text(&self, node: &str, expr: &str) -> String {
-        format!("$__setText({node}, ({expr}));")
+        format!("$__setText({node}, {});", hole(expr))
     }
 
     fn set_text_direct(&self, node: &str, expr: &str) -> String {
-        format!("{node}.data = ({expr});")
+        format!("{node}.data = {};", hole(expr))
     }
 
     fn set_attr_direct(&self, node: &str, name: &str, expr: &str) -> String {
-        format!("{node}.setAttribute('{name}', ({expr}));")
+        format!("{node}.setAttribute('{name}', {});", hole(expr))
     }
 
     fn set_attr(&self, node: &str, name: &str, expr: &str) -> String {
-        format!("$__setAttr({node}, '{name}', ({expr}));")
+        format!("$__setAttr({node}, '{name}', {});", hole(expr))
     }
 
-    fn set_class(&self, node: &str, initial: &str, expr: &str) -> String {
-        format!("$__setClass({node}, {initial}, ({expr}));")
+    fn set_class(&self, node: &str, expr: &str) -> String {
+        format!("$__setClass({node}, {});", hole(expr))
     }
 
     fn set_style(&self, node: &str, expr: &str) -> String {
-        format!("$__setStyle({node} as HTMLElement, ({expr}));")
+        format!("$__setStyle({node} as HTMLElement, {});", hole(expr))
     }
 
     fn set_prop(&self, node: &str, name: &str, expr: &str) -> String {
-        format!("$__setProp({node}, '{name}', ({expr}));")
+        format!("$__setProp({node}, '{name}', {});", hole(expr))
     }
 
     fn local(&self, var: &str, expr: &str) -> String {
-        format!("const {var} = ({expr});")
+        format!("const {var} = {};", hole(expr))
     }
 
     fn bind_group(&self, writes: &[String]) -> String {
@@ -190,4 +206,115 @@ fn js_string(s: &str) -> String {
     }
     out.push('\'');
     out
+}
+
+fn bare(expr: &str) -> bool {
+    let mut chars = expr.chars();
+    match chars.next() {
+        Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '$' => {}
+        _ => return false,
+    }
+    expr.chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '$' || c == '.')
+}
+
+fn hole(expr: &str) -> String {
+    if bare(expr) {
+        expr.to_string()
+    } else {
+        format!("({expr})")
+    }
+}
+
+fn is_global_event(name: &str) -> bool {
+    matches!(
+        name,
+        "abort"
+            | "animationcancel"
+            | "animationend"
+            | "animationiteration"
+            | "animationstart"
+            | "auxclick"
+            | "beforeinput"
+            | "blur"
+            | "cancel"
+            | "canplay"
+            | "canplaythrough"
+            | "change"
+            | "click"
+            | "close"
+            | "contextmenu"
+            | "copy"
+            | "cuechange"
+            | "cut"
+            | "dblclick"
+            | "drag"
+            | "dragend"
+            | "dragenter"
+            | "dragleave"
+            | "dragover"
+            | "dragstart"
+            | "drop"
+            | "durationchange"
+            | "emptied"
+            | "ended"
+            | "error"
+            | "focus"
+            | "focusin"
+            | "focusout"
+            | "formdata"
+            | "gotpointercapture"
+            | "input"
+            | "invalid"
+            | "keydown"
+            | "keypress"
+            | "keyup"
+            | "load"
+            | "loadeddata"
+            | "loadedmetadata"
+            | "loadstart"
+            | "lostpointercapture"
+            | "mousedown"
+            | "mouseenter"
+            | "mouseleave"
+            | "mousemove"
+            | "mouseout"
+            | "mouseover"
+            | "mouseup"
+            | "paste"
+            | "pause"
+            | "play"
+            | "playing"
+            | "pointercancel"
+            | "pointerdown"
+            | "pointerenter"
+            | "pointerleave"
+            | "pointermove"
+            | "pointerout"
+            | "pointerover"
+            | "pointerup"
+            | "progress"
+            | "ratechange"
+            | "reset"
+            | "resize"
+            | "scroll"
+            | "seeked"
+            | "seeking"
+            | "select"
+            | "selectionchange"
+            | "selectstart"
+            | "slotchange"
+            | "stalled"
+            | "submit"
+            | "suspend"
+            | "timeupdate"
+            | "toggle"
+            | "transitioncancel"
+            | "transitionend"
+            | "transitionrun"
+            | "transitionstart"
+            | "volumechange"
+            | "waiting"
+            | "wheel"
+    )
 }

@@ -14,17 +14,19 @@ export class ContextApp extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!.firstChild!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.firstChild!;
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n2.firstChild!;
+const _n5 = _n2.nextSibling!.firstChild!;
 $__effect(() => {
-$__setText(_n1, (param('id') ?? '-'));
+$__setText(_n3, (param('id') ?? '-'));
 });
 $__effect(() => {
-$__setText(_n2, (query('q') ?? '-'));
+$__setText(_n4, (query('q') ?? '-'));
 });
 $__effect(() => {
-$__setText(_n3, (csrf()));
+$__setText(_n5, (csrf()));
 });
 return _r0;
 }

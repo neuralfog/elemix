@@ -3,7 +3,7 @@ source: ssr-harness/ssr_snapshots.rs
 expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/StyleApp.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setStyle, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setStyle, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type State = {
@@ -49,12 +49,12 @@ const _t0 = $__template('<div class="box">Styled box</div><button>color</button>
 export class StyleApp extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
-const _n1 = root.firstChild!.nextSibling!;
-const _n2 = root.firstChild!.nextSibling!.nextSibling!;
-const _n3 = root.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.recolor);
-$__event(_n2, 'click', this.resize);
-$__event(_n3, 'click', this.shade);
+const _n1 = _n0.nextSibling!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.recolor);
+(_n2 as HTMLElement).onclick = (this.resize);
+(_n3 as HTMLElement).onclick = (this.shade);
 $__effect(() => {
 $__setStyle(_n0 as HTMLElement, ({
                 color: this.state.color,
@@ -87,12 +87,12 @@ $__setStyle(_n0 as HTMLElement, ({
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n2, 'click', this.recolor);
-$__event(_n3, 'click', this.resize);
-$__event(_n4, 'click', this.shade);
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+(_n2 as HTMLElement).onclick = (this.recolor);
+(_n3 as HTMLElement).onclick = (this.resize);
+(_n4 as HTMLElement).onclick = (this.shade);
 $__effect(() => {
 $__setStyle(_n1 as HTMLElement, ({
                 color: this.state.color,

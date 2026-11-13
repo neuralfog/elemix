@@ -1,10 +1,9 @@
 ---
 source: tests/snapshots.rs
-assertion_line: 14
 expression: compile(&source)
 input_file: fixtures/SsrClientParent.ts
 ---
-import { $__template, $__clone, $__event, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './SsrClientParentChild';
@@ -23,14 +22,16 @@ export class SsrClientParent extends Component {
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!;
-$__event(_n2, 'click', this.inc);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n2.firstChild!;
+const _n4 = _n2.nextSibling!;
+const _n5 = _n1.nextSibling!;
+(_n4 as HTMLElement).onclick = (this.inc);
 $__effect(() => {
-const _v4 = (this.state.n);
-$__setText(_n1, (_v4));
-$__setProp(_n3, 'value', (_v4));
+const _v6 = this.state.n;
+$__setText(_n3, _v6);
+$__setProp(_n5, 'value', _v6);
 });
 return _r0;
 }

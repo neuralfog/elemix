@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/SsrCycleApp.ts
 ---
 import { $__bounds, $__reanchor, $__seat, $__resume, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<ssr-cycle-probe></ssr-cycle-probe>');
 const _h1 = $__templateEl('<span class="empty">unmounted</span>');
 const _h2 = $__templateEl('<li> </li>');
@@ -25,11 +25,11 @@ export class SsrCycleApp extends Component {
 $$__hydrate(root: Node): void {
 const _n0 = root.firstChild!;
 const _b1 = $__bounds(_n0, 0, 0);
-const _n2 = root.firstChild!.nextSibling!.nextSibling!;
+const _n2 = _n0.nextSibling!.nextSibling!;
 const _b3 = $__bounds(_n2, 0, 0);
 const _a4 = $__reanchor(_n2, _b3[0], _b3[1]);
-const _n5 = root.firstChild!.nextSibling!;
-$__event(_n5, 'click', this.toggle);
+const _n5 = _n0.nextSibling!;
+(_n5 as HTMLElement).onclick = (this.toggle);
 const _s6 = $__seat(_n0, _b1[0], _b1[1]);
 $__child(_s6[0], $__resume(_s6[1], (_r7) => (this.state.mounted
                     ? (() => {
@@ -53,7 +53,7 @@ $__list(_a4, () => (cycle.entries), (entry) => String(entry.id), (entry) => {
 const _r10 = $__cloneEl(_h2);
 const _n11 = _r10.firstChild!;
 $__effect(() => {
-$__setText(_n11, (entry.event));
+$__setText(_n11, entry.event);
 });
 return _r10;
 });
@@ -68,26 +68,27 @@ return _r10;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.nextSibling!.nextSibling!.firstChild!;
-$__child(_n1, () => (this.state.mounted
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+const _n4 = _n3.nextSibling!.firstChild!;
+$__child(_n2, () => (this.state.mounted
                     ? (() => {
-const _r4 = $__cloneEl(_t1);
-return _r4;
+const _r5 = $__cloneEl(_t1);
+return _r5;
 })()
                     : (() => {
-const _r5 = $__cloneEl(_t2);
-return _r5;
-})()));
-$__event(_n2, 'click', this.toggle);
-$__list(_n3, () => (cycle.entries), (entry) => String(entry.id), (entry) => {
-const _r6 = $__cloneEl(_t3);
-const _n7 = _r6.firstChild!;
-$__effect(() => {
-$__setText(_n7, (entry.event));
-});
+const _r6 = $__cloneEl(_t2);
 return _r6;
+})()));
+(_n3 as HTMLElement).onclick = (this.toggle);
+$__list(_n4, () => (cycle.entries), (entry) => String(entry.id), (entry) => {
+const _r7 = $__cloneEl(_t3);
+const _n8 = _r7.firstChild!;
+$__effect(() => {
+$__setText(_n8, entry.event);
+});
+return _r7;
 });
 return _r0;
 }

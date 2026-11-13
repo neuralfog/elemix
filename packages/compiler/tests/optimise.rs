@@ -139,6 +139,23 @@ fn strips_ssr_tpl_wrapper() {
 }
 
 #[test]
+fn strips_multi_arg_ssr_tpl_to_array() {
+    let (optimised, _) = optimise("const _r = $__ssrTpl(`<li>`, x, `</li>`);", &[]);
+    assert!(!optimised.contains("$__ssrTpl("));
+    assert!(optimised.contains("[`<li>`, x, `</li>`]"));
+}
+
+#[test]
+fn strips_nested_ssr_tpl_via_fixpoint() {
+    let (optimised, _) = optimise(
+        "const _r = $__ssrTpl(`<ul>`, $__ssrTpl(`<li>`, y), `</ul>`);",
+        &[],
+    );
+    assert!(!optimised.contains("$__ssrTpl("));
+    assert!(optimised.contains("[`<ul>`, [`<li>`, y], `</ul>`]"));
+}
+
+#[test]
 fn folds_ssr_text_literal_and_escapes() {
     let (optimised, _) = optimise("const _r = $__ssrText('a<b');", &[]);
     assert!(!optimised.contains("$__ssrText("));

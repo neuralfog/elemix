@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MatchApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__event, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<div class="card failed">✕ <!----></div>');
 const _h1 = $__templateEl('<div class="card ready">✓ Deployed to <!----></div>');
 const _h2 = $__templateEl('<div class="card loading"><span class="spinner"></span>Working <!---->%</div>');
@@ -88,15 +88,15 @@ const _b2 = $__bounds(root, 4, 0);
 const _a3 = $__reanchor(_n0, _b1[0], _b1[1]);
 const _a4 = $__reanchor(root, _b2[0], _b2[1]);
 const _n5 = root.firstChild!.firstChild!;
-const _n6 = root.firstChild!.firstChild!.nextSibling!;
-const _n7 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n8 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n9 = root.firstChild!.nextSibling!.nextSibling!;
-$__event(_n5, 'click', this.idle);
-$__event(_n6, 'click', this.loading);
-$__event(_n7, 'click', this.ready);
-$__event(_n8, 'click', this.failed);
-$__event(_n9, 'click', this.toggleMode);
+const _n6 = _n5.nextSibling!;
+const _n7 = _n6.nextSibling!;
+const _n8 = _n7.nextSibling!;
+const _n9 = _n0.nextSibling!;
+(_n5 as HTMLElement).onclick = (this.idle);
+(_n6 as HTMLElement).onclick = (this.loading);
+(_n7 as HTMLElement).onclick = (this.ready);
+(_n8 as HTMLElement).onclick = (this.failed);
+(_n9 as HTMLElement).onclick = (this.toggleMode);
 $__fresh(() => {
 $__child(_a3, () => ((this.state.load)['kind'] === 'idle' ? (() =>
                     (() => {
@@ -109,7 +109,7 @@ const _n17 = _r16.firstChild!.nextSibling!.nextSibling!;
 const _x18 = document.createTextNode('');
 _n17.replaceWith(_x18);
 $__effect(() => {
-$__setText(_x18, (m.pct));
+$__setText(_x18, m.pct);
 });
 return _r16;
 })())(this.state.load) : (this.state.load)['kind'] === 'ready' ? ((m) =>
@@ -119,7 +119,7 @@ const _n14 = _r13.firstChild!.nextSibling!;
 const _x15 = document.createTextNode('');
 _n14.replaceWith(_x15);
 $__effect(() => {
-$__setText(_x15, (m.url));
+$__setText(_x15, m.url);
 });
 return _r13;
 })())(this.state.load) : (this.state.load)['kind'] === 'failed' ? ((m) => (() => {
@@ -128,7 +128,7 @@ const _n11 = _r10.firstChild!.nextSibling!;
 const _x12 = document.createTextNode('');
 _n11.replaceWith(_x12);
 $__effect(() => {
-$__setText(_x12, (m.error));
+$__setText(_x12, m.error);
 });
 return _r10;
 })())(this.state.load) : ''));
@@ -170,58 +170,60 @@ return _r20;
 
     $$__view(): DocumentFragment {
 const _r0 = $__clone(_t0);
-const _n1 = _r0.firstChild!.firstChild!;
-const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
-const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
-const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
-const _n5 = _r0.firstChild!.nextSibling!.firstChild!;
-const _n6 = _r0.firstChild!.nextSibling!.nextSibling!;
-const _n7 = _r0.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
-$__event(_n1, 'click', this.idle);
-$__event(_n2, 'click', this.loading);
-$__event(_n3, 'click', this.ready);
-$__event(_n4, 'click', this.failed);
-$__child(_n5, () => ((this.state.load)['kind'] === 'idle' ? (() =>
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n3.nextSibling!;
+const _n5 = _n4.nextSibling!;
+const _n6 = _n5.nextSibling!;
+const _n7 = _n2.firstChild!;
+const _n8 = _n2.nextSibling!;
+const _n9 = _n8.nextSibling!.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.idle);
+(_n4 as HTMLElement).onclick = (this.loading);
+(_n5 as HTMLElement).onclick = (this.ready);
+(_n6 as HTMLElement).onclick = (this.failed);
+$__child(_n7, () => ((this.state.load)['kind'] === 'idle' ? (() =>
                     (() => {
-const _r17 = $__cloneEl(_t4);
-return _r17;
+const _r19 = $__cloneEl(_t4);
+return _r19;
 })())(this.state.load) : (this.state.load)['kind'] === 'loading' ? ((m) =>
                     (() => {
-const _r14 = $__cloneEl(_t3);
-const _n15 = _r14.firstChild!.nextSibling!.nextSibling!;
-const _x16 = document.createTextNode('');
-_n15.replaceWith(_x16);
+const _r16 = $__cloneEl(_t3);
+const _n17 = _r16.firstChild!.nextSibling!.nextSibling!;
+const _x18 = document.createTextNode('');
+_n17.replaceWith(_x18);
 $__effect(() => {
-$__setText(_x16, (m.pct));
+$__setText(_x18, m.pct);
 });
-return _r14;
+return _r16;
 })())(this.state.load) : (this.state.load)['kind'] === 'ready' ? ((m) =>
                     (() => {
-const _r11 = $__cloneEl(_t2);
-const _n12 = _r11.firstChild!.nextSibling!;
-const _x13 = document.createTextNode('');
-_n12.replaceWith(_x13);
+const _r13 = $__cloneEl(_t2);
+const _n14 = _r13.firstChild!.nextSibling!;
+const _x15 = document.createTextNode('');
+_n14.replaceWith(_x15);
 $__effect(() => {
-$__setText(_x13, (m.url));
+$__setText(_x15, m.url);
 });
-return _r11;
+return _r13;
 })())(this.state.load) : (this.state.load)['kind'] === 'failed' ? ((m) => (() => {
-const _r8 = $__cloneEl(_t1);
-const _n9 = _r8.firstChild!.nextSibling!;
-const _x10 = document.createTextNode('');
-_n9.replaceWith(_x10);
+const _r10 = $__cloneEl(_t1);
+const _n11 = _r10.firstChild!.nextSibling!;
+const _x12 = document.createTextNode('');
+_n11.replaceWith(_x12);
 $__effect(() => {
-$__setText(_x10, (m.error));
+$__setText(_x12, m.error);
 });
-return _r8;
+return _r10;
 })())(this.state.load) : ''));
-$__event(_n6, 'click', this.toggleMode);
-$__child(_n7, () => (this.state.mode === 'compact' ? (() => {
-const _r19 = $__cloneEl(_t6);
-return _r19;
+(_n8 as HTMLElement).onclick = (this.toggleMode);
+$__child(_n9, () => (this.state.mode === 'compact' ? (() => {
+const _r21 = $__cloneEl(_t6);
+return _r21;
 })() : this.state.mode === 'full' ? (() => {
-const _r18 = $__cloneEl(_t5);
-return _r18;
+const _r20 = $__cloneEl(_t5);
+return _r20;
 })() : ''));
 return _r0;
 }
