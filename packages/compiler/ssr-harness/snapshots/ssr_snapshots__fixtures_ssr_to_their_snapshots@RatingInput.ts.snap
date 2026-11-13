@@ -35,10 +35,10 @@ export class RatingInput extends Component {
     static formAssociated = true;
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'rating-input'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="stars">`, ($__ssrRepeat(
-            [1, 2, 3, 4, 5],
-            (n) => $__ssrTpl(`<button type="button"${$__ssrClass({ star: true, on: n <= this.state.value })}>★</button>`),
-            (n) => String(n),
-        )), `</div></template></${this.$$__tag ?? 'rating-input'}>`];
+                [1, 2, 3, 4, 5],
+                (n) => $__ssrTpl(`<button type="button"${$__ssrClass({ star: true, on: n <= this.state.value })}>★</button>`),
+                (n) => String(n),
+            )), `</div></template></${this.$$__tag ?? 'rating-input'}>`];
 }
 
 

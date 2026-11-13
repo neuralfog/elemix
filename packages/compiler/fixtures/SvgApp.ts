@@ -64,7 +64,12 @@ export class SvgApp extends Component {
 
     template = (): Template => tpl`
         <svg viewBox="0 0 200 200" width="200" height="200">
-            <circle cx=${this.state.cx} cy=${this.state.cy} r=${this.state.r} fill=${this.state.color} />
+            <circle
+                cx=${this.state.cx}
+                cy=${this.state.cy}
+                r=${this.state.r}
+                fill=${this.state.color}
+            />
         </svg>
         <button @click=${this.move}>move</button>
         <button @click=${this.grow}>grow</button>

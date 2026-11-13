@@ -26,8 +26,10 @@ export class UserCard extends Component<Props> {
     // #styles
     styles = css;
 
-    template = (): Template => tpl`<div class="card">
-        <span class="name">${this.props.name}</span>
-        <span class="role">${this.props.role}</span>
-    </div>`;
+    template = (): Template => tpl`
+        <div class="card">
+            <span class="name">${this.props.name}</span>
+            <span class="role">${this.props.role}</span>
+        </div>
+    `;
 }

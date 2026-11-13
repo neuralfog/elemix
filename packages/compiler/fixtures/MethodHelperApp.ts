@@ -25,7 +25,13 @@ export class MethodHelperApp extends Component {
                 <div class="row">${this.chip('a')}${this.chip('b')}</div>
                 ${
                     this.state.open
-                        ? tpl`<div class="open">${this.chip('open')}<span class="count">${this.state.count}</span></div>`
+                        ? tpl`
+                            <div class="open">
+                                ${this.chip('open')}<span
+                                    class="count"
+                                >${this.state.count}</span>
+                            </div>
+                        `
                         : tpl`<div class="closed">closed</div>`
                 }
                 <button class="toggle" @click=${this.toggle}>toggle</button>

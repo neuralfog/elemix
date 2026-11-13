@@ -26,8 +26,8 @@ export class PropsApp extends Component {
 
     template = (): Template => tpl`
         <div class="parent">
-            count <span class="pcount">${this.state.count}</span>
-            tags <span class="ptags">${this.state.tags.join(',')}</span>
+            count <span class="pcount">${this.state.count}</span> tags
+            <span class="ptags">${this.state.tags.join(',')}</span>
         </div>
         <props-child
             :label=${'hello'}

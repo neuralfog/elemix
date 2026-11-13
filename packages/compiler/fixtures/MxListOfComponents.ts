@@ -46,13 +46,21 @@ export class MxListOfComponents extends Component {
                 ${repeat(
                     this.state.items,
                     (it) =>
-                        tpl`<mx-counter-child data-id=${it.id} :label=${it.label}></mx-counter-child>`,
+                        tpl`
+                            <mx-counter-child
+                                data-id=${it.id}
+                                :label=${it.label}
+                            ></mx-counter-child>
+                        `,
                     (it) => it.id,
                 )}
             </div>
             <button id="reverse" @click=${this.reverse}>reverse</button>
             <button id="swap" @click=${this.swapEnds}>swap</button>
-            <button id="remove-middle" @click=${this.removeMiddle}>remove</button>
+            <button
+                id="remove-middle"
+                @click=${this.removeMiddle}
+            >remove</button>
             <button id="clear" @click=${this.clear}>clear</button>
         </div>
     `;

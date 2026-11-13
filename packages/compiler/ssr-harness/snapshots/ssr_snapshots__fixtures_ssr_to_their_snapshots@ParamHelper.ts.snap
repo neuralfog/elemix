@@ -28,10 +28,10 @@ const css = `
 export class RowList extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'row-list'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div><button class="add">add row</button><ul class="list">`, ($__ssrRepeat(
-                    this.state.rows,
-                    (r) => $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', r.id)}>`, $__ssrText(r.name), `</li>`),
-                    (r) => r.id,
-                )), `</ul></div></template></${this.$$__tag ?? 'row-list'}>`];
+                        this.state.rows,
+                        (r) => $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', r.id)}>`, $__ssrText(r.name), `</li>`),
+                        (r) => r.id,
+                    )), `</ul></div></template></${this.$$__tag ?? 'row-list'}>`];
 }
 
     state = $__state<{ rows: Row[] }>({

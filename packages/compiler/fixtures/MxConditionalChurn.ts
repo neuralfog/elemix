@@ -25,13 +25,11 @@ export class MxConditionalChurn extends Component {
             <button id="toggle-empty" @click=${this.toggleEmpty}>empty</button>
             <button id="toggle-null" @click=${this.toggleNull}>null</button>
             <button id="tick" @click=${this.bump}>tick</button>
-            <span class="count">${this.state.tick}</span>
-            ${
+            <span class="count">${this.state.tick}</span> ${
                 this.state.showEmpty
                     ? tpl`<span class="e-on">e${this.state.tick}</span>`
                     : ''
-            }
-            ${
+            } ${
                 this.state.showNull
                     ? tpl`<span class="n-on">n${this.state.tick}</span>`
                     : null

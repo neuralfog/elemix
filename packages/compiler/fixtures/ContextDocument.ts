@@ -12,14 +12,12 @@ export class ContextDocument extends Component {
             </head>
             <body>
                 <nav>
-                    <nav-link route="/context/alpha?q=one"
-                        ><a id="to-alpha" href="/context/alpha?q=one"
-                            >Alpha</a
-                        ></nav-link
-                    >
-                    <nav-link route="/context/beta?q=two"
-                        ><a id="to-beta" href="/context/beta?q=two">Beta</a></nav-link
-                    >
+                    <nav-link route="/context/alpha?q=one">
+                        <a id="to-alpha" href="/context/alpha?q=one">Alpha</a>
+                    </nav-link>
+                    <nav-link route="/context/beta?q=two">
+                        <a id="to-beta" href="/context/beta?q=two">Beta</a>
+                    </nav-link>
                 </nav>
                 <slot></slot>
             </body>

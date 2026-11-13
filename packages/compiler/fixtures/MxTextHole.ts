@@ -35,9 +35,7 @@ export class MxTextHole extends Component {
     template = (): Template => tpl`
         <div class="wrap">
             <section class="run">
-                <span class="start">[</span>
-                ${this.state.a}
-                ${this.state.b}
+                <span class="start">[</span> ${this.state.a} ${this.state.b}
                 <span class="end">]</span>
             </section>
             <button id="a-null" @click=${this.aNull}>a-null</button>

@@ -58,9 +58,11 @@ export class StepperWidget extends Component {
         this.state.count++;
     };
 
-    template = (): Template => tpl`<div class="stepper">
-        <button @click=${this.dec}>−</button>
-        <span class="count">${this.state.count}</span>
-        <button @click=${this.inc}>+</button>
-    </div>`;
+    template = (): Template => tpl`
+        <div class="stepper">
+            <button @click=${this.dec}>−</button>
+            <span class="count">${this.state.count}</span>
+            <button @click=${this.inc}>+</button>
+        </div>
+    `;
 }

@@ -22,8 +22,18 @@ export class MxComponentProp extends Component {
         <div class="wrap">
             <section class="host">
                 ${this.state.which === 'a'
-                    ? tpl`<mx-counter-child class="slot-a" :label=${this.state.label}></mx-counter-child>`
-                    : tpl`<mx-counter-child class="slot-b" :label=${`b-${this.state.label}`}></mx-counter-child>`}
+                ? tpl`
+                    <mx-counter-child
+                        class="slot-a"
+                        :label=${this.state.label}
+                    ></mx-counter-child>
+                `
+                : tpl`
+                    <mx-counter-child
+                        class="slot-b"
+                        :label=${`b-${this.state.label}`}
+                    ></mx-counter-child>
+                `}
             </section>
             <button id="rename" @click=${this.rename}>rename</button>
             <button id="swap" @click=${this.swap}>swap</button>

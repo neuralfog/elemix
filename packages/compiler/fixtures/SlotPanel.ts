@@ -19,5 +19,9 @@ export class SlotPanel extends Component {
     // #styles
     styles = css;
 
-    template = (): Template => tpl`<div class="panel"><slot></slot></div>`;
+    template = (): Template => tpl`
+        <div class="panel">
+            <slot></slot>
+        </div>
+    `;
 }

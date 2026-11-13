@@ -47,17 +47,31 @@ export class MxDeepNest extends Component {
         <div class="wrap">
             <section class="host">
                 ${this.state.show
-                    ? tpl`<ul class="list">${repeat(
-                          this.state.items,
-                          (it) => tpl`<li class="row" data-id=${it.id}>
-                              <mx-counter-child :label=${it.label}></mx-counter-child>
-                              ${it.flag ? tpl`<em class="x">${it.x}</em>` : ''}
-                              <button class="flag" @click=${() => this.toggleFlag(it.id)}>f</button>
-                              <button class="x-bump" @click=${() => this.bumpX(it.id)}>x</button>
-                          </li>`,
-                          (it) => it.id,
-                      )}</ul>`
-                    : ''}
+                ? tpl`
+                    <ul class="list">
+                        ${repeat(
+                            this.state.items,
+                            (it) => tpl`
+                                <li class="row" data-id=${it.id}>
+                                    <mx-counter-child
+                                        :label=${it.label}
+                                    ></mx-counter-child>
+                                    ${it.flag ? tpl`<em class="x">${it.x}</em>` : ''}
+                                    <button
+                                        class="flag"
+                                        @click=${() => this.toggleFlag(it.id)}
+                                    >f</button>
+                                    <button
+                                        class="x-bump"
+                                        @click=${() => this.bumpX(it.id)}
+                                    >x</button>
+                                </li>
+                            `,
+                            (it) => it.id,
+                        )}
+                    </ul>
+                `
+                : ''}
             </section>
             <button id="toggle-show" @click=${this.toggleShow}>show</button>
             <button id="add" @click=${this.addOne}>add</button>

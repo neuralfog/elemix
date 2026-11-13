@@ -15,8 +15,7 @@ export class MxLiveChildTeardown extends Component {
 
     template = (): Template => tpl`
         <div class="host">
-            <button id="toggle-child" @click=${this.toggle}>toggle</button>
-            ${
+            <button id="toggle-child" @click=${this.toggle}>toggle</button> ${
                 this.state.mounted
                     ? tpl`<mx-counter-child :label=${'live'}></mx-counter-child>`
                     : tpl`<span class="gone">gone</span>`

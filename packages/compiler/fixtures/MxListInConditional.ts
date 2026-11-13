@@ -31,13 +31,21 @@ export class MxListInConditional extends Component {
         <div class="wrap">
             <section class="host">
                 ${this.state.show
-                    ? tpl`<ul class="list">${repeat(
-                          this.state.items,
-                          (it) =>
-                              tpl`<li class="row" data-id=${it.id}>${it.label}</li>`,
-                          (it) => it.id,
-                      )}</ul>`
-                    : ''}
+                ? tpl`
+                    <ul class="list">
+                        ${repeat(
+                            this.state.items,
+                            (it) =>
+                                tpl`
+                                    <li class="row" data-id=${it.id}>
+                                        ${it.label}
+                                    </li>
+                                `,
+                            (it) => it.id,
+                        )}
+                    </ul>
+                `
+                : ''}
             </section>
             <button id="toggle" @click=${this.toggle}>toggle</button>
             <button id="add" @click=${this.addOne}>add</button>

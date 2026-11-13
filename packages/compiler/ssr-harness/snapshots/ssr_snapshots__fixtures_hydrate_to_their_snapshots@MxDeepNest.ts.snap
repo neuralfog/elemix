@@ -34,7 +34,7 @@ $__event(_n4, 'click', this.addOne);
 $__event(_n5, 'click', this.reverse);
 $__fresh(() => {
 $__child(_a2, () => (this.state.show
-                    ? (() => {
+                ? (() => {
 const _r6 = $__cloneEl(_h0);
 const _n7 = _r6.firstChild!;
 $__list(_n7, () => (this.state.items), (it) => it.id, (it) => {
@@ -61,7 +61,7 @@ return _r8;
 });
 return _r6;
 })()
-                    : ''));
+                : ''));
 });
 }
 
@@ -105,7 +105,7 @@ const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
 const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
 $__child(_n1, () => (this.state.show
-                    ? (() => {
+                ? (() => {
 const _r5 = $__cloneEl(_t1);
 const _n6 = _r5.firstChild!;
 $__list(_n6, () => (this.state.items), (it) => it.id, (it) => {
@@ -132,7 +132,7 @@ return _r7;
 });
 return _r5;
 })()
-                    : ''));
+                : ''));
 $__event(_n2, 'click', this.toggleShow);
 $__event(_n3, 'click', this.addOne);
 $__event(_n4, 'click', this.reverse);

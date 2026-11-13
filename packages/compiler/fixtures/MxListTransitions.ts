@@ -67,7 +67,10 @@ export class MxListTransitions extends Component {
             <button id="add" @click=${this.addOne}>add</button>
             <button id="reverse" @click=${this.reverse}>reverse</button>
             <button id="swap" @click=${this.swapEnds}>swap</button>
-            <button id="remove-middle" @click=${this.removeMiddle}>remove</button>
+            <button
+                id="remove-middle"
+                @click=${this.removeMiddle}
+            >remove</button>
             <button id="rebuild" @click=${this.rebuild}>rebuild</button>
         </div>
     `;

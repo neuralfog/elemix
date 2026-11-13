@@ -18,7 +18,10 @@ export class MultiRootApp extends Component {
                 ${
                     this.state.count < 0
                         ? tpl`<div class="empty">empty</div>`
-                        : tpl`<div class="a">a${this.state.count}</div><div class="b">b</div>`
+                        : tpl`
+                            <div class="a">a${this.state.count}</div>
+                            <div class="b">b</div>
+                        `
                 }
             </div>
             <button class="inc" @click=${this.inc}>+1</button>

@@ -16,7 +16,11 @@ export class MxHoleInHole extends Component {
 
     private get outerTpl(): Template | null {
         return this.state.outer
-            ? tpl`<div class="outer"><span class="o-label">o</span>${this.innerTpl}</div>`
+            ? tpl`
+                <div class="outer">
+                    <span class="o-label">o</span>${this.innerTpl}
+                </div>
+            `
             : null;
     }
 

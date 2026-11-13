@@ -20,7 +20,7 @@ PlainNote.$$__propSafe = true;
 
 export class TitledNote extends Component {
 $$__ssr(): unknown[] {
-return [`<${this.$$__tag ?? 'titled-note'}><template shadowrootmode="open" shadowrootserializable=""><div class="card">`, ($__ssrTpl(`<h2 class="heading">Title</h2>`)), `<p class="body">body</p></div></template></${this.$$__tag ?? 'titled-note'}>`];
+return [`<${this.$$__tag ?? 'titled-note'}><template shadowrootmode="open" shadowrootserializable=""><div class="card">`, ($__ssrTpl(`<h2 class="heading">Title</h2>`)), ` <p class="body">body</p></div></template></${this.$$__tag ?? 'titled-note'}>`];
 }
 
     

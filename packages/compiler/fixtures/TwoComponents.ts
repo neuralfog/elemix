@@ -20,5 +20,10 @@ export class SecondWidget extends Component {
         this.state.label = this.state.label === 'hi' ? 'bye' : 'hi';
     };
     template = (): Template =>
-        tpl`<button class="second" @click=${this.flip}>${this.state.label}</button>`;
+        tpl`
+            <button
+                class="second"
+                @click=${this.flip}
+            >${this.state.label}</button>
+        `;
 }

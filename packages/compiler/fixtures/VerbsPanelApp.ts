@@ -22,13 +22,11 @@ export class VerbsPanelApp extends Component {
             <h1>Panel</h1>
             <button class="toggle" @click=${this.toggle}>toggle</button>
             ${this.state.open ? tpl`<p class="busy">busy</p>` : ''}
-            ${this.cell('POST')}
-            ${this.row('GET')}
+            ${this.cell('POST')} ${this.row('GET')}
             <h2>Verbs</h2>
             <p>Status (${this.state.open ? 'open' : 'none'}).</p>
             <button>DO</button>
-            ${this.cell('PUT')}
-            ${this.row('PATCH')}
+            ${this.cell('PUT')} ${this.row('PATCH')}
         </main>
     `;
 }

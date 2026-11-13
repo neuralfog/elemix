@@ -41,15 +41,19 @@ export class RatingInput extends Component {
         this.internals.setFormValue(String(n));
     };
 
-    template = (): Template => tpl`<div class="stars">
-        ${repeat(
-            [1, 2, 3, 4, 5],
-            (n) => tpl`<button
-                type="button"
-                class=${{ star: true, on: n <= this.state.value }}
-                @click=${() => this.set(n)}
-            >★</button>`,
-            (n) => String(n),
-        )}
-    </div>`;
+    template = (): Template => tpl`
+        <div class="stars">
+            ${repeat(
+                [1, 2, 3, 4, 5],
+                (n) => tpl`
+                    <button
+                        type="button"
+                        class=${{ star: true, on: n <= this.state.value }}
+                        @click=${() => this.set(n)}
+                    >★</button>
+                `,
+                (n) => String(n),
+            )}
+        </div>
+    `;
 }

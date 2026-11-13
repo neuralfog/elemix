@@ -14,8 +14,7 @@ export class NullGuardApp extends Component {
 
     template = (): Template => tpl`
         <main>
-            <button id="toggle" @click=${this.toggle}>toggle</button>
-            ${
+            <button id="toggle" @click=${this.toggle}>toggle</button> ${
                 this.model.row
                     ? tpl`<p class="val">${this.model.row.id}</p>`
                     : tpl`<p class="empty">empty</p>`

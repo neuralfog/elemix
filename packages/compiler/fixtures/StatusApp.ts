@@ -114,7 +114,11 @@ export class StatusApp extends Component {
                 [
                     this.state.status === 'loading',
                     () =>
-                        tpl`<div class="card loading"><span class="spinner"></span>Working…</div>`,
+                        tpl`
+                            <div class="card loading">
+                                <span class="spinner"></span>Working…
+                            </div>
+                        `,
                 ],
                 [
                     this.state.status === 'ready',

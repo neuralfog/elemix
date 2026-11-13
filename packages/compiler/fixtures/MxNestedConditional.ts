@@ -22,14 +22,15 @@ export class MxNestedConditional extends Component {
             <button id="toggle-inner" @click=${this.toggleInner}>inner</button>
             ${
                 this.state.outer
-                    ? tpl`<section class="outer-on">
-                          <span class="outer-label">outer</span>
-                          ${
-                              this.state.inner
-                                  ? tpl`<span class="inner-on">inner-on</span>`
-                                  : tpl`<span class="inner-off">inner-off</span>`
-                          }
-                      </section>`
+                    ? tpl`
+                        <section class="outer-on">
+                            <span class="outer-label">outer</span> ${
+                                this.state.inner
+                                    ? tpl`<span class="inner-on">inner-on</span>`
+                                    : tpl`<span class="inner-off">inner-off</span>`
+                            }
+                        </section>
+                    `
                     : tpl`<p class="outer-off">outer-off</p>`
             }
         </div>

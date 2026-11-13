@@ -99,19 +99,22 @@ export class NestedApp extends Component {
         <div class="tree">
             ${repeat(
                 this.state.categories,
-                (category) => tpl`<div class="category">
-                    <div class="head">
-                        <strong>${category.name}</strong>
-                        <button @click=${() => this.addItem(category)}>+ item</button>
+                (category) => tpl`
+                    <div class="category">
+                        <div class="head">
+                            <strong>${category.name}</strong>
+                            <button @click=${() => this.addItem(category)}>+
+                            item</button>
+                        </div>
+                        <ul>
+                            ${repeat(
+                                category.items,
+                                (item) => tpl`<li>${item.name}</li>`,
+                                (item) => item.id,
+                            )}
+                        </ul>
                     </div>
-                    <ul>
-                        ${repeat(
-                            category.items,
-                            (item) => tpl`<li>${item.name}</li>`,
-                            (item) => item.id,
-                        )}
-                    </ul>
-                </div>`,
+                `,
                 (category) => category.id,
             )}
         </div>

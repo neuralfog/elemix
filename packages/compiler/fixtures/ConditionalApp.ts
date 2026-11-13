@@ -92,18 +92,26 @@ export class ConditionalApp extends Component {
         <div class="panel">
             ${
                 this.state.loggedIn
-                    ? tpl`<div class="card welcome">
-                          <strong>Welcome back! 🎉</strong>
-                          <span>You are signed in.</span>
-                      </div>`
-                    : tpl`<div class="card guest">
-                          <strong>You are signed out</strong>
-                          <span>Sign in to see your dashboard.</span>
-                      </div>`
-            }
-            ${
+                    ? tpl`
+                        <div class="card welcome">
+                            <strong>Welcome back! 🎉</strong>
+                            <span>You are signed in.</span>
+                        </div>
+                    `
+                    : tpl`
+                        <div class="card guest">
+                            <strong>You are signed out</strong>
+                            <span>Sign in to see your dashboard.</span>
+                        </div>
+                    `
+            } ${
                 this.state.showTip
-                    ? tpl`<div class="tip">💡 Toggle the buttons to watch each branch mount and unmount.</div>`
+                    ? tpl`
+                        <div class="tip">
+                            💡 Toggle the buttons to watch each branch mount and
+                            unmount.
+                        </div>
+                    `
                     : ''
             }
         </div>

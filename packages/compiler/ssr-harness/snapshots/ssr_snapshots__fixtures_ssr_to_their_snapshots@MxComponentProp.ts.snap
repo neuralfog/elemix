@@ -14,8 +14,8 @@ type State = { label: string; which: 'a' | 'b' };
 export class MxComponentProp extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'mx-component-prop'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap"><section class="host">`, (this.state.which === 'a'
-                    ? $__ssrTpl($__ssrChild('mx-counter-child', {label: (this.state.label)}, undefined, ` class="slot-a"`))
-                    : $__ssrTpl($__ssrChild('mx-counter-child', {label: (`b-${this.state.label}`)}, undefined, ` class="slot-b"`))), `</section><button id="rename">rename</button><button id="swap">swap</button></div></template></${this.$$__tag ?? 'mx-component-prop'}>`];
+                ? $__ssrTpl($__ssrChild('mx-counter-child', {label: (this.state.label)}, undefined, ` class="slot-a"`))
+                : $__ssrTpl($__ssrChild('mx-counter-child', {label: (`b-${this.state.label}`)}, undefined, ` class="slot-b"`))), `</section><button id="rename">rename</button><button id="swap">swap</button></div></template></${this.$$__tag ?? 'mx-component-prop'}>`];
 }
 
     state = $__state<State>({ label: 'p1', which: 'a' });

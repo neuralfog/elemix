@@ -30,13 +30,16 @@ export class MxConditionalInRow extends Component {
             <ul class="list">
                 ${repeat(
                     this.state.items,
-                    (it) => tpl`<li class="row" data-id=${it.id}>
-                        <span class="lbl">${it.label}</span>
-                        ${it.open
+                    (it) => tpl`
+                        <li class="row" data-id=${it.id}>
+                            <span class="lbl">${it.label}</span> ${it.open
                             ? tpl`<span class="detail">${it.detail}</span>`
-                            : ''}
-                        <button class="row-toggle" @click=${() => this.toggleRow(it.id)}>t</button>
-                    </li>`,
+                            : ''} <button
+                                class="row-toggle"
+                                @click=${() => this.toggleRow(it.id)}
+                            >t</button>
+                        </li>
+                    `,
                     (it) => it.id,
                 )}
             </ul>

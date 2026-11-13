@@ -109,7 +109,10 @@ export class TodoApp extends Component {
                 (todo) => tpl`
                     <li>
                         <span>${todo.text}</span>
-                        <button class="remove" @click=${() => this.removeItem(todo.id)}>×</button>
+                        <button
+                            class="remove"
+                            @click=${() => this.removeItem(todo.id)}
+                        >×</button>
                     </li>
                 `,
                 (todo) => todo.id,

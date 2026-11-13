@@ -25,5 +25,9 @@ export class SubmitButton extends Component {
     };
 
     template = (): Template =>
-        tpl`<button type="button" @click=${this.submit}><slot></slot></button>`;
+        tpl`
+            <button type="button" @click=${this.submit}>
+                <slot></slot>
+            </button>
+        `;
 }

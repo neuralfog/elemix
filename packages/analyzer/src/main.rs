@@ -25,6 +25,9 @@ struct Cli {
     #[arg(long, default_value = ".")]
     root: String,
 
+    #[arg(long = "ignore", value_name = "GLOB", num_args = 1..)]
+    ignore: Vec<String>,
+
     #[arg(long)]
     lsp: bool,
 
@@ -60,8 +63,14 @@ fn main() -> ExitCode {
         }
     };
 
+    let ignores: Vec<glob::Pattern> = cli
+        .ignore
+        .iter()
+        .filter_map(|p| glob::Pattern::new(p).ok())
+        .collect();
+
     let mut files: Vec<(PathBuf, String)> = Vec::new();
-    for path in collect_files(&cli.dirs) {
+    for path in collect_files(&cli.dirs, &ignores) {
         let Ok(canon) = std::fs::canonicalize(&path) else {
             continue;
         };
@@ -116,7 +125,7 @@ fn report_skipped(skipped: &[Skipped]) {
     }
 }
 
-fn collect_files(patterns: &[String]) -> Vec<PathBuf> {
+fn collect_files(patterns: &[String], ignores: &[glob::Pattern]) -> Vec<PathBuf> {
     let mut files = Vec::new();
     for pattern in patterns {
         let glob_pattern = if Path::new(pattern).is_dir() {
@@ -128,7 +137,9 @@ fn collect_files(patterns: &[String]) -> Vec<PathBuf> {
             continue;
         };
         for entry in entries.flatten() {
-            if entry.extension().is_some_and(|e| e == "ts") {
+            if entry.extension().is_some_and(|e| e == "ts")
+                && !ignores.iter().any(|ig| ig.matches_path(&entry))
+            {
                 files.push(entry);
             }
         }

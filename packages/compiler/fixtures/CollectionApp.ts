@@ -157,7 +157,10 @@ export class CollectionApp extends Component {
             <button class="bump-alice" @click=${this.bumpAlice}>bump</button>
             <button class="set-bob" @click=${this.setBob}>bob</button>
             <button class="del-alice" @click=${this.deleteAlice}>del alice</button>
-            <button class="clear-scores" @click=${this.clearScores}>wipe</button>
+            <button
+                class="clear-scores"
+                @click=${this.clearScores}
+            >wipe</button>
             <button class="add-seen" @click=${this.addSeen}>add seen</button>
             <button class="del-seen" @click=${this.deleteSeen}>del seen</button>
             <button class="set-meta" @click=${this.setMeta}>set meta</button>
@@ -174,7 +177,11 @@ export class CollectionApp extends Component {
             ${repeat(
                 [...this.state.scores.keys()],
                 (name) =>
-                    tpl`<li class="score">${name}: ${this.state.scores.get(name)}</li>`,
+                    tpl`
+                        <li class="score">
+                            ${name}: ${this.state.scores.get(name)}
+                        </li>
+                    `,
                 (name) => name,
             )}
         </ul>

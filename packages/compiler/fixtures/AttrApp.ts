@@ -86,10 +86,18 @@ export class AttrApp extends Component {
     };
 
     template = (): Template => tpl`
-        <a class="link" href="/users/${this.state.userId}" title=${this.state.label}>
+        <a
+            class="link"
+            href="/users/${this.state.userId}"
+            title=${this.state.label}
+        >
             Open profile #${this.state.userId}
         </a>
-        <span class="badge" data-count=${this.state.userId} aria-label=${this.state.label}>
+        <span
+            class="badge"
+            data-count=${this.state.userId}
+            aria-label=${this.state.label}
+        >
             ${this.state.label}
         </span>
         <div class="secret" hidden=${this.state.collapsed}>Secret content</div>

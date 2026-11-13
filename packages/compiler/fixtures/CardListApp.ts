@@ -82,15 +82,25 @@ export class CardListApp extends Component {
     };
 
     template = (): Template => tpl`
-        <div class="bar"><button @click=${this.add}>Add user</button></div>
+        <div class="bar">
+            <button @click=${this.add}>Add user</button>
+        </div>
         <div class="list">
             ${repeat(
                 this.state.users,
-                (user) => tpl`<div class="row">
-                    <user-card :name=${user.name} :role=${user.role} />
-                    <button class="promote" @click=${() => this.promote(user.id)}>promote</button>
-                    <button class="drop" @click=${() => this.removeUser(user.id)}>×</button>
-                </div>`,
+                (user) => tpl`
+                    <div class="row">
+                        <user-card :name=${user.name} :role=${user.role} />
+                        <button
+                            class="promote"
+                            @click=${() => this.promote(user.id)}
+                        >promote</button>
+                        <button
+                            class="drop"
+                            @click=${() => this.removeUser(user.id)}
+                        >×</button>
+                    </div>
+                `,
                 (user) => user.id,
             )}
         </div>

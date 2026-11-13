@@ -13,5 +13,13 @@ export class SsrMixedLeaf extends Component {
     };
 
     template = (): Template =>
-        tpl`<div class="leaf">leaf <span class="ln">${this.state.n}</span><button class="lb" @click=${this.bump}>leaf+</button></div>`;
+        tpl`
+            <div class="leaf">
+                leaf
+                <span class="ln">${this.state.n}</span><button
+                    class="lb"
+                    @click=${this.bump}
+                >leaf+</button>
+            </div>
+        `;
 }

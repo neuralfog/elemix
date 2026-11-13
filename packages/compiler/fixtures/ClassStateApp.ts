@@ -103,7 +103,10 @@ export class ClassStateApp extends Component {
         <div class="controls">
             <button class="add" @click=${this.addCherry}>add</button>
             <button class="bump" @click=${this.bumpApple}>bump</button>
-            <button class="coupon-btn" @click=${this.applyCoupon}>coupon</button>
+            <button
+                class="coupon-btn"
+                @click=${this.applyCoupon}
+            >coupon</button>
             <button class="remove" @click=${this.removeBanana}>remove</button>
             <button class="clear" @click=${this.clearCart}>clear</button>
         </div>

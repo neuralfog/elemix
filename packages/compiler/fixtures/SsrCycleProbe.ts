@@ -27,5 +27,9 @@ export class SsrCycleProbe extends Component {
     }
 
     template = (): Template =>
-        tpl`<span class="status">${this.state.ready ? 'ready' : 'pending'}</span>`;
+        tpl`
+            <span
+                class="status"
+            >${this.state.ready ? 'ready' : 'pending'}</span>
+        `;
 }

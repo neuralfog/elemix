@@ -89,7 +89,9 @@ export class ActionsApp extends Component {
                                 class="err"
                                 data-field="${item.field}"
                                 data-code="${item.code}"
-                            >${item.message}</li>
+                            >
+                                ${item.message}
+                            </li>
                         `,
                         (item) => `${item.field}:${item.code}`,
                     )}
@@ -111,58 +113,77 @@ export class ActionsApp extends Component {
         <main>
             <section class="create">
                 <h2>create</h2>
-                <label>name <input id="f-name" type="text" ~model=${this.name} /></label>
-                <label>email <input id="f-email" type="text" ~model=${this.email} /></label>
-                <label>handle <input id="f-handle" type="text" ~model=${this.handle} /></label>
+                <label>name
+                <input id="f-name" type="text" ~model=${this.name} /></label>
+                <label>email
+                <input id="f-email" type="text" ~model=${this.email} /></label>
+                <label>handle
+                <input id="f-handle" type="text" ~model=${this.handle} /></label>
                 <label>age <input id="f-age" type="text" ~model=${this.age} /></label>
                 <button id="create" @click=${this.submitCreate}>create</button>
                 <span class="create-state">${this.stateOf(this.create)}</span>
                 ${this.create.loading ? tpl`<p class="create-loading">saving</p>` : ''}
                 ${
                     this.create.data
-                        ? tpl`<p class="create-data">${this.create.data.id} ${this.create.data.name} ${this.create.data.handle}</p>`
+                        ? tpl`
+                            <p class="create-data">
+                                ${this.create.data.id} ${this.create.data.name}
+                                ${this.create.data.handle}
+                            </p>
+                        `
                         : ''
-                }
-                ${this.errors('create', this.create)}
+                } ${this.errors('create', this.create)}
             </section>
-
             <section class="get">
                 <h2>get</h2>
                 <label>id <input id="f-id" type="text" ~model=${this.userId} /></label>
                 <button id="get" @click=${this.getById}>get</button>
                 ${
                     this.fetchUser.data
-                        ? tpl`<p class="get-data">${this.fetchUser.data.id} ${this.fetchUser.data.name} ${this.fetchUser.data.handle}</p>`
+                        ? tpl`
+                            <p class="get-data">
+                                ${this.fetchUser.data.id}
+                                ${this.fetchUser.data.name}
+                                ${this.fetchUser.data.handle}
+                            </p>
+                        `
                         : ''
-                }
-                ${this.errors('get', this.fetchUser)}
+                } ${this.errors('get', this.fetchUser)}
             </section>
-
             <section class="update">
                 <h2>update</h2>
                 <button id="update" @click=${this.submitUpdate}>update</button>
                 ${
                     this.saveUser.data
-                        ? tpl`<p class="update-data">${this.saveUser.data.id} ${this.saveUser.data.name}</p>`
+                        ? tpl`
+                            <p class="update-data">
+                                ${this.saveUser.data.id}
+                                ${this.saveUser.data.name}
+                            </p>
+                        `
                         : ''
-                }
-                ${this.errors('update', this.saveUser)}
+                } ${this.errors('update', this.saveUser)}
             </section>
-
             <section class="delete">
                 <h2>delete</h2>
                 <button id="delete" @click=${this.submitDelete}>delete</button>
                 ${
                     this.dropUser.data
-                        ? tpl`<p class="delete-data">${this.dropUser.data.id} ${this.dropUser.data.name}</p>`
+                        ? tpl`
+                            <p class="delete-data">
+                                ${this.dropUser.data.id}
+                                ${this.dropUser.data.name}
+                            </p>
+                        `
                         : ''
                 }
             </section>
-
             <section class="echo">
                 <h2>echo</h2>
-                <label>value <input id="f-echo-value" type="text" ~model=${this.echoValue} /></label>
-                <label>page <input id="f-echo-page" type="text" ~model=${this.echoPage} /></label>
+                <label>value
+                <input id="f-echo-value" type="text" ~model=${this.echoValue} /></label>
+                <label>page
+                <input id="f-echo-page" type="text" ~model=${this.echoPage} /></label>
                 <button id="echo" @click=${this.submitEcho}>echo</button>
                 <button id="echo-slow" @click=${this.echoSlow}>slow</button>
                 <button id="echo-fast" @click=${this.echoFast}>fast</button>
@@ -170,15 +191,24 @@ export class ActionsApp extends Component {
                 ${this.runEcho.loading ? tpl`<p class="echo-loading">loading</p>` : ''}
                 ${
                     this.runEcho.data
-                        ? tpl`<p class="echo-data">${this.runEcho.data.value} ${this.runEcho.data.page}</p>`
+                        ? tpl`
+                            <p class="echo-data">
+                                ${this.runEcho.data.value}
+                                ${this.runEcho.data.page}
+                            </p>
+                        `
                         : ''
                 }
             </section>
-
             <section class="conflict">
                 <h2>conflict</h2>
-                <button id="conflict" @click=${this.submitConflict}>conflict</button>
-                <span class="conflict-state">${this.stateOf(this.runConflict)}</span>
+                <button
+                    id="conflict"
+                    @click=${this.submitConflict}
+                >conflict</button>
+                <span
+                    class="conflict-state"
+                >${this.stateOf(this.runConflict)}</span>
                 ${this.errors('conflict', this.runConflict)}
             </section>
         </main>

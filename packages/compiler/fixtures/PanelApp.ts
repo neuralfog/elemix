@@ -78,8 +78,7 @@ export class PanelApp extends Component {
 
     template = (): Template => tpl`
         <div class="panel">
-            ${this.headerTemplate()}
-            ${this.statTemplate()}
+            ${this.headerTemplate()} ${this.statTemplate()}
             <button @click=${this.add}>add</button>
             <button @click=${this.rename}>rename</button>
         </div>

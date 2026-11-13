@@ -43,17 +43,17 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
 $__child(_n1, () => (this.hasSlot('header')
-                ? (() => {
+                    ? (() => {
 const _r3 = $__cloneEl(_t1);
 return _r3;
 })()
-                : ''));
+                    : ''));
 $__child(_n2, () => (this.hasSlot('footer')
-                ? (() => {
+                    ? (() => {
 const _r4 = $__cloneEl(_t2);
 return _r4;
 })()
-                : ''));
+                    : ''));
 return _r0;
 }
 }

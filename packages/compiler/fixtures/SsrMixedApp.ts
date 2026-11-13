@@ -15,5 +15,12 @@ export class SsrMixedApp extends Component {
     };
 
     template = (): Template =>
-        tpl`<div class="outer">outer <span class="on">${this.state.n}</span><button class="ob" @click=${this.bump}>outer+</button><ssr-mixed-client /></div>`;
+        tpl`
+            <div class="outer">
+                outer
+                <span class="on">${this.state.n}</span>
+                <button class="ob" @click=${this.bump}>outer+</button>
+                <ssr-mixed-client />
+            </div>
+        `;
 }

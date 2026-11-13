@@ -7,14 +7,16 @@
         "test": "playwright test",
         "test:headed": "playwright test --headed",
         "test:ui": "playwright test --ui",
-        "lint": "biome format && biome lint --error-on-warnings",
-        "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings"
+        "lint": "biome format && biome lint --error-on-warnings && etf --dirs ../fixtures --root .. && ea --dirs ../fixtures --root .. --ignore ../fixtures/ErrorApp.ts ../fixtures/FreeTemplate.ts ../fixtures/PrimitiveStoreError.ts ../fixtures/WarnApp.ts && dotnet format sharp/Harness.csproj --verify-no-changes",
+        "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings && etf --dirs ../fixtures --root .. --write && dotnet format sharp/Harness.csproj"
     },
     "dependencies": {
         "@neuralfog/elemix": "workspace:*"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.5",
+        "@neuralfog/elemix-analyzer": "workspace:*",
+        "@neuralfog/elemix-template-formatter": "workspace:*",
         "@neuralfog/ts-config": "0.1.2",
         "@playwright/test": "1.61.1",
         "@types/bun": "1.2.19",

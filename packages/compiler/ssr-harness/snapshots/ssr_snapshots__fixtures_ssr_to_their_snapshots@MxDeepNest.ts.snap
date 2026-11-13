@@ -15,12 +15,12 @@ type State = { show: boolean; items: Item[] };
 export class MxDeepNest extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'mx-deep-nest'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap"><section class="host">`, (this.state.show
-                    ? $__ssrTpl(`<ul class="list">`, ($__ssrRepeat(
-                          this.state.items,
-                          (it) => $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', it.id)}>`, $__ssrChild('mx-counter-child', {label: (it.label)}), ` `, (it.flag ? $__ssrTpl(`<em class="x">`, $__ssrText(it.x), `</em>`) : ''), ` <button class="flag">f</button><button class="x-bump">x</button></li>`),
-                          (it) => it.id,
-                      )), `</ul>`)
-                    : ''), `</section><button id="toggle-show">show</button><button id="add">add</button><button id="reverse">reverse</button></div></template></${this.$$__tag ?? 'mx-deep-nest'}>`];
+                ? $__ssrTpl(`<ul class="list">`, ($__ssrRepeat(
+                            this.state.items,
+                            (it) => $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', it.id)}>`, $__ssrChild('mx-counter-child', {label: (it.label)}), ` `, (it.flag ? $__ssrTpl(`<em class="x">`, $__ssrText(it.x), `</em>`) : ''), ` <button class="flag">f</button><button class="x-bump">x</button></li>`),
+                            (it) => it.id,
+                        )), `</ul>`)
+                : ''), `</section><button id="toggle-show">show</button><button id="add">add</button><button id="reverse">reverse</button></div></template></${this.$$__tag ?? 'mx-deep-nest'}>`];
 }
 
     state = $__state<State>({

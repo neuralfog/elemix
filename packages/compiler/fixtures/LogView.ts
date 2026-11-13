@@ -35,17 +35,25 @@ export class LogView extends Component {
     // #styles
     styles = css;
 
-    template = (): Template => tpl`<div class="log">
-        ${
-            log.entries.length
-                ? repeat(
-                      log.entries,
-                      (e) => tpl`<div class=${{ entry: true, [e.event]: true }}>
-                          <span class="n">${e.id}</span>${e.event}()
-                      </div>`,
-                      (e) => String(e.id),
-                  )
-                : tpl`<div class="empty">No events yet — mount the child.</div>`
-        }
-    </div>`;
+    template = (): Template => tpl`
+        <div class="log">
+            ${
+                log.entries.length
+                    ? repeat(
+                          log.entries,
+                          (e) => tpl`
+                              <div class=${{ entry: true, [e.event]: true }}>
+                                  <span class="n">${e.id}</span>${e.event}()
+                              </div>
+                          `,
+                          (e) => String(e.id),
+                      )
+                    : tpl`
+                        <div class="empty">
+                            No events yet — mount the child.
+                        </div>
+                    `
+            }
+        </div>
+    `;
 }

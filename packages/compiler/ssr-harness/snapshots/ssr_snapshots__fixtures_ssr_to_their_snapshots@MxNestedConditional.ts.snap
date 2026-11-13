@@ -13,8 +13,8 @@ export class MxNestedConditional extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'mx-nested-conditional'}><template shadowrootmode="open" shadowrootserializable=""><div class="nest"><button id="toggle-outer">outer</button><button id="toggle-inner">inner</button> `, (this.state.outer
                     ? $__ssrTpl(`<section class="outer-on"><span class="outer-label">outer</span> `, (this.state.inner
-                                  ? $__ssrTpl(`<span class="inner-on">inner-on</span>`)
-                                  : $__ssrTpl(`<span class="inner-off">inner-off</span>`)), `</section>`)
+                                    ? $__ssrTpl(`<span class="inner-on">inner-on</span>`)
+                                    : $__ssrTpl(`<span class="inner-off">inner-off</span>`)), `</section>`)
                     : $__ssrTpl(`<p class="outer-off">outer-off</p>`)), `</div></template></${this.$$__tag ?? 'mx-nested-conditional'}>`];
 }
 

@@ -37,9 +37,11 @@ export class SignalButtons extends Component {
         counter.count++;
     };
 
-    template = (): Template => tpl`<div class="buttons">
-        <button @click=${this.dec}>−</button>
-        <button @click=${this.reset}>Reset</button>
-        <button @click=${this.inc}>+</button>
-    </div>`;
+    template = (): Template => tpl`
+        <div class="buttons">
+            <button @click=${this.dec}>−</button>
+            <button @click=${this.reset}>Reset</button>
+            <button @click=${this.inc}>+</button>
+        </div>
+    `;
 }

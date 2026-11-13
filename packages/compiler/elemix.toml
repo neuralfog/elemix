@@ -1,0 +1,5 @@
+[formatter]
+enabled = true
+indent_style = "space"
+indent_width = 4
+line_width = 80

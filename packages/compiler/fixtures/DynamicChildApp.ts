@@ -32,7 +32,12 @@ export class DynamicChildApp extends Component {
                 ${repeat(
                     items,
                     (it) =>
-                        tpl`<span class="row" data-id=${it.id}>${it.icon()}</span>`,
+                        tpl`
+                            <span
+                                class="row"
+                                data-id=${it.id}
+                            >${it.icon()}</span>
+                        `,
                     (it) => it.id,
                 )}
             </div>

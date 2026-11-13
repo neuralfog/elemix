@@ -28,6 +28,29 @@ fn changed_edit(src: &str, tpl: &scan::Tpl, opts: &Options) -> Option<String> {
 }
 
 pub fn format_source(src: &str, opts: &Options) -> Formatted {
+    let first = format_pass(src, opts);
+    if !first.changed {
+        return first;
+    }
+
+    let mut output = first.output;
+    for _ in 0..8 {
+        let next = format_pass(&output, opts);
+        if next.output == output {
+            break;
+        }
+        output = next.output;
+    }
+
+    let changed = output != src;
+    Formatted {
+        output,
+        templates: first.templates,
+        changed,
+    }
+}
+
+pub(crate) fn format_pass(src: &str, opts: &Options) -> Formatted {
     let tpls = scan::scan(src);
     let templates = tpls.len();
 
@@ -156,6 +179,34 @@ mod tests {
     fn a_formatted_file_is_a_fixed_point() {
         assert_eq!(fmt(TIDY), TIDY);
         assert!(!format_source(TIDY, &opts()).changed);
+    }
+
+    const NESTED_HOLE: &str = r#"class C {
+    template = (): Template => tpl`<div class="log">
+        ${
+            log.entries.length
+                ? repeat(
+                      log.entries,
+                      (e) => tpl`<div class=${{ entry: true, [e.event]: true }}>
+                          <span class="n">${e.id}</span>${e.event}()
+                      </div>`,
+                      (e) => String(e.id),
+                  )
+                : tpl`<div class="empty">No events yet - mount the child.</div>`
+        }
+    </div>`;
+}
+"#;
+
+    #[test]
+    fn nested_template_in_hole_is_a_fixed_point() {
+        let once = fmt(NESTED_HOLE);
+        assert_eq!(fmt(&once), once, "nested-template hole must converge");
+        assert!(!format_source(&once, &opts()).changed);
+        assert!(
+            once.contains("<div class=\"empty\">\n"),
+            "the over-wide nested div must break across lines: {once}"
+        );
     }
 
     #[test]

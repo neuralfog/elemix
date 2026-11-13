@@ -49,14 +49,8 @@ export class ProfileApp extends Component {
 
     template = (): Template => tpl`
         <div class="controls">
-            <label>
-                Name
-                <input type="text" ~model=${this.state.name} />
-            </label>
-            <label>
-                Role
-                <input type="text" ~model=${this.state.role} />
-            </label>
+            <label>Name <input type="text" ~model=${this.state.name} /></label>
+            <label>Role <input type="text" ~model=${this.state.role} /></label>
             <button @click=${this.like}>👍 Like</button>
         </div>
         <profile-card

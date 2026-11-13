@@ -37,11 +37,11 @@ $__child(_n3, () => (this.state.outer
 const _r4 = $__cloneEl(_t1);
 const _n5 = _r4.firstChild!.nextSibling!.nextSibling!;
 $__child(_n5, () => (this.state.inner
-                                  ? (() => {
+                                    ? (() => {
 const _r6 = $__cloneEl(_t2);
 return _r6;
 })()
-                                  : (() => {
+                                    : (() => {
 const _r7 = $__cloneEl(_t3);
 return _r7;
 })()));

@@ -11,5 +11,10 @@ export class TitledNote extends Component {
     heading = (): Template => tpl`<h2 class="heading">Title</h2>`;
 
     template = (): Template =>
-        tpl`<div class="card">${this.heading()}<p class="body">body</p></div>`;
+        tpl`
+            <div class="card">
+                ${this.heading()}
+                <p class="body">body</p>
+            </div>
+        `;
 }

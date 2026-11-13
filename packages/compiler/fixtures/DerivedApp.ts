@@ -53,16 +53,24 @@ export class DerivedApp extends Component {
         this.state.price += 5;
     };
 
-    template = (): Template => tpl`<div>
-        <div class="row">
-            <button class="add-qty" @click=${this.addQty}>qty +1</button>
-            <span class="num qty">${this.state.qty}</span>
+    template = (): Template => tpl`
+        <div>
+            <div class="row">
+                <button class="add-qty" @click=${this.addQty}>qty +1</button>
+                <span class="num qty">${this.state.qty}</span>
+            </div>
+            <div class="row">
+                <button class="bump-price" @click=${this.bumpPrice}>price +5</button>
+                <span class="num price">${this.state.price}</span>
+            </div>
+            <div class="row">
+                <span>subtotal</span>
+                <span class="num subtotal">${this.subtotal}</span>
+            </div>
+            <div class="row">
+                <span>total +20%</span>
+                <span class="num total">${this.total}</span>
+            </div>
         </div>
-        <div class="row">
-            <button class="bump-price" @click=${this.bumpPrice}>price +5</button>
-            <span class="num price">${this.state.price}</span>
-        </div>
-        <div class="row"><span>subtotal</span><span class="num subtotal">${this.subtotal}</span></div>
-        <div class="row"><span>total +20%</span><span class="num total">${this.total}</span></div>
-    </div>`;
+    `;
 }

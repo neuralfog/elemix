@@ -72,6 +72,12 @@ importers:
       '@biomejs/biome':
         specifier: 2.5.5
         version: 2.5.5
+      '@neuralfog/elemix-analyzer':
+        specifier: workspace:*
+        version: link:../../analyzer
+      '@neuralfog/elemix-template-formatter':
+        specifier: workspace:*
+        version: link:../../formatter
       '@neuralfog/ts-config':
         specifier: 0.1.2
         version: 0.1.2

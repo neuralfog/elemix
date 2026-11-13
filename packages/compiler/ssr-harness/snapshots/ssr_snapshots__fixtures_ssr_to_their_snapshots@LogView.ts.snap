@@ -38,12 +38,12 @@ const css = `
 export class LogView extends Component {
 $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'log-view'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="log">`, (log.entries.length
-                ? $__ssrRepeat(
-                      log.entries,
-                      (e) => $__ssrTpl(`<div${$__ssrClass({ entry: true, [e.event]: true })}><span class="n">`, $__ssrText(e.id), `</span>`, $__ssrText(e.event), `()</div>`),
-                      (e) => String(e.id),
-                  )
-                : $__ssrTpl(`<div class="empty">No events yet — mount the child.</div>`)), `</div></template></${this.$$__tag ?? 'log-view'}>`];
+                    ? $__ssrRepeat(
+                          log.entries,
+                          (e) => $__ssrTpl(`<div${$__ssrClass({ entry: true, [e.event]: true })}><span class="n">`, $__ssrText(e.id), `</span>`, $__ssrText(e.event), `()</div>`),
+                          (e) => String(e.id),
+                      )
+                    : $__ssrTpl(`<div class="empty">No events yet — mount the child.</div>`)), `</div></template></${this.$$__tag ?? 'log-view'}>`];
 }
 
 

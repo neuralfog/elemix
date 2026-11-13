@@ -40,14 +40,16 @@ export class RowList extends Component {
         tpl`<li class="row" data-id=${item.id}>${item.name}</li>`;
 
     template = (): Template =>
-        tpl`<div>
-            <button class="add" @click=${this.add}>add row</button>
-            <ul class="list">
-                ${repeat(
-                    this.state.rows,
-                    (r) => this.row(r),
-                    (r) => r.id,
-                )}
-            </ul>
-        </div>`;
+        tpl`
+            <div>
+                <button class="add" @click=${this.add}>add row</button>
+                <ul class="list">
+                    ${repeat(
+                        this.state.rows,
+                        (r) => this.row(r),
+                        (r) => r.id,
+                    )}
+                </ul>
+            </div>
+        `;
 }

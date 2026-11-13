@@ -20,7 +20,11 @@ export class CustomEventApp extends Component {
 
     template(): Template {
         return tpl`
-            <button class="fire" @click=${this.fire} @ping=${this.onPing}>fire</button>
+            <button
+                class="fire"
+                @click=${this.fire}
+                @ping=${this.onPing}
+            >fire</button>
             <span class="caught">${this.state.caught}</span>
         `;
     }

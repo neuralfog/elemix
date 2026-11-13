@@ -104,7 +104,7 @@ pub fn format_template(
 ) -> Option<String> {
     let holes: Vec<String> = holes
         .iter()
-        .map(|h| crate::format::format_source(h, opts).output)
+        .map(|h| crate::format::format_pass(h, opts).output)
         .collect();
     let holes = &holes[..];
 

@@ -28,26 +28,26 @@ $__event(_n2, 'click', this.rename);
 $__event(_n3, 'click', this.swap);
 const _s4 = $__seat(_n0, _b1[0], _b1[1]);
 $__child(_s4[0], $__resume(_s4[1], (_r5) => (this.state.which === 'a'
-                    ? (() => {
+                ? (() => {
 $__effect(() => {
 $__setProp(_r5, 'label', (this.state.label));
 });
 return _r5;
 })()
-                    : (() => {
+                : (() => {
 $__effect(() => {
 $__setProp(_r5, 'label', (`b-${this.state.label}`));
 });
 return _r5;
 })()), () => (this.state.which === 'a'
-                    ? (() => {
+                ? (() => {
 const _r6 = $__cloneEl(_h0);
 $__effect(() => {
 $__setProp(_r6, 'label', (this.state.label));
 });
 return _r6;
 })()
-                    : (() => {
+                : (() => {
 const _r7 = $__cloneEl(_h1);
 $__effect(() => {
 $__setProp(_r7, 'label', (`b-${this.state.label}`));
@@ -72,14 +72,14 @@ const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
 $__child(_n1, () => (this.state.which === 'a'
-                    ? (() => {
+                ? (() => {
 const _r4 = $__cloneEl(_t1);
 $__effect(() => {
 $__setProp(_r4, 'label', (this.state.label));
 });
 return _r4;
 })()
-                    : (() => {
+                : (() => {
 const _r5 = $__cloneEl(_t2);
 $__effect(() => {
 $__setProp(_r5, 'label', (`b-${this.state.label}`));

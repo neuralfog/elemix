@@ -94,7 +94,9 @@ export class MultiStateApp extends Component {
         </div>
         <div class="slice">
             <strong class="name">${this.user.name}</strong>
-            <span class="status">${this.user.online ? 'online' : 'offline'}</span>
+            <span
+                class="status"
+            >${this.user.online ? 'online' : 'offline'}</span>
             <button @click=${this.toggle}>toggle status</button>
             <button @click=${this.rename}>rename</button>
         </div>

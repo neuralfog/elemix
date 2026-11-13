@@ -29,8 +29,7 @@ export class TwinListApp extends Component {
                 this.state.left,
                 (item) => tpl`<span class="left">${item}</span>`,
                 (item) => item,
-            )}
-            ${repeat(
+            )} ${repeat(
                 this.state.right,
                 (item) => tpl`<span class="right">${item}</span>`,
                 (item) => item,

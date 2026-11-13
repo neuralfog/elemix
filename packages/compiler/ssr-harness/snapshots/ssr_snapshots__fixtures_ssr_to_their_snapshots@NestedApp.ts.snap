@@ -75,10 +75,10 @@ $$__ssr(): unknown[] {
 return [`<${this.$$__tag ?? 'nested-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><div class="tree">`, ($__ssrRepeat(
                 this.state.categories,
                 (category) => $__ssrTpl(`<div class="category"><div class="head"><strong>`, $__ssrText(category.name), `</strong><button>+ item</button></div><ul>`, ($__ssrRepeat(
-                            category.items,
-                            (item) => $__ssrTpl(`<li>`, $__ssrText(item.name), `</li>`),
-                            (item) => item.id,
-                        )), `</ul></div>`),
+                                category.items,
+                                (item) => $__ssrTpl(`<li>`, $__ssrText(item.name), `</li>`),
+                                (item) => item.id,
+                            )), `</ul></div>`),
                 (category) => category.id,
             )), `</div></template></${this.$$__tag ?? 'nested-app'}>`];
 }

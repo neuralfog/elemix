@@ -45,10 +45,12 @@ export class ProofDestructuring extends Component {
 
     template = (): Template => {
         const { inc, dec } = this;
-        return tpl`<div>
-            <button class="dec" @click=${dec}>−</button>
-            <span class="count">${this.state.count}</span>
-            <button class="inc" @click=${inc}>+</button>
-        </div>`;
+        return tpl`
+            <div>
+                <button class="dec" @click=${dec}>−</button>
+                <span class="count">${this.state.count}</span>
+                <button class="inc" @click=${inc}>+</button>
+            </div>
+        `;
     };
 }

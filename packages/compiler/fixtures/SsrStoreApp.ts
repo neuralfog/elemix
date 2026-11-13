@@ -15,7 +15,9 @@ export class SsrStoreApp extends Component {
     };
 
     template = (): Template => tpl`
-        <div class="readout">Parent reads: <strong>${this.state.counter.value}</strong></div>
+        <div class="readout">
+            Parent reads: <strong>${this.state.counter.value}</strong>
+        </div>
         <ssr-store-controls :counter=${this.state.counter} />
     `;
 }

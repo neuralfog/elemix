@@ -77,10 +77,7 @@ export class FormApp extends Component {
 
     template = (): Template => tpl`
         <form @submit=${this.submit}>
-            <label>
-                Name
-                <input name="name" type="text" value="Ada" />
-            </label>
+            <label>Name <input name="name" type="text" value="Ada" /></label>
             <label>
                 Rating
                 <rating-input name="rating" />

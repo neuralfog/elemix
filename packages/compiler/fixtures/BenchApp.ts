@@ -173,11 +173,23 @@ export class BenchApp extends Component {
                     this.state.rows,
                     (
                         row,
-                    ) => tpl`<tr class=${{ danger: this.state.selected === row.id }}>
-                        <td class="col-id">${row.id}</td>
-                        <td><a class="lbl" @click=${() => this.select(row.id)}>${row.label}</a></td>
-                        <td><a class="remove" @click=${() => this.removeRow(row.id)}>×</a></td>
-                    </tr>`,
+                    ) => tpl`
+                        <tr class=${{ danger: this.state.selected === row.id }}>
+                            <td class="col-id">${row.id}</td>
+                            <td>
+                                <a
+                                    class="lbl"
+                                    @click=${() => this.select(row.id)}
+                                >${row.label}</a>
+                            </td>
+                            <td>
+                                <a
+                                    class="remove"
+                                    @click=${() => this.removeRow(row.id)}
+                                >×</a>
+                            </td>
+                        </tr>
+                    `,
                     (row) => row.id,
                 )}
             </tbody>

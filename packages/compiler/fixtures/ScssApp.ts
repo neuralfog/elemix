@@ -21,7 +21,10 @@ export class ScssApp extends Component {
     template = (): Template => tpl`
         <div class="card">
             <h2>SCSS styles</h2>
-            <p>Imported from a <code>.scss</code> file as <code>?inline</code> and adopted via <code>#styles</code>.</p>
+            <p>
+                Imported from a <code>.scss</code> file as <code>?inline</code>
+                and adopted via <code>#styles</code>.
+            </p>
             <button @click=${this.inc}>count is ${this.state.count}</button>
         </div>
     `;

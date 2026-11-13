@@ -69,7 +69,12 @@ export class RawApp extends Component {
             ${repeat(
                 this.state.rows,
                 (row) =>
-                    tpl`<li class="row"><span class="rid">${row.id}</span><span class="rlabel">${row.label}</span></li>`,
+                    tpl`
+                        <li class="row">
+                            <span class="rid">${row.id}</span>
+                            <span class="rlabel">${row.label}</span>
+                        </li>
+                    `,
                 (row) => row.id,
             )}
         </ul>

@@ -28,7 +28,7 @@ $__event(_n3, 'click', this.toggle);
 $__event(_n4, 'click', this.addOne);
 $__fresh(() => {
 $__child(_a2, () => (this.state.show
-                    ? (() => {
+                ? (() => {
 const _r5 = $__cloneEl(_h0);
 const _n6 = _r5.firstChild!;
 $__list(_n6, () => (this.state.items), (it) => it.id, (it) => {
@@ -42,7 +42,7 @@ return _r7;
 });
 return _r5;
 })()
-                    : ''));
+                : ''));
 });
 }
 
@@ -71,7 +71,7 @@ const _n1 = _r0.firstChild!.firstChild!.firstChild!;
 const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
 const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
 $__child(_n1, () => (this.state.show
-                    ? (() => {
+                ? (() => {
 const _r4 = $__cloneEl(_t1);
 const _n5 = _r4.firstChild!;
 $__list(_n5, () => (this.state.items), (it) => it.id, (it) => {
@@ -85,7 +85,7 @@ return _r6;
 });
 return _r4;
 })()
-                    : ''));
+                : ''));
 $__event(_n2, 'click', this.toggle);
 $__event(_n3, 'click', this.addOne);
 return _r0;

@@ -38,11 +38,8 @@ export class MxSiblingHoles extends Component {
             <button id="toggle-b" @click=${this.toggleB}>b</button>
             <button id="toggle-c" @click=${this.toggleC}>c</button>
             <section class="holes">
-                <span class="start">[</span>
-                ${this.holeA}
-                ${this.holeB}
-                ${this.holeC}
-                <span class="end">]</span>
+                <span class="start">[</span> ${this.holeA} ${this.holeB}
+                ${this.holeC} <span class="end">]</span>
             </section>
         </div>
     `;

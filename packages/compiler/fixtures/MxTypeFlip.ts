@@ -51,9 +51,7 @@ export class MxTypeFlip extends Component {
     template = (): Template => tpl`
         <div class="wrap">
             <section class="mix">
-                <span class="start">[</span>
-                ${this.left}
-                ${this.right}
+                <span class="start">[</span> ${this.left} ${this.right}
                 <span class="end">]</span>
             </section>
             <button id="l-text" @click=${this.leftText}>l-text</button>

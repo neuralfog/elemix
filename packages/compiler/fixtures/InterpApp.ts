@@ -61,9 +61,15 @@ export class InterpApp extends Component {
     };
 
     template = (): Template => tpl`
-        <p class="full"><span class="k">full:</span> ${this.state.first}${this.state.last}</p>
-        <p class="dash"><span class="k">dash:</span> ${this.state.first}-${this.state.last}</p>
-        <p class="middle"><span class="k">middle:</span> [${this.state.middle}]</p>
+        <p class="full">
+            <span class="k">full:</span> ${this.state.first}${this.state.last}
+        </p>
+        <p class="dash">
+            <span class="k">dash:</span> ${this.state.first}-${this.state.last}
+        </p>
+        <p class="middle">
+            <span class="k">middle:</span> [${this.state.middle}]
+        </p>
         <p class="num"><span class="k">num:</span> ${this.state.n}</p>
         <button @click=${this.swap}>swap</button>
         <button @click=${this.clearMiddle}>set middle</button>
