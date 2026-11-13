@@ -87,14 +87,12 @@ fn run(root_arg: &str) -> Result<(), Box<dyn Error + Sync + Send>> {
                     }
                     if req.method == "textDocument/completion" {
                         let items = serde_json::from_value(req.params)
-                            .map(|p| state.complete(&p))
-                            .unwrap_or_default();
+                            .map_or_else(|_| Default::default(), |p| state.complete(&p));
                         let resp = Response::new_ok(req.id, items);
                         let _ = connection.sender.send(Message::Response(resp));
                     } else if req.method == "textDocument/codeAction" {
                         let actions = serde_json::from_value(req.params)
-                            .map(|p| state.code_actions(&p))
-                            .unwrap_or_default();
+                            .map_or_else(|_| Default::default(), |p| state.code_actions(&p));
                         let resp = Response::new_ok(req.id, actions);
                         let _ = connection.sender.send(Message::Response(resp));
                     } else if req.method == "textDocument/hover" {

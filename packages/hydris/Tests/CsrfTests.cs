@@ -96,4 +96,35 @@ public sealed class CsrfTests {
 
         Assert.True(Make(cookie: SignedCookie(token), headerToken: token).Verify());
     }
+
+    [Fact]
+    public void UnsetNamesFallBackToDefaults() {
+        Csrf.Configure(secure: true);
+        Assert.Equal("hydris_csrf", Csrf.CookieName);
+        Assert.Equal("X-Hydris-Csrf", Csrf.HeaderName);
+    }
+
+    [Fact]
+    public void ConfiguredCookieAndHeaderNamesAreUsed() {
+        Csrf.Configure(secure: true, cookieName: "my_csrf", headerName: "X-My-Csrf");
+        try {
+            Assert.Equal("my_csrf", Csrf.CookieName);
+            Assert.Equal("X-My-Csrf", Csrf.HeaderName);
+
+            var reply = Reply.Text("ok");
+            var token = Make(Method.Get).Issue(reply);
+            Assert.StartsWith("my_csrf=", reply.CookieHeaders[0]);
+
+            Assert.True(Make(cookie: SignedCookie(token), headerToken: token).Verify());
+
+            var stale = new HeaderDictionary {
+                ["Cookie"] = SignedCookie(token),
+                ["X-Hydris-Csrf"] = token,
+            };
+            var request = new Request(Method.Post, "/", new Dictionary<string, string>(), stale);
+            Assert.False(new Csrf(request, new CookieAuthority(request)).Verify());
+        } finally {
+            Csrf.Configure(secure: true);
+        }
+    }
 }

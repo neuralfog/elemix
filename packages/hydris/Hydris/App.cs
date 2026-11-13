@@ -46,7 +46,7 @@ public sealed class App {
 
     public App EnableCsrf(CsrfOptions? options = null) {
         var config = options ?? new CsrfOptions();
-        Csrf.Configure(config.Secure);
+        Csrf.Configure(config.Secure, config.CookieName, config.HeaderName);
         Csrf.Enable();
         return this;
     }

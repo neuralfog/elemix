@@ -143,8 +143,7 @@ fn report(path: Option<&Path>, diags: &[Diagnostic]) {
         let who = d
             .component
             .as_deref()
-            .map(|c| format!("{c}: "))
-            .unwrap_or_default();
+            .map_or_else(String::new, |c| format!("{c}: "));
         eprintln!("  {color}{label}\x1b[0m  {who}{}", d.message);
     }
 }

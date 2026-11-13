@@ -6,13 +6,23 @@ using System.Text;
 namespace Hydris.Http;
 
 public sealed class Csrf(Request request, CookieAuthority authority) : ICsrf {
-    internal const string CookieName = "hydris_csrf";
-    internal const string HeaderName = "X-Hydris-Csrf";
+    private const string DefaultCookieName = "hydris_csrf";
+    private const string DefaultHeaderName = "X-Hydris-Csrf";
 
     internal static bool Enabled { get; private set; }
     internal static bool Secure { get; private set; } = true;
+    internal static string CookieName { get; private set; } = DefaultCookieName;
+    internal static string HeaderName { get; private set; } = DefaultHeaderName;
 
-    internal static void Configure(bool secure) => Secure = secure;
+    internal static void Configure(
+        bool secure,
+        string? cookieName = null,
+        string? headerName = null
+    ) {
+        Secure = secure;
+        CookieName = cookieName ?? DefaultCookieName;
+        HeaderName = headerName ?? DefaultHeaderName;
+    }
 
     internal static void Enable() => Enabled = true;
 
