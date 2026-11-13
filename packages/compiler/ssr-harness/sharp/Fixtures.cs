@@ -65,6 +65,36 @@ public sealed class Fixtures {
     [Get("/mx-live-child-teardown")]
     public Reply MxLiveChildTeardown() => Reply.View("fixtures/MxLiveChildTeardown");
 
+    [Get("/mx-text-hole")]
+    public Reply MxTextHole() => Reply.View("fixtures/MxTextHole");
+
+    [Get("/mx-type-flip")]
+    public Reply MxTypeFlip() => Reply.View("fixtures/MxTypeFlip");
+
+    [Get("/mx-attr-hole")]
+    public Reply MxAttrHole() => Reply.View("fixtures/MxAttrHole");
+
+    [Get("/mx-hole-in-hole")]
+    public Reply MxHoleInHole() => Reply.View("fixtures/MxHoleInHole");
+
+    [Get("/mx-list-transitions")]
+    public Reply MxListTransitions() => Reply.View("fixtures/MxListTransitions");
+
+    [Get("/mx-list-of-components")]
+    public Reply MxListOfComponents() => Reply.View("fixtures/MxListOfComponents");
+
+    [Get("/mx-list-in-conditional")]
+    public Reply MxListInConditional() => Reply.View("fixtures/MxListInConditional");
+
+    [Get("/mx-conditional-in-row")]
+    public Reply MxConditionalInRow() => Reply.View("fixtures/MxConditionalInRow");
+
+    [Get("/mx-component-prop")]
+    public Reply MxComponentProp() => Reply.View("fixtures/MxComponentProp");
+
+    [Get("/mx-deep-nest")]
+    public Reply MxDeepNest() => Reply.View("fixtures/MxDeepNest");
+
     [Get("/view-data-app")]
     public Reply ViewDataApp() =>
         Reply.View("fixtures/ViewDataApp", new VData("Hello viewData", new VUser("Ada"), 3));

@@ -1,0 +1,70 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/MxTextHole.ts
+---
+import { $__template, $__clone, $__event, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { a: string | number | null; b: string | number | null };
+
+const _t0 = $__template('<div class="wrap"><section class="run"><span class="start">[</span> <!----> <!----> <span class="end">]</span></section><button id="a-null">a-null</button><button id="a-text">a-text</button><button id="a-empty">a-empty</button><button id="a-num">a-num</button><button id="b-long">b-long</button><button id="b-null">b-null</button></div>');
+
+export class MxTextHole extends Component {
+    state = $__state<State>({ a: 'A', b: 'B' });
+
+    aNull = (): void => {
+        this.state.a = null;
+    };
+
+    aText = (): void => {
+        this.state.a = 'A2';
+    };
+
+    aEmpty = (): void => {
+        this.state.a = '';
+    };
+
+    aNum = (): void => {
+        this.state.a = 0;
+    };
+
+    bLong = (): void => {
+        this.state.b = 'BBBBB';
+    };
+
+    bNull = (): void => {
+        this.state.b = null;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n2 = _r0.firstChild!.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _x9 = document.createTextNode('');
+_n1.replaceWith(_x9);
+const _x10 = document.createTextNode('');
+_n2.replaceWith(_x10);
+$__event(_n3, 'click', this.aNull);
+$__event(_n4, 'click', this.aText);
+$__event(_n5, 'click', this.aEmpty);
+$__event(_n6, 'click', this.aNum);
+$__event(_n7, 'click', this.bLong);
+$__event(_n8, 'click', this.bNull);
+$__effect(() => {
+$__setText(_x9, (this.state.a));
+});
+$__effect(() => {
+$__setText(_x10, (this.state.b));
+});
+return _r0;
+}
+}
+$__defineComponent('mx-text-hole', MxTextHole);
+MxTextHole.prototype.$$__tag = 'mx-text-hole';

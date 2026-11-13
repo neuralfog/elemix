@@ -1,0 +1,95 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/MxListInConditional.ts
+---
+import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+const _h0 = $__templateEl('<ul class="list"><!----></ul>');
+const _h1 = $__templateEl('<li class="row"> </li>');
+
+import { Component } from '@neuralfog/elemix';
+
+type Item = { id: number; label: string };
+type State = { show: boolean; items: Item[] };
+
+const _t0 = $__template('<div class="wrap"><section class="host"><!----></section><button id="toggle">toggle</button><button id="add">add</button></div>');
+const _t1 = $__templateEl('<ul class="list"><!----></ul>');
+const _t2 = $__templateEl('<li class="row"> </li>');
+
+export class MxListInConditional extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _n3 = root.firstChild!.firstChild!.nextSibling!;
+const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__event(_n3, 'click', this.toggle);
+$__event(_n4, 'click', this.addOne);
+$__fresh(() => {
+$__child(_a2, () => (this.state.show
+                    ? (() => {
+const _r5 = $__cloneEl(_h0);
+const _n6 = _r5.firstChild!;
+$__list(_n6, () => (this.state.items), (it) => it.id, (it) => {
+const _r7 = $__cloneEl(_h1);
+const _n8 = _r7.firstChild!;
+_r7.setAttribute('data-id', ($__toRaw(it).id));
+$__effect(() => {
+$__setText(_n8, (it.label));
+});
+return _r7;
+});
+return _r5;
+})()
+                    : ''));
+});
+}
+
+    state = $__state<State>({
+        show: true,
+        items: [
+            { id: 1, label: 'a' },
+            { id: 2, label: 'b' },
+        ],
+    });
+
+    private seq = 2;
+
+    toggle = (): void => {
+        this.state.show = !this.state.show;
+    };
+
+    addOne = (): void => {
+        const id = ++this.seq;
+        this.state.items.push({ id, label: `n${id}` });
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+$__child(_n1, () => (this.state.show
+                    ? (() => {
+const _r4 = $__cloneEl(_t1);
+const _n5 = _r4.firstChild!;
+$__list(_n5, () => (this.state.items), (it) => it.id, (it) => {
+const _r6 = $__cloneEl(_t2);
+const _n7 = _r6.firstChild!;
+_r6.setAttribute('data-id', ($__toRaw(it).id));
+$__effect(() => {
+$__setText(_n7, (it.label));
+});
+return _r6;
+});
+return _r4;
+})()
+                    : ''));
+$__event(_n2, 'click', this.toggle);
+$__event(_n3, 'click', this.addOne);
+return _r0;
+}
+}
+$__defineComponent('mx-list-in-conditional', MxListInConditional);
+MxListInConditional.prototype.$$__tag = 'mx-list-in-conditional';

@@ -1,0 +1,95 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/MxDeepNest.ts
+---
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__child, $__list, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './MxCounterChild';
+
+type Item = { id: number; label: string; flag: boolean; x: number };
+type State = { show: boolean; items: Item[] };
+
+const _t0 = $__template('<div class="wrap"><section class="host"><!----></section><button id="toggle-show">show</button><button id="add">add</button><button id="reverse">reverse</button></div>');
+const _t1 = $__templateEl('<ul class="list"><!----></ul>');
+const _t2 = $__templateEl('<li class="row"><mx-counter-child></mx-counter-child> <!----> <button class="flag">f</button><button class="x-bump">x</button></li>');
+const _t3 = $__templateEl('<em class="x"> </em>');
+
+export class MxDeepNest extends Component {
+    state = $__state<State>({
+        show: true,
+        items: [
+            { id: 1, label: 'a', flag: true, x: 1 },
+            { id: 2, label: 'b', flag: false, x: 2 },
+        ],
+    });
+
+    private seq = 2;
+
+    toggleShow = (): void => {
+        this.state.show = !this.state.show;
+    };
+
+    addOne = (): void => {
+        const id = ++this.seq;
+        this.state.items.push({ id, label: `n${id}`, flag: false, x: id });
+    };
+
+    reverse = (): void => {
+        this.state.items.reverse();
+    };
+
+    toggleFlag = (id: number): void => {
+        const row = this.state.items.find((it) => it.id === id);
+        if (row) row.flag = !row.flag;
+    };
+
+    bumpX = (id: number): void => {
+        const row = this.state.items.find((it) => it.id === id);
+        if (row) row.x += 1;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+$__child(_n1, () => (this.state.show
+                    ? (() => {
+const _r5 = $__cloneEl(_t1);
+const _n6 = _r5.firstChild!;
+$__list(_n6, () => (this.state.items), (it) => it.id, (it) => {
+const _r7 = $__cloneEl(_t2);
+const _n8 = _r7.firstChild!;
+const _n9 = _r7.firstChild!.nextSibling!.nextSibling!;
+const _n10 = _r7.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n11 = _r7.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__child(_n9, () => (it.flag ? (() => {
+const _r12 = $__cloneEl(_t3);
+const _n13 = _r12.firstChild!;
+$__effect(() => {
+$__setText(_n13, (it.x));
+});
+return _r12;
+})() : ''));
+$__event(_n10, 'click', () => this.toggleFlag(it.id));
+$__event(_n11, 'click', () => this.bumpX(it.id));
+_r7.setAttribute('data-id', ($__toRaw(it).id));
+$__effect(() => {
+$__setProp(_n8, 'label', (it.label));
+});
+return _r7;
+});
+return _r5;
+})()
+                    : ''));
+$__event(_n2, 'click', this.toggleShow);
+$__event(_n3, 'click', this.addOne);
+$__event(_n4, 'click', this.reverse);
+return _r0;
+}
+}
+$__defineComponent('mx-deep-nest', MxDeepNest);
+MxDeepNest.prototype.$$__tag = 'mx-deep-nest';

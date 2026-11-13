@@ -262,5 +262,45 @@
     {
         "tag": "mx-live-child-teardown",
         "fixture": "MxLiveChildTeardown"
+    },
+    {
+        "tag": "mx-text-hole",
+        "fixture": "MxTextHole"
+    },
+    {
+        "tag": "mx-type-flip",
+        "fixture": "MxTypeFlip"
+    },
+    {
+        "tag": "mx-attr-hole",
+        "fixture": "MxAttrHole"
+    },
+    {
+        "tag": "mx-hole-in-hole",
+        "fixture": "MxHoleInHole"
+    },
+    {
+        "tag": "mx-list-transitions",
+        "fixture": "MxListTransitions"
+    },
+    {
+        "tag": "mx-list-of-components",
+        "fixture": "MxListOfComponents"
+    },
+    {
+        "tag": "mx-list-in-conditional",
+        "fixture": "MxListInConditional"
+    },
+    {
+        "tag": "mx-conditional-in-row",
+        "fixture": "MxConditionalInRow"
+    },
+    {
+        "tag": "mx-component-prop",
+        "fixture": "MxComponentProp"
+    },
+    {
+        "tag": "mx-deep-nest",
+        "fixture": "MxDeepNest"
     }
 ]

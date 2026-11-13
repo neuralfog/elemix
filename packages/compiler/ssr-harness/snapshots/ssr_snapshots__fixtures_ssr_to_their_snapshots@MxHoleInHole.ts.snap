@@ -1,0 +1,47 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxHoleInHole.ts
+---
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { outer: boolean; inner: boolean; n: number };
+
+export class MxHoleInHole extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-hole-in-hole'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap"><section class="host">`, $__ssrText(this.outerTpl), `</section><button id="toggle-inner">inner</button><button id="toggle-outer">outer</button><button id="bump">bump</button></div></template></${this.$$__tag ?? 'mx-hole-in-hole'}>`];
+}
+
+    state = $__state<State>({ outer: true, inner: true, n: 1 });
+
+    private get innerTpl(): Template | null {
+        return this.state.inner
+            ? $__ssrTpl(`<span class="inner">i`, $__ssrText(this.state.n), `</span>`)
+            : null;
+    }
+
+    private get outerTpl(): Template | null {
+        return this.state.outer
+            ? $__ssrTpl(`<div class="outer"><span class="o-label">o</span>`, $__ssrText(this.innerTpl), `</div>`)
+            : null;
+    }
+
+    toggleInner = (): void => {
+        this.state.inner = !this.state.inner;
+    };
+
+    toggleOuter = (): void => {
+        this.state.outer = !this.state.outer;
+    };
+
+    bump = (): void => {
+        this.state.n += 1;
+    };
+
+    
+}
+$__defineComponent('mx-hole-in-hole', MxHoleInHole);
+MxHoleInHole.prototype.$$__tag = 'mx-hole-in-hole';
+MxHoleInHole.$$__propSafe = true;

@@ -1,0 +1,47 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxTextHole.ts
+---
+import { $__ssrText, $__ssrLen } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { a: string | number | null; b: string | number | null };
+
+export class MxTextHole extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-text-hole'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap">`, (() => {const _t0 = (this.state.a);const _t1 = (this.state.b);return [`<section class="run" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}"><span class="start">[</span> ${$__ssrText(_t0)} ${$__ssrText(_t1)} <span class="end">]</span></section>`];})(), `<button id="a-null">a-null</button><button id="a-text">a-text</button><button id="a-empty">a-empty</button><button id="a-num">a-num</button><button id="b-long">b-long</button><button id="b-null">b-null</button></div></template></${this.$$__tag ?? 'mx-text-hole'}>`];
+}
+
+    state = $__state<State>({ a: 'A', b: 'B' });
+
+    aNull = (): void => {
+        this.state.a = null;
+    };
+
+    aText = (): void => {
+        this.state.a = 'A2';
+    };
+
+    aEmpty = (): void => {
+        this.state.a = '';
+    };
+
+    aNum = (): void => {
+        this.state.a = 0;
+    };
+
+    bLong = (): void => {
+        this.state.b = 'BBBBB';
+    };
+
+    bNull = (): void => {
+        this.state.b = null;
+    };
+
+    
+}
+$__defineComponent('mx-text-hole', MxTextHole);
+MxTextHole.prototype.$$__tag = 'mx-text-hole';
+MxTextHole.$$__propSafe = true;

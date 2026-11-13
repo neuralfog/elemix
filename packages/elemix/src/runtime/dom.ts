@@ -478,6 +478,7 @@ type Cache = {
     __c?: string;
     __s?: string;
     __r?: Node[] | null;
+    __h?: boolean;
 };
 
 const attrKeys = new Map<string, string>();
@@ -495,8 +496,8 @@ export const $__hydrating = (on: boolean): void => {
 };
 
 export const $__setText = (node: Text, value: unknown): void => {
-    if (hydrating) return;
     const n = node as Text & Cache;
+    if (hydrating && n.__h && !(value instanceof Node)) return;
     if (typeof value === 'string') {
         if (n.__r) clearMounted(n);
         if (n.__t === value) return;

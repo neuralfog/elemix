@@ -1,0 +1,122 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/MxListTransitions.ts
+---
+import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__event, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+const _h0 = $__templateEl('<li class="row"> </li>');
+
+import { Component } from '@neuralfog/elemix';
+
+type Item = { id: number; label: string };
+type State = { items: Item[] };
+
+const _t0 = $__template('<div class="wrap"><ul class="list"><!----></ul><button id="clear">clear</button><button id="add">add</button><button id="reverse">reverse</button><button id="swap">swap</button><button id="remove-middle">remove</button><button id="rebuild">rebuild</button></div>');
+const _t1 = $__templateEl('<li class="row"> </li>');
+
+export class MxListTransitions extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _n3 = root.firstChild!.firstChild!.nextSibling!;
+const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n5 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n8 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n3, 'click', this.clear);
+$__event(_n4, 'click', this.addOne);
+$__event(_n5, 'click', this.reverse);
+$__event(_n6, 'click', this.swapEnds);
+$__event(_n7, 'click', this.removeMiddle);
+$__event(_n8, 'click', this.rebuild);
+$__fresh(() => {
+$__list(_a2, () => (this.state.items), (it) => it.id, (it) => {
+const _r9 = $__cloneEl(_h0);
+const _n10 = _r9.firstChild!;
+_r9.setAttribute('data-id', ($__toRaw(it).id));
+$__effect(() => {
+$__setText(_n10, (it.label));
+});
+return _r9;
+});
+});
+}
+
+    state = $__state<State>({
+        items: [
+            { id: 1, label: 'a' },
+            { id: 2, label: 'b' },
+            { id: 3, label: 'c' },
+        ],
+    });
+
+    private seq = 3;
+
+    clear = (): void => {
+        this.state.items = [];
+    };
+
+    addOne = (): void => {
+        const id = ++this.seq;
+        this.state.items.push({ id, label: `n${id}` });
+    };
+
+    reverse = (): void => {
+        this.state.items.reverse();
+    };
+
+    swapEnds = (): void => {
+        const list = this.state.items;
+        if (list.length < 2) return;
+        const first = list[0];
+        list[0] = list[list.length - 1];
+        list[list.length - 1] = first;
+    };
+
+    removeMiddle = (): void => {
+        const list = this.state.items;
+        if (list.length === 0) return;
+        list.splice(Math.floor(list.length / 2), 1);
+    };
+
+    rebuild = (): void => {
+        this.seq = 3;
+        this.state.items = [
+            { id: 1, label: 'a' },
+            { id: 2, label: 'b' },
+            { id: 3, label: 'c' },
+        ];
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+const _n5 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n6 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+const _n7 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!.nextSibling!;
+$__list(_n1, () => (this.state.items), (it) => it.id, (it) => {
+const _r8 = $__cloneEl(_t1);
+const _n9 = _r8.firstChild!;
+_r8.setAttribute('data-id', ($__toRaw(it).id));
+$__effect(() => {
+$__setText(_n9, (it.label));
+});
+return _r8;
+});
+$__event(_n2, 'click', this.clear);
+$__event(_n3, 'click', this.addOne);
+$__event(_n4, 'click', this.reverse);
+$__event(_n5, 'click', this.swapEnds);
+$__event(_n6, 'click', this.removeMiddle);
+$__event(_n7, 'click', this.rebuild);
+return _r0;
+}
+}
+$__defineComponent('mx-list-transitions', MxListTransitions);
+MxListTransitions.prototype.$$__tag = 'mx-list-transitions';

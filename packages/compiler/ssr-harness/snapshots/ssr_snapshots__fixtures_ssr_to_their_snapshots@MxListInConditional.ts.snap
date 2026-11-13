@@ -1,0 +1,48 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxListInConditional.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Item = { id: number; label: string };
+type State = { show: boolean; items: Item[] };
+
+export class MxListInConditional extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-list-in-conditional'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap"><section class="host">`, (this.state.show
+                    ? $__ssrTpl(`<ul class="list">`, ($__ssrRepeat(
+                          this.state.items,
+                          (it) =>
+                              $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', it.id)}>`, $__ssrText(it.label), `</li>`),
+                          (it) => it.id,
+                      )), `</ul>`)
+                    : ''), `</section><button id="toggle">toggle</button><button id="add">add</button></div></template></${this.$$__tag ?? 'mx-list-in-conditional'}>`];
+}
+
+    state = $__state<State>({
+        show: true,
+        items: [
+            { id: 1, label: 'a' },
+            { id: 2, label: 'b' },
+        ],
+    });
+
+    private seq = 2;
+
+    toggle = (): void => {
+        this.state.show = !this.state.show;
+    };
+
+    addOne = (): void => {
+        const id = ++this.seq;
+        this.state.items.push({ id, label: `n${id}` });
+    };
+
+    
+}
+$__defineComponent('mx-list-in-conditional', MxListInConditional);
+MxListInConditional.prototype.$$__tag = 'mx-list-in-conditional';
+MxListInConditional.$$__propSafe = true;

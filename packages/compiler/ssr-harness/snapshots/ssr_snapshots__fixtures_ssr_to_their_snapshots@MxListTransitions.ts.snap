@@ -1,0 +1,72 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxListTransitions.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Item = { id: number; label: string };
+type State = { items: Item[] };
+
+export class MxListTransitions extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-list-transitions'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap"><ul class="list">`, ($__ssrRepeat(
+                    this.state.items,
+                    (it) => $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', it.id)}>`, $__ssrText(it.label), `</li>`),
+                    (it) => it.id,
+                )), `</ul><button id="clear">clear</button><button id="add">add</button><button id="reverse">reverse</button><button id="swap">swap</button><button id="remove-middle">remove</button><button id="rebuild">rebuild</button></div></template></${this.$$__tag ?? 'mx-list-transitions'}>`];
+}
+
+    state = $__state<State>({
+        items: [
+            { id: 1, label: 'a' },
+            { id: 2, label: 'b' },
+            { id: 3, label: 'c' },
+        ],
+    });
+
+    private seq = 3;
+
+    clear = (): void => {
+        this.state.items = [];
+    };
+
+    addOne = (): void => {
+        const id = ++this.seq;
+        this.state.items.push({ id, label: `n${id}` });
+    };
+
+    reverse = (): void => {
+        this.state.items.reverse();
+    };
+
+    swapEnds = (): void => {
+        const list = this.state.items;
+        if (list.length < 2) return;
+        const first = list[0];
+        list[0] = list[list.length - 1];
+        list[list.length - 1] = first;
+    };
+
+    removeMiddle = (): void => {
+        const list = this.state.items;
+        if (list.length === 0) return;
+        list.splice(Math.floor(list.length / 2), 1);
+    };
+
+    rebuild = (): void => {
+        this.seq = 3;
+        this.state.items = [
+            { id: 1, label: 'a' },
+            { id: 2, label: 'b' },
+            { id: 3, label: 'c' },
+        ];
+    };
+
+    
+}
+$__defineComponent('mx-list-transitions', MxListTransitions);
+MxListTransitions.prototype.$$__tag = 'mx-list-transitions';
+MxListTransitions.$$__propSafe = true;

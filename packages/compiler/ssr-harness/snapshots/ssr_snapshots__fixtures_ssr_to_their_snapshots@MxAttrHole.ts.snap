@@ -1,0 +1,39 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxAttrHole.ts
+---
+import { $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { tag: string | null; flag: boolean; n: number };
+
+export class MxAttrHole extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-attr-hole'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap"><div class="box" data-static="s"${$__ssrAttr('data-tag', this.state.tag)}${$__ssrAttr('data-n', this.state.n)}${$__ssrAttr('aria-hidden', this.state.flag)}><span class="label">box</span></div><button id="clear-tag">clear</button><button id="set-tag">set</button><button id="toggle-flag">flag</button><button id="bump">bump</button></div></template></${this.$$__tag ?? 'mx-attr-hole'}>`];
+}
+
+    state = $__state<State>({ tag: 'one', flag: true, n: 1 });
+
+    clearTag = (): void => {
+        this.state.tag = null;
+    };
+
+    setTag = (): void => {
+        this.state.tag = 'two';
+    };
+
+    toggleFlag = (): void => {
+        this.state.flag = !this.state.flag;
+    };
+
+    bump = (): void => {
+        this.state.n += 1;
+    };
+
+    
+}
+$__defineComponent('mx-attr-hole', MxAttrHole);
+MxAttrHole.prototype.$$__tag = 'mx-attr-hole';
+MxAttrHole.$$__propSafe = true;

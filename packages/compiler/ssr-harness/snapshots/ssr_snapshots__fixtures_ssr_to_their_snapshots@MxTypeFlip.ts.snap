@@ -1,0 +1,63 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxTypeFlip.ts
+---
+import { $__ssrText, $__ssrLen, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Mode = 'text' | 'markup' | 'null';
+type Val = string | Template | null;
+type State = { left: Mode; right: Mode };
+
+export class MxTypeFlip extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-type-flip'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap">`, (() => {const _t0 = (this.left);const _t1 = (this.right);return [`<section class="mix" data-t="${$__ssrLen(_t0)},${$__ssrLen(_t1)}"><span class="start">[</span> ${$__ssrText(_t0)} ${$__ssrText(_t1)} <span class="end">]</span></section>`];})(), `<button id="l-text">l-text</button><button id="l-markup">l-markup</button><button id="l-null">l-null</button><button id="r-text">r-text</button><button id="r-markup">r-markup</button><button id="r-null">r-null</button></div></template></${this.$$__tag ?? 'mx-type-flip'}>`];
+}
+
+    state = $__state<State>({ left: 'text', right: 'markup' });
+
+    private get left(): Val {
+        const m = this.state.left;
+        if (m === 'text') return 'tL';
+        if (m === 'markup') return $__ssrTpl(`<b class="bL">mL</b>`);
+        return null;
+    }
+
+    private get right(): Val {
+        const m = this.state.right;
+        if (m === 'text') return 'tR';
+        if (m === 'markup') return $__ssrTpl(`<i class="bR">mR</i>`);
+        return null;
+    }
+
+    leftText = (): void => {
+        this.state.left = 'text';
+    };
+
+    leftMarkup = (): void => {
+        this.state.left = 'markup';
+    };
+
+    leftNull = (): void => {
+        this.state.left = 'null';
+    };
+
+    rightText = (): void => {
+        this.state.right = 'text';
+    };
+
+    rightMarkup = (): void => {
+        this.state.right = 'markup';
+    };
+
+    rightNull = (): void => {
+        this.state.right = 'null';
+    };
+
+    
+}
+$__defineComponent('mx-type-flip', MxTypeFlip);
+MxTypeFlip.prototype.$$__tag = 'mx-type-flip';
+MxTypeFlip.$$__propSafe = true;

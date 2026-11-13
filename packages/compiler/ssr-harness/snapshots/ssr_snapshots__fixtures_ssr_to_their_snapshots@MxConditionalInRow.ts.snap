@@ -1,0 +1,45 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxConditionalInRow.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Item = { id: number; label: string; open: boolean; detail: string };
+type State = { items: Item[] };
+
+export class MxConditionalInRow extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-conditional-in-row'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap"><ul class="list">`, ($__ssrRepeat(
+                    this.state.items,
+                    (it) => $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', it.id)}><span class="lbl">`, $__ssrText(it.label), `</span> `, (it.open
+                            ? $__ssrTpl(`<span class="detail">`, $__ssrText(it.detail), `</span>`)
+                            : ''), ` <button class="row-toggle">t</button></li>`),
+                    (it) => it.id,
+                )), `</ul><button id="reverse">reverse</button></div></template></${this.$$__tag ?? 'mx-conditional-in-row'}>`];
+}
+
+    state = $__state<State>({
+        items: [
+            { id: 1, label: 'a', open: true, detail: 'da' },
+            { id: 2, label: 'b', open: false, detail: 'db' },
+            { id: 3, label: 'c', open: false, detail: 'dc' },
+        ],
+    });
+
+    toggleRow = (id: number): void => {
+        const row = this.state.items.find((it) => it.id === id);
+        if (row) row.open = !row.open;
+    };
+
+    reverse = (): void => {
+        this.state.items.reverse();
+    };
+
+    
+}
+$__defineComponent('mx-conditional-in-row', MxConditionalInRow);
+MxConditionalInRow.prototype.$$__tag = 'mx-conditional-in-row';
+MxConditionalInRow.$$__propSafe = true;

@@ -1,0 +1,91 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/MxHoleInHole.ts
+---
+import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__effect, $__setText, $__event, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+const _ft0 = $__template('<span class="inner">i<!----></span>');
+const _ft1 = $__template('<div class="outer"><span class="o-label">o</span><!----></div>');
+import { Component } from '@neuralfog/elemix';
+
+type State = { outer: boolean; inner: boolean; n: number };
+
+const _t0 = $__template('<div class="wrap"><section class="host"> </section><button id="toggle-inner">inner</button><button id="toggle-outer">outer</button><button id="bump">bump</button></div>');
+
+export class MxHoleInHole extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _n1 = $__text(_n0);
+const _n2 = root.firstChild!.firstChild!.nextSibling!;
+const _n3 = root.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = root.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n2, 'click', this.toggleInner);
+$__event(_n3, 'click', this.toggleOuter);
+$__event(_n4, 'click', this.bump);
+$__effect(() => {
+$__setText(_n1, (this.outerTpl));
+});
+}
+
+    state = $__state<State>({ outer: true, inner: true, n: 1 });
+
+    private get innerTpl(): Template | null {
+        return this.state.inner
+            ? (() => {
+const _r0 = $__clone(_ft0);
+const _n1 = _r0.firstChild!.firstChild!.nextSibling!;
+const _x2 = document.createTextNode('');
+_n1.replaceWith(_x2);
+$__effect(() => {
+$__setText(_x2, (this.state.n));
+});
+return _r0;
+})()
+            : null;
+    }
+
+    private get outerTpl(): Template | null {
+        return this.state.outer
+            ? (() => {
+const _r3 = $__clone(_ft1);
+const _n4 = _r3.firstChild!.firstChild!.nextSibling!;
+const _x5 = document.createTextNode('');
+_n4.replaceWith(_x5);
+$__effect(() => {
+$__setText(_x5, (this.innerTpl));
+});
+return _r3;
+})()
+            : null;
+    }
+
+    toggleInner = (): void => {
+        this.state.inner = !this.state.inner;
+    };
+
+    toggleOuter = (): void => {
+        this.state.outer = !this.state.outer;
+    };
+
+    bump = (): void => {
+        this.state.n += 1;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!.firstChild!;
+const _n2 = _r0.firstChild!.firstChild!.nextSibling!;
+const _n3 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!;
+const _n4 = _r0.firstChild!.firstChild!.nextSibling!.nextSibling!.nextSibling!;
+$__event(_n2, 'click', this.toggleInner);
+$__event(_n3, 'click', this.toggleOuter);
+$__event(_n4, 'click', this.bump);
+$__effect(() => {
+$__setText(_n1, (this.outerTpl));
+});
+return _r0;
+}
+}
+$__defineComponent('mx-hole-in-hole', MxHoleInHole);
+MxHoleInHole.prototype.$$__tag = 'mx-hole-in-hole';

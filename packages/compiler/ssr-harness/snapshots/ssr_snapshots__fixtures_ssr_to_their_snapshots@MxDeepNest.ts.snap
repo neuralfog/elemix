@@ -1,0 +1,63 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxDeepNest.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrChild, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import './MxCounterChild';
+
+type Item = { id: number; label: string; flag: boolean; x: number };
+type State = { show: boolean; items: Item[] };
+
+export class MxDeepNest extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-deep-nest'}><template shadowrootmode="open" shadowrootserializable=""><div class="wrap"><section class="host">`, (this.state.show
+                    ? $__ssrTpl(`<ul class="list">`, ($__ssrRepeat(
+                          this.state.items,
+                          (it) => $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', it.id)}>`, $__ssrChild('mx-counter-child', {label: (it.label)}), ` `, (it.flag ? $__ssrTpl(`<em class="x">`, $__ssrText(it.x), `</em>`) : ''), ` <button class="flag">f</button><button class="x-bump">x</button></li>`),
+                          (it) => it.id,
+                      )), `</ul>`)
+                    : ''), `</section><button id="toggle-show">show</button><button id="add">add</button><button id="reverse">reverse</button></div></template></${this.$$__tag ?? 'mx-deep-nest'}>`];
+}
+
+    state = $__state<State>({
+        show: true,
+        items: [
+            { id: 1, label: 'a', flag: true, x: 1 },
+            { id: 2, label: 'b', flag: false, x: 2 },
+        ],
+    });
+
+    private seq = 2;
+
+    toggleShow = (): void => {
+        this.state.show = !this.state.show;
+    };
+
+    addOne = (): void => {
+        const id = ++this.seq;
+        this.state.items.push({ id, label: `n${id}`, flag: false, x: id });
+    };
+
+    reverse = (): void => {
+        this.state.items.reverse();
+    };
+
+    toggleFlag = (id: number): void => {
+        const row = this.state.items.find((it) => it.id === id);
+        if (row) row.flag = !row.flag;
+    };
+
+    bumpX = (id: number): void => {
+        const row = this.state.items.find((it) => it.id === id);
+        if (row) row.x += 1;
+    };
+
+    
+}
+$__defineComponent('mx-deep-nest', MxDeepNest);
+MxDeepNest.prototype.$$__tag = 'mx-deep-nest';
+MxDeepNest.$$__propSafe = true;

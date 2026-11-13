@@ -70,16 +70,16 @@ export const $__splitRun = (
                 mounted.push(m);
                 m = next;
             }
-            const anchor = document.createTextNode('') as Text & {
-                __r?: Node[] | null;
-            };
+            const anchor = document.createTextNode('') as Adopted;
+            anchor.__h = true;
             parent?.insertBefore(anchor, m);
             if (m) parent?.removeChild(m);
             anchor.__r = mounted.length ? mounted : null;
             out.push(anchor);
             n = anchor.nextSibling;
         } else {
-            const value = n as Text;
+            const value = n as Adopted;
+            value.__h = true;
             n = value.splitText(dyns[i]);
             out.push(value);
         }
@@ -89,11 +89,24 @@ export const $__splitRun = (
 
 import { $__hydrating } from './dom';
 
+type Adopted = Text & { __h?: boolean; __r?: Node[] | null };
+
 export const $__text = (parent: Node): Text => {
     const first = parent.firstChild;
-    if (first !== null && first.nodeType === 3) return first as Text;
-    const node = document.createTextNode('');
+    if (first !== null && first.nodeType === 3) {
+        (first as Adopted).__h = true;
+        return first as Text;
+    }
+    const node = document.createTextNode('') as Adopted;
+    node.__h = true;
     parent.insertBefore(node, first);
+    if (first !== null) {
+        const mounted: Node[] = [];
+        for (let m: Node | null = node.nextSibling; m; m = m.nextSibling) {
+            mounted.push(m);
+        }
+        node.__r = mounted.length ? mounted : null;
+    }
     return node;
 };
 
