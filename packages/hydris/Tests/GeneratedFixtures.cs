@@ -15,7 +15,7 @@ internal enum Shade {
 }
 
 [Contract]
-internal sealed partial record StrictReq([Hydris.Validation.Required] string Name);
+internal sealed partial record StrictReq(string Name);
 
 [Contract]
 internal sealed partial record Painted(string Shade, bool On, string Id);

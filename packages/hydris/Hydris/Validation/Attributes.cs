@@ -14,7 +14,6 @@ public sealed class RuleAttribute(string name, params object[] args) : Validatio
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public sealed class RuleAttribute<T>(params object[] args) : ValidationAttribute(args) where T : Rule;
 
-public sealed class RequiredAttribute : ValidationAttribute;
 public sealed class FilledAttribute : ValidationAttribute;
 public sealed class EmailAttribute : ValidationAttribute;
 public sealed class UrlAttribute : ValidationAttribute;
@@ -33,10 +32,6 @@ public sealed class AlphaDashAttribute : ValidationAttribute;
 public sealed class AsciiAttribute : ValidationAttribute;
 public sealed class LowercaseAttribute : ValidationAttribute;
 public sealed class UppercaseAttribute : ValidationAttribute;
-public sealed class BooleanAttribute : ValidationAttribute;
-public sealed class IntegerAttribute : ValidationAttribute;
-public sealed class NumericAttribute : ValidationAttribute;
-public sealed class StringAttribute : ValidationAttribute;
 
 public sealed class MinAttribute(double value) : ValidationAttribute(value);
 public sealed class MaxAttribute(double value) : ValidationAttribute(value);

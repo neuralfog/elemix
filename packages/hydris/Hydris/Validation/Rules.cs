@@ -22,7 +22,6 @@ public static class Rules {
     public static string? Check(string name, in Value value) => Resolve(name)?.Check(value);
 
     private static Dictionary<string, Rule> Builtins() => new(StringComparer.Ordinal) {
-        ["required"] = new Required(),
         ["filled"] = new Filled(),
         ["alpha"] = new Alpha(),
         ["alpha_num"] = new AlphaNum(),
@@ -42,10 +41,6 @@ public static class Rules {
         ["doesnt_end_with"] = new DoesntEndWith(),
         ["regex"] = new RegexRule(),
         ["not_regex"] = new NotRegexRule(),
-        ["boolean"] = new Boolean(),
-        ["integer"] = new Integer(),
-        ["numeric"] = new Numeric(),
-        ["string"] = new String(),
         ["digits"] = new Digits(),
         ["digits_between"] = new DigitsBetween(),
         ["min_digits"] = new MinDigits(),

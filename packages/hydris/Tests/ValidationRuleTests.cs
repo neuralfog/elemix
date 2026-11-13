@@ -7,16 +7,6 @@ public sealed class RuleTests {
         Rules.Check(rule, new Value { Field = "x", Raw = value, Args = args }) is null;
 
     [Fact]
-    public void Required() {
-        Assert.False(Passes("required", null));
-        Assert.False(Passes("required", ""));
-        Assert.False(Passes("required", "   "));
-        Assert.True(Passes("required", "foo"));
-        Assert.False(Passes("required", new string[0]));
-        Assert.True(Passes("required", new[] { "a" }));
-    }
-
-    [Fact]
     public void Filled() {
         Assert.True(Passes("filled", null));
         Assert.False(Passes("filled", ""));

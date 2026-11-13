@@ -23,9 +23,9 @@ internal sealed class Slug : Rule {
 
 [Contract]
 public sealed partial record CreateUserRequest(
-    [Required][Between(2, 40)] string Name,
-    [Required][Email] string Email,
-    [Required][Rule<Slug>] string Handle,
+    [Between(2, 40)] string Name,
+    [Email] string Email,
+    [Filled][Rule<Slug>] string Handle,
     [Between(18, 120)] int Age);
 
 [Contract]

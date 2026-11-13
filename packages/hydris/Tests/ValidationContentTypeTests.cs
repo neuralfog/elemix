@@ -40,46 +40,6 @@ public sealed class ContentTypeTests {
     }
 
     [Fact]
-    public void Boolean() {
-        Assert.True(Passes("boolean", true));
-        Assert.True(Passes("boolean", false));
-        Assert.True(Passes("boolean", 0));
-        Assert.True(Passes("boolean", 1));
-        Assert.True(Passes("boolean", "0"));
-        Assert.True(Passes("boolean", "1"));
-        Assert.False(Passes("boolean", "true"));
-        Assert.False(Passes("boolean", 2));
-        Assert.False(Passes("boolean", "yes"));
-    }
-
-    [Fact]
-    public void Integer() {
-        Assert.True(Passes("integer", 5));
-        Assert.True(Passes("integer", "5"));
-        Assert.True(Passes("integer", "-5"));
-        Assert.False(Passes("integer", "5.0"));
-        Assert.False(Passes("integer", "abc"));
-        Assert.False(Passes("integer", 5.5));
-    }
-
-    [Fact]
-    public void Numeric() {
-        Assert.True(Passes("numeric", 5));
-        Assert.True(Passes("numeric", 5.5));
-        Assert.True(Passes("numeric", "5.5"));
-        Assert.True(Passes("numeric", "-3"));
-        Assert.False(Passes("numeric", "abc"));
-        Assert.False(Passes("numeric", true));
-    }
-
-    [Fact]
-    public void StringRule() {
-        Assert.True(Passes("string", "x"));
-        Assert.False(Passes("string", 5));
-        Assert.False(Passes("string", null));
-    }
-
-    [Fact]
     public void Digits() {
         Assert.True(Passes("digits", "12345", "5"));
         Assert.False(Passes("digits", "123", "5"));

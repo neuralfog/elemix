@@ -172,6 +172,9 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         sb.AppendLine("        {");
         foreach (var member in members)
             sb.Append("            ").Append(member.Type.ToDisplayString(FullyQualified)).Append(' ').Append(member.Local).AppendLine(" = default!;");
+        foreach (var member in members)
+            if (member.Required && member.Type.IsValueType)
+                sb.Append("            bool ").Append(member.Seen).AppendLine(" = false;");
         sb.AppendLine("            while (reader.Read() && reader.TokenType == global::System.Text.Json.JsonTokenType.PropertyName)");
         sb.AppendLine("            {");
         sb.AppendLine("                var name = reader.GetString();");
@@ -182,12 +185,20 @@ public sealed class ContractGenerator : IIncrementalGenerator {
             sb.Append("                    case \"").Append(member.Wire).AppendLine("\":");
             sb.AppendLine("                    {");
             JsonRead.EmitValue(sb, "                        ", member.Type, member.Local, 0);
+            if (member.Required && member.Type.IsValueType)
+                sb.Append("                        ").Append(member.Seen).AppendLine(" = true;");
             sb.AppendLine("                        break;");
             sb.AppendLine("                    }");
         }
         sb.AppendLine("                    default: reader.Skip(); break;");
         sb.AppendLine("                }");
         sb.AppendLine("            }");
+        foreach (var member in members) {
+            if (!member.Required)
+                continue;
+            var condition = member.Type.IsValueType ? "!" + member.Seen : member.Local + " is null";
+            sb.Append("            if (").Append(condition).Append(") errors.Add(").Append(Literal(member.Wire)).Append(", \"required\", ").Append(Literal("The " + member.Wire + " field is required.")).AppendLine(");");
+        }
         var arguments = string.Join(", ", members.Select(m => m.Local));
         sb.Append("            var value = new ").Append(typeName).Append('(').Append(arguments).AppendLine(");");
         sb.AppendLine("            Validate(value, errors);");
@@ -240,7 +251,7 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         var members = new List<Member>();
         foreach (var parameter in primary.Parameters) {
             var attributes = parameterAttributes.TryGetValue(parameter.Name, out var found) ? found : ImmutableArray<AttributeData>.Empty;
-            members.Add(new Member(parameter.Name, parameter.Type, Camel(parameter.Name), Rules(attributes), parameter.Locations.FirstOrDefault()));
+            members.Add(new Member(parameter.Name, parameter.Type, Camel(parameter.Name), Rules(attributes), parameter.Locations.FirstOrDefault(), IsRequired(parameter.Type)));
         }
 
         return members;
@@ -336,8 +347,16 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         name.Length == 0 ? name : char.ToLowerInvariant(name[0]) + name.Substring(1);
 
 
+    private static ITypeSymbol? UnwrapNullable(ITypeSymbol type) =>
+        type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } named
+            ? named.TypeArguments[0]
+            : null;
+
+    private static bool IsRequired(ITypeSymbol type) =>
+        UnwrapNullable(type) is null && type.NullableAnnotation != NullableAnnotation.Annotated;
+
     private sealed class Member {
-        public Member(string name, ITypeSymbol type, string wire, IReadOnlyList<Rule> rules, Location? location) {
+        public Member(string name, ITypeSymbol type, string wire, IReadOnlyList<Rule> rules, Location? location, bool required) {
             Name = name;
             Type = type;
             Wire = wire;
@@ -345,6 +364,7 @@ public sealed class ContractGenerator : IIncrementalGenerator {
             Location = location;
             Label = wire;
             Local = "arg" + name;
+            Required = required;
         }
 
         public string Name { get; }
@@ -352,6 +372,8 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         public string Wire { get; }
         public string Label { get; }
         public string Local { get; }
+        public string Seen => "seen" + Name;
+        public bool Required { get; }
         public IReadOnlyList<Rule> Rules { get; }
         public Location? Location { get; }
     }

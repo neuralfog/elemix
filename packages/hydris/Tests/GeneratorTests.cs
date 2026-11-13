@@ -38,7 +38,7 @@ public sealed class GeneratorTests {
 
     [Fact]
     public async Task BodyValidationReturns400WithFieldError() {
-        var reply = await Dispatch(Method.Post, "/gen-bind/strict", body: "{\"name\":\"\"}");
+        var reply = await Dispatch(Method.Post, "/gen-bind/strict", body: "{}");
 
         Assert.Equal(400, reply.StatusCode);
         var json = Encoding.UTF8.GetString(reply.Content);

@@ -84,19 +84,19 @@ test.describe('ActionsApp (actions end to end)', () => {
         await expect(root.locator('.create-data')).toHaveCount(0);
     });
 
-    test('empty required fields report required codes', async ({ page }) => {
+    test('empty fields fail their content rules', async ({ page }) => {
         const root = await hydrate(page);
         await fill(page, { 'f-name': '', 'f-email': '', 'f-handle': '' });
         await root.locator('#create').click();
 
         await expect(
-            root.locator('.err[data-field="name"][data-code="required"]'),
+            root.locator('.err[data-field="name"][data-code="between"]'),
         ).toHaveCount(1);
         await expect(
-            root.locator('.err[data-field="email"][data-code="required"]'),
+            root.locator('.err[data-field="email"][data-code="email"]'),
         ).toHaveCount(1);
         await expect(
-            root.locator('.err[data-field="handle"][data-code="required"]'),
+            root.locator('.err[data-field="handle"][data-code="filled"]'),
         ).toHaveCount(1);
     });
 
