@@ -34,7 +34,8 @@ const island = (id: string, data: unknown): string =>
 
 const renderOne = (View: ViewClass): string => {
     const view = new View();
-    view.$$__attachFormInternals?.();
+    if ((View as { formAssociated?: boolean }).formAssociated)
+        view.$$__attachFormInternals?.();
     view.$$__beforeMount?.();
     return $__render(view.$$__ssr());
 };

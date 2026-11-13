@@ -107,8 +107,8 @@ export const $__render = (rope: Rope): string => {
     return parts.join('');
 };
 
-export const $__ssrText = (value: unknown): string => {
-    if (Array.isArray(value)) return $__render(value as Rope) + HYDRATE_MARK;
+export const $__ssrText = (value: unknown): Rope => {
+    if (Array.isArray(value)) return [value as Rope, HYDRATE_MARK];
     if (value == null) return '';
     const s = String(value);
     return s.indexOf('&') === -1 &&
@@ -255,7 +255,8 @@ export const $__ssrChild = (
         }));
     }
     child.$$__props = props;
-    child.$$__attachFormInternals?.();
+    if ((ctor as { formAssociated?: boolean }).formAssociated)
+        child.$$__attachFormInternals?.();
     child.$$__beforeMount?.();
     const rendered = child.$$__ssr();
     const parts: Rope[] = Array.isArray(rendered) ? rendered : [rendered];
