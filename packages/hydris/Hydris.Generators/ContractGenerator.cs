@@ -173,7 +173,7 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         foreach (var member in members)
             sb.Append("            ").Append(member.Type.ToDisplayString(FullyQualified)).Append(' ').Append(member.Local).AppendLine(" = default!;");
         foreach (var member in members)
-            if (member.Required && member.Type.IsValueType)
+            if (member.Required)
                 sb.Append("            bool ").Append(member.Seen).AppendLine(" = false;");
         sb.AppendLine("            while (reader.Read() && reader.TokenType == global::System.Text.Json.JsonTokenType.PropertyName)");
         sb.AppendLine("            {");
@@ -185,7 +185,7 @@ public sealed class ContractGenerator : IIncrementalGenerator {
             sb.Append("                    case \"").Append(member.Wire).AppendLine("\":");
             sb.AppendLine("                    {");
             JsonRead.EmitValue(sb, "                        ", member.Type, member.Local, 0);
-            if (member.Required && member.Type.IsValueType)
+            if (member.Required)
                 sb.Append("                        ").Append(member.Seen).AppendLine(" = true;");
             sb.AppendLine("                        break;");
             sb.AppendLine("                    }");
@@ -196,8 +196,7 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         foreach (var member in members) {
             if (!member.Required)
                 continue;
-            var condition = member.Type.IsValueType ? "!" + member.Seen : member.Local + " is null";
-            sb.Append("            if (").Append(condition).Append(") errors.Add(").Append(Literal(member.Wire)).Append(", \"required\", ").Append(Literal("The " + member.Wire + " field is required.")).AppendLine(");");
+            sb.Append("            if (!").Append(member.Seen).Append(") errors.Add(").Append(Literal(member.Wire)).Append(", \"required\", ").Append(Literal("The " + member.Wire + " field is required.")).AppendLine(");");
         }
         var arguments = string.Join(", ", members.Select(m => m.Local));
         sb.Append("            var value = new ").Append(typeName).Append('(').Append(arguments).AppendLine(");");

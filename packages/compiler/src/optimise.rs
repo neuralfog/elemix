@@ -889,7 +889,6 @@ fn replace_has_slot(body: &[char], slot_names: &Option<Vec<String>>) -> Vec<char
     out
 }
 
-#[allow(clippy::too_many_arguments)]
 fn inline_child(
     child: &ChildMeta,
     props: &[(String, String)],

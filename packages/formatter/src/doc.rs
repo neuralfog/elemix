@@ -15,12 +15,7 @@ pub enum Doc {
     Indent(Box<Doc>),
     Group(Box<Group>),
     Fill(Vec<Doc>),
-    #[allow(dead_code)]
-    IfBreak {
-        brk: Box<Doc>,
-        flat: Box<Doc>,
-    },
-    #[allow(dead_code)]
+    IfBreak { brk: Box<Doc>, flat: Box<Doc> },
     LineSuffix(Box<Doc>),
     BreakParent,
 }
@@ -82,7 +77,6 @@ pub fn fill(items: Vec<Doc>) -> Doc {
     Doc::Fill(items)
 }
 
-#[cfg(test)]
 pub fn if_break(brk: Doc, flat: Doc) -> Doc {
     Doc::IfBreak {
         brk: Box::new(brk),
@@ -90,7 +84,6 @@ pub fn if_break(brk: Doc, flat: Doc) -> Doc {
     }
 }
 
-#[cfg(test)]
 pub fn line_suffix(contents: Doc) -> Doc {
     Doc::LineSuffix(Box::new(contents))
 }
