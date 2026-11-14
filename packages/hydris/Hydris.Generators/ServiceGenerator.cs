@@ -58,21 +58,24 @@ public sealed class ServiceGenerator : IIncrementalGenerator {
         var transient = Registrations(context, "Hydris.Container.TransientAttribute", "Transient");
         var handlers = Registrations(context, "Hydris.Container.HandlerAttribute", "Scoped");
         var middlewares = Registrations(context, "Hydris.Middleware.MiddlewareAttribute", "Scoped");
+        var configs = Registrations(context, "Hydris.Container.ConfigAttribute", "Singleton");
 
         var combined = singletons.Collect()
             .Combine(scoped.Collect())
             .Combine(transient.Collect())
             .Combine(handlers.Collect())
-            .Combine(middlewares.Collect());
+            .Combine(middlewares.Collect())
+            .Combine(configs.Collect());
 
         context.RegisterSourceOutput(combined, static (production, data) => {
-            var ((((singleton, scope), transientLines), handlerLines), middlewareLines) = data;
+            var (((((singleton, scope), transientLines), handlerLines), middlewareLines), configLines) = data;
             var lines = new List<string>();
             Collect(lines, singleton);
             Collect(lines, scope);
             Collect(lines, transientLines);
             Collect(lines, handlerLines);
             Collect(lines, middlewareLines);
+            Collect(lines, configLines);
             production.AddSource("GeneratedServices.g.cs", Emit(lines));
         });
 

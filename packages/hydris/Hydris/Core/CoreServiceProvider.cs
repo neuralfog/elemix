@@ -13,6 +13,8 @@ public sealed class CoreServiceProvider : ServiceProvider {
             Path.Combine(AppContext.BaseDirectory, "public", "_elemix", "manifest.json")));
         container.Scoped(c => new CookieAuthority(c.Get<Request>()));
         container.Scoped<ICsrf>(c => new Csrf(c.Get<Request>(), c.Get<CookieAuthority>()));
+        container.Singleton(_ => new CspConfig());
+        container.Singleton(c => new CspPolicy(c.Get<CspConfig>()));
     }
 
     public static DiContainer RequestScope(DiContainer container, Request request) {

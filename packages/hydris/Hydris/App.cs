@@ -51,6 +51,16 @@ public sealed class App {
         return this;
     }
 
+    public App EnableCsp(CspOptions? options = null) {
+        var config = options ?? new CspOptions();
+        if (!string.IsNullOrEmpty(config.EnvFile))
+            Env.Load(config.EnvFile);
+
+        Csp.Configure(Container.Get<CspPolicy>(), config.ReportOnly ?? Container.Get<CspConfig>().ReportOnly);
+        Csp.Enable();
+        return this;
+    }
+
     public App Assets(string prefix, string dir, AssetOptions? options = null) {
         ArgumentException.ThrowIfNullOrEmpty(prefix);
         ArgumentException.ThrowIfNullOrEmpty(dir);

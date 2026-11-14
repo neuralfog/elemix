@@ -11,3 +11,6 @@ public sealed class TransientAttribute : Attribute;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class HandlerAttribute : Attribute;
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+public sealed class ConfigAttribute : Attribute;
