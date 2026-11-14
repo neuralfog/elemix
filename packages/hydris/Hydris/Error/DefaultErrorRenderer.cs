@@ -9,31 +9,25 @@ public sealed class DefaultErrorRenderer : IErrorRenderer {
         var message = MessageOf(error);
 
         if (json || WantsJson(request))
-            return Reply.Json(new ErrorPayload(message, status), ErrorJson.Default.ErrorPayload).Status(status);
+            return Reply.Json(new ErrorPayload(message, (int)status), ErrorJson.Default.ErrorPayload).Status(status);
 
-        return Reply.Html(Page(status, message)).Status(status);
+        return Reply.Html(Page((int)status, message)).Status(status);
     }
 
-    internal static int StatusOf(Exception error) => error switch {
+    internal static Status StatusOf(Exception error) => error switch {
         HttpException http => http.Status,
-        Microsoft.AspNetCore.Http.BadHttpRequestException bad => bad.StatusCode,
-        _ => 500,
+        Microsoft.AspNetCore.Http.BadHttpRequestException bad => (Status)bad.StatusCode,
+        _ => Status.InternalServerError,
     };
 
     private static string MessageOf(Exception error) => error switch {
         HttpException http => http.Message,
-        Microsoft.AspNetCore.Http.BadHttpRequestException bad => Reason(bad.StatusCode),
-        _ => "Internal Server Error",
-    };
-
-    private static string Reason(int status) => status switch {
-        400 => "Bad Request",
-        413 => "Payload Too Large",
-        _ => "Request Error",
+        Microsoft.AspNetCore.Http.BadHttpRequestException bad => ((Status)bad.StatusCode).Reason(),
+        _ => Status.InternalServerError.Reason(),
     };
 
     private static bool WantsJson(Request request) =>
-        (request.Header("Accept") ?? string.Empty).Contains("application/json", StringComparison.Ordinal);
+        (request.Header(HeaderNames.Accept) ?? string.Empty).Contains(ContentType.ApplicationJson.Mime(), StringComparison.Ordinal);
 
     private static string Page(int status, string message) =>
         "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">" +

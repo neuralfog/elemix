@@ -7,7 +7,7 @@ namespace Hydris.Http;
 
 public sealed class Csrf(Request request, CookieAuthority authority) : ICsrf {
     private const string DefaultCookieName = "hydris_csrf";
-    private const string DefaultHeaderName = "X-Hydris-Csrf";
+    private const string DefaultHeaderName = HeaderNames.XHydrisCsrf;
 
     internal static bool Enabled { get; private set; }
     internal static bool Secure { get; private set; } = true;

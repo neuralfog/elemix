@@ -31,6 +31,6 @@ public sealed class ContractValidation {
             writer.WriteEndArray();
             writer.WriteEndObject();
         }
-        return Reply.Json(buffer.WrittenSpan).Status(400);
+        return Reply.Json(buffer.WrittenSpan).Status(Status.BadRequest);
     }
 }

@@ -24,7 +24,7 @@ public sealed class Request(
     public IReadOnlyDictionary<string, string> Params { get; } = parameters;
     public IHeaderDictionary Headers { get; } = headers;
     public IDictionary<string, object?> Bag => BagStore ??= [];
-    public IReadOnlyDictionary<string, string> Cookies => CookieJar ??= CookieAuthority.Parse(Header("Cookie"));
+    public IReadOnlyDictionary<string, string> Cookies => CookieJar ??= CookieAuthority.Parse(Header(HeaderNames.Cookie));
     public IReadOnlyDictionary<string, string> QueryValues => QueryBag ??= ParseQuery(Query);
     public string Ip { get; internal set; } = string.Empty;
     public string Protocol { get; internal set; } = string.Empty;

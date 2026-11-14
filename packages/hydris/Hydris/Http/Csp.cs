@@ -1,8 +1,8 @@
 namespace Hydris.Http;
 
 internal static class Csp {
-    private const string EnforceHeader = "Content-Security-Policy";
-    private const string ReportHeader = "Content-Security-Policy-Report-Only";
+    private const string EnforceHeader = HeaderNames.ContentSecurityPolicy;
+    private const string ReportHeader = HeaderNames.ContentSecurityPolicyReportOnly;
 
     internal static bool Enabled { get; private set; }
     internal static bool ReportOnly { get; private set; }

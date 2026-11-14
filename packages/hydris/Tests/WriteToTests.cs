@@ -78,7 +78,7 @@ public sealed class WriteToTests : IDisposable {
         var response = new FakeResponse();
         var body = new FakeBody();
 
-        var reply = Reply.AssetFile(path, "text/plain", "etag", "no-cache", null, false);
+        var reply = Reply.AssetFile(path, ContentType.Text, "etag", "no-cache", null, false);
         await reply.WriteTo(response, body, head: true, CancellationToken.None);
 
         Assert.Equal(13, response.Headers.ContentLength);
@@ -92,7 +92,7 @@ public sealed class WriteToTests : IDisposable {
         var response = new FakeResponse();
         var body = new FakeBody();
 
-        var reply = Reply.AssetFile(path, "text/plain", "etag", "no-cache", null, false);
+        var reply = Reply.AssetFile(path, ContentType.Text, "etag", "no-cache", null, false);
         await reply.WriteTo(response, body, head: false, CancellationToken.None);
 
         Assert.Equal(13, response.Headers.ContentLength);

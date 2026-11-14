@@ -43,7 +43,7 @@ public sealed class RequestBodyTests {
         var request = Make([], Request.DefaultMaxBodyBytes + 1);
         var error = await Assert.ThrowsAsync<PayloadTooLargeException>(
             async () => await request.ReadBodyAsync());
-        Assert.Equal(413, error.Status);
+        Assert.Equal(Status.PayloadTooLarge, error.Status);
     }
 
     [Fact]

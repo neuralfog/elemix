@@ -16,10 +16,10 @@ internal sealed class AssetConfig {
 
     private static string ComposeCacheControl(AssetOptions options) {
         if (options.Immutable)
-            return $"public, max-age={options.MaxAge ?? DefaultMaxAge}, immutable";
+            return $"{CacheDirective.Public}, {CacheDirective.MaxAge}={options.MaxAge ?? DefaultMaxAge}, {CacheDirective.Immutable}";
         if (options.MaxAge is int maxAge)
-            return $"public, max-age={maxAge}";
-        return "no-cache";
+            return $"{CacheDirective.Public}, {CacheDirective.MaxAge}={maxAge}";
+        return CacheDirective.NoCache;
     }
 }
 
@@ -34,11 +34,11 @@ internal static class AssetHandler {
             throw new NotFoundException();
 
         var etag = Etag(new FileInfo(target));
-        if (request.Header("If-None-Match") == etag)
+        if (request.Header(HeaderNames.IfNoneMatch) == etag)
             return Reply.NotModified(etag, config.CacheControl);
 
         var contentType = Reply.MimeOf(target);
-        var choice = Compressor.NegotiateStatic(target, contentType, request.Header("Accept-Encoding"));
+        var choice = Compressor.NegotiateStatic(target, contentType.Mime(), request.Header(HeaderNames.AcceptEncoding));
         return Reply.AssetFile(choice.Path, contentType, etag, config.CacheControl, choice.Encoding, choice.Vary);
     }
 

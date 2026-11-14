@@ -53,7 +53,7 @@ internal sealed class Dispatcher(
             }
 
             if (Csrf.Enabled && IsUnsafe(method) && !match.NoCsrf && !scope.Get<ICsrf>().Verify()) {
-                reply = Reply.Text("CSRF token mismatch.").Status(419);
+                reply = Reply.Text("CSRF token mismatch.").Status(Status.PageExpired);
             } else {
                 var chain = Chain(middlewares, match.Middlewares);
                 reply = await Pipeline.Run(scope, chain, () => match.Handler(scope));
@@ -75,18 +75,18 @@ internal sealed class Dispatcher(
     public void DisposeContext(Context context, Exception? exception) { }
 
     private Reply Fail(Exception error, Request request, bool json) {
-        if (DefaultErrorRenderer.StatusOf(error) >= 500)
+        if (DefaultErrorRenderer.StatusOf(error).Code() >= Status.InternalServerError.Code())
             Console.Error.WriteLine(error);
 
         Reply reply;
         try {
             reply = errors.Render(error, request, json);
         } catch {
-            reply = Reply.Text("Internal Server Error").Status(500);
+            reply = Reply.Text(Status.InternalServerError.Reason()).Status(Status.InternalServerError);
         }
 
         if (error is MethodNotAllowedException allowed && allowed.Allowed.Count > 0)
-            reply.Header("Allow", string.Join(", ", allowed.Allowed));
+            reply.Header(HeaderNames.Allow, string.Join(", ", allowed.Allowed));
 
         return reply;
     }

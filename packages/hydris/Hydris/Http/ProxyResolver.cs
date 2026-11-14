@@ -2,7 +2,7 @@ namespace Hydris.Http;
 
 internal static class ProxyResolver {
     private static readonly string[] ForwardedIpHeaders =
-        ["CF-Connecting-IP", "True-Client-IP", "X-Forwarded-For"];
+        [HeaderNames.CfConnectingIp, HeaderNames.TrueClientIp, HeaderNames.XForwardedFor];
 
     public static string ResolveIp(Request request, string socketIp, bool trustProxy) {
         if (trustProxy) {
@@ -18,7 +18,7 @@ internal static class ProxyResolver {
 
     public static string ResolveProtocol(Request request, string scheme, bool trustProxy) {
         if (trustProxy) {
-            var forwarded = request.Header("X-Forwarded-Proto");
+            var forwarded = request.Header(HeaderNames.XForwardedProto);
             if (!string.IsNullOrEmpty(forwarded))
                 return First(forwarded);
         }

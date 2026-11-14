@@ -2,14 +2,14 @@ namespace Hydris.Http;
 
 public sealed record SecurityHeadersConfig {
     private static readonly (string Key, string Name)[] Catalog = [
-        ("SECURITY_HSTS", "Strict-Transport-Security"),
-        ("SECURITY_CONTENT_TYPE_OPTIONS", "X-Content-Type-Options"),
-        ("SECURITY_REFERRER_POLICY", "Referrer-Policy"),
-        ("SECURITY_FRAME_OPTIONS", "X-Frame-Options"),
-        ("SECURITY_PERMISSIONS_POLICY", "Permissions-Policy"),
-        ("SECURITY_CROSS_ORIGIN_OPENER_POLICY", "Cross-Origin-Opener-Policy"),
-        ("SECURITY_CROSS_ORIGIN_EMBEDDER_POLICY", "Cross-Origin-Embedder-Policy"),
-        ("SECURITY_CROSS_ORIGIN_RESOURCE_POLICY", "Cross-Origin-Resource-Policy"),
+        ("SECURITY_HSTS", HeaderNames.StrictTransportSecurity),
+        ("SECURITY_CONTENT_TYPE_OPTIONS", HeaderNames.XContentTypeOptions),
+        ("SECURITY_REFERRER_POLICY", HeaderNames.ReferrerPolicy),
+        ("SECURITY_FRAME_OPTIONS", HeaderNames.XFrameOptions),
+        ("SECURITY_PERMISSIONS_POLICY", HeaderNames.PermissionsPolicy),
+        ("SECURITY_CROSS_ORIGIN_OPENER_POLICY", HeaderNames.CrossOriginOpenerPolicy),
+        ("SECURITY_CROSS_ORIGIN_EMBEDDER_POLICY", HeaderNames.CrossOriginEmbedderPolicy),
+        ("SECURITY_CROSS_ORIGIN_RESOURCE_POLICY", HeaderNames.CrossOriginResourcePolicy),
     ];
 
     public IReadOnlyList<KeyValuePair<string, string>> Headers { get; }

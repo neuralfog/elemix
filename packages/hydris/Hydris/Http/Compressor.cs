@@ -8,11 +8,6 @@ using Hydris.Routing;
 
 namespace Hydris.Http;
 
-internal enum ContentEncoding {
-    Brotli,
-    Gzip,
-}
-
 internal sealed record CompressionSettings(int Threshold, bool Brotli, bool Gzip);
 
 internal readonly record struct StaticChoice(string Path, string? Encoding, bool Vary);
@@ -75,9 +70,9 @@ internal static class Compressor {
         if (encoding is null)
             return new StaticChoice(path, null, true);
 
-        var sibling = path + SiblingExtension(encoding.Value);
+        var sibling = path + encoding.Value.Extension();
         if (File.Exists(sibling) && File.GetLastWriteTimeUtc(sibling) >= File.GetLastWriteTimeUtc(path))
-            return new StaticChoice(sibling, Token(encoding.Value), true);
+            return new StaticChoice(sibling, encoding.Value.Token(), true);
 
         return new StaticChoice(path, null, true);
     }
@@ -88,13 +83,13 @@ internal static class Compressor {
             return;
         if (request.Method == Method.Head || reply.IsFile)
             return;
-        if (reply.HeaderValue("Content-Encoding") is not null)
+        if (reply.HeaderValue(HeaderNames.ContentEncoding) is not null)
             return;
-        if (!IsCompressibleStatus(reply.StatusCode) || !IsCompressible(reply.HeaderValue("Content-Type")))
+        if (!IsCompressibleStatus(reply.StatusCode) || !IsCompressible(reply.HeaderValue(HeaderNames.ContentType)))
             return;
 
         reply.AppendVary();
-        var encoding = Negotiate(request.Header("Accept-Encoding"), settings);
+        var encoding = Negotiate(request.Header(HeaderNames.AcceptEncoding), settings);
         if (encoding is null)
             return;
 
@@ -106,7 +101,7 @@ internal static class Compressor {
         var encoded = cached is not null
             ? cached.Encoded(encoding.Value)
             : Compress(body, encoding.Value, DynamicBrotliQuality, DynamicGzipLevel);
-        reply.ApplyEncoding(encoded, Token(encoding.Value));
+        reply.ApplyEncoding(encoded, encoding.Value.Token());
     }
 
     internal static byte[] Encode(byte[] body, ContentEncoding encoding) =>
@@ -187,10 +182,6 @@ internal static class Compressor {
         return output.ToArray();
     }
 
-    private static bool IsCompressibleStatus(int status) => status is >= 200 and < 300 and not 204;
-
-    private static string Token(ContentEncoding encoding) => encoding == ContentEncoding.Brotli ? "br" : "gzip";
-
-    private static string SiblingExtension(ContentEncoding encoding) =>
-        encoding == ContentEncoding.Brotli ? ".br" : ".gz";
+    private static bool IsCompressibleStatus(int status) =>
+        status >= (int)Status.Ok && status < (int)Status.MultipleChoices && status != (int)Status.NoContent;
 }

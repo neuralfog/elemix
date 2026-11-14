@@ -8,43 +8,44 @@ using System.Text.Json.Serialization.Metadata;
 using Hydris.Container;
 using Hydris.Error;
 using Microsoft.AspNetCore.Http.Features;
+using HttpStatus = Hydris.Http.Status;
 
 namespace Hydris.Http;
 
 public sealed class Reply {
     private static string RootPath = AppContext.BaseDirectory;
 
-    private static readonly FrozenDictionary<string, string> MimeTypes = new Dictionary<string, string> {
-        [".html"] = "text/html; charset=utf-8",
-        [".htm"] = "text/html; charset=utf-8",
-        [".css"] = "text/css; charset=utf-8",
-        [".js"] = "text/javascript; charset=utf-8",
-        [".mjs"] = "text/javascript; charset=utf-8",
-        [".json"] = "application/json; charset=utf-8",
-        [".txt"] = "text/plain; charset=utf-8",
-        [".csv"] = "text/csv; charset=utf-8",
-        [".xml"] = "application/xml",
-        [".svg"] = "image/svg+xml",
-        [".png"] = "image/png",
-        [".jpg"] = "image/jpeg",
-        [".jpeg"] = "image/jpeg",
-        [".gif"] = "image/gif",
-        [".webp"] = "image/webp",
-        [".avif"] = "image/avif",
-        [".ico"] = "image/x-icon",
-        [".pdf"] = "application/pdf",
-        [".zip"] = "application/zip",
-        [".gz"] = "application/gzip",
-        [".wasm"] = "application/wasm",
-        [".mp3"] = "audio/mpeg",
-        [".wav"] = "audio/wav",
-        [".ogg"] = "audio/ogg",
-        [".mp4"] = "video/mp4",
-        [".webm"] = "video/webm",
-        [".woff"] = "font/woff",
-        [".woff2"] = "font/woff2",
-        [".ttf"] = "font/ttf",
-        [".otf"] = "font/otf",
+    private static readonly FrozenDictionary<string, ContentType> MimeTypes = new Dictionary<string, ContentType> {
+        [".html"] = ContentType.Html,
+        [".htm"] = ContentType.Html,
+        [".css"] = ContentType.Css,
+        [".js"] = ContentType.JavaScript,
+        [".mjs"] = ContentType.JavaScript,
+        [".json"] = ContentType.Json,
+        [".txt"] = ContentType.Text,
+        [".csv"] = ContentType.Csv,
+        [".xml"] = ContentType.Xml,
+        [".svg"] = ContentType.Svg,
+        [".png"] = ContentType.Png,
+        [".jpg"] = ContentType.Jpeg,
+        [".jpeg"] = ContentType.Jpeg,
+        [".gif"] = ContentType.Gif,
+        [".webp"] = ContentType.Webp,
+        [".avif"] = ContentType.Avif,
+        [".ico"] = ContentType.Icon,
+        [".pdf"] = ContentType.Pdf,
+        [".zip"] = ContentType.Zip,
+        [".gz"] = ContentType.Gzip,
+        [".wasm"] = ContentType.Wasm,
+        [".mp3"] = ContentType.Mp3,
+        [".wav"] = ContentType.Wav,
+        [".ogg"] = ContentType.Ogg,
+        [".mp4"] = ContentType.Mp4,
+        [".webm"] = ContentType.Webm,
+        [".woff"] = ContentType.Woff,
+        [".woff2"] = ContentType.Woff2,
+        [".ttf"] = ContentType.Ttf,
+        [".otf"] = ContentType.Otf,
     }.ToFrozenDictionary();
 
     private readonly Dictionary<string, string> HeaderMap;
@@ -54,28 +55,28 @@ public sealed class Reply {
     private int Code;
     private PendingRender? Pending;
 
-    private Reply(byte[] payload, int code, string contentType) {
+    private Reply(byte[] payload, HttpStatus status, ContentType contentType) {
         Payload = payload;
-        Code = code;
-        HeaderMap = new Dictionary<string, string> { ["Content-Type"] = contentType };
+        Code = (int)status;
+        HeaderMap = new Dictionary<string, string> { [HeaderNames.ContentType] = contentType.Mime() };
     }
 
-    private Reply(string filePath, int code, string contentType) {
+    private Reply(string filePath, HttpStatus status, ContentType contentType) {
         Payload = [];
         FilePath = filePath;
-        Code = code;
-        HeaderMap = new Dictionary<string, string> { ["Content-Type"] = contentType };
+        Code = (int)status;
+        HeaderMap = new Dictionary<string, string> { [HeaderNames.ContentType] = contentType.Mime() };
     }
 
     public static Reply Text(string body) =>
-        new(Encoding.UTF8.GetBytes(body), 200, "text/plain; charset=utf-8");
+        new(Encoding.UTF8.GetBytes(body), HttpStatus.Ok, ContentType.Text);
 
     public static Reply Html(string body) =>
-        new(Encoding.UTF8.GetBytes(body), 200, "text/html; charset=utf-8");
+        new(Encoding.UTF8.GetBytes(body), HttpStatus.Ok, ContentType.Html);
 
     public static Reply View(string view) {
         ArgumentException.ThrowIfNullOrEmpty(view);
-        return new Reply([], 200, "text/html; charset=utf-8") {
+        return new Reply([], HttpStatus.Ok, ContentType.Html) {
             Pending = new PendingRender(view, null, CacheMode.Default),
         };
     }
@@ -86,7 +87,7 @@ public sealed class Reply {
         var buffer = new ArrayBufferWriter<byte>();
         using (var writer = new Utf8JsonWriter(buffer))
             data.Write(writer);
-        return new Reply([], 200, "text/html; charset=utf-8") {
+        return new Reply([], HttpStatus.Ok, ContentType.Html) {
             Pending = new PendingRender(view, Encoding.UTF8.GetString(buffer.WrittenSpan), CacheMode.Default),
         };
     }
@@ -126,17 +127,17 @@ public sealed class Reply {
     }
 
     public static Reply Json<T>(T value, JsonTypeInfo<T> typeInfo) =>
-        new(JsonSerializer.SerializeToUtf8Bytes(value, typeInfo), 200, "application/json; charset=utf-8");
+        new(JsonSerializer.SerializeToUtf8Bytes(value, typeInfo), HttpStatus.Ok, ContentType.Json);
 
     public static Reply Json(ReadOnlySpan<byte> utf8Json) =>
-        new(utf8Json.ToArray(), 200, "application/json; charset=utf-8");
+        new(utf8Json.ToArray(), HttpStatus.Ok, ContentType.Json);
 
     public static Reply Json<T>(T value) where T : IViewData {
         Debug.Assert(value is not null);
         var buffer = new ArrayBufferWriter<byte>();
         using (var writer = new Utf8JsonWriter(buffer))
             value.Write(writer);
-        return new Reply(buffer.WrittenSpan.ToArray(), 200, "application/json; charset=utf-8");
+        return new Reply(buffer.WrittenSpan.ToArray(), HttpStatus.Ok, ContentType.Json);
     }
 
     public static Reply Action<T>(T value) where T : IViewData {
@@ -144,23 +145,23 @@ public sealed class Reply {
         var buffer = new ArrayBufferWriter<byte>();
         using (var writer = new Utf8JsonWriter(buffer))
             value.Write(writer);
-        return new Reply(buffer.WrittenSpan.ToArray(), 200, "application/json; charset=utf-8");
+        return new Reply(buffer.WrittenSpan.ToArray(), HttpStatus.Ok, ContentType.Json);
     }
 
     public static Reply Binary(byte[] data) {
         Debug.Assert(data is not null);
-        return new Reply(data, 200, "application/octet-stream");
+        return new Reply(data, HttpStatus.Ok, ContentType.OctetStream);
     }
 
     public static Reply File(string path) {
         var resolved = Locate(path);
-        return new Reply(resolved, 200, MimeOf(resolved));
+        return new Reply(resolved, HttpStatus.Ok, MimeOf(resolved));
     }
 
     public static Reply FileDownload(string path, string? downloadName = null) {
         var resolved = Locate(path);
         var name = downloadName is { Length: > 0 } ? downloadName : Path.GetFileName(resolved);
-        return new Reply(resolved, 200, MimeOf(resolved)).Header("Content-Disposition", Disposition(name));
+        return new Reply(resolved, HttpStatus.Ok, MimeOf(resolved)).Header(HeaderNames.ContentDisposition, Disposition(name));
     }
 
     public static void FileBase(string path) {
@@ -168,26 +169,26 @@ public sealed class Reply {
         RootPath = Path.GetFullPath(path);
     }
 
-    public static Reply Redirect(string location, int code = 302) {
-        var reply = new Reply([], code, "text/plain; charset=utf-8");
-        reply.HeaderMap["Location"] = location;
+    public static Reply Redirect(string location, HttpStatus status = HttpStatus.Found) {
+        var reply = new Reply([], status, ContentType.Text);
+        reply.HeaderMap[HeaderNames.Location] = location;
         return reply;
     }
 
     public static Reply NotModified(string etag, string cacheControl) {
-        var reply = new Reply([], 304, "text/plain; charset=utf-8");
-        reply.HeaderMap["ETag"] = etag;
-        reply.HeaderMap["Cache-Control"] = cacheControl;
+        var reply = new Reply([], HttpStatus.NotModified, ContentType.Text);
+        reply.HeaderMap[HeaderNames.ETag] = etag;
+        reply.HeaderMap[HeaderNames.CacheControl] = cacheControl;
         return reply;
     }
 
     internal static Reply AssetFile(
-        string filePath, string contentType, string etag, string cacheControl, string? encoding, bool vary) {
-        var reply = new Reply(filePath, 200, contentType);
-        reply.HeaderMap["ETag"] = etag;
-        reply.HeaderMap["Cache-Control"] = cacheControl;
+        string filePath, ContentType contentType, string etag, string cacheControl, string? encoding, bool vary) {
+        var reply = new Reply(filePath, HttpStatus.Ok, contentType);
+        reply.HeaderMap[HeaderNames.ETag] = etag;
+        reply.HeaderMap[HeaderNames.CacheControl] = cacheControl;
         if (encoding is not null)
-            reply.HeaderMap["Content-Encoding"] = encoding;
+            reply.HeaderMap[HeaderNames.ContentEncoding] = encoding;
         if (vary)
             reply.AppendVary();
         return reply;
@@ -195,6 +196,11 @@ public sealed class Reply {
 
     public Reply Status(int code) {
         Code = code;
+        return this;
+    }
+
+    public Reply Status(HttpStatus status) {
+        Code = (int)status;
         return this;
     }
 
@@ -240,18 +246,18 @@ public sealed class Reply {
 
     internal void ApplyEncoding(byte[] encoded, string encoding) {
         Payload = encoded;
-        HeaderMap["Content-Encoding"] = encoding;
+        HeaderMap[HeaderNames.ContentEncoding] = encoding;
         AppendVary();
     }
 
     internal void AppendVary() {
-        if (!HeaderMap.TryGetValue("Vary", out var existing)) {
-            HeaderMap["Vary"] = "Accept-Encoding";
+        if (!HeaderMap.TryGetValue(HeaderNames.Vary, out var existing)) {
+            HeaderMap[HeaderNames.Vary] = HeaderNames.AcceptEncoding;
             return;
         }
-        if (existing.Contains("Accept-Encoding", StringComparison.OrdinalIgnoreCase))
+        if (existing.Contains(HeaderNames.AcceptEncoding, StringComparison.OrdinalIgnoreCase))
             return;
-        HeaderMap["Vary"] = $"{existing}, Accept-Encoding";
+        HeaderMap[HeaderNames.Vary] = $"{existing}, {HeaderNames.AcceptEncoding}";
     }
 
     internal string? HeaderValue(string name) => HeaderMap.GetValueOrDefault(name);
@@ -285,8 +291,8 @@ public sealed class Reply {
         return resolved;
     }
 
-    internal static string MimeOf(string path) =>
-        MimeTypes.GetValueOrDefault(Path.GetExtension(path).ToLowerInvariant(), "application/octet-stream");
+    internal static ContentType MimeOf(string path) =>
+        MimeTypes.GetValueOrDefault(Path.GetExtension(path).ToLowerInvariant(), ContentType.OctetStream);
 
     private static string Disposition(string name) {
         var fallback = name.Replace("\"", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
