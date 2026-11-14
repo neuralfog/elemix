@@ -8,6 +8,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.6] - 2026-11-14
+
+### Added
+
+- hydris is now a Native-AOT C# framework published to NuGet, as four packages:
+  `Hydris`, `Hydris.QuickJs`, `Hydris.Generators` and `Hydris.Cli`. The renderer
+  ships prebuilt native binaries for Linux, macOS and Windows on x64 and arm64,
+  published through trusted publishing (OIDC).
+- Server-side rendering of elemix components through an embedded QuickJS engine.
+- Server actions in the style of tRPC: `[Action]` and `[Contract]` source
+  generators bind and validate request DTOs, write response DTOs, and generate a
+  typed TypeScript client plus a reactive action function on the elemix side.
+  End-to-end type safety bridges the C# backend and TypeScript frontend through a
+  generated client, rather than the shared-TypeScript inference tRPC relies on.
+- A validation rule engine wired into contract DTOs through typed rule attributes.
+- Contract support for complex types (enums, dates, nested objects, arrays) on both
+  request parse and response write.
+- Ambient request context: route params, query and CSRF are passed to every
+  template and readable in TypeScript via `param()`, `query()` and `csrf()`.
+- Action request binding from route and query params, request cancellation, and
+  custom response status and headers.
+- CSRF protection with configurable cookie and header names.
+- Security response headers (HSTS, nosniff, referrer policy).
+- A `[Config]` attribute for DI config services and CSP.
+- `Hydris.Env` for `.env` loading and typed validation.
+- A swappable logger with a driver/adapter pattern.
+- Opt-in compression, content-hashed assets, and per-request module store reset.
+- Cookie-backed stores.
+- Client-side soft navigation with hydration.
+- `Hydris.Cli` task runner, including a `routes` command that lists built-in routes.
+- A public `reactive()` primitive in elemix; server actions return a reactive handle.
+
+### Changed
+
+- hydris was rewritten from the JavaScript proof of concept to C# with Native-AOT.
+  The renderer is QuickJS embedded through a native shim with an engine-owned
+  render buffer.
+- CSR, SSR and compiler-output performance passes.
+- The optimise pass moved into the compiler.
+
+### Fixed
+
+- Reactivity audit pass across the runtime and compiler: text-hole hydration,
+  `deleteProperty` and root reactive array tracking, fragment row and fragment
+  hole moves, class de-duplication, and cross-run split-text holes. Each fix is
+  pinned by a fixture run in both the CSR and SSR harnesses.
+- Template and markup-returning holes survive SSR render and hydration, mounted
+  as children with the server DOM normalised before fixed-path navigation.
+- Conditional holes survive data flipping to null; torn-down effects are disposed
+  so a stale subscriber copy cannot re-run them.
+- The QuickJS window mock no longer stands in for a client check during SSR.
+- Navigation, store and `activeScopes` exports corrected.
+
+### Removed
+
+- `@neuralfog/elemix-storybook`.
+- The JavaScript hydris proof of concept.
+
+### Security
+
+- hydris security audit and resolution of its findings (header/CRLF injection,
+  nosniff, routing denial of service, type confusion, and others).
+
 ## [0.9.5] - 2026-08-22
 
 ### Fixed

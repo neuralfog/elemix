@@ -1,6 +1,6 @@
 {
     "name": "@neuralfog/elemix-ssr",
-    "version": "0.0.0",
+    "version": "0.9.6",
     "license": "MIT",
     "author": "brownhounds",
     "type": "module",

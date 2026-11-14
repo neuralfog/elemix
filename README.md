@@ -24,6 +24,7 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-vscode` | VS Code Extension For Elemix. | [README](packages/vscode/README.md) |
 | `@neuralfog/elemix-nvim` | Neovim Plugin For Elemix. | [README](packages/nvim/README.md) |
 | `create-elemix-app` | Scaffold A New Elemix App. | [README](packages/create-app/README.md) |
+| `Hydris` | Server-Side Rendering Framework For Elemix (Native-AOT C#, on NuGet). | [README](packages/hydris/Hydris/README.md) |
 
 ## Contributing
 

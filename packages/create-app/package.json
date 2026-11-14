@@ -1,6 +1,6 @@
 {
     "name": "create-elemix-app",
-    "version": "0.9.5",
+    "version": "0.9.6",
     "description": "Scaffold a new elemix app from the official template.",
     "license": "MIT",
     "author": "brownhounds",
