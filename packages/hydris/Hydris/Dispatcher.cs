@@ -65,6 +65,8 @@ internal sealed class Dispatcher(
         reply.Materialize(request, scope);
         if (Csp.Enabled)
             Csp.Apply(reply);
+        if (SecurityHeaderGate.Enabled)
+            SecurityHeaderGate.Apply(reply);
         if (Compressor.Enabled)
             Compressor.ApplyDynamic(reply, request);
         await reply.WriteTo(context.Response, context.Body, method == Method.Head, context.Lifetime.RequestAborted);

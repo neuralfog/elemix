@@ -61,6 +61,16 @@ public sealed class App {
         return this;
     }
 
+    public App EnableSecurityHeaders(SecurityHeadersOptions? options = null) {
+        var config = options ?? new SecurityHeadersOptions();
+        if (!string.IsNullOrEmpty(config.EnvFile))
+            Env.Load(config.EnvFile);
+
+        SecurityHeaderGate.Configure(Container.Get<SecurityHeaders>());
+        SecurityHeaderGate.Enable();
+        return this;
+    }
+
     public App Assets(string prefix, string dir, AssetOptions? options = null) {
         ArgumentException.ThrowIfNullOrEmpty(prefix);
         ArgumentException.ThrowIfNullOrEmpty(dir);

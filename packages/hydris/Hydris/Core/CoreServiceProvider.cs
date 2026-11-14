@@ -15,6 +15,8 @@ public sealed class CoreServiceProvider : ServiceProvider {
         container.Scoped<ICsrf>(c => new Csrf(c.Get<Request>(), c.Get<CookieAuthority>()));
         container.Singleton(_ => new CspConfig());
         container.Singleton(c => new CspPolicy(c.Get<CspConfig>()));
+        container.Singleton(_ => new SecurityHeadersConfig());
+        container.Singleton(c => new SecurityHeaders(c.Get<SecurityHeadersConfig>()));
     }
 
     public static DiContainer RequestScope(DiContainer container, Request request) {
