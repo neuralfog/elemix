@@ -1,6 +1,7 @@
 using System.IO;
 using Hydris.Container;
 using Hydris.Http;
+using Hydris.Logging;
 
 namespace Hydris.Core;
 
@@ -17,6 +18,7 @@ public sealed class CoreServiceProvider : ServiceProvider {
         container.Singleton(c => new CspPolicy(c.Get<CspConfig>()));
         container.Singleton(_ => new SecurityHeadersConfig());
         container.Singleton(c => new SecurityHeaders(c.Get<SecurityHeadersConfig>()));
+        container.Singleton(_ => new Logger(new ConsoleLoggerDriver()));
     }
 
     public static DiContainer RequestScope(DiContainer container, Request request) {

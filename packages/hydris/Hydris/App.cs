@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
-using Hydris.Cli;
 using Hydris.Container;
 using Hydris.Core;
 using Hydris.Error;
@@ -13,6 +12,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using HLog = Hydris.Logging;
 
 namespace Hydris;
 
@@ -71,6 +71,11 @@ public sealed class App {
         return this;
     }
 
+    public App Logger(HLog.ILoggerDriver? driver = null, HLog.LogLevel minimum = HLog.LogLevel.Info) {
+        Container.Singleton(_ => new HLog.Logger(driver ?? new HLog.ConsoleLoggerDriver(), minimum));
+        return this;
+    }
+
     public App Assets(string prefix, string dir, AssetOptions? options = null) {
         ArgumentException.ThrowIfNullOrEmpty(prefix);
         ArgumentException.ThrowIfNullOrEmpty(dir);
@@ -98,9 +103,10 @@ public sealed class App {
         var stopwatch = Stopwatch.StartNew();
 
         Container.Start();
+        var log = Container.Get<HLog.Logger>();
 
         using var loggerFactory = LoggerFactory.Create(builder =>
-            builder.AddSimpleConsole(o => o.SingleLine = true).SetMinimumLevel(LogLevel.Warning));
+            builder.AddProvider(new HLog.MicrosoftLoggerBridge(log)).SetMinimumLevel(LogLevel.Warning));
 
         if (Container.Has<IRenderer>())
             Views.UseRenderer(Container.Get<IRenderer>());
@@ -119,11 +125,9 @@ public sealed class App {
 
         await server.StartAsync(new Dispatcher(Routes, Container, TrustProxy, Middlewares, Errors, MaxBody), CancellationToken.None);
 
-        Console.Write(Banner.Serve(new BannerInfo {
-            Port = port,
-            Dev = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") != "Production",
-            Ms = stopwatch.ElapsedMilliseconds
-        }));
+        var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? string.Empty;
+        var development = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") != "Production";
+        log.Ready(new HLog.ServerReady(version, "http", "localhost", port, stopwatch.ElapsedMilliseconds, development));
 
         var shutdown = new TaskCompletionSource();
         using var sigint = PosixSignalRegistration.Create(PosixSignal.SIGINT, Stop);

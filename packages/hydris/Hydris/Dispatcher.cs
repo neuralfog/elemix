@@ -2,6 +2,7 @@ using Hydris.Container;
 using Hydris.Core;
 using Hydris.Error;
 using Hydris.Http;
+using Hydris.Logging;
 using Hydris.Middleware;
 using Hydris.Routing;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -76,7 +77,7 @@ internal sealed class Dispatcher(
 
     private Reply Fail(Exception error, Request request, bool json) {
         if (DefaultErrorRenderer.StatusOf(error).Code() >= Status.InternalServerError.Code())
-            Console.Error.WriteLine(error);
+            services.Get<Logger>().Error(error.Message, error);
 
         Reply reply;
         try {
