@@ -1,5 +1,7 @@
 <img src=".readme/elemix-banner.svg" alt="elemix - Reactive Elements" width="100%" />
 
+[![release](https://github.com/neuralfog/elemix/actions/workflows/release.yml/badge.svg)](https://github.com/neuralfog/elemix/actions/workflows/release.yml)
+
 # Elemix
 
 A compiled frontend library - no virtual DOM, incredibly fast, with state management that doesn't suck and frictionless ergonomics that stay out of your way - for the love of the web 💙
@@ -24,7 +26,7 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-vscode` | VS Code Extension For Elemix. | [README](packages/vscode/README.md) |
 | `@neuralfog/elemix-nvim` | Neovim Plugin For Elemix. | [README](packages/nvim/README.md) |
 | `create-elemix-app` | Scaffold A New Elemix App. | [README](packages/create-app/README.md) |
-| `Hydris` | Server-Side Rendering Framework For Elemix (Native-AOT C#, on NuGet). | [README](packages/hydris/Hydris/README.md) |
+| `Hydris` | Server-Side Rendering Framework For Elemix (Native-AOT C#). | [README](packages/hydris/Hydris/README.md) |
 
 ## Contributing
 
