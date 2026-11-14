@@ -1,5 +1,4 @@
 using System.Collections.Frozen;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -40,7 +39,7 @@ internal static class Compressor {
     }.ToFrozenSet(StringComparer.Ordinal);
 
     internal static void Configure(CompressionOptions options) {
-        Debug.Assert(options is not null);
+        ArgumentNullException.ThrowIfNull(options);
         if (Locked)
             throw new InvalidOperationException(
                 "Compression must be configured before Serve; it locks once the server boots.");

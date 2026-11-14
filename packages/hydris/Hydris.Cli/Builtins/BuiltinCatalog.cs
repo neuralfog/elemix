@@ -3,7 +3,7 @@ namespace Hydris.Cli.Builtins;
 public readonly record struct BuiltinInfo(string Usage, string Description);
 
 public static class BuiltinCatalog {
-    public static readonly IReadOnlyList<BuiltinInfo> All = [
+    public static IReadOnlyList<BuiltinInfo> All { get; } = [
         new("build [args]", "run the hydris build"),
         new("watch <glob>... -- <cmd>", "re-run a command when files change"),
         new("routes", "list every route and flag duplicates"),

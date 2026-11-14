@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Hydris.Container;
 using Hydris.Http;
 
@@ -52,7 +53,7 @@ internal sealed class Route(
         return segments.Length == Segments.Length ? parameters ?? EmptyParams : null;
     }
 
-    private static readonly IReadOnlyDictionary<string, string> EmptyParams = new Dictionary<string, string>();
+    private static readonly IReadOnlyDictionary<string, string> EmptyParams = ReadOnlyDictionary<string, string>.Empty;
 
     private static string[] SegmentsOf(string path) {
         var query = path.IndexOf('?');

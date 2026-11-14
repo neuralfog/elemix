@@ -2,13 +2,8 @@ using Hydris.Http;
 
 namespace Hydris.Error;
 
-public class HttpException : Exception {
-    public Status Status { get; }
-
-    public HttpException(Status status, string? message = null)
-        : base(message ?? status.Reason()) {
-        Status = status;
-    }
+public class HttpException(Status status, string? message = null) : Exception(message ?? status.Reason()) {
+    public Status Status { get; } = status;
 }
 
 public sealed class BadRequestException(string? message = null) : HttpException(Status.BadRequest, message);

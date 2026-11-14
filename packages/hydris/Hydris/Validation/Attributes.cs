@@ -3,7 +3,7 @@ namespace Hydris.Validation;
 public abstract class ValidationAttribute : Attribute {
     protected ValidationAttribute(params object[] args) => Args = args;
 
-    public object[] Args { get; }
+    public IReadOnlyList<object> Args { get; }
 }
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]

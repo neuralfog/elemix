@@ -4,15 +4,15 @@ using System.Text.RegularExpressions;
 namespace Hydris.Cli;
 
 public sealed class Glob {
-    private readonly Regex pattern;
+    private readonly Regex Pattern;
     public string BaseDir { get; }
 
     private Glob(string baseDir, Regex pattern) {
         BaseDir = baseDir;
-        this.pattern = pattern;
+        Pattern = pattern;
     }
 
-    public bool IsMatch(string relativePath) => pattern.IsMatch(relativePath.Replace('\\', '/'));
+    public bool IsMatch(string relativePath) => Pattern.IsMatch(relativePath.Replace('\\', '/'));
 
     public static Glob Compile(string raw) {
         var p = raw.Replace('\\', '/');

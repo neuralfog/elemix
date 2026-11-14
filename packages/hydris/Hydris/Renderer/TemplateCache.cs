@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace Hydris.Renderer;
 
@@ -8,7 +7,7 @@ public sealed class TemplateCache : IRenderer, IDisposable {
     private readonly ConcurrentDictionary<string, CachedView> Cache = [];
 
     public TemplateCache(IRenderer inner) {
-        Debug.Assert(inner is not null);
+        ArgumentNullException.ThrowIfNull(inner);
         Inner = inner;
     }
 

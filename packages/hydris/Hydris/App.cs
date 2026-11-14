@@ -19,7 +19,7 @@ namespace Hydris;
 public sealed class App {
     public Router Routes { get; } = new();
     public DiContainer Container { get; } = new();
-    public bool TrustProxy { get; set; }
+    private bool TrustProxyEnabled;
 
     private readonly List<Type> Middlewares = [];
     private IErrorRenderer Errors = new DefaultErrorRenderer();
@@ -36,6 +36,11 @@ public sealed class App {
 
     public App Middleware<T>() where T : IMiddleware {
         Middlewares.Add(typeof(T));
+        return this;
+    }
+
+    public App TrustProxy(bool trust = true) {
+        TrustProxyEnabled = trust;
         return this;
     }
 
@@ -88,7 +93,7 @@ public sealed class App {
     }
 
     public App RenderErrors(IErrorRenderer renderer) {
-        Debug.Assert(renderer is not null);
+        ArgumentNullException.ThrowIfNull(renderer);
         Errors = renderer;
         return this;
     }
@@ -123,7 +128,7 @@ public sealed class App {
 
         using var server = new KestrelServer(Options.Create(kestrel), transport, loggerFactory);
 
-        await server.StartAsync(new Dispatcher(Routes, Container, TrustProxy, Middlewares, Errors, MaxBody), CancellationToken.None);
+        await server.StartAsync(new Dispatcher(Routes, Container, TrustProxyEnabled, Middlewares, Errors, MaxBody), CancellationToken.None);
 
         var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? string.Empty;
         var development = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") != "Production";

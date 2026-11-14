@@ -1,6 +1,5 @@
 using System.Buffers.Text;
 using System.Collections.Frozen;
-using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -65,7 +64,7 @@ public sealed class CookieAuthority(Request request) {
     public string Sign(string name, string value) => $"{value}.{Mac(name, value)}";
 
     public void SetCookie(Reply reply, string name, string value, CookieOptions? options = null) {
-        Debug.Assert(reply is not null);
+        ArgumentNullException.ThrowIfNull(reply);
         reply.Cookie(name, Sign(name, value), options);
     }
 

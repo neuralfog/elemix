@@ -14,13 +14,11 @@ internal sealed class AssetConfig {
         CacheControl = ComposeCacheControl(options);
     }
 
-    private static string ComposeCacheControl(AssetOptions options) {
-        if (options.Immutable)
-            return $"{CacheDirective.Public}, {CacheDirective.MaxAge}={options.MaxAge ?? DefaultMaxAge}, {CacheDirective.Immutable}";
-        if (options.MaxAge is int maxAge)
-            return $"{CacheDirective.Public}, {CacheDirective.MaxAge}={maxAge}";
-        return CacheDirective.NoCache;
-    }
+    private static string ComposeCacheControl(AssetOptions options) => options switch {
+        { Immutable: true } => $"{CacheDirective.Public}, {CacheDirective.MaxAge}={options.MaxAge ?? DefaultMaxAge}, {CacheDirective.Immutable}",
+        { MaxAge: int maxAge } => $"{CacheDirective.Public}, {CacheDirective.MaxAge}={maxAge}",
+        _ => CacheDirective.NoCache,
+    };
 }
 
 internal static class AssetHandler {

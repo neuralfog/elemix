@@ -1,5 +1,4 @@
 using System.Buffers.Text;
-using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -27,7 +26,7 @@ public sealed class Csrf(Request request, CookieAuthority authority) : ICsrf {
     internal static void Enable() => Enabled = true;
 
     public string Issue(Reply reply) {
-        Debug.Assert(reply is not null);
+        ArgumentNullException.ThrowIfNull(reply);
 
         var existing = authority.Get(CookieName);
         if (existing is not null)

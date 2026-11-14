@@ -7,11 +7,12 @@ using System.Text.RegularExpressions;
 namespace Hydris.Validation;
 
 [ValidationRule]
-internal sealed class Email : Rule {
-    private static readonly Regex Pattern = new(@"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$");
+internal sealed partial class Email : Rule {
+    [GeneratedRegex(@"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$")]
+    private static partial Regex Pattern();
 
     public override string? Check(in Value value) =>
-        value.IsString(out var s) && Pattern.IsMatch(s)
+        value.IsString(out var s) && Pattern().IsMatch(s)
             ? null
             : $"The {value.Field} field must be a valid email address.";
 }
@@ -27,21 +28,23 @@ internal sealed class Url : Rule {
 }
 
 [ValidationRule]
-internal sealed class Uuid : Rule {
-    private static readonly Regex Pattern = new(@"^[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}$");
+internal sealed partial class Uuid : Rule {
+    [GeneratedRegex(@"^[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}$")]
+    private static partial Regex Pattern();
 
     public override string? Check(in Value value) =>
-        value.IsString(out var s) && Pattern.IsMatch(s)
+        value.IsString(out var s) && Pattern().IsMatch(s)
             ? null
             : $"The {value.Field} field must be a valid UUID.";
 }
 
 [ValidationRule]
-internal sealed class Ulid : Rule {
-    private static readonly Regex Pattern = new(@"^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$");
+internal sealed partial class Ulid : Rule {
+    [GeneratedRegex(@"^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$")]
+    private static partial Regex Pattern();
 
     public override string? Check(in Value value) =>
-        value.IsString(out var s) && Pattern.IsMatch(s)
+        value.IsString(out var s) && Pattern().IsMatch(s)
             ? null
             : $"The {value.Field} field must be a valid ULID.";
 }
@@ -71,11 +74,12 @@ internal sealed class Ipv6 : Rule {
 }
 
 [ValidationRule]
-internal sealed class MacAddress : Rule {
-    private static readonly Regex Pattern = new(@"^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$");
+internal sealed partial class MacAddress : Rule {
+    [GeneratedRegex(@"^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$")]
+    private static partial Regex Pattern();
 
     public override string? Check(in Value value) =>
-        value.IsString(out var s) && Pattern.IsMatch(s)
+        value.IsString(out var s) && Pattern().IsMatch(s)
             ? null
             : $"The {value.Field} field must be a valid MAC address.";
 }
@@ -95,11 +99,12 @@ internal sealed class Json : Rule {
 }
 
 [ValidationRule]
-internal sealed class HexColor : Rule {
-    private static readonly Regex Pattern = new(@"^#(?:(?:[0-9a-fA-F]{3}){1,2}|(?:[0-9a-fA-F]{4}){1,2})$");
+internal sealed partial class HexColor : Rule {
+    [GeneratedRegex(@"^#(?:(?:[0-9a-fA-F]{3}){1,2}|(?:[0-9a-fA-F]{4}){1,2})$")]
+    private static partial Regex Pattern();
 
     public override string? Check(in Value value) =>
-        value.IsString(out var s) && Pattern.IsMatch(s)
+        value.IsString(out var s) && Pattern().IsMatch(s)
             ? null
             : $"The {value.Field} field must be a valid hexadecimal color.";
 }
@@ -122,14 +127,15 @@ internal sealed class DateFormat : Rule {
 }
 
 [ValidationRule]
-internal sealed class Decimal : Rule {
-    private static readonly Regex Pattern = new(@"^[+-]?\d*\.?(\d*)$");
+internal sealed partial class Decimal : Rule {
+    [GeneratedRegex(@"^[+-]?\d*\.?(\d*)$")]
+    private static partial Regex Pattern();
 
     public override string? Check(in Value value) {
         if (!value.IsNumeric(out _))
             return Message(value);
 
-        var match = Pattern.Match(value.Str());
+        var match = Pattern().Match(value.Str());
         if (!match.Success)
             return Message(value);
 

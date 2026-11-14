@@ -36,7 +36,7 @@ public sealed class DiContainer : IAsyncDisposable {
     }
 
     public DiContainer Value<T>(T instance) {
-        Debug.Assert(instance is not null);
+        ArgumentNullException.ThrowIfNull(instance);
         SetLocal(typeof(T), instance);
         return this;
     }
@@ -60,14 +60,14 @@ public sealed class DiContainer : IAsyncDisposable {
     public T Get<T>() => (T)Resolve(typeof(T));
 
     public object Get(Type type) {
-        Debug.Assert(type is not null);
+        ArgumentNullException.ThrowIfNull(type);
         return Resolve(type);
     }
 
     public bool Has<T>() => Has(typeof(T));
 
     public bool Has(Type type) {
-        Debug.Assert(type is not null);
+        ArgumentNullException.ThrowIfNull(type);
         for (DiContainer? c = this; c is not null; c = c.Parent) {
             if (c.TryGetLocal(type, out _))
                 return true;

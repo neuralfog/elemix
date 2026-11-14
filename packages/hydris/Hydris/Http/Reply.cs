@@ -149,7 +149,7 @@ public sealed class Reply {
     }
 
     public static Reply Binary(byte[] data) {
-        Debug.Assert(data is not null);
+        ArgumentNullException.ThrowIfNull(data);
         return new Reply(data, HttpStatus.Ok, ContentType.OctetStream);
     }
 

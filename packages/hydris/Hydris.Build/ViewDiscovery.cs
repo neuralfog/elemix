@@ -4,7 +4,7 @@ namespace Hydris.Build;
 
 public readonly record struct View(string Key, string Source, string? Export, bool Exists);
 
-public static partial class ViewDiscovery {
+internal static partial class ViewDiscovery {
     [GeneratedRegex(@"Reply\s*\.\s*View\s*\(\s*""([^""]+)""")]
     private static partial Regex ViewCall();
 

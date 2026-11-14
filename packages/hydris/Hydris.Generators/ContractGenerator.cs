@@ -245,7 +245,7 @@ public sealed class ContractGenerator : IIncrementalGenerator {
             .OrderByDescending(c => c.Parameters.Length)
             .FirstOrDefault();
         if (primary is null)
-            return new List<Member>();
+            return [];
 
         var members = new List<Member>();
         foreach (var parameter in primary.Parameters) {
@@ -354,7 +354,7 @@ public sealed class ContractGenerator : IIncrementalGenerator {
     private static bool IsRequired(ITypeSymbol type) =>
         UnwrapNullable(type) is null && type.NullableAnnotation != NullableAnnotation.Annotated;
 
-    private sealed class Member {
+    private sealed record Member {
         public Member(string name, ITypeSymbol type, string wire, IReadOnlyList<Rule> rules, Location? location, bool required) {
             Name = name;
             Type = type;
@@ -377,7 +377,7 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         public Location? Location { get; }
     }
 
-    private sealed class Rule {
+    private sealed record Rule {
         public Rule(string name, IReadOnlyList<string> args) {
             Name = name;
             Args = args;

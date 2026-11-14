@@ -221,19 +221,5 @@ public static class TaskRunner {
         return Path.GetFullPath(Path.Combine(config.RootDir, task.Cwd));
     }
 
-    private sealed class Leaf {
-        public Leaf(string label, string command, string? shell, string cwd, Dictionary<string, string> env) {
-            Label = label;
-            Command = command;
-            Shell = shell;
-            Cwd = cwd;
-            Env = env;
-        }
-
-        public string Label { get; }
-        public string Command { get; }
-        public string? Shell { get; }
-        public string Cwd { get; }
-        public Dictionary<string, string> Env { get; }
-    }
+    private sealed record Leaf(string Label, string Command, string? Shell, string Cwd, Dictionary<string, string> Env);
 }

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Hydris.Build;
 
-public static class ContractEmit {
+internal static class ContractEmit {
     private static readonly string[] SkipSegments = ["obj", "bin", "node_modules", ".git"];
 
     public static int Run(string root, string viewsRoot) {
@@ -293,13 +293,13 @@ public static class ContractEmit {
         Dictionary<string, EnumDef> enums) {
         raw = raw.Trim();
         if (raw.EndsWith("?", StringComparison.Ordinal))
-            return MapType(raw.Substring(0, raw.Length - 1), contracts, enums) + " | null";
+            return MapType(raw[..^1], contracts, enums) + " | null";
         if (raw.EndsWith("[]", StringComparison.Ordinal))
-            return Wrap(MapType(raw.Substring(0, raw.Length - 2), contracts, enums)) + "[]";
+            return Wrap(MapType(raw[..^2], contracts, enums)) + "[]";
         var open = raw.IndexOf('<');
         if (open > 0 && raw.EndsWith(">", StringComparison.Ordinal)) {
-            var outer = raw.Substring(0, open);
-            var inner = raw.Substring(open + 1, raw.Length - open - 2);
+            var outer = raw[..open];
+            var inner = raw[(open + 1)..^1];
             if (outer is "List" or "IList" or "IReadOnlyList" or "ICollection"
                 or "IReadOnlyCollection" or "IEnumerable" or "HashSet")
                 return Wrap(MapType(inner, contracts, enums)) + "[]";
@@ -330,12 +330,12 @@ public static class ContractEmit {
     private static string Core(string raw) {
         raw = raw.Trim();
         if (raw.EndsWith("?", StringComparison.Ordinal))
-            return Core(raw.Substring(0, raw.Length - 1));
+            return Core(raw[..^1]);
         if (raw.EndsWith("[]", StringComparison.Ordinal))
-            return Core(raw.Substring(0, raw.Length - 2));
+            return Core(raw[..^2]);
         var open = raw.IndexOf('<');
         if (open > 0 && raw.EndsWith(">", StringComparison.Ordinal))
-            return Core(raw.Substring(open + 1, raw.Length - open - 2));
+            return Core(raw[(open + 1)..^1]);
         return raw;
     }
 
@@ -343,7 +343,7 @@ public static class ContractEmit {
         var names = new HashSet<string>(StringComparer.Ordinal);
         foreach (var segment in path.Split('/')) {
             if (segment.Length > 1 && segment[0] == ':')
-                names.Add(segment.Substring(1));
+                names.Add(segment[1..]);
         }
 
         return names;
@@ -356,7 +356,7 @@ public static class ContractEmit {
                 continue;
             sb.Append('/');
             if (segment.Length > 1 && segment[0] == ':')
-                sb.Append("${encodeURIComponent(String(args.").Append(segment.Substring(1)).Append("))}");
+                sb.Append("${encodeURIComponent(String(args.").Append(segment[1..]).Append("))}");
             else
                 sb.Append(segment);
         }
@@ -365,7 +365,7 @@ public static class ContractEmit {
     }
 
     private static string StripNullable(string raw) =>
-        raw.EndsWith("?", StringComparison.Ordinal) ? raw.Substring(0, raw.Length - 1) : raw;
+        raw.EndsWith("?", StringComparison.Ordinal) ? raw[..^1] : raw;
 
     private static readonly HashSet<string> Reserved = new(StringComparer.Ordinal) {
         "break", "case", "catch", "class", "const", "continue", "debugger", "default",
@@ -380,7 +380,7 @@ public static class ContractEmit {
         Reserved.Contains(name) ? name + "Action" : name;
 
     private static string Pascal(string name) =>
-        name.Length == 0 ? name : char.ToUpperInvariant(name[0]) + name.Substring(1);
+        name.Length == 0 ? name : char.ToUpperInvariant(name[0]) + name[1..];
 
     private static ContractDef ReadContract(RecordDeclarationSyntax record) {
         var fields = new List<FieldDef>();
@@ -451,11 +451,11 @@ public static class ContractEmit {
             SimpleNameSyntax simple => simple.Identifier.Text,
             _ => name.ToString(),
         };
-        return text.EndsWith("Attribute", StringComparison.Ordinal) ? text.Substring(0, text.Length - 9) : text;
+        return text.EndsWith("Attribute", StringComparison.Ordinal) ? text[..^9] : text;
     }
 
     private static string Camel(string name) =>
-        name.Length == 0 ? name : char.ToLowerInvariant(name[0]) + name.Substring(1);
+        name.Length == 0 ? name : char.ToLowerInvariant(name[0]) + name[1..];
 
     private static IEnumerable<string> Sources(string root) {
         foreach (var file in Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories)) {
