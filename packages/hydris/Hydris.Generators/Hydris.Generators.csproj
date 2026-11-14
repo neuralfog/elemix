@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsPackable>true</IsPackable>
     <PackageId>Hydris.Generators</PackageId>
     <Description>Source generators for Hydris (ViewData).</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput>

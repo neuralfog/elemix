@@ -139,3 +139,13 @@ if (existsSync(formatterLock)) {
     writeFileSync(formatterLock, text);
     console.log(`${formatterLock} -> ${next}`);
 }
+
+const hydrisProps = 'packages/hydris/Directory.Build.props';
+if (existsSync(hydrisProps)) {
+    const text = readFileSync(hydrisProps, 'utf8').replace(
+        /(<Version>)[^<]+(<\/Version>)/,
+        `$1${next}$2`,
+    );
+    writeFileSync(hydrisProps, text);
+    console.log(`${hydrisProps} -> ${next}`);
+}

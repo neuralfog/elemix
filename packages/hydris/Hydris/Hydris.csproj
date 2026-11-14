@@ -6,6 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Hydris</RootNamespace>
     <AssemblyName>Hydris</AssemblyName>
+    <IsPackable>true</IsPackable>
+    <PackageId>Hydris</PackageId>
+    <Description>Server-side rendering framework for elemix, built on Native-AOT C#.</Description>
     <IsAotCompatible>true</IsAotCompatible>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

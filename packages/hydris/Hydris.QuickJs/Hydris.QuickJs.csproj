@@ -6,6 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Hydris.QuickJs</RootNamespace>
     <AssemblyName>Hydris.QuickJs</AssemblyName>
+    <IsPackable>true</IsPackable>
+    <PackageId>Hydris.QuickJs</PackageId>
+    <Description>Embedded QuickJS server-side rendering engine for Hydris.</Description>
     <IsAotCompatible>true</IsAotCompatible>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
