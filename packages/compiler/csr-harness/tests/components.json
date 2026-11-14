@@ -302,5 +302,73 @@
     {
         "tag": "mx-deep-nest",
         "fixture": "MxDeepNest"
+    },
+    {
+        "tag": "delete-prop-app",
+        "fixture": "DeletePropApp"
+    },
+    {
+        "tag": "root-array-app",
+        "fixture": "RootArrayApp"
+    },
+    {
+        "tag": "fragment-row-app",
+        "fixture": "FragmentRowApp"
+    },
+    {
+        "tag": "empty-trailing-hole-app",
+        "fixture": "EmptyTrailingHoleApp"
+    },
+    {
+        "tag": "cross-run-holes-app",
+        "fixture": "CrossRunHolesApp"
+    },
+    {
+        "tag": "structural-sibling-app",
+        "fixture": "StructuralSiblingApp"
+    },
+    {
+        "tag": "emoji-prefix-app",
+        "fixture": "EmojiPrefixApp"
+    },
+    {
+        "tag": "dup-class-app",
+        "fixture": "DupClassApp"
+    },
+    {
+        "tag": "template-hole-app",
+        "fixture": "TemplateHoleApp"
+    },
+    {
+        "tag": "fragment-hole-app",
+        "fixture": "FragmentHoleApp"
+    },
+    {
+        "tag": "prop-safe-app",
+        "fixture": "PropSafeApp"
+    },
+    {
+        "tag": "card-list-app",
+        "fixture": "CardListApp"
+    },
+    {
+        "tag": "lifecycle-app",
+        "fixture": "LifecycleApp"
+    },
+    {
+        "tag": "pragma-app",
+        "fixture": "PragmaApp"
+    },
+    {
+        "tag": "rating-input",
+        "fixture": "RatingInput"
+    },
+    {
+        "tag": "signal-app",
+        "fixture": "SignalApp"
+    },
+    {
+        "tag": "reset-mixed",
+        "fixture": "ResetMixed"
     }
 ]

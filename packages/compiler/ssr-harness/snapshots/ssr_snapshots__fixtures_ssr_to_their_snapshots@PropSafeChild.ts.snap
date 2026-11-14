@@ -1,0 +1,21 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/PropSafeChild.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Props = { label: string };
+
+export class PropSafeChild extends Component<Props> {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'prop-safe-child'}><template shadowrootmode="open" shadowrootserializable=""><span class="lbl">`, $__ssrText(this.props.label), `</span></template></${this.$$__tag ?? 'prop-safe-child'}>`];
+}
+
+    
+}
+$__defineComponent('prop-safe-child', PropSafeChild);
+PropSafeChild.prototype.$$__tag = 'prop-safe-child';
+PropSafeChild.$$__propSafe = true;

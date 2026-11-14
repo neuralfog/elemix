@@ -53,6 +53,39 @@ public sealed class Fixtures {
     [Get("/null-guard-app")]
     public Reply NullGuardApp() => Reply.View("fixtures/NullGuardApp");
 
+    [Get("/empty-trailing-hole-app")]
+    public Reply EmptyTrailingHoleApp() => Reply.View("fixtures/EmptyTrailingHoleApp");
+
+    [Get("/cross-run-holes-app")]
+    public Reply CrossRunHolesApp() => Reply.View("fixtures/CrossRunHolesApp");
+
+    [Get("/structural-sibling-app")]
+    public Reply StructuralSiblingApp() => Reply.View("fixtures/StructuralSiblingApp");
+
+    [Get("/emoji-prefix-app")]
+    public Reply EmojiPrefixApp() => Reply.View("fixtures/EmojiPrefixApp");
+
+    [Get("/dup-class-app")]
+    public Reply DupClassApp() => Reply.View("fixtures/DupClassApp");
+
+    [Get("/delete-prop-app")]
+    public Reply DeletePropApp() => Reply.View("fixtures/DeletePropApp");
+
+    [Get("/root-array-app")]
+    public Reply RootArrayApp() => Reply.View("fixtures/RootArrayApp");
+
+    [Get("/fragment-row-app")]
+    public Reply FragmentRowApp() => Reply.View("fixtures/FragmentRowApp");
+
+    [Get("/template-hole-app")]
+    public Reply TemplateHoleApp() => Reply.View("fixtures/TemplateHoleApp");
+
+    [Get("/fragment-hole-app")]
+    public Reply FragmentHoleApp() => Reply.View("fixtures/FragmentHoleApp");
+
+    [Get("/prop-safe-app")]
+    public Reply PropSafeApp() => Reply.View("fixtures/PropSafeApp");
+
     [Get("/mx-sibling-holes")]
     public Reply MxSiblingHoles() => Reply.View("fixtures/MxSiblingHoles");
 
@@ -138,6 +171,9 @@ public sealed class Fixtures {
 
     [Get("/attr-app")]
     public Reply AttrApp() => Reply.View("fixtures/AttrApp");
+
+    [Get("/async-app")]
+    public Reply AsyncApp() => Reply.View("fixtures/AsyncApp");
 
     [Get("/verbs-panel-app")]
     public Reply VerbsPanelApp() => Reply.View("fixtures/VerbsPanelApp");

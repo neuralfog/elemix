@@ -1,0 +1,31 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/RootArrayApp.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<p class="len"> </p><button>add</button>');
+
+export class RootArrayApp extends Component {
+    state = $__state<number[]>([1, 2, 3]);
+
+    add = (): void => {
+        this.state.push(this.state.length + 1);
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.add);
+$__effect(() => {
+$__setText(_n2, this.state.length);
+});
+return _r0;
+}
+}
+$__defineComponent('root-array-app', RootArrayApp);
+RootArrayApp.prototype.$$__tag = 'root-array-app';

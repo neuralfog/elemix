@@ -220,12 +220,44 @@ fn hydrate_bind(
         let el_var = grab(ctx, emitter, root, parent, &mut grabbed, &mut lines);
         let lens = ctx.var("d");
         lines.push(emitter.dyn_lens(&lens, &el_var));
-        let prefixes: Vec<usize> = idxs.iter().map(|&i| parsed.holes[i].prefix).collect();
-        let run_index = idxs.first().map_or(0, |&i| parsed.holes[i].run_index);
-        let vals = ctx.var("v");
-        lines.push(emitter.split_run(&vals, &el_var, run_index, &prefixes, &lens));
-        for (k, &i) in idxs.iter().enumerate() {
-            node_for[i] = format!("{vals}[{k}]");
+        let mut runs: Vec<(usize, usize)> = Vec::new();
+        let mut s = 0;
+        while s < idxs.len() {
+            let run = parsed.holes[idxs[s]].run_index;
+            let mut e = s + 1;
+            while e < idxs.len() && parsed.holes[idxs[e]].run_index == run {
+                e += 1;
+            }
+            runs.push((s, e));
+            s = e;
+        }
+        if runs.len() == 1 {
+            let (s, e) = runs[0];
+            let run_index = parsed.holes[idxs[s]].run_index;
+            let prefixes: Vec<usize> = idxs[s..e].iter().map(|&i| parsed.holes[i].prefix).collect();
+            let vals = ctx.var("v");
+            lines.push(emitter.split_run(&vals, &el_var, run_index, &prefixes, &lens));
+            for (k, i) in (s..e).enumerate() {
+                node_for[idxs[i]] = format!("{vals}[{k}]");
+            }
+        } else {
+            let mut caps: Vec<String> = Vec::new();
+            for &(s, _) in &runs {
+                let run_index = parsed.holes[idxs[s]].run_index;
+                let cvar = ctx.var("c");
+                lines.push(emitter.run_start(&cvar, &el_var, run_index));
+                caps.push(cvar);
+            }
+            for (gi, &(s, e)) in runs.iter().enumerate() {
+                let prefixes: Vec<usize> =
+                    idxs[s..e].iter().map(|&i| parsed.holes[i].prefix).collect();
+                let lens_arg = format!("{lens}.slice({s}, {e})");
+                let vals = ctx.var("v");
+                lines.push(emitter.split_run_at(&vals, &caps[gi], &prefixes, &lens_arg));
+                for (k, i) in (s..e).enumerate() {
+                    node_for[idxs[i]] = format!("{vals}[{k}]");
+                }
+            }
         }
     }
 

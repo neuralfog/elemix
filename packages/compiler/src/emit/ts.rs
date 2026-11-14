@@ -64,6 +64,23 @@ impl Emitter for TsEmitter {
         format!("const {var} = $__splitRun({node} as Text, [{arr}], {lens});")
     }
 
+    fn run_start(&self, var: &str, el: &str, run: usize) -> String {
+        let mut node = format!("{el}.firstChild");
+        for _ in 0..run {
+            node.push_str("!.nextSibling");
+        }
+        format!("const {var} = {node};")
+    }
+
+    fn split_run_at(&self, var: &str, node: &str, statics: &[usize], lens: &str) -> String {
+        let arr = statics
+            .iter()
+            .map(std::string::ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(", ");
+        format!("const {var} = $__splitRun({node} as Text, [{arr}], {lens});")
+    }
+
     fn text(&self, var: &str, el: &str) -> String {
         format!("const {var} = $__text({el});")
     }

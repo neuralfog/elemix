@@ -1,0 +1,36 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/FragmentHoleApp.ts
+---
+import { $__ssrText, $__ssrTpl, $__ssrRepeat, $__ssrWhen } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class FragmentHoleApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'fragment-hole-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="box">`, ($__ssrWhen(this.state.show, () => $__ssrTpl(($__ssrRepeat(
+                    this.state.items,
+                    (i) => $__ssrTpl(`<span class="it">`, $__ssrText(i), `</span>`),
+                    (i) => i,
+                )), ` <span class="tail">tail</span>`))), `</div><button class="add">add</button><button class="toggle">toggle</button></template></${this.$$__tag ?? 'fragment-hole-app'}>`];
+}
+
+    state = $__state<{ show: boolean; items: string[] }>({
+        show: true,
+        items: ['a', 'b'],
+    });
+
+    add = (): void => {
+        this.state.items = [...this.state.items, 'c'];
+    };
+
+    toggle = (): void => {
+        this.state.show = !this.state.show;
+    };
+
+    
+}
+$__defineComponent('fragment-hole-app', FragmentHoleApp);
+FragmentHoleApp.prototype.$$__tag = 'fragment-hole-app';
+FragmentHoleApp.$$__propSafe = true;

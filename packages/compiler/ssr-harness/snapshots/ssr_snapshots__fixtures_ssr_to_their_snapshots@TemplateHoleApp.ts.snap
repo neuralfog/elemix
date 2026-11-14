@@ -1,0 +1,26 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/TemplateHoleApp.ts
+---
+import { $__ssrText, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class TemplateHoleApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'template-hole-app'}><template shadowrootmode="open" shadowrootserializable=""><p class="line">tag: `, ($__ssrTpl(`<em class="frag">frag-`, $__ssrText(this.state.n), `</em>`)), `</p><button>bump</button></template></${this.$$__tag ?? 'template-hole-app'}>`];
+}
+
+    state = $__state<{ n: number }>({ n: 0 });
+
+    
+    bump = (): void => {
+        this.state.n++;
+    };
+
+    
+}
+$__defineComponent('template-hole-app', TemplateHoleApp);
+TemplateHoleApp.prototype.$$__tag = 'template-hole-app';
+TemplateHoleApp.$$__propSafe = true;

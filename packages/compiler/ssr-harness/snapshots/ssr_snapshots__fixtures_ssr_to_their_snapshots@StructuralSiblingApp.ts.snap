@@ -1,0 +1,25 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/StructuralSiblingApp.ts
+---
+import { $__ssrHole, $__ssrTpl } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class StructuralSiblingApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'structural-sibling-app'}><template shadowrootmode="open" shadowrootserializable="">`, (() => {const _h0 = $__ssrHole((this.state.a));return [`<p class="line" data-t="${_h0[1]}">Label: ${_h0[0]} `, (this.state.open ? $__ssrTpl(`<b class="flag">x</b>`) : ''), `</p>`];})(), `<button>toggle</button></template></${this.$$__tag ?? 'structural-sibling-app'}>`];
+}
+
+    state = $__state<{ a: string; open: boolean }>({ a: 'A', open: true });
+
+    toggle = (): void => {
+        this.state.open = !this.state.open;
+    };
+
+    
+}
+$__defineComponent('structural-sibling-app', StructuralSiblingApp);
+StructuralSiblingApp.prototype.$$__tag = 'structural-sibling-app';
+StructuralSiblingApp.$$__propSafe = true;

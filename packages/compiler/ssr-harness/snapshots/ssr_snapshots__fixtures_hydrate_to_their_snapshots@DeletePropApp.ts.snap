@@ -1,0 +1,42 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/DeletePropApp.ts
+---
+import { $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<p class="val"> </p><button>drop</button>');
+
+export class DeletePropApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _n1 = $__text(_n0);
+const _n2 = _n0.nextSibling!;
+(_n2 as HTMLElement).onclick = (this.drop);
+$__effect(() => {
+$__setText(_n1, this.state.x);
+});
+}
+
+    state = $__state<{ x?: string }>({ x: 'present' });
+
+    drop = (): void => {
+        delete this.state.x;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.drop);
+$__effect(() => {
+$__setText(_n2, this.state.x);
+});
+return _r0;
+}
+}
+$__defineComponent('delete-prop-app', DeletePropApp);
+DeletePropApp.prototype.$$__tag = 'delete-prop-app';

@@ -1,0 +1,26 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/PropSafeApp.ts
+---
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import './PropSafeChild';
+
+export class PropSafeApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'prop-safe-app'}><template shadowrootmode="open" shadowrootserializable="">`, $__ssrChild('prop-safe-child', {label: (this.state.label)}), `<button>bump</button></template></${this.$$__tag ?? 'prop-safe-app'}>`];
+}
+
+    state = $__state<{ label: string }>({ label: 'hello' });
+
+    bump = (): void => {
+        this.state.label = 'world';
+    };
+
+    
+}
+$__defineComponent('prop-safe-app', PropSafeApp);
+PropSafeApp.prototype.$$__tag = 'prop-safe-app';
+PropSafeApp.$$__propSafe = true;

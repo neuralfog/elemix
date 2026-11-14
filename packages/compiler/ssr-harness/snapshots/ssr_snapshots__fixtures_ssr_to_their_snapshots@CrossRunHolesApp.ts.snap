@@ -1,0 +1,26 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/CrossRunHolesApp.ts
+---
+import { $__ssrHole } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class CrossRunHolesApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'cross-run-holes-app'}><template shadowrootmode="open" shadowrootserializable="">`, (() => {const _h0 = $__ssrHole((this.state.a));const _h1 = $__ssrHole((this.state.b));return [`<p class="pair" data-t="${_h0[1]},${_h1[1]}">${_h0[0]}<span class="mid">|</span>${_h1[0]}</p>`];})(), `<button>bump</button></template></${this.$$__tag ?? 'cross-run-holes-app'}>`];
+}
+
+    state = $__state<{ a: string; b: string }>({ a: 'A', b: 'B' });
+
+    bump = (): void => {
+        this.state.a = 'X';
+        this.state.b = 'Y';
+    };
+
+    
+}
+$__defineComponent('cross-run-holes-app', CrossRunHolesApp);
+CrossRunHolesApp.prototype.$$__tag = 'cross-run-holes-app';
+CrossRunHolesApp.$$__propSafe = true;

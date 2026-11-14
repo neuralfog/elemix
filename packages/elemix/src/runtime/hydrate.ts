@@ -78,6 +78,11 @@ export const $__splitRun = (
             out.push(anchor);
             n = anchor.nextSibling;
         } else {
+            if (n?.nodeType !== 3) {
+                const text = document.createTextNode('') as Adopted;
+                parent?.insertBefore(text, n);
+                n = text;
+            }
             const value = n as Adopted;
             value.__h = true;
             n = value.splitText(dyns[i]);

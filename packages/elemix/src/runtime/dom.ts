@@ -159,7 +159,7 @@ export const $__ref = (el: Element, ref: { value: unknown }): void => {
 
 export const $__child = (anchor: Node, get: Getter<unknown>): void => {
     let current: Node | null = null;
-    let range: Node[] | null = null;
+    let lead: Node | null = null;
     let scopes: Scope | null = null;
     $__effect(() => {
         const parent = anchor.parentNode;
@@ -178,7 +178,7 @@ export const $__child = (anchor: Node, get: Getter<unknown>): void => {
         scopes = fresh;
 
         const frag = next instanceof DocumentFragment;
-        if (!range && !frag) {
+        if (!lead && !frag) {
             if (current) {
                 parent.replaceChild(next, current);
             } else {
@@ -188,15 +188,21 @@ export const $__child = (anchor: Node, get: Getter<unknown>): void => {
             return;
         }
 
-        if (range) {
-            for (const n of range) parent.removeChild(n);
-            range = null;
+        if (lead) {
+            let n: Node | null = lead;
+            while (n && n !== anchor) {
+                const nx: Node | null = n.nextSibling;
+                parent.removeChild(n);
+                n = nx;
+            }
+            lead = null;
         } else if (current) {
             parent.removeChild(current);
         }
         current = null;
         if (frag) {
-            range = [...next.childNodes];
+            lead = document.createComment('');
+            parent.insertBefore(lead, anchor);
             parent.insertBefore(next, anchor);
         } else {
             parent.insertBefore(next, anchor);
@@ -246,13 +252,14 @@ const moveRow = (
         parent.insertBefore(first, ref);
         return;
     }
-    const end: ChildNode | null = (last as ChildNode).nextSibling;
+    const batch: ChildNode[] = [];
     let n: ChildNode | null = first as ChildNode;
-    while (n && n !== end) {
-        const next: ChildNode | null = n.nextSibling;
-        parent.insertBefore(n, ref);
-        n = next;
+    while (n) {
+        batch.push(n);
+        if (n === last) break;
+        n = n.nextSibling;
     }
+    for (let i = 0; i < batch.length; i++) parent.insertBefore(batch[i], ref);
 };
 
 export const $__list = <T>(
@@ -269,10 +276,13 @@ export const $__list = <T>(
     const place = (key: unknown, node: Node, scope: Scope | null): void => {
         if (node.nodeType === 11) {
             if (tails === null) tails = new Map();
-            const first = node.firstChild as Rowed;
-            first.__sc = scope;
-            nodes.set(key, first);
-            tails.set(key, node.lastChild as Node);
+            const lead = document.createComment('') as Rowed;
+            const trail = document.createComment('');
+            lead.__sc = scope;
+            node.insertBefore(lead, node.firstChild);
+            node.appendChild(trail);
+            nodes.set(key, lead);
+            tails.set(key, trail);
         } else {
             (node as Rowed).__sc = scope;
             nodes.set(key, node);

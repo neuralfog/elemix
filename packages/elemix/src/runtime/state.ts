@@ -76,6 +76,15 @@ const objectHandler: ProxyHandler<Target> = {
         }
         return true;
     },
+    deleteProperty(target, key) {
+        if (!hasOwn.call(target, key)) return true;
+        delete target[key];
+        if (typeof key !== 'symbol') {
+            const d = deps.get(target)?.[key];
+            if (d !== undefined) $__trigger(d);
+        }
+        return true;
+    },
 };
 
 const classHandler: ProxyHandler<Target> = {
@@ -105,6 +114,15 @@ const classHandler: ProxyHandler<Target> = {
         }
         return true;
     },
+    deleteProperty(target, key) {
+        if (!hasOwn.call(target, key)) return true;
+        delete target[key];
+        if (typeof key !== 'symbol') {
+            const d = deps.get(target)?.[key];
+            if (d !== undefined) $__trigger(d);
+        }
+        return true;
+    },
 };
 
 const arrayHandler: ProxyHandler<Target> = {
@@ -123,8 +141,10 @@ const arrayHandler: ProxyHandler<Target> = {
             }
             return value;
         }
-        if ($__activeScope !== null && Array.isArray(value))
-            $__track(depFor($__toRaw(value), ARRAY));
+        if ($__activeScope !== null) {
+            $__track(depFor(target, ARRAY));
+            if (Array.isArray(value)) $__track(depFor($__toRaw(value), ARRAY));
+        }
         return value === null || typeof value !== 'object'
             ? value
             : $__reactive(value);
@@ -133,6 +153,12 @@ const arrayHandler: ProxyHandler<Target> = {
         const prev = target[key];
         target[key] = value;
         if (prev !== value) $__trigger(depFor(target, ARRAY));
+        return true;
+    },
+    deleteProperty(target, key) {
+        if (!hasOwn.call(target, key)) return true;
+        delete target[key];
+        $__trigger(depFor(target, ARRAY));
         return true;
     },
 };

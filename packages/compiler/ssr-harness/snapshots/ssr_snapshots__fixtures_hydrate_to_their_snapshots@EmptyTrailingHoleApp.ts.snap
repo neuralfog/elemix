@@ -1,0 +1,45 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/EmptyTrailingHoleApp.ts
+---
+import { $__dynLens, $__splitRun } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<p class="greet">Hello <!----></p><button>fill</button>');
+
+export class EmptyTrailingHoleApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.nextSibling!;
+const _n1 = root.firstChild!;
+const _d2 = $__dynLens(_n1);
+const _v3 = $__splitRun(_n1.firstChild as Text, [6], _d2);
+(_n0 as HTMLElement).onclick = (this.fill);
+$__effect(() => {
+$__setText(_v3[0], this.state.name);
+});
+}
+
+    state = $__state<{ name: string }>({ name: '' });
+
+    fill = (): void => {
+        this.state.name = 'World';
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.nextSibling!;
+const _n3 = _n1.nextSibling!;
+const _x4 = document.createTextNode('');
+_n2.replaceWith(_x4);
+(_n3 as HTMLElement).onclick = (this.fill);
+$__effect(() => {
+$__setText(_x4, this.state.name);
+});
+return _r0;
+}
+}
+$__defineComponent('empty-trailing-hole-app', EmptyTrailingHoleApp);
+EmptyTrailingHoleApp.prototype.$$__tag = 'empty-trailing-hole-app';

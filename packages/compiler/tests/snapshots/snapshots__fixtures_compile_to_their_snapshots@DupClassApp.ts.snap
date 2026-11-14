@@ -1,0 +1,24 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/DupClassApp.ts
+---
+import { $__template, $__clone, $__effect, $__setClass, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<div>x</div>');
+
+export class DupClassApp extends Component {
+    state = $__state<{ cls: string }>({ cls: 'btn btn' });
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+$__effect(() => {
+$__setClass(_n1, this.state.cls);
+});
+return _r0;
+}
+}
+$__defineComponent('dup-class-app', DupClassApp);
+DupClassApp.prototype.$$__tag = 'dup-class-app';

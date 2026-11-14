@@ -1,0 +1,44 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/FragmentRowApp.ts
+---
+import { $__ssrText, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Group = { id: string; items: string[] };
+
+export class FragmentRowApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'fragment-row-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="rows">`, ($__ssrRepeat(
+                this.state.groups,
+                (group) => $__ssrTpl(($__ssrRepeat(
+                        group.items,
+                        (item) => $__ssrTpl(`<span class="inner">`, $__ssrText(item), `</span>`),
+                        (item) => item,
+                    )), ` <span class="tail">end-`, $__ssrText(group.id), `</span>`),
+                (group) => group.id,
+            )), `</div><button class="prepend">prepend</button><button class="reverse">reverse</button></template></${this.$$__tag ?? 'fragment-row-app'}>`];
+}
+
+    state = $__state<{ groups: Group[] }>({
+        groups: [
+            { id: 'g1', items: ['a', 'b'] },
+            { id: 'g2', items: ['c', 'd'] },
+        ],
+    });
+
+    prependInner = (): void => {
+        this.state.groups[0].items.unshift('z');
+    };
+
+    reverseOuter = (): void => {
+        this.state.groups = this.state.groups.slice().reverse();
+    };
+
+    
+}
+$__defineComponent('fragment-row-app', FragmentRowApp);
+FragmentRowApp.prototype.$$__tag = 'fragment-row-app';
+FragmentRowApp.$$__propSafe = true;

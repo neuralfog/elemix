@@ -1,0 +1,25 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/DeletePropApp.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class DeletePropApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'delete-prop-app'}><template shadowrootmode="open" shadowrootserializable=""><p class="val">`, $__ssrText(this.state.x), `</p><button>drop</button></template></${this.$$__tag ?? 'delete-prop-app'}>`];
+}
+
+    state = $__state<{ x?: string }>({ x: 'present' });
+
+    drop = (): void => {
+        delete this.state.x;
+    };
+
+    
+}
+$__defineComponent('delete-prop-app', DeletePropApp);
+DeletePropApp.prototype.$$__tag = 'delete-prop-app';
+DeletePropApp.$$__propSafe = true;

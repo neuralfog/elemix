@@ -1,0 +1,40 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/EmojiPrefixApp.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<p class="e"><!---->🎉<!----></p><button>bump</button>');
+
+export class EmojiPrefixApp extends Component {
+    state = $__state<{ a: string; b: string }>({ a: 'A', b: 'B' });
+
+    bump = (): void => {
+        this.state.a = 'X';
+        this.state.b = 'Y';
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n2.nextSibling!.nextSibling!;
+const _n4 = _n1.nextSibling!;
+const _x5 = document.createTextNode('');
+_n2.replaceWith(_x5);
+const _x6 = document.createTextNode('');
+_n3.replaceWith(_x6);
+(_n4 as HTMLElement).onclick = (this.bump);
+$__effect(() => {
+$__setText(_x5, this.state.a);
+});
+$__effect(() => {
+$__setText(_x6, this.state.b);
+});
+return _r0;
+}
+}
+$__defineComponent('emoji-prefix-app', EmojiPrefixApp);
+EmojiPrefixApp.prototype.$$__tag = 'emoji-prefix-app';

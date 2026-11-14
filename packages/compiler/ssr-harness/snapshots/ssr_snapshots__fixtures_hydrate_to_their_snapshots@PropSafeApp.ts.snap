@@ -1,0 +1,40 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/PropSafeApp.ts
+---
+import { $__template, $__clone, $__effect, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import './PropSafeChild';
+
+const _t0 = $__template('<prop-safe-child></prop-safe-child><button>bump</button>');
+
+export class PropSafeApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _n1 = _n0.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.bump);
+$__effect(() => {
+$__setProp(_n0, 'label', this.state.label);
+});
+}
+
+    state = $__state<{ label: string }>({ label: 'hello' });
+
+    bump = (): void => {
+        this.state.label = 'world';
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.nextSibling!;
+(_n2 as HTMLElement).onclick = (this.bump);
+$__effect(() => {
+$__setProp(_n1, 'label', this.state.label);
+});
+return _r0;
+}
+}
+$__defineComponent('prop-safe-app', PropSafeApp);
+PropSafeApp.prototype.$$__tag = 'prop-safe-app';

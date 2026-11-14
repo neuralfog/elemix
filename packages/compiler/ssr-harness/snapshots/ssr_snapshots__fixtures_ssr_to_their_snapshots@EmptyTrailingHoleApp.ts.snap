@@ -1,0 +1,25 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/EmptyTrailingHoleApp.ts
+---
+import { $__ssrHole } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class EmptyTrailingHoleApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'empty-trailing-hole-app'}><template shadowrootmode="open" shadowrootserializable="">${(() => {const _h0 = $__ssrHole((this.state.name));return `<p class="greet" data-t="${_h0[1]}">Hello ${_h0[0]}</p>`;})()}<button>fill</button></template></${this.$$__tag ?? 'empty-trailing-hole-app'}>`];
+}
+
+    state = $__state<{ name: string }>({ name: '' });
+
+    fill = (): void => {
+        this.state.name = 'World';
+    };
+
+    
+}
+$__defineComponent('empty-trailing-hole-app', EmptyTrailingHoleApp);
+EmptyTrailingHoleApp.prototype.$$__tag = 'empty-trailing-hole-app';
+EmptyTrailingHoleApp.$$__propSafe = true;

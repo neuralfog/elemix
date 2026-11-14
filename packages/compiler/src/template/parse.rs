@@ -462,7 +462,7 @@ fn serialize(children: &[Child], path: &NodePath, markup: &mut String, holes: &m
                 let mut p = path.clone();
                 p.push(Step::ChildNode(node_count));
                 let prefix = match idx.checked_sub(1).and_then(|i| children.get(i)) {
-                    Some(Child::Text(t)) => t.chars().count(),
+                    Some(Child::Text(t)) => t.encode_utf16().count(),
                     _ => 0,
                 };
                 let is_text = text_hole(children, idx, expr);
@@ -918,6 +918,32 @@ pub fn structural_holes(statics: &[String], holes: &[String]) -> Vec<StructHole>
     out
 }
 
+fn merged_node_count(children: &[Child], lo: usize, hi: usize) -> usize {
+    let mut count = 0usize;
+    let mut run_open = false;
+    for idx in lo..hi {
+        match &children[idx] {
+            Child::Text(_) => {
+                if !run_open {
+                    run_open = true;
+                    count += 1;
+                }
+            }
+            Child::Anchor(expr, _) if text_hole(children, idx, expr) => {
+                if !run_open {
+                    run_open = true;
+                    count += 1;
+                }
+            }
+            _ => {
+                run_open = false;
+                count += 1;
+            }
+        }
+    }
+    count
+}
+
 fn collect_struct(children: &[Child], path: &NodePath, out: &mut Vec<StructHole>) {
     let total = children.len();
     for (idx, child) in children.iter().enumerate() {
@@ -925,8 +951,8 @@ fn collect_struct(children: &[Child], path: &NodePath, out: &mut Vec<StructHole>
             Child::Anchor(expr, _) if !text_hole(children, idx, expr) => {
                 out.push(StructHole {
                     parent: path.clone(),
-                    before: idx,
-                    after: total - idx - 1,
+                    before: merged_node_count(children, 0, idx),
+                    after: merged_node_count(children, idx + 1, total),
                     expr: expr.clone(),
                     list: expr.trim_start().starts_with("repeat("),
                 });

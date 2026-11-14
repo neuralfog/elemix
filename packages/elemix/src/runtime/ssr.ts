@@ -135,7 +135,13 @@ export const $__ssrAttr = (name: string, value: unknown): string => {
 export const $__ssrClass = (value: unknown): string => {
     let next = '';
     if (typeof value === 'string') {
-        next = value;
+        const seen = new Set<string>();
+        for (const part of value.split(' ')) {
+            if (part && !seen.has(part)) {
+                seen.add(part);
+                next += next.length ? ` ${part}` : part;
+            }
+        }
     } else if (value !== null && typeof value === 'object') {
         const obj = value as Record<string, unknown>;
         for (const name in obj) {

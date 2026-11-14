@@ -1,0 +1,25 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/RootArrayApp.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class RootArrayApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'root-array-app'}><template shadowrootmode="open" shadowrootserializable=""><p class="len">`, $__ssrText(this.state.length), `</p><button>add</button></template></${this.$$__tag ?? 'root-array-app'}>`];
+}
+
+    state = $__state<number[]>([1, 2, 3]);
+
+    add = (): void => {
+        this.state.push(this.state.length + 1);
+    };
+
+    
+}
+$__defineComponent('root-array-app', RootArrayApp);
+RootArrayApp.prototype.$$__tag = 'root-array-app';
+RootArrayApp.$$__propSafe = true;

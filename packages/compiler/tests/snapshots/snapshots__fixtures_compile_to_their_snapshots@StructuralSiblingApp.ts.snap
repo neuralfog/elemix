@@ -1,0 +1,39 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/StructuralSiblingApp.ts
+---
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<p class="line">Label: <!----> <!----></p><button>toggle</button>');
+const _t1 = $__templateEl('<b class="flag">x</b>');
+
+export class StructuralSiblingApp extends Component {
+    state = $__state<{ a: string; open: boolean }>({ a: 'A', open: true });
+
+    toggle = (): void => {
+        this.state.open = !this.state.open;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!.nextSibling!;
+const _n3 = _n2.nextSibling!.nextSibling!;
+const _n4 = _n1.nextSibling!;
+const _x5 = document.createTextNode('');
+_n2.replaceWith(_x5);
+$__child(_n3, () => (this.state.open ? (() => {
+const _r6 = $__cloneEl(_t1);
+return _r6;
+})() : ''));
+(_n4 as HTMLElement).onclick = (this.toggle);
+$__effect(() => {
+$__setText(_x5, this.state.a);
+});
+return _r0;
+}
+}
+$__defineComponent('structural-sibling-app', StructuralSiblingApp);
+StructuralSiblingApp.prototype.$$__tag = 'structural-sibling-app';

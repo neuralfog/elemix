@@ -14,6 +14,8 @@ pub trait Emitter {
     fn text_anchor(&self, var: &str, anchor: &str) -> String;
     fn dyn_lens(&self, var: &str, el: &str) -> String;
     fn split_run(&self, var: &str, el: &str, run: usize, statics: &[usize], lens: &str) -> String;
+    fn run_start(&self, var: &str, el: &str, run: usize) -> String;
+    fn split_run_at(&self, var: &str, node: &str, statics: &[usize], lens: &str) -> String;
     fn text(&self, var: &str, el: &str) -> String;
     fn comment_anchor(&self, var: &str, sibling: &str) -> String;
     fn ret(&self, root: &str, builder: bool, el: bool, multi_root: bool) -> String;
