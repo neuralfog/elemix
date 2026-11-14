@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Hydris/Hydris.csproj" />
+    <ProjectReference Include="../Hydris.Build/Hydris.Build.csproj" />
     <ProjectReference Include="../Hydris.Generators/Hydris.Generators.csproj"
                       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>

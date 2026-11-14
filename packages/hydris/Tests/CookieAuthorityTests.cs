@@ -39,6 +39,15 @@ public sealed class CookieAuthorityTests {
     }
 
     [Fact]
+    public void StoresStripsUnsafeKeysNestedInArrays() {
+        var value = Uri.EscapeDataString("{\"a\":[{\"__proto__\":{\"p\":1}},{\"ok\":2}]}");
+        var seed = AuthWith($"store.x={value}").Stores();
+
+        Assert.DoesNotContain("__proto__", seed);
+        Assert.Contains("\"ok\":2", seed);
+    }
+
+    [Fact]
     public void SerializeEncodesValueAndDefaultsPath() {
         Assert.Equal("n=a%20b; Path=/", CookieAuthority.Serialize("n", "a b"));
     }

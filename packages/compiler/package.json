@@ -9,6 +9,7 @@
         "lint:fix": "cargo clippy --all-targets --fix --allow-dirty --allow-staged && cargo fmt",
         "test": "pnpm run test:rust && pnpm run test:wasm && pnpm run test:types && pnpm run test:csr",
         "test:rust": "cargo test",
+        "bless": "INSTA_UPDATE=always cargo test",
         "test:types": "tsc --noEmit -p tsconfig.fixtures.json",
         "test:csr": "pnpm --filter @neuralfog/elemix-csr-harness run e2e",
         "build:wasm": "wasm-pack build --target web --out-dir pkg --no-default-features --features wasm && node scripts/wasm-pkg.mjs",

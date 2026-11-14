@@ -1,0 +1,24 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/PollutionProbe.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class PollutionProbe extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'pollution-probe'}><template shadowrootmode="open" shadowrootserializable=""><span class="pollution">`, $__ssrText(this.check()), `</span></template></${this.$$__tag ?? 'pollution-probe'}>`];
+}
+
+    check = (): string =>
+        ({} as Record<string, unknown>).polluted === undefined
+            ? 'clean'
+            : 'POLLUTED';
+
+    
+}
+$__defineComponent('pollution-probe', PollutionProbe);
+PollutionProbe.prototype.$$__tag = 'pollution-probe';
+PollutionProbe.$$__propSafe = true;

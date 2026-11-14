@@ -98,9 +98,16 @@ public sealed class CookieAuthority(Request request) {
             if (node.ContainsKey(key))
                 node.Remove(key);
         }
-        foreach (var (_, child) in node) {
-            if (child is JsonObject nested)
-                Sanitize(nested);
+        foreach (var (_, child) in node)
+            SanitizeChild(child);
+    }
+
+    private static void SanitizeChild(JsonNode? child) {
+        if (child is JsonObject obj)
+            Sanitize(obj);
+        else if (child is JsonArray array) {
+            foreach (var item in array)
+                SanitizeChild(item);
         }
     }
 

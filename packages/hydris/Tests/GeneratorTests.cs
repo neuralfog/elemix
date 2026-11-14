@@ -37,6 +37,12 @@ public sealed class GeneratorTests {
     }
 
     [Fact]
+    public async Task TypeConfusedBodyReturns400() {
+        var reply = await Dispatch(Method.Post, "/gen-bind/strict", body: "{\"name\":123}");
+        Assert.Equal(400, reply.StatusCode);
+    }
+
+    [Fact]
     public async Task BodyValidationReturns400WithFieldError() {
         var reply = await Dispatch(Method.Post, "/gen-bind/strict", body: "{}");
 

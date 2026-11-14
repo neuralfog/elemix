@@ -59,11 +59,16 @@ internal sealed class Dispatcher(
                 var chain = Chain(middlewares, match.Middlewares);
                 reply = await Pipeline.Run(scope, chain, () => match.Handler(scope));
             }
+            reply.Materialize(request, scope);
         } catch (Exception error) {
             reply = Fail(error, request, match?.Json ?? false);
+            try {
+                reply.Materialize(request, scope);
+            } catch {
+                reply = Reply.Text(Status.InternalServerError.Reason()).Status(Status.InternalServerError);
+            }
         }
 
-        reply.Materialize(request, scope);
         if (Csp.Enabled)
             Csp.Apply(reply);
         if (SecurityHeaderGate.Enabled)

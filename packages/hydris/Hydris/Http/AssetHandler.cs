@@ -33,11 +33,12 @@ internal static class AssetHandler {
 
         var etag = Etag(new FileInfo(target));
         if (request.Header(HeaderNames.IfNoneMatch) == etag)
-            return Reply.NotModified(etag, config.CacheControl);
+            return Reply.NotModified(etag, config.CacheControl).Header(HeaderNames.XContentTypeOptions, "nosniff");
 
         var contentType = Reply.MimeOf(target);
         var choice = Compressor.NegotiateStatic(target, contentType.Mime(), request.Header(HeaderNames.AcceptEncoding));
-        return Reply.AssetFile(choice.Path, contentType, etag, config.CacheControl, choice.Encoding, choice.Vary);
+        return Reply.AssetFile(choice.Path, contentType, etag, config.CacheControl, choice.Encoding, choice.Vary)
+            .Header(HeaderNames.XContentTypeOptions, "nosniff");
     }
 
     public static Reply ServeElemix(Request request, AssetConfig config) {

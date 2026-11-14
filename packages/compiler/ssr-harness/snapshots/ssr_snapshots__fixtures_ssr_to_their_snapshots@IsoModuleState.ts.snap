@@ -1,0 +1,28 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/IsoModuleState.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component, param } from '@neuralfog/elemix';
+
+import { isoProbe } from './isoProbe';
+
+export class IsoModuleState extends Component {
+    $$__beforeMount(): void {
+        this.seed();
+    }
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'iso-module-state'}><template shadowrootmode="open" shadowrootserializable=""><div class="iso-module"><span class="count">`, $__ssrText(isoProbe.seen.length), `</span><span class="seen">`, $__ssrText(isoProbe.seen.join('|')), `</span><span class="token">`, $__ssrText(param('token') ?? '-'), `</span></div></template></${this.$$__tag ?? 'iso-module-state'}>`];
+}
+
+    seed(): void {
+        isoProbe.seen.push(param('token') ?? '-');
+    }
+
+    
+}
+$__defineComponent('iso-module-state', IsoModuleState);
+IsoModuleState.prototype.$$__tag = 'iso-module-state';
+IsoModuleState.$$__propSafe = true;

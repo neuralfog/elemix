@@ -30,7 +30,7 @@ public sealed class Csrf(Request request, CookieAuthority authority) : ICsrf {
 
         var existing = authority.Get(CookieName);
         if (existing is not null)
-            return existing;
+            return Mask(existing);
 
         var token = Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(32));
         authority.SetCookie(reply, CookieName, token, new CookieOptions {
@@ -39,16 +39,44 @@ public sealed class Csrf(Request request, CookieAuthority authority) : ICsrf {
             SameSite = SameSiteMode.Lax,
             Path = "/",
         });
-        return token;
+        return Mask(token);
     }
 
     public bool Verify() {
         var cookie = authority.Get(CookieName);
         var submitted = request.Header(HeaderName);
-        return cookie is not null &&
-               submitted is not null &&
+        if (cookie is null || submitted is null)
+            return false;
+        var unmasked = Unmask(submitted);
+        return unmasked is not null &&
                CryptographicOperations.FixedTimeEquals(
                    Encoding.UTF8.GetBytes(cookie),
-                   Encoding.UTF8.GetBytes(submitted));
+                   Encoding.UTF8.GetBytes(unmasked));
+    }
+
+    private static string Mask(string token) {
+        var raw = Encoding.UTF8.GetBytes(token);
+        var combined = new byte[raw.Length * 2];
+        var nonce = combined.AsSpan(0, raw.Length);
+        RandomNumberGenerator.Fill(nonce);
+        for (var i = 0; i < raw.Length; i++)
+            combined[raw.Length + i] = (byte)(raw[i] ^ nonce[i]);
+        return Base64Url.EncodeToString(combined);
+    }
+
+    private static string? Unmask(string value) {
+        byte[] combined;
+        try {
+            combined = Base64Url.DecodeFromChars(value);
+        } catch (FormatException) {
+            return null;
+        }
+        if (combined.Length == 0 || (combined.Length & 1) != 0)
+            return null;
+        var half = combined.Length / 2;
+        var raw = new byte[half];
+        for (var i = 0; i < half; i++)
+            raw[i] = (byte)(combined[i] ^ combined[half + i]);
+        return Encoding.UTF8.GetString(raw);
     }
 }

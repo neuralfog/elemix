@@ -352,4 +352,16 @@ public sealed class Fixtures {
     [Get("/two-components")]
     public Reply FirstWidget() => Reply.View("fixtures/TwoComponents@FirstWidget");
 
+    [Get("/iso/ctx/:token")]
+    public Reply IsoCtx() => Reply.View("fixtures/IsoContext");
+
+    [Get("/iso/module/:token")]
+    public Reply IsoModule() => Reply.View("fixtures/IsoModuleState");
+
+    [Get("/attack/:p")]
+    public Reply AttackProbe() => Reply.View("fixtures/AttackProbe");
+
+    [Get("/pollution-probe")]
+    public Reply PollutionProbe() => Reply.View("fixtures/PollutionProbe");
+
 }

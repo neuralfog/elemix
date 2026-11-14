@@ -44,6 +44,44 @@ public sealed class ReplyTests {
     }
 
     [Fact]
+    public void RedirectRejectsAbsoluteUrl() {
+        Assert.Throws<ArgumentException>(() => Reply.Redirect("https://evil.example"));
+    }
+
+    [Fact]
+    public void RedirectRejectsProtocolRelativeUrl() {
+        Assert.Throws<ArgumentException>(() => Reply.Redirect("//evil.example"));
+    }
+
+    [Fact]
+    public void RedirectRejectsBackslashSchemeTrick() {
+        Assert.Throws<ArgumentException>(() => Reply.Redirect("/\\evil.example"));
+    }
+
+    [Fact]
+    public void RedirectExternalAllowsAbsoluteUrl() {
+        var reply = Reply.RedirectExternal("https://partner.example/next");
+
+        Assert.Equal(302, reply.StatusCode);
+        Assert.Equal("https://partner.example/next", reply.HeaderValue("Location"));
+    }
+
+    [Fact]
+    public void RedirectExternalRejectsLineBreaks() {
+        Assert.Throws<ArgumentException>(() => Reply.RedirectExternal("https://x.example/\r\nSet-Cookie: a=b"));
+    }
+
+    [Fact]
+    public void RedirectExternalRejectsNullByte() {
+        Assert.Throws<ArgumentException>(() => Reply.RedirectExternal("https://x.example/\0evil"));
+    }
+
+    [Fact]
+    public void RedirectRejectsLineBreaksInLocalPath() {
+        Assert.Throws<ArgumentException>(() => Reply.Redirect("/home\r\nSet-Cookie: a=b"));
+    }
+
+    [Fact]
     public void StatusOverridesTheCode() {
         var reply = Reply.Text("created").Status(201);
 
@@ -55,6 +93,16 @@ public sealed class ReplyTests {
         var reply = Reply.Text("x").Header("X-Custom", "value");
 
         Assert.Equal("value", reply.HeaderValue("X-Custom"));
+    }
+
+    [Fact]
+    public void HeaderRejectsCrlfInValue() {
+        Assert.Throws<ArgumentException>(() => Reply.Text("x").Header("X-Custom", "a\r\nSet-Cookie: evil=1"));
+    }
+
+    [Fact]
+    public void HeaderRejectsCrlfInName() {
+        Assert.Throws<ArgumentException>(() => Reply.Text("x").Header("X-Custom\r\nEvil", "value"));
     }
 
     [Fact]

@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-const TOKEN = /^[A-Za-z0-9_-]{43}$/;
+const TOKEN = /^[A-Za-z0-9_-]{80,}$/;
 
 test.describe('ContextApp (ambient request context)', () => {
-    test('params/query/csrf SSR, survive hydrate, and re-read on soft-nav while csrf stays stable', async ({
+    test('params/query/csrf SSR, survive hydrate, and re-read on soft-nav while csrf stays a valid per-response token', async ({
         page,
     }) => {
         const res = await page.goto('/context/alpha?q=one');
@@ -51,12 +51,12 @@ test.describe('ContextApp (ambient request context)', () => {
 
         await expect(root.locator('.id')).toHaveText('beta');
         await expect(root.locator('.q')).toHaveText('two');
-        await expect(root.locator('.csrf')).toHaveText(token);
+        await expect(root.locator('.csrf')).toHaveText(TOKEN);
 
         await page.locator('#to-alpha').click();
         await expect(root.locator('.id')).toHaveText('alpha');
         await expect(root.locator('.q')).toHaveText('one');
-        await expect(root.locator('.csrf')).toHaveText(token);
+        await expect(root.locator('.csrf')).toHaveText(TOKEN);
     });
 
     test('missing param/query fall back cleanly and csrf is a real token', async ({

@@ -241,7 +241,7 @@ internal static class ContractEmit {
 
             sb.Append("                const response = await fetch(").Append(target).AppendLine(", {");
         } else {
-            sb.Append("                const response = await fetch('").Append(action.Path).AppendLine("', {");
+            sb.Append("                const response = await fetch('").Append(JsSingleQuoted(action.Path)).AppendLine("', {");
         }
 
         sb.Append("                    method: Method.").Append(action.Verb).AppendLine(",");
@@ -355,13 +355,29 @@ internal static class ContractEmit {
             if (segment.Length == 0)
                 continue;
             sb.Append('/');
-            if (segment.Length > 1 && segment[0] == ':')
+            if (segment.Length > 1 && segment[0] == ':' && IsIdentifier(segment[1..]))
                 sb.Append("${encodeURIComponent(String(args.").Append(segment[1..]).Append("))}");
             else
-                sb.Append(segment);
+                sb.Append(JsTemplate(segment));
         }
 
         return sb.Append('`').ToString();
+    }
+
+    private static string JsSingleQuoted(string value) =>
+        value.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\r", "\\r").Replace("\n", "\\n");
+
+    private static string JsTemplate(string value) =>
+        value.Replace("\\", "\\\\").Replace("`", "\\`").Replace("$", "\\$");
+
+    private static bool IsIdentifier(string name) {
+        if (name.Length == 0 || !(char.IsLetter(name[0]) || name[0] == '_'))
+            return false;
+        foreach (var c in name) {
+            if (!(char.IsLetterOrDigit(c) || c == '_'))
+                return false;
+        }
+        return true;
     }
 
     private static string StripNullable(string raw) =>

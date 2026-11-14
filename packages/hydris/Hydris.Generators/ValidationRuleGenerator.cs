@@ -29,8 +29,11 @@ public sealed class ValidationRuleGenerator : IIncrementalGenerator {
             name = syntax.Attributes[0].ConstructorArguments[0].Value as string;
         name ??= Snake(type.Name);
 
-        return $"global::Hydris.Validation.Rules.Register(\"{name}\", new {type.ToDisplayString(FullyQualified)}());";
+        return $"global::Hydris.Validation.Rules.Register({Literal(name)}, new {type.ToDisplayString(FullyQualified)}());";
     }
+
+    private static string Literal(string value) =>
+        Microsoft.CodeAnalysis.CSharp.SymbolDisplay.FormatLiteral(value, true);
 
     private static string Snake(string name) {
         var builder = new StringBuilder();

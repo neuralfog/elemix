@@ -1,0 +1,19 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/IsoContext.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component, csrf, param, query } from '@neuralfog/elemix';
+
+export class IsoContext extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'iso-context'}><template shadowrootmode="open" shadowrootserializable=""><div class="iso-ctx"><span class="token">`, $__ssrText(param('token') ?? '-'), `</span><span class="q">`, $__ssrText(query('q') ?? '-'), `</span><span class="csrf">`, $__ssrText(csrf()), `</span></div></template></${this.$$__tag ?? 'iso-context'}>`];
+}
+
+    
+}
+$__defineComponent('iso-context', IsoContext);
+IsoContext.prototype.$$__tag = 'iso-context';
+IsoContext.$$__propSafe = true;

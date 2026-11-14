@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Hydris.Tests" />
+    <InternalsVisibleTo Include="Hydris.QuickJs" />
   </ItemGroup>
 
 </Project>

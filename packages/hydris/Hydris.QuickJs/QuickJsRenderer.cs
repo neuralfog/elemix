@@ -48,10 +48,22 @@ public sealed class QuickJsRenderer : IRenderer, IDisposable {
             }
 
             var pointer = QuickJs.Render(engine.Handle, data ?? string.Empty, out var length);
-            var bytes = new byte[length];
-            if (length > 0)
-                Marshal.Copy(pointer, bytes, 0, length);
-            QuickJs.FreeRender(engine.Handle);
+            byte[] bytes;
+            try {
+                if (length < 0)
+                    throw new InvalidOperationException($"{key}: render returned a negative length");
+                bytes = new byte[length];
+                if (length > 0) {
+                    if (pointer == IntPtr.Zero)
+                        throw new InvalidOperationException($"{key}: render returned a null buffer");
+                    Marshal.Copy(pointer, bytes, 0, length);
+                }
+            } finally {
+                QuickJs.FreeRender(engine.Handle);
+            }
+
+            if (RenderError.TryRead(bytes, out var renderError))
+                throw new InvalidOperationException($"{key}: {renderError}");
             return bytes;
         } finally {
             engine.LastUsed = Stopwatch.GetTimestamp();

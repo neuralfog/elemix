@@ -13,7 +13,7 @@ using HttpStatus = Hydris.Http.Status;
 namespace Hydris.Http;
 
 public sealed class Reply {
-    private static string RootPath = AppContext.BaseDirectory;
+    private static string RootPath = Normalize(AppContext.BaseDirectory);
 
     private static readonly FrozenDictionary<string, ContentType> MimeTypes = new Dictionary<string, ContentType> {
         [".html"] = ContentType.Html,
@@ -77,7 +77,7 @@ public sealed class Reply {
     public static Reply View(string view) {
         ArgumentException.ThrowIfNullOrEmpty(view);
         return new Reply([], HttpStatus.Ok, ContentType.Html) {
-            Pending = new PendingRender(view, null, CacheMode.Default),
+            Pending = new PendingRender(view, null, CacheMode.None),
         };
     }
 
@@ -88,7 +88,7 @@ public sealed class Reply {
         using (var writer = new Utf8JsonWriter(buffer))
             data.Write(writer);
         return new Reply([], HttpStatus.Ok, ContentType.Html) {
-            Pending = new PendingRender(view, Encoding.UTF8.GetString(buffer.WrittenSpan), CacheMode.Default),
+            Pending = new PendingRender(view, Encoding.UTF8.GetString(buffer.WrittenSpan), CacheMode.None),
         };
     }
 
@@ -100,6 +100,7 @@ public sealed class Reply {
         var csrf = Csrf.Enabled ? scope.Get<ICsrf>().Issue(this) : string.Empty;
         var context = RequestContext.Build(request, csrf);
         if (pending.Cache == CacheMode.None) {
+            HeaderMap[HeaderNames.CacheControl] = "no-store";
             Payload = Views.Render(pending.View, Context(pending.ViewData, stores, context));
             return;
         }
@@ -166,13 +167,28 @@ public sealed class Reply {
 
     public static void FileBase(string path) {
         ArgumentException.ThrowIfNullOrEmpty(path);
-        RootPath = Path.GetFullPath(path);
+        RootPath = Normalize(path);
     }
 
     public static Reply Redirect(string location, HttpStatus status = HttpStatus.Found) {
+        if (!IsLocalRedirect(location))
+            throw new ArgumentException("Redirect target must be a local path starting with '/'; use RedirectExternal for absolute URLs.", nameof(location));
         var reply = new Reply([], status, ContentType.Text);
-        reply.HeaderMap[HeaderNames.Location] = location;
+        reply.HeaderMap[HeaderNames.Location] = GuardHeaderValue(location);
         return reply;
+    }
+
+    public static Reply RedirectExternal(string location, HttpStatus status = HttpStatus.Found) {
+        ArgumentException.ThrowIfNullOrEmpty(location);
+        var reply = new Reply([], status, ContentType.Text);
+        reply.HeaderMap[HeaderNames.Location] = GuardHeaderValue(location);
+        return reply;
+    }
+
+    private static bool IsLocalRedirect(string location) {
+        if (string.IsNullOrEmpty(location) || location[0] != '/')
+            return false;
+        return location.Length == 1 || (location[1] != '/' && location[1] != '\\');
     }
 
     public static Reply NotModified(string etag, string cacheControl) {
@@ -204,9 +220,9 @@ public sealed class Reply {
         return this;
     }
 
-    public Reply NoCache() {
+    public Reply Cache() {
         if (Pending is { } pending)
-            Pending = pending with { Cache = CacheMode.None };
+            Pending = pending with { Cache = CacheMode.Ttl };
         return this;
     }
 
@@ -217,8 +233,22 @@ public sealed class Reply {
     }
 
     public Reply Header(string name, string value) {
-        HeaderMap[name] = value;
+        GuardHeaderName(name);
+        HeaderMap[name] = GuardHeaderValue(value);
         return this;
+    }
+
+    private static void GuardHeaderName(string name) {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        if (name.Contains('\r') || name.Contains('\n') || name.Contains('\0'))
+            throw new ArgumentException("Header name must not contain line breaks or null bytes.", nameof(name));
+    }
+
+    private static string GuardHeaderValue(string value) {
+        ArgumentNullException.ThrowIfNull(value);
+        if (value.Contains('\r') || value.Contains('\n') || value.Contains('\0'))
+            throw new ArgumentException("Header value must not contain line breaks or null bytes.", nameof(value));
+        return value;
     }
 
     public Reply Cookie(string name, string value, CookieOptions? options = null) {
@@ -286,10 +316,16 @@ public sealed class Reply {
 
     private static string Locate(string path) {
         var resolved = Path.GetFullPath(path, RootPath);
-        if (!System.IO.File.Exists(resolved))
+        if (!Within(resolved, RootPath) || !System.IO.File.Exists(resolved))
             throw new NotFoundException();
         return resolved;
     }
+
+    private static string Normalize(string path) =>
+        Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
+
+    private static bool Within(string target, string root) =>
+        target == root || target.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal);
 
     internal static ContentType MimeOf(string path) =>
         MimeTypes.GetValueOrDefault(Path.GetExtension(path).ToLowerInvariant(), ContentType.OctetStream);
@@ -300,8 +336,8 @@ public sealed class Reply {
     }
 
     private enum CacheMode : byte {
-        Default,
         None,
+        Ttl,
         Infinite,
     }
 

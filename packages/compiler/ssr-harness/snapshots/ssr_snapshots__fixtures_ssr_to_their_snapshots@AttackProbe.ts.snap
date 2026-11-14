@@ -1,0 +1,19 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/AttackProbe.ts
+---
+import { $__ssrText, $__ssrAttr } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component, param } from '@neuralfog/elemix';
+
+export class AttackProbe extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'attack-probe'}><template shadowrootmode="open" shadowrootserializable=""><div class="attack"><span class="text">`, $__ssrText(param('p') ?? ''), `</span><a class="attr"${$__ssrAttr('title', param('p') ?? '')}>link</a><input class="val"${$__ssrAttr('value', param('p') ?? '')}/></div></template></${this.$$__tag ?? 'attack-probe'}>`];
+}
+
+    
+}
+$__defineComponent('attack-probe', AttackProbe);
+AttackProbe.prototype.$$__tag = 'attack-probe';
+AttackProbe.$$__propSafe = true;

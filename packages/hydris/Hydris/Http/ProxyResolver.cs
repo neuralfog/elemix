@@ -1,16 +1,11 @@
 namespace Hydris.Http;
 
 internal static class ProxyResolver {
-    private static readonly string[] ForwardedIpHeaders =
-        [HeaderNames.CfConnectingIp, HeaderNames.TrueClientIp, HeaderNames.XForwardedFor];
-
     public static string ResolveIp(Request request, string socketIp, bool trustProxy) {
         if (trustProxy) {
-            foreach (var header in ForwardedIpHeaders) {
-                var value = request.Header(header);
-                if (!string.IsNullOrEmpty(value))
-                    return First(value);
-            }
+            var forwarded = request.Header(HeaderNames.XForwardedFor);
+            if (!string.IsNullOrEmpty(forwarded))
+                return Last(forwarded);
         }
 
         return socketIp;
@@ -20,14 +15,14 @@ internal static class ProxyResolver {
         if (trustProxy) {
             var forwarded = request.Header(HeaderNames.XForwardedProto);
             if (!string.IsNullOrEmpty(forwarded))
-                return First(forwarded);
+                return Last(forwarded);
         }
 
         return scheme;
     }
 
-    private static string First(string value) {
-        var comma = value.IndexOf(',');
-        return (comma >= 0 ? value[..comma] : value).Trim();
+    private static string Last(string value) {
+        var comma = value.LastIndexOf(',');
+        return (comma >= 0 ? value[(comma + 1)..] : value).Trim();
     }
 }

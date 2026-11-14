@@ -37,6 +37,21 @@ public sealed class AssetTests : IDisposable {
     }
 
     [Fact]
+    public void ServesAssetsWithNoSniff() {
+        var config = Make("app.css", "body{}");
+
+        var ok = AssetHandler.Serve(Get("app.css"), config);
+        Assert.Equal("nosniff", ok.HeaderValue("X-Content-Type-Options"));
+
+        var etag = ok.HeaderValue("ETag")!;
+        var notModified = AssetHandler.Serve(
+            Get("app.css", new HeaderDictionary { ["If-None-Match"] = etag }),
+            config);
+        Assert.Equal(304, notModified.StatusCode);
+        Assert.Equal("nosniff", notModified.HeaderValue("X-Content-Type-Options"));
+    }
+
+    [Fact]
     public void ResolvesNestedSubdirectories() {
         Directory.CreateDirectory(System.IO.Path.Combine(Dir, "img"));
         var config = Make(System.IO.Path.Combine("img", "logo.svg"));

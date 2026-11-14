@@ -73,4 +73,27 @@ public sealed class ReplyFileTests : IDisposable {
     public void MissingFileThrowsNotFound() {
         Assert.Throws<NotFoundException>(() => Reply.File(System.IO.Path.Combine(Dir, "nope.pdf")));
     }
+
+    [Fact]
+    public void FileRejectsAbsolutePathOutsideRoot() {
+        var outside = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"hydris-secret-{Guid.NewGuid():N}.txt");
+        System.IO.File.WriteAllText(outside, "secret");
+        try {
+            Assert.Throws<NotFoundException>(() => Reply.File(outside));
+        } finally {
+            System.IO.File.Delete(outside);
+        }
+    }
+
+    [Fact]
+    public void FileRejectsRelativeTraversalOutsideRoot() {
+        var outside = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"hydris-secret-{Guid.NewGuid():N}.txt");
+        System.IO.File.WriteAllText(outside, "secret");
+        try {
+            var relative = System.IO.Path.GetRelativePath(AppContext.BaseDirectory, outside);
+            Assert.Throws<NotFoundException>(() => Reply.File(relative));
+        } finally {
+            System.IO.File.Delete(outside);
+        }
+    }
 }

@@ -33,8 +33,9 @@ public sealed class CsrfTests {
     [Fact]
     public void MatchingTokenPasses() {
         Csrf.Configure(secure: true);
-        var token = "abc123";
-        Assert.True(Make(cookie: SignedCookie(token), headerToken: token).Verify());
+        var cookie = SignedCookie("abc123");
+        var masked = Make(Method.Get, cookie: cookie).Issue(Reply.Text("ok"));
+        Assert.True(Make(cookie: cookie, headerToken: masked).Verify());
     }
 
     [Fact]
@@ -80,21 +81,35 @@ public sealed class CsrfTests {
     [Fact]
     public void IssueReusesAnExistingValidCookie() {
         Csrf.Configure(secure: true);
-        var token = "abc123";
+        var cookie = SignedCookie("abc123");
         var reply = Reply.Text("ok");
-        var issued = Make(Method.Get, cookie: SignedCookie(token)).Issue(reply);
+        var issued = Make(Method.Get, cookie: cookie).Issue(reply);
 
-        Assert.Equal(token, issued);
         Assert.Empty(reply.CookieHeaders);
+        Assert.True(Make(cookie: cookie, headerToken: issued).Verify());
     }
 
     [Fact]
     public void IssuedTokenVerifiesOnTheNextRequest() {
         Csrf.Configure(secure: true);
         var reply = Reply.Text("ok");
-        var token = Make(Method.Get).Issue(reply);
+        var masked = Make(Method.Get).Issue(reply);
+        var cookiePair = reply.CookieHeaders[0].Split(';')[0];
 
-        Assert.True(Make(cookie: SignedCookie(token), headerToken: token).Verify());
+        Assert.True(Make(cookie: cookiePair, headerToken: masked).Verify());
+    }
+
+    [Fact]
+    public void IssuedTokenIsMaskedPerResponseYetVerifies() {
+        Csrf.Configure(secure: true);
+        var cookie = SignedCookie("session-secret-token");
+
+        var a = Make(Method.Get, cookie: cookie).Issue(Reply.Text("ok"));
+        var b = Make(Method.Get, cookie: cookie).Issue(Reply.Text("ok"));
+
+        Assert.NotEqual(a, b);
+        Assert.True(Make(cookie: cookie, headerToken: a).Verify());
+        Assert.True(Make(cookie: cookie, headerToken: b).Verify());
     }
 
     [Fact]
@@ -112,14 +127,15 @@ public sealed class CsrfTests {
             Assert.Equal("X-My-Csrf", Csrf.HeaderName);
 
             var reply = Reply.Text("ok");
-            var token = Make(Method.Get).Issue(reply);
-            Assert.StartsWith("my_csrf=", reply.CookieHeaders[0]);
+            var masked = Make(Method.Get).Issue(reply);
+            var cookiePair = reply.CookieHeaders[0].Split(';')[0];
+            Assert.StartsWith("my_csrf=", cookiePair);
 
-            Assert.True(Make(cookie: SignedCookie(token), headerToken: token).Verify());
+            Assert.True(Make(cookie: cookiePair, headerToken: masked).Verify());
 
             var stale = new HeaderDictionary {
-                ["Cookie"] = SignedCookie(token),
-                ["X-Hydris-Csrf"] = token,
+                ["Cookie"] = cookiePair,
+                ["X-Hydris-Csrf"] = masked,
             };
             var request = new Request(Method.Post, "/", new Dictionary<string, string>(), stale);
             Assert.False(new Csrf(request, new CookieAuthority(request)).Verify());

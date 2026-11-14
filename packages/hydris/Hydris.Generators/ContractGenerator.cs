@@ -163,6 +163,11 @@ public sealed class ContractGenerator : IIncrementalGenerator {
         sb.AppendLine("                errors.Add(\"\", \"invalid\", \"The request body is not valid JSON.\");");
         sb.AppendLine("                return null;");
         sb.AppendLine("            }");
+        sb.AppendLine("            catch (global::System.Exception ex) when (ex is global::System.InvalidOperationException or global::System.FormatException or global::System.OverflowException)");
+        sb.AppendLine("            {");
+        sb.AppendLine("                errors.Add(\"\", \"invalid\", \"The request body has a field of the wrong type.\");");
+        sb.AppendLine("                return null;");
+        sb.AppendLine("            }");
         sb.AppendLine("        }");
     }
 

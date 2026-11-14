@@ -61,8 +61,9 @@ public sealed class Router {
         Debug.Assert(path is not null);
 
         var span = PathSpan(path);
-        Span<Range> buffer = stackalloc Range[MaxSegments];
-        var segments = Split(span, buffer);
+        Span<Range> buffer = stackalloc Range[StackSegments];
+        if (!TrySplit(span, buffer, out var segments))
+            return null;
 
         var route = Tree.Find(method, span, segments);
         if (route is null)
@@ -77,8 +78,9 @@ public sealed class Router {
         Debug.Assert(path is not null);
 
         var span = PathSpan(path);
-        Span<Range> buffer = stackalloc Range[MaxSegments];
-        var segments = Split(span, buffer);
+        Span<Range> buffer = stackalloc Range[StackSegments];
+        if (!TrySplit(span, buffer, out var segments))
+            return [];
 
         var methods = new List<Method>();
         foreach (var route in Routes) {
@@ -89,21 +91,31 @@ public sealed class Router {
         return methods;
     }
 
-    private const int MaxSegments = 32;
+    private const int StackSegments = 32;
+    private const int MaxSegments = 256;
 
     private static ReadOnlySpan<char> PathSpan(string path) {
         var query = path.IndexOf('?');
         return query >= 0 ? path.AsSpan(0, query) : path.AsSpan();
     }
 
-    private static ReadOnlySpan<Range> Split(ReadOnlySpan<char> path, Span<Range> buffer) {
+    private static bool TrySplit(ReadOnlySpan<char> path, Span<Range> buffer, out ReadOnlySpan<Range> segments) {
         var count = Tokenize(path, buffer);
-        if (count >= 0)
-            return buffer[..count];
+        if (count >= 0) {
+            segments = buffer[..count];
+            return true;
+        }
 
-        var heap = new Range[CountSegments(path)];
+        var total = CountSegments(path);
+        if (total > MaxSegments) {
+            segments = default;
+            return false;
+        }
+
+        var heap = new Range[total];
         Tokenize(path, heap);
-        return heap;
+        segments = heap;
+        return true;
     }
 
     private static int Tokenize(ReadOnlySpan<char> path, Span<Range> segments) {

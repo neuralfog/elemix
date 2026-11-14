@@ -17,6 +17,19 @@ public sealed class RouterTests {
     }
 
     [Fact]
+    public void RejectsPathsBeyondTheSegmentCap() {
+        var router = new Router();
+        router.Get("/*", Ok);
+
+        var deep = "/" + string.Join('/', Enumerable.Repeat("a", 100));
+        Assert.NotNull(router.Match(Method.Get, deep));
+
+        var absurd = "/" + string.Join('/', Enumerable.Repeat("a", 2000));
+        Assert.Null(router.Match(Method.Get, absurd));
+        Assert.Empty(router.AllowedMethods(absurd));
+    }
+
+    [Fact]
     public void NoMatchForUnknownPath() {
         var router = new Router();
 

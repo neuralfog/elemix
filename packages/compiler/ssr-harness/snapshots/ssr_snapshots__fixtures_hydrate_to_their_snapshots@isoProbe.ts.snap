@@ -1,0 +1,7 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/isoProbe.ts
+---
+import { $__moduleState } from '@neuralfog/elemix/ssr-runtime/client';
+export const isoProbe = $__moduleState(() => ({ seen: [] as string[] }));

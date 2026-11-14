@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Hydris.QuickJs/Hydris.QuickJs.csproj" />
+    <InternalsVisibleTo Include="Hydris.Tests" />
   </ItemGroup>
 
 </Project>

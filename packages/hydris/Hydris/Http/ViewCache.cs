@@ -5,6 +5,7 @@ namespace Hydris.Http;
 internal static class ViewCache {
     private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(2);
     private static readonly TimeSpan Reap = TimeSpan.FromMinutes(2);
+    private const int MaxEntries = 2048;
 
-    internal static RenderCache<CachedView> Instance { get; } = new(Ttl, Reap);
+    internal static RenderCache<CachedView> Instance { get; } = new(Ttl, Reap, MaxEntries);
 }
