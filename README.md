@@ -4,7 +4,7 @@
 
 # Elemix
 
-A compiled frontend library - no virtual DOM, incredibly fast, with state management that doesn't suck and frictionless ergonomics that stay out of your way - for the love of the web 💙
+A compiled frontend library built on Custom Elements - no virtual DOM, incredibly fast, with state management that doesn't suck and frictionless ergonomics that stay out of your way - for the love of the web 💙
 
 **[elemix.dev](https://elemix.dev/)**
 
@@ -27,6 +27,13 @@ The **[Roadmap](ROADMAP.md)** is the full log of development.
 | `@neuralfog/elemix-nvim` | Neovim Plugin For Elemix. | [README](packages/nvim/README.md) |
 | `create-elemix-app` | Scaffold A New Elemix App. | [README](packages/create-app/README.md) |
 | `Hydris` | Server-Side Rendering Framework For Elemix (Native-AOT C#). | [README](packages/hydris/Hydris/README.md) |
+
+## References
+
+| Reference | Description | Repo |
+| --- | --- | --- |
+| `elemix-template` | The Official Starter Template (`create-elemix-app`). | [GitHub](https://github.com/neuralfog/elemix-template) |
+| `elemix-ssr-benchmarks` | Hydris SSR Benchmarks Against Next.js, Nuxt And ASP.NET. | [GitHub](https://github.com/neuralfog/elemix-ssr-benchmarks) |
 
 ## Contributing
 
