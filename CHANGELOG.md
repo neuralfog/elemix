@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.7] - 2026-11-15
+
+### Added
+
+- `html()` content directive: drop a trusted HTML string into a template hole
+  (`${html(markup)}`) and it renders as live DOM, compiled for both SSR and the
+  client. Vue's `v-html`, resolved at compile time rather than at runtime.
+
+### Changed
+
+- hydris `Serve(ServerConfig)` is now typed, and the CLI auto-loads `.env`.
+
+### Fixed
+
+- elemix-ssr now compiles `node_modules` `.ts` files that carry elemix markers.
+  Components shipped as source (such as `NavLink`) register correctly instead of
+  rendering empty inside nested shadow roots.
+- Raw-element content stays verbatim: the compiler no longer collapses whitespace
+  inside `<pre>`, `<textarea>`, `<script>` and `<style>`, and the formatter no
+  longer dedents `<pre>` content rendered through a hole.
+- hydris sends no response body on `304` and `204` responses.
+
 ## [0.9.6] - 2026-11-14
 
 ### Added
