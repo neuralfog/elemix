@@ -1,0 +1,30 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ShadowNavHomeApp.ts
+---
+import { $__ssrHole, $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { ShadowNavDocument } from './ShadowNavDocument';
+import './ShadowNavShell';
+
+export class ShadowNavHomeApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'shadow-nav-home-app'}><template shadowrootmode="open" shadowrootserializable="">`, $__ssrChild('shadow-nav-shell', {}), `<main id="page" data-page="home"><h1>Home</h1>${(() => {const _h0 = $__ssrHole((this.state.count));return `<button id="counter" data-t="${_h0[1]}">count ${_h0[0]}</button>`;})()}</main></template></${this.$$__tag ?? 'shadow-nav-home-app'}>`];
+}
+
+
+    state = $__state({ count: 0 });
+
+    inc = (): void => {
+        this.state.count++;
+    };
+
+    
+}
+$__defineComponent('shadow-nav-home-app', ShadowNavHomeApp);
+ShadowNavHomeApp.prototype.$$__tag = 'shadow-nav-home-app';
+ShadowNavHomeApp.$$__propSafe = true;
+ShadowNavHomeApp.$$__document = ShadowNavDocument;

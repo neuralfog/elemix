@@ -1,0 +1,37 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/ShadowNavHomeApp.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { ShadowNavDocument } from './ShadowNavDocument';
+import './ShadowNavShell';
+
+const _t0 = $__template('<shadow-nav-shell></shadow-nav-shell><main id="page" data-page="home"><h1>Home</h1><button id="counter">count <!----></button></main>');
+
+export class ShadowNavHomeApp extends Component {
+
+    state = $__state({ count: 0 });
+
+    inc = (): void => {
+        this.state.count++;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.nextSibling!.firstChild!.nextSibling!;
+const _n2 = _n1.firstChild!.nextSibling!;
+(_n1 as HTMLElement).onclick = (this.inc);
+const _x3 = document.createTextNode('');
+_n2.replaceWith(_x3);
+$__effect(() => {
+$__setText(_x3, this.state.count);
+});
+return _r0;
+}
+}
+$__defineComponent('shadow-nav-home-app', ShadowNavHomeApp);
+ShadowNavHomeApp.prototype.$$__tag = 'shadow-nav-home-app';
+ShadowNavHomeApp.$$__document = ShadowNavDocument;

@@ -53,6 +53,9 @@ public sealed class Fixtures {
     [Get("/shadow-nav-about")]
     public Reply ShadowNavAboutApp() => Reply.View("fixtures/ShadowNavAboutApp", new NavData("About", "about"));
 
+    [Get("/code-tabs-app")]
+    public Reply CodeTabsApp() => Reply.View("fixtures/CodeTabsApp");
+
     [Get("/context/:id")]
     public Reply ContextApp() => Reply.View("fixtures/ContextApp");
 

@@ -1,0 +1,20 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ShadowNavShell.ts
+---
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import '@neuralfog/elemix/navigation/NavLink';
+
+export class ShadowNavShell extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'shadow-nav-shell'}><template shadowrootmode="open" shadowrootserializable=""><nav class="nav">`, $__ssrChild('nav-link', {}, `<a id="to-home" href="/shadow-nav-home">Home</a>`, ` route="/shadow-nav-home"`), $__ssrChild('nav-link', {}, `<a id="to-about" href="/shadow-nav-about">About</a>`, ` route="/shadow-nav-about"`), `<a id="hard-link" href="/shadow-nav-home">Hard</a>`, $__ssrChild('nav-link', {}, `<button id="disabled-btn" aria-disabled="true">Off</button>`, ` route="/shadow-nav-about"`), `</nav></template></${this.$$__tag ?? 'shadow-nav-shell'}>`];
+}
+
+    
+}
+$__defineComponent('shadow-nav-shell', ShadowNavShell);
+ShadowNavShell.prototype.$$__tag = 'shadow-nav-shell';
+ShadowNavShell.$$__propSafe = true;

@@ -1,0 +1,51 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/CodeTabsApp.ts
+---
+import { $__template, $__clone, $__effect, $__setClass, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<div class="tabs"><button id="to-ts">ts</button><button id="to-scss">scss</button><pre id="panel-ts"><code><span class="k">import</span> x <span class="k">from</span> <span class="s">\'y\'</span>;\n<span class="c">// #state</span>\n    count = <span class="n">0</span>;</code></pre><pre id="panel-scss"><code><span class="t">button</span> {\n    color: <span class="n">#fff</span>;\n}</code></pre></div>');
+
+export class CodeTabsApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _n1 = _n0.nextSibling!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+(_n0 as HTMLElement).onclick = (() => this.show('ts'));
+(_n1 as HTMLElement).onclick = (() => this.show('scss'));
+$__effect(() => {
+$__setClass(_n2, (this.state.tab === 'ts' ? 'panel' : 'panel hidden'));
+});
+$__effect(() => {
+$__setClass(_n3, (this.state.tab === 'scss' ? 'panel' : 'panel hidden'));
+});
+}
+
+    state = $__state({ tab: 'ts' });
+
+    show = (tab: string): void => {
+        this.state.tab = tab;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n2.nextSibling!;
+const _n4 = _n3.nextSibling!;
+(_n1 as HTMLElement).onclick = (() => this.show('ts'));
+(_n2 as HTMLElement).onclick = (() => this.show('scss'));
+$__effect(() => {
+$__setClass(_n3, (this.state.tab === 'ts' ? 'panel' : 'panel hidden'));
+});
+$__effect(() => {
+$__setClass(_n4, (this.state.tab === 'scss' ? 'panel' : 'panel hidden'));
+});
+return _r0;
+}
+}
+$__defineComponent('code-tabs-app', CodeTabsApp);
+CodeTabsApp.prototype.$$__tag = 'code-tabs-app';

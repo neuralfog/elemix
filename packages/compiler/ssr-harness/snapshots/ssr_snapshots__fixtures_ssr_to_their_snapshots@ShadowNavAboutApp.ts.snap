@@ -1,0 +1,24 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ShadowNavAboutApp.ts
+---
+import { $__ssrChild } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { ShadowNavDocument } from './ShadowNavDocument';
+import './ShadowNavShell';
+
+export class ShadowNavAboutApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'shadow-nav-about-app'}><template shadowrootmode="open" shadowrootserializable="">`, $__ssrChild('shadow-nav-shell', {}), `<main id="page" data-page="about"><h1>About</h1></main></template></${this.$$__tag ?? 'shadow-nav-about-app'}>`];
+}
+
+
+    
+}
+$__defineComponent('shadow-nav-about-app', ShadowNavAboutApp);
+ShadowNavAboutApp.prototype.$$__tag = 'shadow-nav-about-app';
+ShadowNavAboutApp.$$__propSafe = true;
+ShadowNavAboutApp.$$__document = ShadowNavDocument;

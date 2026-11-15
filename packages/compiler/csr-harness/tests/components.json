@@ -4,6 +4,10 @@
         "fixture": "AsyncApp"
     },
     {
+        "tag": "code-tabs-app",
+        "fixture": "CodeTabsApp"
+    },
+    {
         "tag": "attr-app",
         "fixture": "AttrApp"
     },

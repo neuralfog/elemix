@@ -209,6 +209,21 @@ mod tests {
         );
     }
 
+    const PRE_IN_HOLE: &str = "class C {\n    template = () => tpl`\n        <figure>\n            ${\n                this.tab === 'ts'\n                    ? tpl`<pre><code><span class=\"t-key\">import</span> x\n<span class=\"t-hint\">// #state</span>\n    count = <span class=\"t-num\">0</span>;</code></pre>`\n                    : tpl`<pre><code>b</code></pre>`\n            }\n        </figure>\n    `;\n}\n";
+
+    #[test]
+    fn pre_verbatim_content_in_a_hole_is_never_eaten() {
+        let out = fmt(PRE_IN_HOLE);
+        for frag in [
+            "<span class=\"t-key\">import</span>",
+            "<span class=\"t-hint\">// #state</span>",
+            "<span class=\"t-num\">0</span>;",
+        ] {
+            assert!(out.contains(frag), "corrupted fragment {frag:?} in:\n{out}");
+        }
+        assert_eq!(fmt(&out), out, "pre-in-hole must converge");
+    }
+
     #[test]
     fn leaves_non_template_files_byte_identical() {
         let src = "const x = 1;\nconst s = `not a tpl ${x}`;\n";

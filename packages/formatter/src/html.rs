@@ -429,10 +429,9 @@ fn hole_doc(hole: &str) -> Doc {
     let mut parts = vec![text(format!("${{{}", lines[0]))];
     for (i, l) in lines.iter().enumerate().skip(1) {
         parts.push(hardline());
-        let stripped = if l.len() >= min_indent {
-            &l[min_indent..]
-        } else {
-            l.trim_start()
+        let stripped = match l.get(..min_indent) {
+            Some(head) if head.bytes().all(|b| b == b' ' || b == b'\t') => &l[min_indent..],
+            _ => l.trim_start(),
         };
         if i == last {
             parts.push(text(format!("{stripped}}}")));
@@ -797,6 +796,18 @@ mod tests {
     fn pre_content_is_verbatim() {
         let out = fmt(&["<pre>  a\n  b  </pre>"], &[]);
         assert!(out.contains("  a\n  b  "), "pre kept verbatim: {out:?}");
+    }
+
+    #[test]
+    fn pre_with_child_elements_is_verbatim() {
+        let input = "<pre><code><span class=\"k\">import</span> x\n<span class=\"h\">// note</span>\n    styles = x;</code></pre>";
+        let out = fmt(&[input], &[]);
+        assert!(
+            out.contains(
+                "<code><span class=\"k\">import</span> x\n<span class=\"h\">// note</span>\n    styles = x;</code>"
+            ),
+            "pre+children kept verbatim: {out:?}"
+        );
     }
 
     #[test]

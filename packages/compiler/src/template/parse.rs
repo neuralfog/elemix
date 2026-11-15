@@ -366,10 +366,15 @@ fn escape_tmpl(s: &str) -> String {
     out
 }
 
+fn is_raw_elem(tag: &str) -> bool {
+    matches!(tag, "pre" | "textarea" | "script" | "style")
+}
+
 fn normalize(children: &mut Vec<Child>) {
     for ch in children.iter_mut() {
         match ch {
             Child::Text(t) => *t = collapse_ws(t),
+            Child::Elem(e) if is_raw_elem(&e.tag) => {}
             Child::Elem(e) => normalize(&mut e.children),
             Child::Anchor(..) => {}
         }

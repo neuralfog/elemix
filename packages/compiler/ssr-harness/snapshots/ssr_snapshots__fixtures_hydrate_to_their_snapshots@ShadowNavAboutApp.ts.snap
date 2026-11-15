@@ -1,0 +1,27 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/ShadowNavAboutApp.ts
+---
+import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { ShadowNavDocument } from './ShadowNavDocument';
+import './ShadowNavShell';
+
+const _t0 = $__template('<shadow-nav-shell></shadow-nav-shell><main id="page" data-page="about"><h1>About</h1></main>');
+
+export class ShadowNavAboutApp extends Component {
+$$__hydrate(root: Node): void {
+
+}
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('shadow-nav-about-app', ShadowNavAboutApp);
+ShadowNavAboutApp.prototype.$$__tag = 'shadow-nav-about-app';
+ShadowNavAboutApp.$$__document = ShadowNavDocument;

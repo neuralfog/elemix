@@ -1,0 +1,29 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/CodeTabsApp.ts
+---
+import { $__ssrClass } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class CodeTabsApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'code-tabs-app'}><template shadowrootmode="open" shadowrootserializable=""><div class="tabs"><button id="to-ts">ts</button><button id="to-scss">scss</button><pre id="panel-ts"${$__ssrClass(this.state.tab === 'ts' ? 'panel' : 'panel hidden')}><code><span class="k">import</span> x <span class="k">from</span> <span class="s">'y'</span>;
+<span class="c">// #state</span>
+    count = <span class="n">0</span>;</code></pre><pre id="panel-scss"${$__ssrClass(this.state.tab === 'scss' ? 'panel' : 'panel hidden')}><code><span class="t">button</span> {
+    color: <span class="n">#fff</span>;
+}</code></pre></div></template></${this.$$__tag ?? 'code-tabs-app'}>`];
+}
+
+    state = $__state({ tab: 'ts' });
+
+    show = (tab: string): void => {
+        this.state.tab = tab;
+    };
+
+    
+}
+$__defineComponent('code-tabs-app', CodeTabsApp);
+CodeTabsApp.prototype.$$__tag = 'code-tabs-app';
+CodeTabsApp.$$__propSafe = true;
