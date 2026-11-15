@@ -56,6 +56,9 @@ public sealed class Fixtures {
     [Get("/code-tabs-app")]
     public Reply CodeTabsApp() => Reply.View("fixtures/CodeTabsApp");
 
+    [Get("/html-directive-app")]
+    public Reply HtmlDirectiveApp() => Reply.View("fixtures/HtmlDirectiveApp");
+
     [Get("/context/:id")]
     public Reply ContextApp() => Reply.View("fixtures/ContextApp");
 

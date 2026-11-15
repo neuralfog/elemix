@@ -712,6 +712,10 @@ fn child_getter(expr: &str, ctx: &mut Ctx, emitter: &dyn Emitter, hy: Option<&st
         lower_choose(expr, ctx, emitter, hy)
     } else if trimmed.starts_with("match(") {
         lower_match(expr, ctx, emitter, hy)
+    } else if trimmed.starts_with("html(") {
+        let args = split_call_args(expr);
+        let markup = args.first().cloned().unwrap_or_default();
+        format!("$__html({markup})")
     } else {
         sub(expr, ctx, emitter, true, hy)
     }

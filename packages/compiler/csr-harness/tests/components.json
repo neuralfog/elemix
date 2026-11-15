@@ -8,6 +8,10 @@
         "fixture": "CodeTabsApp"
     },
     {
+        "tag": "html-directive-app",
+        "fixture": "HtmlDirectiveApp"
+    },
+    {
         "tag": "attr-app",
         "fixture": "AttrApp"
     },

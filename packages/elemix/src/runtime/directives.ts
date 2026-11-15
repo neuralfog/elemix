@@ -13,6 +13,8 @@ export const when = (
     _otherwise?: () => Template,
 ): Template => uncompiled('when');
 
+export const html = (_markup: string): Template => uncompiled('html');
+
 export const choose = (
     _cases: Array<[condition: unknown, template: () => Template]>,
 ): Template => uncompiled('choose');

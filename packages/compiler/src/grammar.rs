@@ -81,7 +81,7 @@ fn classify_attr(name: &str) -> (BindingKind, Option<String>) {
 fn classify_content(expr: &str) -> BindingKind {
     match leading_call(expr) {
         Some("repeat") => return BindingKind::List,
-        Some("when" | "choose" | "match") => return BindingKind::Child,
+        Some("when" | "choose" | "match" | "html") => return BindingKind::Child,
         _ => {}
     }
     if contains_html_template(expr) {

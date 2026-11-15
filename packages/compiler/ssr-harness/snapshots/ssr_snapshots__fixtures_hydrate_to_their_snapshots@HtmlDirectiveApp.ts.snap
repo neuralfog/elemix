@@ -1,0 +1,44 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/HtmlDirectiveApp.ts
+---
+import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__child, $__html, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const BOLD = '<strong class="m">bold</strong> raw';
+const ITALIC = '<em class="m">italic</em> raw';
+
+const _t0 = $__template('<div><div id="sink"><!----></div><button id="swap">swap</button></div>');
+
+export class HtmlDirectiveApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.firstChild!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _n3 = _n0.nextSibling!;
+(_n3 as HTMLElement).onclick = (this.swap);
+$__fresh(() => {
+$__child(_a2, () => ($__html(this.state.active === 'bold' ? BOLD : ITALIC)));
+});
+}
+
+    state = $__state({ active: 'bold' });
+
+    swap = (): void => {
+        this.state.active = 'italic';
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!;
+$__child(_n2, () => ($__html(this.state.active === 'bold' ? BOLD : ITALIC)));
+(_n3 as HTMLElement).onclick = (this.swap);
+return _r0;
+}
+}
+$__defineComponent('html-directive-app', HtmlDirectiveApp);
+HtmlDirectiveApp.prototype.$$__tag = 'html-directive-app';

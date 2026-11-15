@@ -1,0 +1,28 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/HtmlDirectiveApp.ts
+---
+import { $__ssrHtml } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const BOLD = '<strong class="m">bold</strong> raw';
+const ITALIC = '<em class="m">italic</em> raw';
+
+export class HtmlDirectiveApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'html-directive-app'}><template shadowrootmode="open" shadowrootserializable=""><div><div id="sink">`, ($__ssrHtml(this.state.active === 'bold' ? BOLD : ITALIC)), `</div><button id="swap">swap</button></div></template></${this.$$__tag ?? 'html-directive-app'}>`];
+}
+
+    state = $__state({ active: 'bold' });
+
+    swap = (): void => {
+        this.state.active = 'italic';
+    };
+
+    
+}
+$__defineComponent('html-directive-app', HtmlDirectiveApp);
+HtmlDirectiveApp.prototype.$$__tag = 'html-directive-app';
+HtmlDirectiveApp.$$__propSafe = true;

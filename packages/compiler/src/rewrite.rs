@@ -24,6 +24,7 @@ const PRIMITIVES: &[&str] = &[
     "$__list",
     "$__effect",
     "$__setText",
+    "$__html",
     "$__setAttr",
     "$__setClass",
     "$__setStyle",

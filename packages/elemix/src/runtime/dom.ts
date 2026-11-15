@@ -532,6 +532,12 @@ export const $__setText = (node: Text, value: unknown): void => {
     node.data = next;
 };
 
+export const $__html = (markup: unknown): Node => {
+    const t = document.createElement('template');
+    t.innerHTML = markup == null ? '' : String(markup);
+    return t.content;
+};
+
 export const $__setAttr = (el: Element, name: string, value: unknown): void => {
     if (hydrating) return;
     let key = attrKeys.get(name);

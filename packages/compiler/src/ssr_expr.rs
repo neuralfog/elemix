@@ -10,6 +10,7 @@ const DIRECTIVES: &[(&str, &str)] = &[
     ("when", "$__ssrWhen"),
     ("choose", "$__ssrChoose"),
     ("match", "$__ssrMatch"),
+    ("html", "$__ssrHtml"),
 ];
 
 struct Edit {

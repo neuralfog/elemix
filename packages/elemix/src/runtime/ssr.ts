@@ -107,6 +107,9 @@ export const $__render = (rope: Rope): string => {
     return parts.join('');
 };
 
+export const $__ssrHtml = (markup: unknown): string =>
+    markup == null ? '' : String(markup);
+
 export const $__ssrText = (value: unknown): Rope => {
     if (Array.isArray(value)) return [value as Rope, HYDRATE_MARK];
     if (value == null) return '';
