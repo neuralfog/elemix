@@ -173,10 +173,10 @@ export const build = async (
             aliasSsr(build);
             build.onLoad({ filter: /\.ts$/ }, async (args) => {
                 const source = await Bun.file(args.path).text();
-                if (args.path.includes('/node_modules/')) {
+                const needs = MARKERS.some((m) => source.includes(m));
+                if (args.path.includes('/node_modules/') && !needs) {
                     return { contents: source, loader: 'ts' };
                 }
-                const needs = MARKERS.some((m) => source.includes(m));
                 if (mode === '--hydrate') {
                     return {
                         contents: needs
@@ -240,11 +240,12 @@ export const build = async (
             setup(build) {
                 aliasSsr(build);
                 build.onLoad({ filter: /\.ts$/ }, async (args) => {
-                    if (args.path.includes('/node_modules/'))
-                        return {
-                            contents: await Bun.file(args.path).text(),
-                            loader: 'ts',
-                        };
+                    const source = await Bun.file(args.path).text();
+                    if (
+                        args.path.includes('/node_modules/') &&
+                        !MARKERS.some((m) => source.includes(m))
+                    )
+                        return { contents: source, loader: 'ts' };
                     return {
                         contents: await compileCached(args.path),
                         loader: 'ts',

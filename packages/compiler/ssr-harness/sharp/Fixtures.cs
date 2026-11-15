@@ -44,6 +44,15 @@ public sealed class Fixtures {
     [Get("/nav-about-app")]
     public Reply NavAboutApp() => Reply.View("fixtures/NavAboutApp", new NavData("About", "about"));
 
+    [Get("/shadow-nav-redirect")]
+    public Reply ShadowNavRedirect() => Reply.Redirect("/shadow-nav-about");
+
+    [Get("/shadow-nav-home")]
+    public Reply ShadowNavHomeApp() => Reply.View("fixtures/ShadowNavHomeApp", new NavData("Home", "home"));
+
+    [Get("/shadow-nav-about")]
+    public Reply ShadowNavAboutApp() => Reply.View("fixtures/ShadowNavAboutApp", new NavData("About", "about"));
+
     [Get("/context/:id")]
     public Reply ContextApp() => Reply.View("fixtures/ContextApp");
 
