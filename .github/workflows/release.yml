@@ -923,10 +923,16 @@ jobs:
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
 
+      - uses: actions/upload-artifact@v7
+        with:
+          name: hydris-nupkgs
+          path: nupkgs/*.nupkg
+
   release-notes:
     name: GitHub Release
     needs:
       - version
+      - publish-nvim
       - publish-compiler
       - publish-analyzer
       - publish-formatter
@@ -967,6 +973,10 @@ jobs:
         with:
           name: vsix
           path: vsix
+      - uses: actions/download-artifact@v8
+        with:
+          name: hydris-nupkgs
+          path: nupkgs
 
       - name: Package prebuilt binaries
         run: |
@@ -1008,3 +1018,4 @@ jobs:
           fi
           gh release upload "$TAG" dist-assets/* --clobber
           gh release upload "$TAG" vsix/*.vsix --clobber
+          gh release upload "$TAG" nupkgs/*.nupkg --clobber
