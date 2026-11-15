@@ -90,6 +90,8 @@ public static class Dispatcher {
         if (config is null)
             return cliEnv;
         var merged = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var pair in EnvFile.LoadDirectory(config.RootDir))
+            merged[pair.Key] = pair.Value;
         foreach (var pair in config.File.Env)
             merged[pair.Key] = pair.Value;
         foreach (var pair in cliEnv)

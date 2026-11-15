@@ -206,6 +206,8 @@ public static class TaskRunner {
         TaskSpec task,
         IReadOnlyDictionary<string, string> cliEnv) {
         var env = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var pair in Env.EnvFile.LoadDirectory(config.RootDir))
+            env[pair.Key] = pair.Value;
         foreach (var pair in config.File.Env)
             env[pair.Key] = pair.Value;
         foreach (var pair in task.Env)

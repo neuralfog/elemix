@@ -22,6 +22,23 @@ public static class EnvFile {
         return result;
     }
 
+    public static Dictionary<string, string> LoadDirectory(string directory) {
+        var result = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
+            return result;
+
+        var files = Directory.EnumerateFiles(directory)
+            .Where(static path => path.EndsWith(".env", StringComparison.Ordinal))
+            .ToArray();
+        Array.Sort(files, StringComparer.Ordinal);
+
+        foreach (var file in files) {
+            foreach (var pair in Parse(file))
+                result[pair.Key] = pair.Value;
+        }
+        return result;
+    }
+
     public static Dictionary<string, string> ParsePair(string pair) {
         var eq = pair.IndexOf('=');
         if (eq <= 0)

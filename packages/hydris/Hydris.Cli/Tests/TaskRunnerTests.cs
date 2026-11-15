@@ -10,6 +10,47 @@ public sealed class TaskRunnerTests {
     private static int Run(string yaml, string task) =>
         TaskRunner.Run(Config(yaml), task, new Dictionary<string, string>());
 
+    private static int RunIn(string root, string yaml, string task, Dictionary<string, string>? cliEnv = null) =>
+        TaskRunner.Run(
+            new LoadedConfig { File = ConfigLoader.Parse(yaml), Path = Path.Combine(root, "hydris.yml"), RootDir = root },
+            task,
+            cliEnv ?? new Dictionary<string, string>());
+
+    [Fact]
+    public void DotEnvValueReachesTheTask() {
+        var dir = Directory.CreateTempSubdirectory().FullName;
+        try {
+            File.WriteAllText(Path.Combine(dir, ".env"), "GREETING=hello\n");
+            Assert.Equal(0, RunIn(dir, "tasks:\n  check:\n    run: test \"$GREETING\" = hello", "check"));
+        } finally {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void HydrisYmlEnvOverridesDotEnv() {
+        var dir = Directory.CreateTempSubdirectory().FullName;
+        try {
+            File.WriteAllText(Path.Combine(dir, ".env"), "GREETING=fromdotenv\n");
+            var yaml = "env:\n  GREETING: fromyaml\ntasks:\n  check:\n    run: test \"$GREETING\" = fromyaml";
+            Assert.Equal(0, RunIn(dir, yaml, "check"));
+        } finally {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void CliEnvOverridesDotEnv() {
+        var dir = Directory.CreateTempSubdirectory().FullName;
+        try {
+            File.WriteAllText(Path.Combine(dir, ".env"), "GREETING=fromdotenv\n");
+            Assert.Equal(0, RunIn(dir, "tasks:\n  check:\n    run: test \"$GREETING\" = fromcli", "check",
+                new Dictionary<string, string> { ["GREETING"] = "fromcli" }));
+        } finally {
+            Directory.Delete(dir, true);
+        }
+    }
+
     [Fact]
     public void RunExecutesAScalarCommand() {
         Assert.Equal(0, Run("tasks:\n  a: { run: \"exit 0\" }", "a"));

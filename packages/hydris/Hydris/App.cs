@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Net;
 using System.Runtime.InteropServices;
 using Hydris.Container;
 using Hydris.Core;
@@ -104,7 +103,17 @@ public sealed class App {
         return this;
     }
 
-    public async Task Serve(int port = 5000) {
+    public Task Serve(int port = 5000) {
+        var host = Environment.GetEnvironmentVariable("HYDRIS_HOST");
+        return Serve(new ServerConfig {
+            Host = string.IsNullOrEmpty(host) ? "127.0.0.1" : host,
+            Port = port,
+        });
+    }
+
+    public async Task Serve(ServerConfig config) {
+        ArgumentNullException.ThrowIfNull(config);
+
         var stopwatch = Stopwatch.StartNew();
 
         Container.Start();
@@ -118,9 +127,9 @@ public sealed class App {
         Views.UseManifest(Container.Get<ElemixManifest>());
         Compressor.Lock();
 
+        var maxBody = config.MaxRequestBodyBytes ?? MaxBody;
         var kestrel = new KestrelServerOptions();
-        kestrel.Limits.MaxRequestBodySize = MaxBody;
-        kestrel.Listen(BindAddress(), port);
+        ServerConfigMapper.Configure(kestrel, config, MaxBody);
 
         var transport = new SocketTransportFactory(
             Options.Create(new SocketTransportOptions()),
@@ -128,11 +137,12 @@ public sealed class App {
 
         using var server = new KestrelServer(Options.Create(kestrel), transport, loggerFactory);
 
-        await server.StartAsync(new Dispatcher(Routes, Container, TrustProxyEnabled, Middlewares, Errors, MaxBody), CancellationToken.None);
+        await server.StartAsync(new Dispatcher(Routes, Container, TrustProxyEnabled, Middlewares, Errors, maxBody), CancellationToken.None);
 
         var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? string.Empty;
         var development = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") != "Production";
-        log.Ready(new HLog.ServerReady(version, "http", "localhost", port, stopwatch.ElapsedMilliseconds, development));
+        var scheme = config.Tls is null ? "http" : "https";
+        log.Ready(new HLog.ServerReady(version, scheme, config.Host, config.Port, stopwatch.ElapsedMilliseconds, development));
 
         var shutdown = new TaskCompletionSource();
         using var sigint = PosixSignalRegistration.Create(PosixSignal.SIGINT, Stop);
@@ -147,10 +157,5 @@ public sealed class App {
             context.Cancel = true;
             shutdown.TrySetResult();
         }
-    }
-
-    private static IPAddress BindAddress() {
-        var host = Environment.GetEnvironmentVariable("HYDRIS_HOST");
-        return string.IsNullOrEmpty(host) ? IPAddress.Loopback : IPAddress.Parse(host);
     }
 }

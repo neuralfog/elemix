@@ -33,4 +33,60 @@ public sealed class EnvFileTests {
             File.Delete(path);
         }
     }
+
+    [Fact]
+    public void LoadDirectoryReadsDotEnv() {
+        var dir = Directory.CreateTempSubdirectory().FullName;
+        try {
+            File.WriteAllText(Path.Combine(dir, ".env"), "FOO=bar\n");
+            Assert.Equal("bar", EnvFile.LoadDirectory(dir)["FOO"]);
+        } finally {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void LoadDirectoryReadsAnyStarDotEnvFile() {
+        var dir = Directory.CreateTempSubdirectory().FullName;
+        try {
+            File.WriteAllText(Path.Combine(dir, "service.env"), "A=1\n");
+            Assert.Equal("1", EnvFile.LoadDirectory(dir)["A"]);
+        } finally {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void LoadDirectoryMergesAllEnvFilesLaterNameWins() {
+        var dir = Directory.CreateTempSubdirectory().FullName;
+        try {
+            File.WriteAllText(Path.Combine(dir, ".env"), "SHARED=base\nONLY_BASE=x\n");
+            File.WriteAllText(Path.Combine(dir, "z-override.env"), "SHARED=override\nONLY_Z=y\n");
+            var env = EnvFile.LoadDirectory(dir);
+            Assert.Equal("override", env["SHARED"]);
+            Assert.Equal("x", env["ONLY_BASE"]);
+            Assert.Equal("y", env["ONLY_Z"]);
+        } finally {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void LoadDirectoryIgnoresNonEnvFiles() {
+        var dir = Directory.CreateTempSubdirectory().FullName;
+        try {
+            File.WriteAllText(Path.Combine(dir, "notes.txt"), "SKIP=1\n");
+            File.WriteAllText(Path.Combine(dir, ".env.local"), "ALSO_SKIP=1\n");
+            var env = EnvFile.LoadDirectory(dir);
+            Assert.False(env.ContainsKey("SKIP"));
+            Assert.False(env.ContainsKey("ALSO_SKIP"));
+        } finally {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void LoadDirectoryEmptyForMissingDirectory() {
+        Assert.Empty(EnvFile.LoadDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))));
+    }
 }
