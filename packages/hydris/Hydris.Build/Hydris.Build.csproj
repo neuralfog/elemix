@@ -8,6 +8,7 @@
     <RootNamespace>Hydris.Build</RootNamespace>
     <AssemblyName>Hydris.Build</AssemblyName>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>hydris-build</ToolCommandName>
     <PackageId>Hydris.Build</PackageId>

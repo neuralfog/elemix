@@ -3,9 +3,15 @@
     "version": "0.9.6",
     "license": "MIT",
     "author": "brownhounds",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/neuralfog/elemix.git",
+        "directory": "packages/elemix-ssr"
+    },
     "type": "module",
     "files": [
-        "./src/**/*"
+        "./src/**/*",
+        "CHANGELOG.md"
     ],
     "exports": {
         ".": "./src/index.ts",
