@@ -302,15 +302,19 @@ public sealed class Reply {
         if (CookieList is not null)
             response.Headers.SetCookie = CookieList.ToArray();
 
+        var noBody = Code == 304 || Code == 204 || Code < 200;
+
         if (FilePath is not null) {
-            response.Headers.ContentLength = new FileInfo(FilePath).Length;
-            if (!head)
+            if (!noBody)
+                response.Headers.ContentLength = new FileInfo(FilePath).Length;
+            if (!noBody && !head)
                 await body.SendFileAsync(FilePath, 0, null, cancellationToken);
             return;
         }
 
-        response.Headers.ContentLength = Payload.Length;
-        if (!head)
+        if (!noBody)
+            response.Headers.ContentLength = Payload.Length;
+        if (!noBody && !head)
             await body.Writer.WriteAsync(Payload, cancellationToken);
     }
 

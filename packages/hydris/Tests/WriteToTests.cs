@@ -44,6 +44,18 @@ public sealed class WriteToTests : IDisposable {
         public void DisableBuffering() { }
     }
 
+    private sealed class ForbiddenBody : IHttpResponseBodyFeature {
+        public Stream Stream => Stream.Null;
+        public PipeWriter Writer => throw new InvalidOperationException("body write attempted");
+
+        public Task SendFileAsync(string path, long offset, long? count, CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("body write attempted");
+
+        public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task CompleteAsync() => Task.CompletedTask;
+        public void DisableBuffering() { }
+    }
+
     private static async Task<byte[]> BodyBytes(FakeBody body) {
         await body.Writer.FlushAsync();
         return body.Sink.ToArray();
@@ -97,5 +109,27 @@ public sealed class WriteToTests : IDisposable {
 
         Assert.Equal(13, response.Headers.ContentLength);
         Assert.Equal("file contents", Encoding.UTF8.GetString(body.Sink.ToArray()));
+    }
+
+    [Fact]
+    public async Task NotModifiedWritesNoBodyOrContentLength() {
+        var response = new FakeResponse();
+        var body = new ForbiddenBody();
+
+        await Reply.NotModified("etag", "no-cache").WriteTo(response, body, head: false, CancellationToken.None);
+
+        Assert.Equal(304, response.StatusCode);
+        Assert.Null(response.Headers.ContentLength);
+    }
+
+    [Fact]
+    public async Task HeadNotModifiedWritesNoBodyOrContentLength() {
+        var response = new FakeResponse();
+        var body = new ForbiddenBody();
+
+        await Reply.NotModified("etag", "no-cache").WriteTo(response, body, head: true, CancellationToken.None);
+
+        Assert.Equal(304, response.StatusCode);
+        Assert.Null(response.Headers.ContentLength);
     }
 }
