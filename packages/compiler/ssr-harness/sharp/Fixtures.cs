@@ -59,6 +59,12 @@ public sealed class Fixtures {
     [Get("/html-directive-app")]
     public Reply HtmlDirectiveApp() => Reply.View("fixtures/HtmlDirectiveApp");
 
+    [Get("/delegation-sweep-app")]
+    public Reply DelegationSweepApp() => Reply.View("fixtures/DelegationSweepApp");
+
+    [Get("/multi-root-delegation-app")]
+    public Reply MultiRootDelegationApp() => Reply.View("fixtures/MultiRootDelegationApp");
+
     [Get("/context/:id")]
     public Reply ContextApp() => Reply.View("fixtures/ContextApp");
 

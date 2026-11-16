@@ -21,7 +21,7 @@ pub trait Emitter {
     fn ret(&self, root: &str, builder: bool, el: bool, multi_root: bool) -> String;
     fn pending(&self, note: &str) -> String;
 
-    fn event(&self, node: &str, name: &str, handler: &str) -> String;
+    fn event(&self, node: &str, name: &str, handler: &str, delegate: bool) -> String;
     fn model(&self, node: &str, expr: &str) -> String;
     fn onmodel(&self, node: &str, transform: &str) -> String;
     fn reference(&self, node: &str, target: &str) -> String;

@@ -378,5 +378,13 @@
     {
         "tag": "reset-mixed",
         "fixture": "ResetMixed"
+    },
+    {
+        "tag": "delegation-sweep-app",
+        "fixture": "DelegationSweepApp"
+    },
+    {
+        "tag": "multi-root-delegation-app",
+        "fixture": "MultiRootDelegationApp"
     }
 ]

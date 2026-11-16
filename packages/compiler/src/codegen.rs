@@ -297,7 +297,9 @@ fn hydrate_bind(
         };
         let g = read.as_str();
         match b.kind {
-            BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
+            BindingKind::Event => {
+                lines.push(emitter.event(node, name, &b.expr, !ctx.reactive.is_empty()));
+            }
             BindingKind::Model => lines.push(emitter.model(node, &b.expr)),
             BindingKind::OnModel => lines.push(emitter.onmodel(node, &b.expr)),
             BindingKind::Ref => lines.push(emitter.reference(node, &b.expr)),
@@ -573,7 +575,9 @@ fn gen_template(
                     group.push((tag, w));
                 }
             }
-            BindingKind::Event => lines.push(emitter.event(node, name, &b.expr)),
+            BindingKind::Event => {
+                lines.push(emitter.event(node, name, &b.expr, !ctx.reactive.is_empty()));
+            }
             BindingKind::Model => lines.push(emitter.model(node, &b.expr)),
             BindingKind::OnModel => lines.push(emitter.onmodel(node, &b.expr)),
             BindingKind::Ref => lines.push(emitter.reference(node, &b.expr)),

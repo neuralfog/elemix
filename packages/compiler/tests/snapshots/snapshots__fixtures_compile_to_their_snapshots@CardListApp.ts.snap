@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/CardListApp.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__list, $__effect, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__delegate, $__list, $__effect, $__setProp, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './UserCard';
@@ -96,8 +96,8 @@ const _r4 = $__cloneEl(_t1);
 const _n5 = _r4.firstChild!;
 const _n6 = _n5.nextSibling!;
 const _n7 = _n6.nextSibling!;
-(_n6 as HTMLElement).onclick = (() => this.promote(user.id));
-(_n7 as HTMLElement).onclick = (() => this.removeUser(user.id));
+$__delegate(_n6, 'click', () => this.promote(user.id));
+$__delegate(_n7, 'click', () => this.removeUser(user.id));
 $__effect(() => {
 $__setProp(_n5, 'name', user.name);
 });

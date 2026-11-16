@@ -101,8 +101,14 @@ impl Emitter for TsEmitter {
         format!("// TODO[ec]: {note}")
     }
 
-    fn event(&self, node: &str, name: &str, handler: &str) -> String {
-        if is_global_event(name) {
+    fn event(&self, node: &str, name: &str, handler: &str, delegate: bool) -> String {
+        if is_delegated_event(name) {
+            if delegate {
+                format!("$__delegate({node}, '{name}', {handler});")
+            } else {
+                format!("({node} as HTMLElement).on{name} = ({handler});")
+            }
+        } else if is_global_event(name) {
             format!("({node} as HTMLElement).on{name} = ({handler});")
         } else {
             format!("$__event({node}, '{name}', {handler});")
@@ -243,6 +249,33 @@ fn hole(expr: &str) -> String {
     }
 }
 
+fn is_delegated_event(name: &str) -> bool {
+    matches!(
+        name,
+        "click"
+            | "dblclick"
+            | "auxclick"
+            | "contextmenu"
+            | "mousedown"
+            | "mouseup"
+            | "mousemove"
+            | "mouseover"
+            | "mouseout"
+            | "pointerdown"
+            | "pointerup"
+            | "pointermove"
+            | "pointerover"
+            | "pointerout"
+            | "keydown"
+            | "keyup"
+            | "keypress"
+            | "input"
+            | "beforeinput"
+            | "focusin"
+            | "focusout"
+    )
+}
+
 fn is_global_event(name: &str) -> bool {
     matches!(
         name,
@@ -251,20 +284,15 @@ fn is_global_event(name: &str) -> bool {
             | "animationend"
             | "animationiteration"
             | "animationstart"
-            | "auxclick"
-            | "beforeinput"
             | "blur"
             | "cancel"
             | "canplay"
             | "canplaythrough"
             | "change"
-            | "click"
             | "close"
-            | "contextmenu"
             | "copy"
             | "cuechange"
             | "cut"
-            | "dblclick"
             | "drag"
             | "dragend"
             | "dragenter"
@@ -277,39 +305,23 @@ fn is_global_event(name: &str) -> bool {
             | "ended"
             | "error"
             | "focus"
-            | "focusin"
-            | "focusout"
             | "formdata"
             | "gotpointercapture"
-            | "input"
             | "invalid"
-            | "keydown"
-            | "keypress"
-            | "keyup"
             | "load"
             | "loadeddata"
             | "loadedmetadata"
             | "loadstart"
             | "lostpointercapture"
-            | "mousedown"
             | "mouseenter"
             | "mouseleave"
-            | "mousemove"
-            | "mouseout"
-            | "mouseover"
-            | "mouseup"
             | "paste"
             | "pause"
             | "play"
             | "playing"
             | "pointercancel"
-            | "pointerdown"
             | "pointerenter"
             | "pointerleave"
-            | "pointermove"
-            | "pointerout"
-            | "pointerover"
-            | "pointerup"
             | "progress"
             | "ratechange"
             | "reset"

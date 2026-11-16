@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/MxConditionalInRow.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__delegate, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<li class="row"><span class="lbl"> </span> <!----> <button class="row-toggle">t</button></li>');
 const _h1 = $__templateEl('<span class="detail"> </span>');
 
@@ -41,7 +41,7 @@ $__setText(_n10, it.detail);
 return _r9;
 })()
                             : ''));
-(_n8 as HTMLElement).onclick = (() => this.toggleRow(it.id));
+$__delegate(_n8, 'click', () => this.toggleRow(it.id));
 _r4.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
 $__setText(_n6, it.label);
@@ -89,7 +89,7 @@ $__setText(_n10, it.detail);
 return _r9;
 })()
                             : ''));
-(_n8 as HTMLElement).onclick = (() => this.toggleRow(it.id));
+$__delegate(_n8, 'click', () => this.toggleRow(it.id));
 _r4.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
 $__setText(_n6, it.label);

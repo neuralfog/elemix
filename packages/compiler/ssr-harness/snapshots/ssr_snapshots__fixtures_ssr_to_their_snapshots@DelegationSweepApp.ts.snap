@@ -1,0 +1,83 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/DelegationSweepApp.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Row = { id: number; name: string };
+
+type State = {
+    rows: Row[];
+    log: string;
+};
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .log { display: block; margin-bottom: 8px; font-family: ui-monospace, monospace; }
+    .rows { list-style: none; margin: 0; padding: 0; }
+    .row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    .label { cursor: pointer; }
+`;
+
+export class DelegationSweepApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'delegation-sweep-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><button id="add">add</button><output class="log">`, $__ssrText(this.state.log), `</output><ul class="rows">`, ($__ssrRepeat(
+                this.state.rows,
+                (row) => $__ssrTpl(`<li class="row"${$__ssrAttr('data-id', row.id)}><span class="label">`, $__ssrText(row.name), `</span><button class="rm">x</button><button class="star">star</button><input class="edit"/></li>`),
+                (row) => row.id,
+            )), `</ul></template></${this.$$__tag ?? 'delegation-sweep-app'}>`];
+}
+
+
+    state = $__state<State>({
+        rows: [
+            { id: 1, name: 'alpha' },
+            { id: 2, name: 'bravo' },
+            { id: 3, name: 'charlie' },
+            { id: 4, name: 'delta' },
+        ],
+        log: '',
+    });
+
+    private seq = 4;
+
+    add = (): void => {
+        const id = ++this.seq;
+        this.state.rows.push({ id, name: `row-${id}` });
+        this.state.log = `add:${id}`;
+    };
+
+    select = (id: number): void => {
+        this.state.log = `select:${id}`;
+    };
+
+    removeRow = (id: number): void => {
+        const i = this.state.rows.findIndex((r) => r.id === id);
+        if (i !== -1) this.state.rows.splice(i, 1);
+        this.state.log = `remove:${id}`;
+    };
+
+    star = (id: number): void => {
+        this.state.log = `star:${id}`;
+    };
+
+    type = (id: number, value: string): void => {
+        this.state.log = `type:${id}:${value}`;
+    };
+
+    key = (id: number, k: string): void => {
+        this.state.log = `key:${id}:${k}`;
+    };
+
+    blurred = (id: number): void => {
+        this.state.log = `blur:${id}`;
+    };
+
+    
+}
+$__defineComponent('delegation-sweep-app', DelegationSweepApp);
+DelegationSweepApp.prototype.$$__tag = 'delegation-sweep-app';
+DelegationSweepApp.$$__propSafe = true;

@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/MxDeepNest.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__child, $__list, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__delegate, $__child, $__list, $__effect, $__setText, $__setProp, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 import './MxCounterChild';
@@ -75,8 +75,8 @@ $__setText(_n14, it.x);
 });
 return _r13;
 })() : ''));
-(_n11 as HTMLElement).onclick = (() => this.toggleFlag(it.id));
-(_n12 as HTMLElement).onclick = (() => this.bumpX(it.id));
+$__delegate(_n11, 'click', () => this.toggleFlag(it.id));
+$__delegate(_n12, 'click', () => this.bumpX(it.id));
 _r8.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
 $__setProp(_n9, 'label', it.label);

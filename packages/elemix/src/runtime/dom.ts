@@ -153,6 +153,43 @@ export const $__event = (
     store[slot] = handler;
 };
 
+const $__delegatedTypes = new Set<string>();
+
+const $__delegatedDispatch = (type: string): EventListener => {
+    const key = `$$${type}`;
+    return (e: Event): void => {
+        let current: EventTarget | null = null;
+        Object.defineProperty(e, 'currentTarget', {
+            configurable: true,
+            get: () => current,
+        });
+        const path = e.composedPath();
+        for (let i = 0; i < path.length; i++) {
+            const node = path[i];
+            const handler = (
+                node as unknown as Record<string, EventListener | undefined>
+            )[key];
+            if (handler !== undefined) {
+                current = node;
+                handler.call(node, e);
+                if (e.cancelBubble) break;
+            }
+        }
+    };
+};
+
+export const $__delegate = (
+    el: Element,
+    type: string,
+    handler: EventListener,
+): void => {
+    (el as unknown as Record<string, EventListener>)[`$$${type}`] = handler;
+    if (!$__delegatedTypes.has(type)) {
+        $__delegatedTypes.add(type);
+        document.addEventListener(type, $__delegatedDispatch(type));
+    }
+};
+
 export const $__ref = (el: Element, ref: { value: unknown }): void => {
     ref.value = el;
 };

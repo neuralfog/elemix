@@ -3,7 +3,7 @@ source: tests/snapshots.rs
 expression: compile(&source)
 input_file: fixtures/MxConditionalInRow.ts
 ---
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__delegate, $__child, $__list, $__effect, $__setText, $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
 import { Component } from '@neuralfog/elemix';
 
 type Item = { id: number; label: string; open: boolean; detail: string };
@@ -52,7 +52,7 @@ $__setText(_n10, it.detail);
 return _r9;
 })()
                             : ''));
-(_n8 as HTMLElement).onclick = (() => this.toggleRow(it.id));
+$__delegate(_n8, 'click', () => this.toggleRow(it.id));
 _r4.setAttribute('data-id', ($__toRaw(it).id));
 $__effect(() => {
 $__setText(_n6, it.label);

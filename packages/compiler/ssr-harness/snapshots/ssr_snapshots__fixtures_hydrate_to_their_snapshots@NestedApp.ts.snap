@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/NestedApp.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__delegate, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<div class="category"><div class="head"><strong> </strong><button>+ item</button></div><ul><!----></ul></div>');
 const _h1 = $__templateEl('<li> </li>');
 
@@ -91,7 +91,7 @@ const _n5 = _n4.firstChild!;
 const _n6 = _n5.firstChild!;
 const _n7 = _n5.nextSibling!;
 const _n8 = _n4.nextSibling!.firstChild!;
-(_n7 as HTMLElement).onclick = (() => this.addItem(category));
+$__delegate(_n7, 'click', () => this.addItem(category));
 $__list(_n8, () => (category.items), (item) => item.id, (item) => {
 const _r9 = $__cloneEl(_h1);
 const _n10 = _r9.firstChild!;
@@ -143,7 +143,7 @@ const _n4 = _n3.firstChild!;
 const _n5 = _n4.firstChild!;
 const _n6 = _n4.nextSibling!;
 const _n7 = _n3.nextSibling!.firstChild!;
-(_n6 as HTMLElement).onclick = (() => this.addItem(category));
+$__delegate(_n6, 'click', () => this.addItem(category));
 $__list(_n7, () => (category.items), (item) => item.id, (item) => {
 const _r8 = $__cloneEl(_t2);
 const _n9 = _r8.firstChild!;

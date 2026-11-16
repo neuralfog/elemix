@@ -1,0 +1,115 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/MultiRootDelegationApp.ts
+---
+import { $__bounds, $__reanchor, $__fresh, $__text } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__toRaw, $__event, $__delegate, $__list, $__effect, $__setText, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+const _h0 = $__template('<button class="up">+</button><span class="val"> </span><button class="down">-</button>');
+
+import { Component } from '@neuralfog/elemix';
+
+type Cell = { id: number; n: number };
+
+type State = {
+    cells: Cell[];
+    log: string;
+};
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .log { display: block; margin-bottom: 8px; font-family: ui-monospace, monospace; }
+    .cells { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: auto auto auto; gap: 4px 8px; width: max-content; }
+    button { cursor: pointer; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<output class="log"> </output><ul class="cells"><!----></ul>');
+const _t1 = $__template('<button class="up">+</button><span class="val"> </span><button class="down">-</button>');
+
+export class MultiRootDelegationApp extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!.nextSibling!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _n3 = root.firstChild!;
+const _n4 = $__text(_n3);
+$__effect(() => {
+$__setText(_n4, this.state.log);
+});
+$__fresh(() => {
+$__list(_a2, () => (this.state.cells), (cell) => cell.id, (cell) => {
+const _r5 = $__clone(_h0);
+const _n6 = _r5.firstChild!.nextSibling!;
+const _n7 = _r5.firstChild!;
+const _n8 = _n6.firstChild!;
+const _n9 = _n6.nextSibling!;
+$__delegate(_n7, 'click', () => this.bump(cell.id, 1));
+$__delegate(_n9, 'click', () => this.bump(cell.id, -1));
+$__event(_n9, 'custom-tap', (e: Event) =>
+                        this.tap(cell.id, String((e as CustomEvent).detail)));
+const _v10 = ($__toRaw(cell).id);
+_n7.setAttribute('data-id', _v10);
+_n6.setAttribute('data-id', _v10);
+_n9.setAttribute('data-id', _v10);
+$__effect(() => {
+$__setText(_n8, cell.n);
+});
+return _r5;
+});
+});
+}
+
+
+    state = $__state<State>({
+        cells: [
+            { id: 1, n: 0 },
+            { id: 2, n: 0 },
+            { id: 3, n: 0 },
+        ],
+        log: '',
+    });
+
+    bump = (id: number, by: number): void => {
+        const cell = this.state.cells.find((c) => c.id === id);
+        if (cell) cell.n += by;
+        this.state.log = `bump:${id}:${by}`;
+    };
+
+    tap = (id: number, detail: string): void => {
+        this.state.log = `tap:${id}:${detail}`;
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n1.nextSibling!.firstChild!;
+$__list(_n3, () => (this.state.cells), (cell) => cell.id, (cell) => {
+const _r4 = $__clone(_t1);
+const _n5 = _r4.firstChild!.nextSibling!;
+const _n6 = _r4.firstChild!;
+const _n7 = _n5.firstChild!;
+const _n8 = _n5.nextSibling!;
+$__delegate(_n6, 'click', () => this.bump(cell.id, 1));
+$__delegate(_n8, 'click', () => this.bump(cell.id, -1));
+$__event(_n8, 'custom-tap', (e: Event) =>
+                        this.tap(cell.id, String((e as CustomEvent).detail)));
+const _v9 = ($__toRaw(cell).id);
+_n6.setAttribute('data-id', _v9);
+_n5.setAttribute('data-id', _v9);
+_n8.setAttribute('data-id', _v9);
+$__effect(() => {
+$__setText(_n7, cell.n);
+});
+return _r4;
+});
+$__effect(() => {
+$__setText(_n2, this.state.log);
+});
+return _r0;
+}
+}
+MultiRootDelegationApp.$$__sheets = [..._s0];
+$__defineComponent('multi-root-delegation-app', MultiRootDelegationApp);
+MultiRootDelegationApp.prototype.$$__tag = 'multi-root-delegation-app';

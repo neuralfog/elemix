@@ -10,6 +10,7 @@ internal static class ServerConfigMapper {
         ArgumentNullException.ThrowIfNull(kestrel);
         ArgumentNullException.ThrowIfNull(config);
 
+        kestrel.AddServerHeader = false;
         ApplyLimits(kestrel.Limits, config, defaultMaxBody);
         kestrel.Listen(ResolveHost(config.Host), config.Port, listen => {
             if (config.Protocols is { } protocols)

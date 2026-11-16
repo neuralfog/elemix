@@ -4,7 +4,7 @@ expression: "compile_hydrate(&source, false).0"
 input_file: fixtures/RatingInput.ts
 ---
 import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
-import { $__template, $__clone, $__templateEl, $__cloneEl, $__list, $__effect, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__delegate, $__list, $__effect, $__setClass, $__defineComponent, $__sheet, $__state } from '@neuralfog/elemix/runtime';
 const _h0 = $__templateEl('<button type="button">★</button>');
 
 import { Component } from '@neuralfog/elemix';
@@ -46,7 +46,7 @@ const _a2 = $__reanchor(_n0, _b1[0], _b1[1]);
 $__fresh(() => {
 $__list(_a2, () => ([1, 2, 3, 4, 5]), (n) => String(n), (n) => {
 const _r3 = $__cloneEl(_h0);
-(_r3 as HTMLElement).onclick = (() => this.set(n));
+$__delegate(_r3, 'click', () => this.set(n));
 $__effect(() => {
 $__setClass(_r3, ({ star: true, on: n <= this.state.value }));
 });
@@ -72,7 +72,7 @@ const _r0 = $__clone(_t0);
 const _n1 = _r0.firstChild!.firstChild!;
 $__list(_n1, () => ([1, 2, 3, 4, 5]), (n) => String(n), (n) => {
 const _r2 = $__cloneEl(_t1);
-(_r2 as HTMLElement).onclick = (() => this.set(n));
+$__delegate(_r2, 'click', () => this.set(n));
 $__effect(() => {
 $__setClass(_r2, ({ star: true, on: n <= this.state.value }));
 });

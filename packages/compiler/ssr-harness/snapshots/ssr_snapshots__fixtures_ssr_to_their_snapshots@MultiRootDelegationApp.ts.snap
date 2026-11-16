@@ -1,0 +1,57 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MultiRootDelegationApp.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Cell = { id: number; n: number };
+
+type State = {
+    cells: Cell[];
+    log: string;
+};
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    .log { display: block; margin-bottom: 8px; font-family: ui-monospace, monospace; }
+    .cells { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: auto auto auto; gap: 4px 8px; width: max-content; }
+    button { cursor: pointer; }
+`;
+
+export class MultiRootDelegationApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'multi-root-delegation-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><output class="log">`, $__ssrText(this.state.log), `</output><ul class="cells">`, ($__ssrRepeat(
+                this.state.cells,
+                (cell) => $__ssrTpl(`<button class="up"${$__ssrAttr('data-id', cell.id)}>+</button><span class="val"${$__ssrAttr('data-id', cell.id)}>`, $__ssrText(cell.n), `</span><button class="down"${$__ssrAttr('data-id', cell.id)}>-</button>`),
+                (cell) => cell.id,
+            )), `</ul></template></${this.$$__tag ?? 'multi-root-delegation-app'}>`];
+}
+
+
+    state = $__state<State>({
+        cells: [
+            { id: 1, n: 0 },
+            { id: 2, n: 0 },
+            { id: 3, n: 0 },
+        ],
+        log: '',
+    });
+
+    bump = (id: number, by: number): void => {
+        const cell = this.state.cells.find((c) => c.id === id);
+        if (cell) cell.n += by;
+        this.state.log = `bump:${id}:${by}`;
+    };
+
+    tap = (id: number, detail: string): void => {
+        this.state.log = `tap:${id}:${detail}`;
+    };
+
+    
+}
+$__defineComponent('multi-root-delegation-app', MultiRootDelegationApp);
+MultiRootDelegationApp.prototype.$$__tag = 'multi-root-delegation-app';
+MultiRootDelegationApp.$$__propSafe = true;

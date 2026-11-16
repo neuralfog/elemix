@@ -79,11 +79,27 @@ fn standard_events_inline_to_the_on_handler() {
     let out = gen(&["<button @click=", ">x</button>"], &["this.run"]);
     assert!(
         out.contains(".onclick = (this.run);"),
-        "standard events assign the on-handler directly:\n{out}"
+        "a top-level event assigns the on-handler directly:\n{out}"
     );
     assert!(
-        !out.contains("$__event("),
-        "no delegating call for a standard event:\n{out}"
+        !out.contains("$__delegate("),
+        "events outside a repeat do not delegate:\n{out}"
+    );
+}
+
+#[test]
+fn events_inside_a_repeat_row_delegate() {
+    let out = gen(
+        &["<ul>", "</ul>"],
+        &["repeat(this.rows, (r) => tpl`<li @click=${r.go}>x</li>`, (r) => r.id)"],
+    );
+    assert!(
+        out.contains("$__delegate(") && out.contains("'click', r.go)"),
+        "events inside a repeat row route through delegation:\n{out}"
+    );
+    assert!(
+        !out.contains(".onclick"),
+        "a delegated row event does not use the on-handler:\n{out}"
     );
 }
 

@@ -17,6 +17,7 @@ const PRIMITIVES: &[&str] = &[
     "$__cloneEl",
     "$__toRaw",
     "$__event",
+    "$__delegate",
     "$__model",
     "$__onmodel",
     "$__ref",
