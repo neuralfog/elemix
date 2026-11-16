@@ -4,7 +4,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "playwright test",
+        "test": "pnpm test:dev && pnpm test:prod",
+        "test:dev": "playwright test",
+        "test:prod": "DOTNET_ENVIRONMENT=Production playwright test",
         "test:headed": "playwright test --headed",
         "test:ui": "playwright test --ui",
         "lint": "biome format && biome lint --error-on-warnings && etf --dirs ../fixtures --root .. && ea --dirs ../fixtures --root .. --ignore ../fixtures/ErrorApp.ts ../fixtures/FreeTemplate.ts ../fixtures/PrimitiveStoreError.ts ../fixtures/WarnApp.ts && dotnet format sharp/Harness.csproj --verify-no-changes",

@@ -106,15 +106,23 @@ export const build = async (
         return 1;
     }
 
+    // @Note this is not ideal, this package should be pure...
+    // I am not planning on supporting any other language so
+    // this may be just fine, come back if this becomes an issue.
+    const minify = process.env.DOTNET_ENVIRONMENT === 'Production';
+
     const runCompiler = async (
         source: string,
         mode: '--ssr' | '--hydrate',
     ): Promise<string> => {
-        const proc = Bun.spawn([compiler, '--stdin', mode], {
-            stdin: Buffer.from(source),
-            stdout: 'pipe',
-            stderr: 'inherit',
-        });
+        const proc = Bun.spawn(
+            [compiler, '--stdin', mode, ...(minify ? ['--minify'] : [])],
+            {
+                stdin: Buffer.from(source),
+                stdout: 'pipe',
+                stderr: 'inherit',
+            },
+        );
         const code = await new Response(proc.stdout).text();
         await proc.exited;
         return code;
@@ -319,6 +327,7 @@ export const build = async (
         target: 'browser',
         format: 'esm',
         splitting: true,
+        minify,
         naming: {
             entry: '[name]-[hash].[ext]',
             chunk: '[name]-[hash].[ext]',
