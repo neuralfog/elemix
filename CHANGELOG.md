@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.8] - 2026-11-16
+
+### Changed
+
+- elemix compiles events bound inside a `repeat` row to event delegation: one
+  listener per event type dispatches the whole list instead of a handler on
+  every row. Top-level and non-bubbling events keep their direct binding.
+- hydris production builds now minify their output: component CSS and SSR inline
+  styles through the compiler, the client hydration bundles through the bundler.
+
+### Fixed
+
+- hydris soft navigation resets the scroll position to the top after every
+  navigation.
+
 ## [0.9.7] - 2026-11-15
 
 ### Added
