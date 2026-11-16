@@ -44,6 +44,12 @@ public sealed class Fixtures {
     [Get("/nav-about-app")]
     public Reply NavAboutApp() => Reply.View("fixtures/NavAboutApp", new NavData("About", "about"));
 
+    [Get("/scroll-nav-a")]
+    public Reply ScrollNavAApp() => Reply.View("fixtures/ScrollNavAApp");
+
+    [Get("/scroll-nav-b")]
+    public Reply ScrollNavBApp() => Reply.View("fixtures/ScrollNavBApp");
+
     [Get("/shadow-nav-redirect")]
     public Reply ShadowNavRedirect() => Reply.Redirect("/shadow-nav-about");
 

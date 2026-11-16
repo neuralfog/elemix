@@ -143,7 +143,7 @@ const run = async (url: string, push: boolean): Promise<void> => {
     } catch {
         return hard(target);
     }
-    if (push) window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 };
 
 export const navigate = (to: string): void => {

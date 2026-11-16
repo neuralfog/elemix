@@ -1,0 +1,23 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/ScrollNavAApp.ts
+---
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { ScrollNavDocument } from './ScrollNavDocument';
+
+export class ScrollNavAApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'scroll-nav-a-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${':host{display:block}'}</style><main id="page" data-page="a"><h1>Page A</h1><div id="spacer-a" style="height: 3000px"></div><div id="bottom-a">bottom a</div></main></template></${this.$$__tag ?? 'scroll-nav-a-app'}>`];
+}
+
+
+
+    
+}
+$__defineComponent('scroll-nav-a-app', ScrollNavAApp);
+ScrollNavAApp.prototype.$$__tag = 'scroll-nav-a-app';
+ScrollNavAApp.$$__propSafe = true;
+ScrollNavAApp.$$__document = ScrollNavDocument;

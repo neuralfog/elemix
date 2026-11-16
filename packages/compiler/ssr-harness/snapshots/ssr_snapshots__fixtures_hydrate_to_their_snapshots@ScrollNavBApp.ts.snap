@@ -1,0 +1,29 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/ScrollNavBApp.ts
+---
+import { $__template, $__clone, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+import { ScrollNavDocument } from './ScrollNavDocument';
+
+const _s0 = $__sheet(':host{display:block}');
+const _t0 = $__template('<main id="page" data-page="b"><h1>Page B</h1><div id="spacer-b" style="height: 3000px"></div><div id="bottom-b">bottom b</div></main>');
+
+export class ScrollNavBApp extends Component {
+$$__hydrate(root: Node): void {
+
+}
+
+
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+ScrollNavBApp.$$__sheets = [..._s0];
+$__defineComponent('scroll-nav-b-app', ScrollNavBApp);
+ScrollNavBApp.prototype.$$__tag = 'scroll-nav-b-app';
+ScrollNavBApp.$$__document = ScrollNavDocument;

@@ -1,0 +1,24 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/ScrollNavDocument.ts
+---
+import { $__template, $__clone, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+import '@neuralfog/elemix/navigation/NavLink';
+
+const _t0 = $__template('<html lang="en"><head><meta charset="utf-8"/><title>Scroll Nav</title></head><body><nav class="nav"><nav-link route="/scroll-nav-a"><a id="to-a" href="/scroll-nav-a">A</a></nav-link><nav-link route="/scroll-nav-b"><a id="to-b" href="/scroll-nav-b">B</a></nav-link></nav><slot></slot></body></html>');
+
+export class ScrollNavDocument extends Component {
+    static $$__noShadow = true;
+$$__hydrate(root: Node): void {
+
+}
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+return _r0;
+}
+}
+$__defineComponent('scroll-nav-document', ScrollNavDocument);
+ScrollNavDocument.prototype.$$__tag = 'scroll-nav-document';
