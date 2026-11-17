@@ -30,6 +30,9 @@ struct Cli {
     path: Option<PathBuf>,
 
     #[arg(long)]
+    scss: Option<PathBuf>,
+
+    #[arg(long)]
     ssr: bool,
 
     #[arg(long)]
@@ -53,6 +56,19 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
+
+    if let Some(path) = cli.scss.as_deref() {
+        match elemix_compiler::scss::compile_path(path, cli.minify) {
+            Some(css) => io::stdout()
+                .write_all(css.as_bytes())
+                .expect("write stdout"),
+            None => {
+                eprintln!("error: failed to compile scss {}", path.display());
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
 
     if cli.ssr_collect_meta {
         let mut source = String::new();

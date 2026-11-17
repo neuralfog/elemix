@@ -9,13 +9,9 @@
         "lint:fix": "make lint-fix"
     },
     "dependencies": {
-        "@neuralfog/elemix": "workspace:*",
-        "@neuralfog/elemix-ssr": "workspace:*"
+        "@neuralfog/elemix": "workspace:*"
     },
     "optionalDependencies": {
         "@neuralfog/elemix-compiler-linux-x64": "0.9.5"
-    },
-    "devDependencies": {
-        "sass": "1.108.2"
     }
 }

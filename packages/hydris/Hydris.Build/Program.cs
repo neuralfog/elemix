@@ -41,7 +41,7 @@ var start = new ProcessStartInfo("bun") {
 };
 start.ArgumentList.Add("-e");
 start.ArgumentList.Add(
-    "const { build } = await import('@neuralfog/elemix-ssr/build'); process.exit(await build(process.env.HYDRIS_VIEWS, process.env.HYDRIS_ROOT));");
+    "const { build } = await import('@neuralfog/elemix/build'); process.exit(await build(process.env.HYDRIS_VIEWS, process.env.HYDRIS_ROOT));");
 start.Environment["HYDRIS_VIEWS"] = viewsJson;
 start.Environment["HYDRIS_ROOT"] = root;
 if (optimise)

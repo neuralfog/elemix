@@ -1,5 +1,19 @@
 use std::path::Path;
 
+pub fn compile_path(path: &Path, minify: bool) -> Option<String> {
+    let style = if minify {
+        grass::OutputStyle::Compressed
+    } else {
+        grass::OutputStyle::Expanded
+    };
+    let css = grass::from_path(path, &grass::Options::default().style(style)).ok()?;
+    Some(if minify {
+        crate::ssr_style::minify_css(&css)
+    } else {
+        css
+    })
+}
+
 pub fn inline_scss_imports(source: &str, base_dir: Option<&Path>, minify: bool) -> String {
     let Some(dir) = base_dir else {
         return source.to_string();
@@ -23,12 +37,7 @@ fn try_inline(line: &str, dir: &Path, minify: bool) -> Option<String> {
         return None;
     }
     let rel = spec.strip_suffix("?inline").unwrap_or(spec);
-    let style = if minify {
-        grass::OutputStyle::Compressed
-    } else {
-        grass::OutputStyle::Expanded
-    };
-    let css = grass::from_path(dir.join(rel), &grass::Options::default().style(style)).ok()?;
+    let css = compile_path(&dir.join(rel), minify)?;
     let newline = if line.ends_with('\n') { "\n" } else { "" };
     Some(format!(
         "const {ident} = `{}`;{newline}",

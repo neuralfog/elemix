@@ -25,9 +25,6 @@ importers:
       '@neuralfog/elemix':
         specifier: workspace:*
         version: link:../elemix
-      '@neuralfog/elemix-ssr':
-        specifier: workspace:*
-        version: link:../elemix-ssr
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -114,6 +111,9 @@ importers:
       '@neuralfog/ts-config':
         specifier: 0.1.2
         version: 0.1.2
+      '@types/bun':
+        specifier: 1.4.4
+        version: 1.4.4
       '@types/node':
         specifier: 26.6.6
         version: 26.6.6
@@ -139,31 +139,6 @@ importers:
         specifier: 5.1.0
         version: 5.1.0(@types/node@26.6.6)(@vitest/coverage-v8@5.1.0)(@vitest/ui@5.1.0)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(sass@1.108.2))
 
-  packages/elemix-ssr:
-    dependencies:
-      '@neuralfog/elemix':
-        specifier: workspace:*
-        version: link:../elemix
-      sass:
-        specifier: 1.108.2
-        version: 1.108.2
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 2.6.8
-        version: 2.6.8
-      '@neuralfog/ts-config':
-        specifier: 0.1.2
-        version: 0.1.2
-      '@types/bun':
-        specifier: 1.4.4
-        version: 1.4.4
-      '@types/node':
-        specifier: 26.6.6
-        version: 26.6.6
-      typescript:
-        specifier: 7.0.2
-        version: 7.0.2
-
   packages/formatter: {}
 
   packages/hydris:
@@ -171,13 +146,6 @@ importers:
       '@neuralfog/elemix':
         specifier: workspace:*
         version: link:../elemix
-      '@neuralfog/elemix-ssr':
-        specifier: workspace:*
-        version: link:../elemix-ssr
-    devDependencies:
-      sass:
-        specifier: 1.108.2
-        version: 1.108.2
     optionalDependencies:
       '@neuralfog/elemix-compiler-linux-x64':
         specifier: 0.9.5
@@ -994,9 +962,6 @@ packages:
 
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
-
-  '@types/node@26.1.1':
-    resolution: {integrity: sha512-nxAkRSVkN1Y0JC1W8ky/fTfkGsMmcrRsbx+3XoZE+rMOX71kLYTV7fLXpqud1GpbpP5TuffXFqfX7fH2GgZREw==}
 
   '@types/node@26.6.6':
     resolution: {integrity: sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==}
@@ -1872,9 +1837,6 @@ packages:
   underscore@1.13.8:
     resolution: {integrity: sha512-DXtD3ZtEQzc7M8m4cXotyHR+FAS18C64asBYY5vqZexfYryNNnDc02W4hKg3rdQuqOYas1jkseX0+nZXjTXnvQ==}
 
-  undici-types@8.3.0:
-    resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
-
   undici-types@8.9.0:
     resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
@@ -2455,7 +2417,7 @@ snapshots:
       detect-libc: 2.1.2
       is-glob: 4.0.3
       node-addon-api: 7.1.1
-      picomatch: 4.0.5
+      picomatch: 4.0.7
     optionalDependencies:
       '@parcel/watcher-android-arm64': 2.5.6
       '@parcel/watcher-darwin-arm64': 2.5.6
@@ -2573,10 +2535,6 @@ snapshots:
   '@types/deep-eql@4.0.2': {}
 
   '@types/estree@1.0.9': {}
-
-  '@types/node@26.1.1':
-    dependencies:
-      undici-types: 8.3.0
 
   '@types/node@26.6.6':
     dependencies:
@@ -2812,8 +2770,8 @@ snapshots:
 
   bun-types@1.4.4:
     dependencies:
-      '@types/node': 26.1.1
-      undici-types: 8.3.0
+      '@types/node': 26.6.6
+      undici-types: 8.9.0
 
   bundle-name@4.1.0:
     dependencies:
@@ -2834,6 +2792,7 @@ snapshots:
   chokidar@5.0.0:
     dependencies:
       readdirp: 5.0.0
+    optional: true
 
   chownr@3.0.0: {}
 
@@ -2995,7 +2954,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  immutable@5.1.9: {}
+  immutable@5.1.9:
+    optional: true
 
   is-alphabetical@2.0.1: {}
 
@@ -3257,7 +3217,8 @@ snapshots:
     dependencies:
       mute-stream: 0.0.8
 
-  readdirp@5.0.0: {}
+  readdirp@5.0.0:
+    optional: true
 
   retry@0.12.0: {}
 
@@ -3291,9 +3252,10 @@ snapshots:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.9
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
     optionalDependencies:
       '@parcel/watcher': 2.5.6
+    optional: true
 
   sax@1.6.0: {}
 
@@ -3422,8 +3384,6 @@ snapshots:
       '@typescript/typescript-win32-x64': 7.0.2
 
   underscore@1.13.8: {}
-
-  undici-types@8.3.0: {}
 
   undici-types@8.9.0: {}
 

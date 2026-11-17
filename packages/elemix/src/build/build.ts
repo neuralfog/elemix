@@ -1,14 +1,11 @@
 import {
     existsSync,
     mkdirSync,
-    readFileSync,
     rmSync,
     statSync,
     writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
-import { compileString } from 'sass';
-import { sassPlugin } from './sass';
 
 type View = { key: string; source: string; export?: string | null };
 type ChildMeta = {
@@ -35,12 +32,6 @@ const logError = (message: string): void =>
 
 const NAV_IMPORT = "import '@neuralfog/elemix/ssr-runtime/client';";
 
-const aliasSsr = (build: Bun.PluginBuilder): void => {
-    build.onResolve({ filter: /^@neuralfog\/elemix-ssr(\/|$)/ }, (args) => ({
-        path: Bun.resolveSync(args.path, import.meta.dir),
-    }));
-};
-
 const devBinary = (root: string): string | null => {
     let dir = root;
     for (;;) {
@@ -56,15 +47,10 @@ const devBinary = (root: string): string | null => {
     }
 };
 
-const minifyCss = (css: string): string =>
-    css
-        .replace(/\/\*[\s\S]*?\*\//g, '')
-        .replace(/\s+/g, ' ')
-        .replace(/\s*([{}:;,>])\s*/g, '$1')
-        .replace(/;}/g, '}')
-        .trim();
-
-const resetStyles = (root: string): string | null => {
+const resetStyles = async (
+    root: string,
+    compiler: string,
+): Promise<string | null> => {
     const candidates = [
         join(root, 'Views', 'Scss', 'reset.scss'),
         join(root, 'Views', 'Scss', 'reset.css'),
@@ -73,7 +59,13 @@ const resetStyles = (root: string): string | null => {
     ];
     for (const path of candidates) {
         if (!existsSync(path)) continue;
-        return minifyCss(compileString(readFileSync(path, 'utf8')).css);
+        const proc = Bun.spawn([compiler, '--scss', path, '--minify'], {
+            stdout: 'pipe',
+            stderr: 'inherit',
+        });
+        const css = await new Response(proc.stdout).text();
+        await proc.exited;
+        return css;
     }
     return null;
 };
@@ -114,9 +106,17 @@ export const build = async (
     const runCompiler = async (
         source: string,
         mode: '--ssr' | '--hydrate',
+        path: string,
     ): Promise<string> => {
         const proc = Bun.spawn(
-            [compiler, '--stdin', mode, ...(minify ? ['--minify'] : [])],
+            [
+                compiler,
+                '--stdin',
+                mode,
+                '--path',
+                path,
+                ...(minify ? ['--minify'] : []),
+            ],
             {
                 stdin: Buffer.from(source),
                 stdout: 'pipe',
@@ -167,7 +167,7 @@ export const build = async (
         if (hit !== undefined) return hit;
         const src = await Bun.file(path).text();
         const needs = MARKERS.some((m) => src.includes(m));
-        const code = needs ? await runCompiler(src, '--ssr') : src;
+        const code = needs ? await runCompiler(src, '--ssr', path) : src;
         compiledCache.set(path, code);
         if (needs)
             for (const meta of await runCollectMeta(code))
@@ -178,7 +178,6 @@ export const build = async (
     const elemixLoader = (mode: '--ssr' | '--hydrate'): Bun.BunPlugin => ({
         name: `elemix${mode}`,
         setup(build) {
-            aliasSsr(build);
             build.onLoad({ filter: /\.ts$/ }, async (args) => {
                 const source = await Bun.file(args.path).text();
                 const needs = MARKERS.some((m) => source.includes(m));
@@ -188,7 +187,7 @@ export const build = async (
                 if (mode === '--hydrate') {
                     return {
                         contents: needs
-                            ? await runCompiler(source, '--hydrate')
+                            ? await runCompiler(source, '--hydrate', args.path)
                             : source,
                         loader: 'ts',
                     };
@@ -206,12 +205,12 @@ export const build = async (
                     code = result.code;
                 }
                 const remapped = args.path.endsWith(
-                    'elemix-ssr/src/component.ts',
+                    'elemix/src/ssr/component.ts',
                 )
                     ? code
                     : code.replace(
                           /from '@neuralfog\/elemix'/g,
-                          "from '@neuralfog/elemix-ssr/component'",
+                          "from '@neuralfog/elemix/ssr/component'",
                       );
                 return { contents: remapped, loader: 'ts' };
             });
@@ -230,7 +229,7 @@ export const build = async (
     let failed = 0;
     let hydrateCount = 0;
 
-    const reset = resetStyles(outputRoot);
+    const reset = await resetStyles(outputRoot, compiler);
     const resetImport = reset === null ? 'render' : 'render, $__setResetStyles';
     const resetCall =
         reset === null ? '' : `$__setResetStyles(${JSON.stringify(reset)});\n`;
@@ -246,7 +245,6 @@ export const build = async (
         const register: Bun.BunPlugin = {
             name: 'elemix-register',
             setup(build) {
-                aliasSsr(build);
                 build.onLoad({ filter: /\.ts$/ }, async (args) => {
                     const source = await Bun.file(args.path).text();
                     if (
@@ -263,7 +261,7 @@ export const build = async (
         };
         await Bun.build({
             entrypoints: [discoverEntry],
-            plugins: [register, sassPlugin],
+            plugins: [register],
             format: 'iife',
             target: 'browser',
         });
@@ -279,11 +277,11 @@ export const build = async (
         const pick = `(page as Record<string, unknown>)[${JSON.stringify(exportName)}] ?? (page as Record<string, unknown>).default ?? Object.values(page).find((e) => typeof e === 'function')`;
         writeFileSync(
             entry,
-            `import { ${resetImport} } from '@neuralfog/elemix-ssr';\nimport * as page from ${JSON.stringify(view.source)};\n${resetCall}const view = ${pick};\nglobalThis.render = (ctx?: unknown) => render(view as never, ctx as never);\n`,
+            `import { ${resetImport} } from '@neuralfog/elemix/ssr';\nimport * as page from ${JSON.stringify(view.source)};\n${resetCall}const view = ${pick};\nglobalThis.render = (ctx?: unknown) => render(view as never, ctx as never);\n`,
         );
         const result = await Bun.build({
             entrypoints: [entry],
-            plugins: [ssr, sassPlugin],
+            plugins: [ssr],
             format: 'iife',
             target: 'browser',
             minify: { syntax: true, whitespace: false, identifiers: false },
@@ -333,7 +331,7 @@ export const build = async (
             chunk: '[name]-[hash].[ext]',
             asset: '[name]-[hash].[ext]',
         },
-        plugins: [hydrate, sassPlugin],
+        plugins: [hydrate],
     });
 
     if (!client.success) {

@@ -5,7 +5,6 @@
         "#views/*": "./Views/*"
     },
     "dependencies": {
-        "@neuralfog/elemix": "link:../../../elemix",
-        "@neuralfog/elemix-ssr": "link:../../../elemix-ssr"
+        "@neuralfog/elemix": "link:../../../elemix"
     }
 }

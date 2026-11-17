@@ -3,7 +3,6 @@ import { existsSync, readFileSync } from 'node:fs';
 const CHANGELOG = 'CHANGELOG.md';
 const PACKAGES = [
     '@neuralfog/elemix',
-    '@neuralfog/elemix-ssr',
     '@neuralfog/elemix-testing-library',
     '@neuralfog/elemix-compiler',
     '@neuralfog/elemix-compiler-wasm',
