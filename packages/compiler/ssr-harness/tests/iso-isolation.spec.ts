@@ -85,7 +85,7 @@ test.describe('render isolation (adversarial)', () => {
     test('viewData does not bleed between concurrent distinct routes', async ({
         request,
     }) => {
-        const plan = Array.from({ length: 40 }, (_, i) =>
+        const plan = Array.from({ length: 120 }, (_, i) =>
             i % 2 === 0
                 ? { path: '/view-data-app', own: 'Ada', foreign: 'buried' }
                 : {
@@ -95,6 +95,11 @@ test.describe('render isolation (adversarial)', () => {
                   },
         );
 
+        const viewData = (body: string): string => {
+            const m = body.match(/id="__elemix_vd">(.*?)<\/script>/s);
+            return m ? m[1] : '';
+        };
+
         const bodies = await Promise.all(
             plan.map(async (p) => ({
                 p,
@@ -103,8 +108,9 @@ test.describe('render isolation (adversarial)', () => {
         );
 
         for (const { p, body } of bodies) {
-            expect(body).toContain(p.own);
-            expect(body).not.toContain(p.foreign);
+            const vd = viewData(body);
+            expect(vd).toContain(p.own);
+            expect(vd).not.toContain(p.foreign);
         }
     });
 });
