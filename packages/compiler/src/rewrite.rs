@@ -136,8 +136,8 @@ pub fn plan_components(source: &str) -> Vec<SsrComp> {
     let mut out = Vec::new();
     for stmt in &ret.program.body {
         let (class, class_start) = match stmt {
-            Statement::ExportNamedDeclaration(export) => match &export.declaration {
-                Some(Declaration::ClassDeclaration(class)) => {
+            Statement::ExportDeclaration(export) => match &export.declaration {
+                Declaration::ClassDeclaration(class) => {
                     (class.as_ref(), export.span.start as usize)
                 }
                 _ => continue,
@@ -175,7 +175,7 @@ fn plan(source: &str) -> Plan {
         match stmt {
             Statement::ImportDeclaration(import) => {
                 let span = (import.span.start as usize, import.span.end as usize);
-                match import.source.value.as_str() {
+                match import.source.value.as_str().unwrap_or_default() {
                     "@neuralfog/elemix/directives" => directives_import = Some(span),
                     "@neuralfog/elemix/types" => {
                         let names = import_names(import);
@@ -194,8 +194,8 @@ fn plan(source: &str) -> Plan {
                     _ => {}
                 }
             }
-            Statement::ExportNamedDeclaration(export) => {
-                if let Some(Declaration::ClassDeclaration(class)) = &export.declaration {
+            Statement::ExportDeclaration(export) => {
+                if let Declaration::ClassDeclaration(class) = &export.declaration {
                     if let Some(c) = component(source, export.span.start as usize, class) {
                         comps.push(c);
                     }
@@ -273,16 +273,13 @@ fn is_template_key(key: &PropertyKey) -> bool {
 fn template_tag<'a>(
     arrow: &'a ArrowFunctionExpression,
 ) -> Option<&'a TaggedTemplateExpression<'a>> {
-    if arrow.expression {
-        let Statement::ExpressionStatement(es) = arrow.body.statements.first()? else {
-            return None;
-        };
-        match &es.expression {
+    if arrow.is_expression() {
+        match arrow.get_expression()? {
             Expression::TaggedTemplateExpression(tt) => Some(tt),
             _ => None,
         }
     } else {
-        return_tag(&arrow.body.statements)
+        return_tag(&arrow.body.as_function_body()?.statements)
     }
 }
 
@@ -311,10 +308,13 @@ fn block_prelude(source: &str, stmts: &[Statement]) -> String {
 }
 
 fn arrow_prelude(source: &str, arrow: &ArrowFunctionExpression) -> String {
-    if arrow.expression {
+    if arrow.is_expression() {
         return String::new();
     }
-    block_prelude(source, &arrow.body.statements)
+    let Some(body) = arrow.body.as_function_body() else {
+        return String::new();
+    };
+    block_prelude(source, &body.statements)
 }
 
 fn slice(source: &str, span: Span) -> String {
@@ -331,7 +331,7 @@ fn import_names(import: &oxc_ast::ast::ImportDeclaration) -> Vec<String> {
             ImportDeclarationSpecifier::ImportSpecifier(spec) => match &spec.imported {
                 ModuleExportName::IdentifierName(id) => Some(id.name.to_string()),
                 ModuleExportName::IdentifierReference(id) => Some(id.name.to_string()),
-                ModuleExportName::StringLiteral(s) => Some(s.value.to_string()),
+                ModuleExportName::StringLiteral(s) => Some(s.value.display().to_string()),
             },
             _ => None,
         })

@@ -129,7 +129,8 @@ fn analyze_main(arrow: &ArrowFunctionExpression, source: &str) -> Option<MainTem
 
     let mut local_helpers = HashMap::new();
     let mut main = None;
-    for stmt in &arrow.body.statements {
+    let fn_body = arrow.body.as_function_body()?;
+    for stmt in &fn_body.statements {
         match stmt {
             Statement::VariableDeclaration(decl) => {
                 for d in &decl.declarations {
@@ -163,7 +164,10 @@ fn analyze_main(arrow: &ArrowFunctionExpression, source: &str) -> Option<MainTem
     Some(MainTemplate {
         statics,
         holes,
-        body: (arrow.body.span.start as usize, arrow.body.span.end as usize),
+        body: (
+            arrow.body.span().start as usize,
+            arrow.body.span().end as usize,
+        ),
         local_helpers,
     })
 }
@@ -218,13 +222,10 @@ fn collect_block<'a>(statements: &'a [Statement<'a>], source: &str) -> BlockPart
 fn expression_html<'a>(
     arrow: &'a ArrowFunctionExpression<'a>,
 ) -> Option<&'a TaggedTemplateExpression<'a>> {
-    if !arrow.expression {
+    if !arrow.is_expression() {
         return None;
     }
-    let Statement::ExpressionStatement(stmt) = arrow.body.statements.first()? else {
-        return None;
-    };
-    match &stmt.expression {
+    match arrow.get_expression()? {
         Expression::TaggedTemplateExpression(html) => Some(html),
         _ => None,
     }
@@ -413,9 +414,9 @@ fn all_classes<'a>(program: &'a oxc_ast::ast::Program<'a>) -> Vec<&'a Class<'a>>
     let mut classes = Vec::new();
     for stmt in &program.body {
         match stmt {
-            Statement::ExportNamedDeclaration(export) => {
-                if let Some(Declaration::ClassDeclaration(class)) = &export.declaration {
-                    classes.push(&**class);
+            Statement::ExportDeclaration(export) => {
+                if let Declaration::ClassDeclaration(class) = &export.declaration {
+                    classes.push(class.as_ref());
                 }
             }
             Statement::ClassDeclaration(class) => classes.push(&**class),

@@ -31,22 +31,22 @@ cli = ["dep:clap", "dep:glob"]
 wasm = ["dep:wasm-bindgen", "dep:console_error_panic_hook"]
 
 [dependencies]
-clap = { version = "4.6.1", features = ["derive"], optional = true }
-glob = { version = "0.3.3", optional = true }
-oxc_allocator = "0.136.0"
-oxc_ast = "0.136.0"
-oxc_ast_visit = "0.136.0"
-oxc_parser = "0.136.0"
-oxc_span = "0.136.0"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-wasm-bindgen = { version = "0.2", optional = true }
-console_error_panic_hook = { version = "0.1", optional = true }
+clap = { version = "=4.6.8", features = ["derive"], optional = true }
+glob = { version = "=0.3.4", optional = true }
+oxc_allocator = "=0.159.0"
+oxc_ast = "=0.159.0"
+oxc_ast_visit = "=0.159.0"
+oxc_parser = "=0.159.0"
+oxc_span = "=0.159.0"
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.154"
+wasm-bindgen = { version = "=0.2.127", optional = true }
+console_error_panic_hook = { version = "=0.1.7", optional = true }
 
 [dev-dependencies]
-criterion = "0.8.2"
-insta = { version = "1", features = ["glob"] }
-proptest = "1.11.0"
+criterion = "=0.8.2"
+insta = { version = "=1.48.0", features = ["glob"] }
+proptest = "=1.12.0"
 
 [[bench]]
 name = "compile"

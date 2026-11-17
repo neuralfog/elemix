@@ -201,10 +201,14 @@ pub fn locate(source: &str) -> Result<Located, LocatedError> {
                 before_mounts: Vec::new(),
                 mounts: Vec::new(),
                 disposes: Vec::new(),
-                super_class: class.super_class.as_ref().and_then(|e| match e {
-                    Expression::Identifier(id) => Some(id.name.to_string()),
-                    _ => None,
-                }),
+                super_class: class
+                    .heritage
+                    .as_ref()
+                    .map(|h| &h.expression)
+                    .and_then(|e| match e {
+                        Expression::Identifier(id) => Some(id.name.to_string()),
+                        _ => None,
+                    }),
             });
         } else if let Some(target) = as_const(stmt) {
             targets.push(target);
@@ -554,8 +558,8 @@ fn as_class<'a, 'b>(stmt: &'a Statement<'b>) -> Option<(&'a Class<'b>, usize)> {
             let class: &Class = c;
             Some((class, c.span.start as usize))
         }
-        Statement::ExportNamedDeclaration(e) => match &e.declaration {
-            Some(Declaration::ClassDeclaration(c)) => {
+        Statement::ExportDeclaration(e) => match &e.declaration {
+            Declaration::ClassDeclaration(c) => {
                 let class: &Class = c;
                 Some((class, e.span.start as usize))
             }
@@ -568,8 +572,8 @@ fn as_class<'a, 'b>(stmt: &'a Statement<'b>) -> Option<(&'a Class<'b>, usize)> {
 fn as_const(stmt: &Statement) -> Option<(usize, Kind)> {
     let (decl, stmt_start) = match stmt {
         Statement::VariableDeclaration(v) => (v.as_ref(), v.span.start as usize),
-        Statement::ExportNamedDeclaration(export) => match &export.declaration {
-            Some(Declaration::VariableDeclaration(v)) => (v.as_ref(), export.span.start as usize),
+        Statement::ExportDeclaration(export) => match &export.declaration {
+            Declaration::VariableDeclaration(v) => (v.as_ref(), export.span.start as usize),
             _ => return None,
         },
         _ => return None,

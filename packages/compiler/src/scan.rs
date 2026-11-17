@@ -66,24 +66,22 @@ pub fn scan_imports(source: &str) -> Vec<Import> {
                     })
                     .collect();
                 out.push(Import {
-                    specifier: d.source.value.to_string(),
+                    specifier: d.source.value.display().to_string(),
                     names,
                 });
             }
-            Statement::ExportNamedDeclaration(d) => {
-                if let Some(src) = &d.source {
-                    out.push(Import {
-                        specifier: src.value.to_string(),
-                        names: d
-                            .specifiers
-                            .iter()
-                            .map(|s| s.exported.name().to_string())
-                            .collect(),
-                    });
-                }
+            Statement::ExportFromDeclaration(d) => {
+                out.push(Import {
+                    specifier: d.source.value.display().to_string(),
+                    names: d
+                        .specifiers
+                        .iter()
+                        .map(|s| s.exported.name().to_string())
+                        .collect(),
+                });
             }
             Statement::ExportAllDeclaration(d) => out.push(Import {
-                specifier: d.source.value.to_string(),
+                specifier: d.source.value.display().to_string(),
                 names: Vec::new(),
             }),
             _ => {}

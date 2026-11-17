@@ -67,7 +67,7 @@ pub fn merge_runtime_imports(source: &str) -> String {
         let Statement::ImportDeclaration(import) = stmt else {
             continue;
         };
-        if import.source.value.as_str() != RUNTIME {
+        if import.source.value != RUNTIME {
             continue;
         }
         let Some(specifiers) = &import.specifiers else {
@@ -80,7 +80,7 @@ pub fn merge_runtime_imports(source: &str) -> String {
                 ImportDeclarationSpecifier::ImportSpecifier(s) => names.push(match &s.imported {
                     ModuleExportName::IdentifierName(id) => id.name.to_string(),
                     ModuleExportName::IdentifierReference(id) => id.name.to_string(),
-                    ModuleExportName::StringLiteral(s) => s.value.to_string(),
+                    ModuleExportName::StringLiteral(s) => s.value.display().to_string(),
                 }),
                 _ => {
                     pure = false;

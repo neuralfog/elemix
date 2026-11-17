@@ -67,7 +67,7 @@ pub fn lower(source: &str, ssr: bool) -> String {
     let mut main_import: Option<(usize, usize, Vec<String>)> = None;
     for stmt in &ret.program.body {
         if let Statement::ImportDeclaration(import) = stmt {
-            if import.source.value.as_str() == "@neuralfog/elemix" {
+            if import.source.value == "@neuralfog/elemix" {
                 let names = import_names(import);
                 if names.iter().any(|n| n == "tpl") {
                     let remaining = names.into_iter().filter(|n| n != "tpl").collect();
@@ -139,7 +139,7 @@ fn import_names(import: &ImportDeclaration) -> Vec<String> {
             ImportDeclarationSpecifier::ImportSpecifier(spec) => match &spec.imported {
                 ModuleExportName::IdentifierName(id) => Some(id.name.to_string()),
                 ModuleExportName::IdentifierReference(id) => Some(id.name.to_string()),
-                ModuleExportName::StringLiteral(s) => Some(s.value.to_string()),
+                ModuleExportName::StringLiteral(s) => Some(s.value.display().to_string()),
             },
             _ => None,
         })
