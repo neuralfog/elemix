@@ -25,14 +25,13 @@
     },
     "dependencies": {
         "@neuralfog/elemix": "workspace:*",
-        "sass": "1.103.1"
+        "sass": "1.108.2"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.5.3",
-        "@neuralfog/biome-config": "0.1.2",
+        "@biomejs/biome": "2.6.8",
         "@neuralfog/ts-config": "0.1.2",
-        "@types/bun": "1.4.0",
-        "@types/node": "26.1.1",
+        "@types/bun": "1.4.4",
+        "@types/node": "26.6.6",
         "typescript": "7.0.2"
     }
 }

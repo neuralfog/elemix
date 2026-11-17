@@ -1,5 +1,4 @@
 {
-    "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
     "files": {
         "includes": [
             "**",
@@ -59,6 +58,9 @@
             },
             "style": {
                 "useImportType": "off"
+            },
+            "performance": {
+                "useDomNodeTextContent": "off"
             }
         }
     }

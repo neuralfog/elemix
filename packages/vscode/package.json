@@ -118,15 +118,14 @@
         "publish": "vsce publish --no-dependencies"
     },
     "dependencies": {
-        "vscode-languageclient": "^10.1.0"
+        "vscode-languageclient": "11.0.0"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.5.3",
-        "@neuralfog/biome-config": "0.1.2",
-        "@types/node": "26.1.1",
+        "@biomejs/biome": "2.6.8",
+        "@types/node": "26.6.6",
         "@types/vscode": "1.125.0",
-        "@vscode/vsce": "3.9.2",
-        "esbuild": "0.28.1",
+        "@vscode/vsce": "4.1.1",
+        "esbuild": "0.28.2",
         "typescript": "7.0.2"
     }
 }

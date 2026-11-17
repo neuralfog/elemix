@@ -1,5 +1,4 @@
 {
-    "extends": ["@neuralfog/biome-config/biome"],
     "files": {
         "includes": [
             "**",
@@ -10,6 +9,11 @@
         ]
     },
     "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 80,
+        "formatWithErrors": true,
         "includes": [
             "**",
             "!**/node_modules/**/*",
@@ -18,10 +22,28 @@
             "!**/coverage/**/*"
         ]
     },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "arrowParentheses": "always",
+            "bracketSpacing": true,
+            "semicolons": "always"
+        }
+    },
+    "json": {
+        "formatter": {
+            "enabled": true
+        }
+    },
     "linter": {
         "rules": {
             "suspicious": {
+                "noExplicitAny": "off",
+                "noImplicitAnyLet": "off",
                 "noDocumentCookie": "off"
+            },
+            "correctness": {
+                "noUnusedImports": "error"
             }
         }
     },

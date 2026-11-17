@@ -15,12 +15,12 @@
         "@neuralfog/elemix": "workspace:*"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.5.5",
+        "@biomejs/biome": "2.6.8",
         "@neuralfog/elemix-vite": "workspace:*",
         "@neuralfog/ts-config": "0.1.2",
-        "@playwright/test": "1.61.1",
-        "@types/bun": "1.2.19",
+        "@playwright/test": "1.65.1",
+        "@types/bun": "1.4.4",
         "typescript": "7.0.2",
-        "vite": "8.1.4"
+        "vite": "8.3.8"
     }
 }

@@ -31,10 +31,9 @@
         "lint:fix": "biome format --write . && biome lint --write . --error-on-warnings && tsc --noEmit"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.5.3",
-        "@neuralfog/biome-config": "0.1.2",
-        "@types/node": "26.1.1",
-        "esbuild": "0.28.1",
+        "@biomejs/biome": "2.6.8",
+        "@types/node": "26.6.6",
+        "esbuild": "0.28.2",
         "typescript": "7.0.2"
     }
 }

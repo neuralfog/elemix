@@ -3,7 +3,7 @@ packages:
   - 'packages/compiler/ssr-harness'
   - 'packages/compiler/csr-harness'
 overrides:
-  esbuild: 0.28.1
+  esbuild: 0.28.2
 allowBuilds:
   '@biomejs/biome': true
   '@parcel/watcher': false
