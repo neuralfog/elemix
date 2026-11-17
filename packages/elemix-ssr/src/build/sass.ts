@@ -90,6 +90,10 @@ export const compileScssFile = (path: string): string => {
     return compileString(source, {
         url: pathToFileURL(path),
         importer: scssImporter,
+        style:
+            process.env.DOTNET_ENVIRONMENT === 'Production'
+                ? 'compressed'
+                : 'expanded',
     }).css;
 };
 
