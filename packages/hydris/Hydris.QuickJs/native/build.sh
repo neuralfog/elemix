@@ -2,8 +2,8 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-SRC="$HERE/../../Vendor/quickjs-ng/0.16.2"
-MI="$HERE/../../Vendor/mimalloc/3.5.1"
+SRC="$HERE/../../Vendor/quickjs-ng/0.18.0"
+MI="$HERE/../../Vendor/mimalloc/3.7.0"
 RUNTIMES="$HERE/runtimes"
 
 if [ ! -d "$SRC" ]; then
