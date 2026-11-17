@@ -10,6 +10,7 @@ pub mod optimise;
 pub mod pragma;
 pub mod rewrite;
 pub mod scan;
+pub mod scss;
 #[cfg(feature = "cli")]
 pub mod sourcemap;
 pub mod splice;

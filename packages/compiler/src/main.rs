@@ -27,6 +27,9 @@ struct Cli {
     stdin: bool,
 
     #[arg(long)]
+    path: Option<PathBuf>,
+
+    #[arg(long)]
     ssr: bool,
 
     #[arg(long)]
@@ -83,7 +86,13 @@ fn main() {
     if cli.stdin {
         let mut source = String::new();
         io::stdin().read_to_string(&mut source).expect("read stdin");
-        let (code, diags) = compile_dispatch(&source, cli.ssr, cli.hydrate, cli.minify);
+        let (code, diags) = compile_dispatch(
+            &source,
+            cli.ssr,
+            cli.hydrate,
+            cli.minify,
+            cli.path.as_deref().and_then(Path::parent),
+        );
         report(None, &diags);
         let payload = if cli.sourcemap {
             let map = line_map(&source, &code, "input.ts");
@@ -191,7 +200,10 @@ fn compile_dispatch(
     ssr: bool,
     hydrate: bool,
     minify: bool,
+    base_dir: Option<&Path>,
 ) -> (String, Vec<Diagnostic>) {
+    let inlined = elemix_compiler::scss::inline_scss_imports(source, base_dir, minify);
+    let source = inlined.as_str();
     if hydrate {
         compile_hydrate(source, minify)
     } else if ssr {
@@ -213,7 +225,7 @@ fn emit(
     let name = src.file_name().expect("source has a file name");
     let dest = dir.join(name);
 
-    let (code, diags) = compile_dispatch(source, ssr, hydrate, minify);
+    let (code, diags) = compile_dispatch(source, ssr, hydrate, minify, src.parent());
     report(Some(src), &diags);
 
     fs::create_dir_all(dir).expect("create out dir");
