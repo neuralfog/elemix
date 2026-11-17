@@ -1,0 +1,17 @@
+$radius: 8px;
+$shades: (
+    'a': #111111,
+    'b': #222222,
+);
+
+@function fg($key) {
+    @if $key == 'text' {
+        @return #1e293b;
+    }
+    @return #000000;
+}
+
+@mixin card($pad) {
+    padding: $pad;
+    border-radius: $radius;
+}

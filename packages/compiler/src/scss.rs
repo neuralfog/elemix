@@ -84,6 +84,54 @@ mod tests {
     use super::*;
 
     const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures");
+    const FEATURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/scss");
+
+    fn feature_css(minify: bool) -> String {
+        compile_path(&Path::new(FEATURES).join("features.scss"), minify)
+            .expect("features.scss compiles")
+    }
+
+    #[test]
+    fn mixin_and_module_variable_from_a_used_partial() {
+        let css = feature_css(true);
+        assert!(css.contains(".card{padding:16px;border-radius:8px"));
+    }
+
+    #[test]
+    fn module_function_with_if_resolves() {
+        assert!(feature_css(true).contains("color:#1e293b"));
+    }
+
+    #[test]
+    fn each_over_a_map_with_interpolation() {
+        let css = feature_css(true);
+        assert!(css.contains(".text-a{color:#111}"));
+        assert!(css.contains(".text-b{color:#222}"));
+    }
+
+    #[test]
+    fn for_loop_with_math_and_parent_selector() {
+        let css = feature_css(true);
+        assert!(css.contains(".bar:nth-child(1){width:10px}"));
+        assert!(css.contains(".bar:nth-child(3){width:30px}"));
+    }
+
+    #[test]
+    fn expanded_keeps_full_hex_and_no_dynamic_source() {
+        let css = feature_css(false);
+        assert!(css.contains("#111111"));
+        assert!(!css.contains("@use"));
+        assert!(!css.contains("@mixin"));
+    }
+
+    #[test]
+    fn inline_import_of_a_module_using_scss_file() {
+        let src = "import css from './features.scss?inline';\n";
+        let out = inline_scss_imports(src, Some(Path::new(FEATURES)), true);
+        assert!(out.starts_with("const css = `"));
+        assert!(out.contains(".card{padding:16px"));
+        assert!(!out.contains("@include"));
+    }
 
     #[test]
     fn inlines_scss_import_as_compiled_const() {

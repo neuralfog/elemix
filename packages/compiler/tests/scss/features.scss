@@ -1,0 +1,20 @@
+@use 'theme';
+
+.card {
+    @include theme.card(16px);
+    color: theme.fg('text');
+}
+
+@each $name, $hex in theme.$shades {
+    .text-#{$name} {
+        color: $hex;
+    }
+}
+
+.bar {
+    @for $i from 1 through 3 {
+        &:nth-child(#{$i}) {
+            width: $i * 10px;
+        }
+    }
+}
