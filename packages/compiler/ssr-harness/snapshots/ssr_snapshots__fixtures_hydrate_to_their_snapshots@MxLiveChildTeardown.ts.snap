@@ -62,9 +62,7 @@ const _n2 = _n1.nextSibling!.nextSibling!;
 $__child(_n2, () => (this.state.mounted
                     ? (() => {
 const _r3 = $__cloneEl(_t1);
-$__effect(() => {
 $__setProp(_r3, 'label', ('live'));
-});
 return _r3;
 })()
                     : (() => {

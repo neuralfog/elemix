@@ -36,17 +36,13 @@ const _n6 = _n5.nextSibling!;
 $__child(_n2, () => ((() => {
 const _r7 = $__cloneEl(_t1);
 const _n8 = _r7.firstChild!;
-$__effect(() => {
-$__setText(_n8, ('a'));
-});
+_n8.data = ('a');
 return _r7;
 })()));
 $__child(_n3, () => ((() => {
 const _r9 = $__cloneEl(_t1);
 const _n10 = _r9.firstChild!;
-$__effect(() => {
-$__setText(_n10, ('b'));
-});
+_n10.data = ('b');
 return _r9;
 })()));
 $__child(_n4, () => (this.state.open
@@ -57,9 +53,7 @@ const _n13 = _n12.nextSibling!.firstChild!;
 $__child(_n12, () => ((() => {
 const _r14 = $__cloneEl(_t1);
 const _n15 = _r14.firstChild!;
-$__effect(() => {
-$__setText(_n15, ('open'));
-});
+_n15.data = ('open');
 return _r14;
 })()));
 $__effect(() => {

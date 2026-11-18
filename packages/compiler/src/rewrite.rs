@@ -9,6 +9,7 @@ use oxc_ast::ast::{
 };
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
+use std::collections::HashMap;
 
 const PRIMITIVES: &[&str] = &[
     "$__template",
@@ -45,6 +46,7 @@ struct Plan {
     directives_import: Option<(usize, usize)>,
     types_import: Option<(usize, usize, Vec<String>)>,
     main_import: Option<(usize, usize, Vec<String>)>,
+    source_free: HashMap<String, bool>,
 }
 
 pub fn rewrite(source: &str, ssr: bool) -> String {
@@ -66,8 +68,8 @@ pub fn rewrite(source: &str, ssr: bool) -> String {
             .iter()
             .map(|c| (c.statics.clone(), c.holes.clone()))
             .collect();
-        let (decls, bodies) = generate_all(&templates, &emitter);
-        let runtime_import = runtime_import(&decls, &bodies.join("\n"));
+        let (decls, bodies) = generate_all(&templates, &plan.source_free, &emitter);
+        let runtime_import = runtime_import(&decls, &format!("{source}\n{}", bodies.join("\n")));
 
         for (c, body) in plan.comps.iter().zip(&bodies) {
             let view = if c.prelude.is_empty() {
@@ -165,6 +167,7 @@ pub fn plan_components(source: &str) -> Vec<SsrComp> {
 fn plan(source: &str) -> Plan {
     let allocator = Allocator::default();
     let ret = Parser::new(&allocator, source, SourceType::ts()).parse();
+    let source_free = crate::static_expr::source_free_map(source, &ret.program);
 
     let mut comps = Vec::new();
     let mut directives_import = None;
@@ -215,6 +218,7 @@ fn plan(source: &str) -> Plan {
         directives_import,
         types_import,
         main_import,
+        source_free,
     }
 }
 

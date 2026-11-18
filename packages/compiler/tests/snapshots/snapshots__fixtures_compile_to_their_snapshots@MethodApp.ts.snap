@@ -26,9 +26,7 @@ const _n3 = _n1.firstChild!;
 const _n4 = _n2.firstChild!;
 const _n5 = _n2.nextSibling!;
 (_n5 as HTMLElement).onclick = (this.inc);
-$__effect(() => {
-$__setText(_n3, label);
-});
+_n3.data = label;
 $__effect(() => {
 $__setText(_n4, this.state.count);
 });

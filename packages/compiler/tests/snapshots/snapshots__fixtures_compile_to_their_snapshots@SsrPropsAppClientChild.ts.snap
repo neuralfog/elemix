@@ -36,6 +36,8 @@ const _n2 = _n1.firstChild!.nextSibling!;
 const _n3 = _n2.firstChild!;
 const _n4 = _n2.nextSibling!.nextSibling!.firstChild!;
 const _n5 = _n1.nextSibling!;
+$__setProp(_n5, 'label', ('hello'));
+$__setProp(_n5, 'flag', true);
 $__effect(() => {
 const _v6 = this.state.count;
 $__setText(_n3, _v6);
@@ -43,12 +45,6 @@ $__setProp(_n5, 'count', _v6);
 });
 $__effect(() => {
 $__setText(_n4, (this.state.tags.join(',')));
-});
-$__effect(() => {
-$__setProp(_n5, 'label', ('hello'));
-});
-$__effect(() => {
-$__setProp(_n5, 'flag', true);
 });
 $__effect(() => {
 $__setProp(_n5, 'tags', this.state.tags);

@@ -21,7 +21,14 @@ struct Ctx {
     decls: String,
     seen: HashMap<String, String>,
     reactive: Vec<Reactive>,
+    source_free: HashMap<String, bool>,
     tpl_prefix: &'static str,
+}
+
+impl Ctx {
+    fn is_source_free(&self, expr: &str) -> bool {
+        self.source_free.get(expr).copied().unwrap_or(false)
+    }
 }
 
 impl Ctx {
@@ -61,9 +68,11 @@ pub fn generate(statics: &[String], holes: &[String], emitter: &dyn Emitter) -> 
 
 pub fn generate_all(
     templates: &[(Vec<String>, Vec<String>)],
+    source_free: &HashMap<String, bool>,
     emitter: &dyn Emitter,
 ) -> (String, Vec<String>) {
     let mut ctx = Ctx::new("t");
+    ctx.source_free = source_free.clone();
     let bodies = templates
         .iter()
         .map(|(statics, holes)| gen_template(statics, holes, &mut ctx, emitter, false, false))
@@ -498,6 +507,8 @@ fn gen_template(
                 let v = ctx.var("v");
                 if is_static_key(e, ctx) {
                     static_hoists.push(emitter.local(&v, &static_raw(e)));
+                } else if ctx.is_source_free(e) {
+                    static_hoists.push(emitter.local(&v, e));
                 } else {
                     reactive_hoist.insert(v.clone(), emitter.local(&v, e));
                 }
@@ -511,6 +522,7 @@ fn gen_template(
     for (b, node) in bindings.iter().zip(&nodes) {
         let name = b.name.as_deref().unwrap_or("");
         let stat = is_grouped(&b.kind) && is_static_key(b.expr.trim(), ctx);
+        let one_shot = stat || (is_grouped(&b.kind) && ctx.is_source_free(b.expr.trim()));
         let read: String = match cse.get(b.expr.trim()) {
             Some(v) => v.clone(),
             None if stat => static_raw(b.expr.trim()),
@@ -529,7 +541,7 @@ fn gen_template(
             BindingKind::List => lines.push(lower_list(&b.expr, node, ctx, emitter)),
             BindingKind::Child => lines.extend(lower_child(&b.expr, node, ctx, emitter)),
             BindingKind::Text if b.baked => {
-                if stat {
+                if one_shot {
                     statics.push(emitter.set_text_direct(node, g));
                 } else {
                     group.push((tag, emitter.set_text(node, g)));
@@ -538,14 +550,14 @@ fn gen_template(
             BindingKind::Text => {
                 let tnode = ctx.var("x");
                 lines.push(emitter.text_anchor(&tnode, node));
-                if stat {
+                if one_shot {
                     statics.push(emitter.set_text_direct(&tnode, g));
                 } else {
                     group.push((tag, emitter.set_text(&tnode, g)));
                 }
             }
             BindingKind::Attr => {
-                if stat {
+                if one_shot {
                     statics.push(emitter.set_attr_direct(node, name, g));
                 } else {
                     group.push((tag, emitter.set_attr(node, name, g)));
@@ -553,7 +565,7 @@ fn gen_template(
             }
             BindingKind::Class => {
                 let w = emitter.set_class(node, g);
-                if stat {
+                if one_shot {
                     statics.push(w);
                 } else {
                     group.push((tag, w));
@@ -561,7 +573,7 @@ fn gen_template(
             }
             BindingKind::Style => {
                 let w = emitter.set_style(node, g);
-                if stat {
+                if one_shot {
                     statics.push(w);
                 } else {
                     group.push((tag, w));
@@ -569,7 +581,7 @@ fn gen_template(
             }
             BindingKind::Prop => {
                 let w = emitter.set_prop(node, name, g);
-                if stat {
+                if one_shot {
                     statics.push(w);
                 } else {
                     group.push((tag, w));

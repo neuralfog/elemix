@@ -73,30 +73,14 @@ const _n5 = _n1.nextSibling!;
 const _n6 = _n5.firstChild!.firstChild!;
 const _n7 = _n6.nextSibling!;
 const _n8 = _n7.nextSibling!;
-$__effect(() => {
 $__setProp(_n1, 'title', ('Group One'));
-});
-$__effect(() => {
 $__setProp(_n2, 'label', ('Alpha'));
-});
-$__effect(() => {
 $__setProp(_n3, 'label', ('Beta'));
-});
-$__effect(() => {
 $__setProp(_n4, 'label', ('Gamma'));
-});
-$__effect(() => {
 $__setProp(_n5, 'title', ('Group Two'));
-});
-$__effect(() => {
 $__setProp(_n6, 'label', ('Delta'));
-});
-$__effect(() => {
 $__setProp(_n7, 'label', ('Epsilon'));
-});
-$__effect(() => {
 $__setProp(_n8, 'label', ('Zeta'));
-});
 return _r0;
 }
 }
