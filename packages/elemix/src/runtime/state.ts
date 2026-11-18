@@ -3,6 +3,7 @@ import { type Dep, $__track, $__trigger, $__activeScope } from './reactive';
 const RAW = Symbol();
 const ARRAY = Symbol();
 const COLLECTION = Symbol();
+const DEPS = Symbol();
 const RAW_SKIP = Symbol.for('elemix.raw');
 
 export const $__isClient = (): boolean =>
@@ -20,13 +21,14 @@ const MUTATORS = new Set<string>([
 ]);
 
 const proxies = new WeakMap<object, object>();
-const deps = new WeakMap<object, Record<PropertyKey, Dep>>();
+
+type Deps = { [DEPS]?: Record<PropertyKey, Dep> };
 
 const depFor = (target: object, key: PropertyKey): Dep => {
-    let map = deps.get(target);
+    let map = (target as Deps)[DEPS];
     if (map === undefined) {
         map = Object.create(null) as Record<PropertyKey, Dep>;
-        deps.set(target, map);
+        Object.defineProperty(target, DEPS, { value: map, configurable: true });
     }
     let d = map[key];
     if (d === undefined) {
@@ -35,6 +37,9 @@ const depFor = (target: object, key: PropertyKey): Dep => {
     }
     return d;
 };
+
+const peekDep = (target: object, key: PropertyKey): Dep | undefined =>
+    (target as Deps)[DEPS]?.[key];
 
 export const $__depOf = (obj: object, key: PropertyKey): Dep => {
     const t = (obj as Record<PropertyKey, unknown>)[RAW];
@@ -71,7 +76,7 @@ const objectHandler: ProxyHandler<Target> = {
         if (prev === value) return true;
         target[key] = value;
         if (typeof key !== 'symbol') {
-            const d = deps.get(target)?.[key];
+            const d = peekDep(target, key);
             if (d !== undefined) $__trigger(d);
         }
         return true;
@@ -80,7 +85,7 @@ const objectHandler: ProxyHandler<Target> = {
         if (!hasOwn.call(target, key)) return true;
         delete target[key];
         if (typeof key !== 'symbol') {
-            const d = deps.get(target)?.[key];
+            const d = peekDep(target, key);
             if (d !== undefined) $__trigger(d);
         }
         return true;
@@ -109,7 +114,7 @@ const classHandler: ProxyHandler<Target> = {
         if (prev === value) return true;
         target[key] = value;
         if (typeof key !== 'symbol') {
-            const d = deps.get(target)?.[key];
+            const d = peekDep(target, key);
             if (d !== undefined) $__trigger(d);
         }
         return true;
@@ -118,7 +123,7 @@ const classHandler: ProxyHandler<Target> = {
         if (!hasOwn.call(target, key)) return true;
         delete target[key];
         if (typeof key !== 'symbol') {
-            const d = deps.get(target)?.[key];
+            const d = peekDep(target, key);
             if (d !== undefined) $__trigger(d);
         }
         return true;
