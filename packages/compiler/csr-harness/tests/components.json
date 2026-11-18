@@ -340,10 +340,6 @@
         "fixture": "EmojiPrefixApp"
     },
     {
-        "tag": "dup-class-app",
-        "fixture": "DupClassApp"
-    },
-    {
         "tag": "template-hole-app",
         "fixture": "TemplateHoleApp"
     },

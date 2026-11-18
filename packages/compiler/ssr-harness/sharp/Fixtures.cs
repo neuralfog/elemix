@@ -92,9 +92,6 @@ public sealed class Fixtures {
     [Get("/emoji-prefix-app")]
     public Reply EmojiPrefixApp() => Reply.View("fixtures/EmojiPrefixApp");
 
-    [Get("/dup-class-app")]
-    public Reply DupClassApp() => Reply.View("fixtures/DupClassApp");
-
     [Get("/delete-prop-app")]
     public Reply DeletePropApp() => Reply.View("fixtures/DeletePropApp");
 

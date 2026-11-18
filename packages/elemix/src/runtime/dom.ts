@@ -595,23 +595,11 @@ export const $__setAttr = (el: Element, name: string, value: unknown): void => {
     else el.setAttribute(name, next);
 };
 
-const dedupeClasses = (value: string): string => {
-    const seen = new Set<string>();
-    let out = '';
-    for (const part of value.split(' ')) {
-        if (part && !seen.has(part)) {
-            seen.add(part);
-            out += out.length ? ` ${part}` : part;
-        }
-    }
-    return out;
-};
-
 export const $__setClass = (el: Element, value: unknown): void => {
     if (hydrating) return;
     let next: string;
     if (typeof value === 'string') {
-        next = value.indexOf(' ') === -1 ? value : dedupeClasses(value);
+        next = value;
     } else if (value !== null && typeof value === 'object') {
         next = '';
         const obj = value as Record<string, unknown>;
