@@ -8,6 +8,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/) when it s
 > The [Roadmap](https://github.com/neuralfog/elemix/blob/main/ROADMAP.md) is the full
 > log of development.
 
+## [0.9.9] - 2026-11-19
+
+### Removed
+
+- The `@neuralfog/elemix-ssr` package is gone. Its SSR runtime and build live in
+  elemix now, so it is one package to install, not two.
+
+### Changed
+
+- Inlined component SCSS is compiled by the elemix compiler itself, and minified
+  in production builds.
+- The compiler elides the reactive effect for template expressions it can prove
+  static. A constant bound once becomes a plain write instead of a tracked
+  effect that could never fire again.
+- Reactive dependency records live on the reactive object behind a
+  non-enumerable symbol instead of a side `WeakMap`. Every tracked read is a
+  property load rather than a hash lookup, and the record is collected with the
+  object.
+- The runtime writes class bindings as-is and no longer de-duplicates repeated
+  tokens on every update. The browser never minded the duplicates, and the work
+  was not free.
+
+### Fixed
+
+- `render()` repaints nested content. A manual repaint updated only top-level
+  holes, leaving keyed-list rows and `when`/`choose` branches stale. It now
+  reaches inside matched rows and conditional branches. `#effect` stays
+  reactive-only, so a manual repaint never fires it.
+
 ## [0.9.8] - 2026-11-16
 
 ### Changed
