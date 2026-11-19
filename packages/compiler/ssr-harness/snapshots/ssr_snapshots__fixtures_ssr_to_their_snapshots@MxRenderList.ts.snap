@@ -1,0 +1,64 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxRenderList.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrClass, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Row = { id: number; label: string; on: boolean };
+
+export class MxRenderList extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-render-list'}><template shadowrootmode="open" shadowrootserializable=""><ul class="rows">`, ($__ssrRepeat(
+                this.rows,
+                (r) => $__ssrTpl(`<li${$__ssrClass(r.on ? 'on' : 'off')}${$__ssrAttr('data-id', r.id)}>`, $__ssrText(r.label), `</li>`),
+                (r) => r.id,
+            )), `</ul><button class="edit">edit</button><button class="toggle">toggle</button><button class="add">add</button><button class="drop">drop</button><button class="swap">swap</button><button class="wipe">wipe</button></template></${this.$$__tag ?? 'mx-render-list'}>`];
+}
+
+    rows: Row[] = [
+        { id: 1, label: 'one', on: false },
+        { id: 2, label: 'two', on: false },
+        { id: 3, label: 'three', on: false },
+    ];
+    next = 4;
+
+    edit = (): void => {
+        this.rows[1].label = `${this.rows[1].label}!`;
+        this.render();
+    };
+
+    toggle = (): void => {
+        this.rows[1].on = !this.rows[1].on;
+        this.render();
+    };
+
+    add = (): void => {
+        this.rows.push({ id: this.next++, label: 'new', on: false });
+        this.render();
+    };
+
+    drop = (): void => {
+        this.rows = this.rows.filter((r) => r.id !== 2);
+        this.render();
+    };
+
+    swap = (): void => {
+        const a = this.rows[0];
+        this.rows[0] = this.rows[this.rows.length - 1];
+        this.rows[this.rows.length - 1] = a;
+        this.render();
+    };
+
+    wipe = (): void => {
+        this.rows = [];
+        this.render();
+    };
+
+    
+}
+$__defineComponent('mx-render-list', MxRenderList);
+MxRenderList.prototype.$$__tag = 'mx-render-list';
+MxRenderList.$$__propSafe = true;

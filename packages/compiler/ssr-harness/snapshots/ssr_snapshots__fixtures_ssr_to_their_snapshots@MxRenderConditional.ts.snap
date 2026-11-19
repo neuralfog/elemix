@@ -1,0 +1,44 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxRenderConditional.ts
+---
+import { $__ssrText, $__ssrTpl, $__ssrWhen, $__ssrChoose } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+export class MxRenderConditional extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-render-conditional'}><template shadowrootmode="open" shadowrootserializable=""><div class="when">`, ($__ssrWhen(
+                this.s.show,
+                () => $__ssrTpl(`<span class="shown">`, $__ssrText(this.s.inner), `</span>`),
+                () => $__ssrTpl(`<span class="hidden">off</span>`),
+            )), `</div><div class="choose">`, ($__ssrChoose([
+                [this.s.n === 0, () => $__ssrTpl(`<span class="zero">zero</span>`)],
+                [this.s.n === 1, () => $__ssrTpl(`<span class="one">one</span>`)],
+                [true, () => $__ssrTpl(`<span class="two">two</span>`)],
+            ])), `</div><button class="toggle">toggle</button><button class="edit-inner">edit inner</button><button class="grade">grade</button></template></${this.$$__tag ?? 'mx-render-conditional'}>`];
+}
+
+    s = { show: false, n: 0, inner: 'x' };
+
+    toggle = (): void => {
+        this.s.show = !this.s.show;
+        this.render();
+    };
+
+    editInner = (): void => {
+        this.s.inner = `${this.s.inner}!`;
+        this.render();
+    };
+
+    grade = (): void => {
+        this.s.n = (this.s.n + 1) % 3;
+        this.render();
+    };
+
+    
+}
+$__defineComponent('mx-render-conditional', MxRenderConditional);
+MxRenderConditional.prototype.$$__tag = 'mx-render-conditional';
+MxRenderConditional.$$__propSafe = true;

@@ -312,6 +312,26 @@
         "fixture": "MxDeepNest"
     },
     {
+        "tag": "mx-render-list",
+        "fixture": "MxRenderList"
+    },
+    {
+        "tag": "mx-render-bindings",
+        "fixture": "MxRenderBindings"
+    },
+    {
+        "tag": "mx-render-nested",
+        "fixture": "MxRenderNested"
+    },
+    {
+        "tag": "mx-render-conditional",
+        "fixture": "MxRenderConditional"
+    },
+    {
+        "tag": "mx-render-effect",
+        "fixture": "MxRenderEffect"
+    },
+    {
         "tag": "delete-prop-app",
         "fixture": "DeletePropApp"
     },

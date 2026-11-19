@@ -2,6 +2,7 @@ import {
     collect,
     takeScopes,
     rerun,
+    setFullRender,
     dispose,
     $__untrack,
     type Scope,
@@ -201,10 +202,15 @@ export class Component<
     }
 
     public render(): void {
-        let scope = this.$$__scopes;
-        while (scope) {
-            rerun(scope);
-            scope = scope.next;
+        setFullRender(true);
+        try {
+            let scope = this.$$__scopes;
+            while (scope) {
+                rerun(scope);
+                scope = scope.next;
+            }
+        } finally {
+            setFullRender(false);
         }
     }
 

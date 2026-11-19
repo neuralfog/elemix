@@ -152,6 +152,21 @@ public sealed class Fixtures {
     [Get("/mx-deep-nest")]
     public Reply MxDeepNest() => Reply.View("fixtures/MxDeepNest");
 
+    [Get("/mx-render-list")]
+    public Reply MxRenderList() => Reply.View("fixtures/MxRenderList");
+
+    [Get("/mx-render-bindings")]
+    public Reply MxRenderBindings() => Reply.View("fixtures/MxRenderBindings");
+
+    [Get("/mx-render-nested")]
+    public Reply MxRenderNested() => Reply.View("fixtures/MxRenderNested");
+
+    [Get("/mx-render-conditional")]
+    public Reply MxRenderConditional() => Reply.View("fixtures/MxRenderConditional");
+
+    [Get("/mx-render-effect")]
+    public Reply MxRenderEffect() => Reply.View("fixtures/MxRenderEffect");
+
     [Get("/view-data-app")]
     public Reply ViewDataApp() =>
         Reply.View("fixtures/ViewDataApp", new VData("Hello viewData", new VUser("Ada"), 3));

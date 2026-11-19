@@ -82,6 +82,20 @@ const runScope = (scope: Scope): void => {
 
 export const rerun = (scope: Scope): void => runScope(scope);
 
+let fullRender = false;
+export const isFullRender = (): boolean => fullRender;
+export const setFullRender = (on: boolean): void => {
+    fullRender = on;
+};
+
+export const rerunChain = (head: Scope | null): void => {
+    let scope = head;
+    while (scope) {
+        runScope(scope);
+        scope = scope.next;
+    }
+};
+
 export const collect = <T, A = unknown, B = unknown>(
     fn: (a: A, b: B) => T,
     a?: A,

@@ -2,6 +2,8 @@ import {
     type Scope,
     collect,
     dispose,
+    isFullRender,
+    rerunChain,
     $__effect,
     takeScopes,
     $__untrack,
@@ -201,6 +203,7 @@ export const $__child = (anchor: Node, get: Getter<unknown>): void => {
     $__effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
+        if (isFullRender()) $__untrack(() => rerunChain(scopes));
         const value = collect(get);
         const fresh = takeScopes();
         const next =
@@ -335,6 +338,12 @@ export const $__list = <T>(
     $__effect(() => {
         const parent = anchor.parentNode;
         if (!parent) return;
+        if (isFullRender()) {
+            $__untrack(() => {
+                for (const row of nodes.values())
+                    rerunChain((row as Rowed).__sc ?? null);
+            });
+        }
         const list = items();
         const rawList = $__toRaw(list);
         const len = rawList.length;

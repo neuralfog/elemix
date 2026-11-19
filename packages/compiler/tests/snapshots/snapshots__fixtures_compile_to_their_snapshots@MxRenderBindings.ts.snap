@@ -1,0 +1,53 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/MxRenderBindings.ts
+---
+import { $__template, $__clone, $__effect, $__setText, $__setAttr, $__setClass, $__setStyle, $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<div><span class="text"> </span><span class="attr">x</span><span data-t="obj">y</span><span class="style">z</span></div><button class="mut">mut</button>');
+
+export class MxRenderBindings extends Component {
+    s = { text: 'hi', attr: 'a1', cls: 'red', active: false, color: 'blue', size: 10 };
+
+    mut = (): void => {
+        this.s.text = 'bye';
+        this.s.attr = 'a2';
+        this.s.cls = 'green';
+        this.s.active = true;
+        this.s.color = 'orange';
+        this.s.size = 20;
+        this.render();
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.firstChild!;
+const _n3 = _n2.firstChild!;
+const _n4 = _n2.nextSibling!;
+const _n5 = _n4.nextSibling!;
+const _n6 = _n5.nextSibling!;
+const _n7 = _n1.nextSibling!;
+(_n7 as HTMLElement).onclick = (this.mut);
+$__effect(() => {
+$__setClass(_n1, (`box ${this.s.cls}`));
+});
+$__effect(() => {
+$__setText(_n3, this.s.text);
+});
+$__effect(() => {
+$__setAttr(_n4, 'data-v', this.s.attr);
+});
+$__effect(() => {
+$__setClass(_n5, ({ on: this.s.active, base: true }));
+});
+$__effect(() => {
+$__setStyle(_n6 as HTMLElement, ({ color: this.s.color, width: `${this.s.size}px` }));
+});
+return _r0;
+}
+}
+$__defineComponent('mx-render-bindings', MxRenderBindings);
+MxRenderBindings.prototype.$$__tag = 'mx-render-bindings';

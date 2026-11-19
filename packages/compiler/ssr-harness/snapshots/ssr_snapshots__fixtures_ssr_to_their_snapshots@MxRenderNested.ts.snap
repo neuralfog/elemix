@@ -1,0 +1,58 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxRenderNested.ts
+---
+import { $__ssrText, $__ssrAttr, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type Inner = { id: number; v: string };
+type Group = { id: number; name: string; items: Inner[] };
+
+export class MxRenderNested extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-render-nested'}><template shadowrootmode="open" shadowrootserializable=""><ul class="groups">`, ($__ssrRepeat(
+                this.groups,
+                (g) => $__ssrTpl(`<li class="group"${$__ssrAttr('data-id', g.id)}><span class="gname">`, $__ssrText(g.name), `</span><ul class="items">`, ($__ssrRepeat(
+                                g.items,
+                                (it) => $__ssrTpl(`<li class="item"${$__ssrAttr('data-id', it.id)}>`, $__ssrText(it.v), `</li>`),
+                                (it) => it.id,
+                            )), `</ul></li>`),
+                (g) => g.id,
+            )), `</ul><button class="edit-inner">edit inner</button><button class="add-inner">add inner</button><button class="edit-outer">edit outer</button></template></${this.$$__tag ?? 'mx-render-nested'}>`];
+}
+
+    groups: Group[] = [
+        {
+            id: 1,
+            name: 'g1',
+            items: [
+                { id: 11, v: 'a' },
+                { id: 12, v: 'b' },
+            ],
+        },
+        { id: 2, name: 'g2', items: [{ id: 21, v: 'c' }] },
+    ];
+    next = 100;
+
+    editInner = (): void => {
+        this.groups[0].items[0].v = `${this.groups[0].items[0].v}!`;
+        this.render();
+    };
+
+    addInner = (): void => {
+        this.groups[0].items.push({ id: this.next++, v: 'z' });
+        this.render();
+    };
+
+    editOuter = (): void => {
+        this.groups[0].name = `${this.groups[0].name}!`;
+        this.render();
+    };
+
+    
+}
+$__defineComponent('mx-render-nested', MxRenderNested);
+MxRenderNested.prototype.$$__tag = 'mx-render-nested';
+MxRenderNested.$$__propSafe = true;

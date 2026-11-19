@@ -1,0 +1,116 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_hydrate(&source, false).0"
+input_file: fixtures/MxRenderConditional.ts
+---
+import { $__bounds, $__reanchor, $__fresh } from '@neuralfog/elemix/ssr-runtime/client';
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__child, $__effect, $__setText, $__defineComponent } from '@neuralfog/elemix/runtime';
+const _h0 = $__templateEl('<span class="shown"> </span>');
+const _h1 = $__templateEl('<span class="hidden">off</span>');
+const _h2 = $__templateEl('<span class="two">two</span>');
+const _h3 = $__templateEl('<span class="one">one</span>');
+const _h4 = $__templateEl('<span class="zero">zero</span>');
+
+import { Component } from '@neuralfog/elemix';
+
+const _t0 = $__template('<div class="when"><!----></div><div class="choose"><!----></div><button class="toggle">toggle</button><button class="edit-inner">edit inner</button><button class="grade">grade</button>');
+const _t1 = $__templateEl('<span class="shown"> </span>');
+const _t2 = $__templateEl('<span class="hidden">off</span>');
+const _t3 = $__templateEl('<span class="two">two</span>');
+const _t4 = $__templateEl('<span class="one">one</span>');
+const _t5 = $__templateEl('<span class="zero">zero</span>');
+
+export class MxRenderConditional extends Component {
+$$__hydrate(root: Node): void {
+const _n0 = root.firstChild!;
+const _b1 = $__bounds(_n0, 0, 0);
+const _n2 = _n0.nextSibling!;
+const _b3 = $__bounds(_n2, 0, 0);
+const _a4 = $__reanchor(_n0, _b1[0], _b1[1]);
+const _a5 = $__reanchor(_n2, _b3[0], _b3[1]);
+const _n6 = _n2.nextSibling!;
+const _n7 = _n6.nextSibling!;
+const _n8 = _n7.nextSibling!;
+(_n6 as HTMLElement).onclick = (this.toggle);
+(_n7 as HTMLElement).onclick = (this.editInner);
+(_n8 as HTMLElement).onclick = (this.grade);
+$__fresh(() => {
+$__child(_a4, () => (this.s.show ? (() => {
+const _r9 = $__cloneEl(_h0);
+const _n10 = _r9.firstChild!;
+$__effect(() => {
+$__setText(_n10, this.s.inner);
+});
+return _r9;
+})() : (() => {
+const _r11 = $__cloneEl(_h1);
+return _r11;
+})()));
+$__child(_a5, () => (this.s.n === 0 ? (() => {
+const _r14 = $__cloneEl(_h4);
+return _r14;
+})() : this.s.n === 1 ? (() => {
+const _r13 = $__cloneEl(_h3);
+return _r13;
+})() : true ? (() => {
+const _r12 = $__cloneEl(_h2);
+return _r12;
+})() : ''));
+});
+}
+
+    s = { show: false, n: 0, inner: 'x' };
+
+    toggle = (): void => {
+        this.s.show = !this.s.show;
+        this.render();
+    };
+
+    editInner = (): void => {
+        this.s.inner = `${this.s.inner}!`;
+        this.render();
+    };
+
+    grade = (): void => {
+        this.s.n = (this.s.n + 1) % 3;
+        this.render();
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n2.firstChild!;
+const _n5 = _n2.nextSibling!;
+const _n6 = _n5.nextSibling!;
+const _n7 = _n6.nextSibling!;
+$__child(_n3, () => (this.s.show ? (() => {
+const _r8 = $__cloneEl(_t1);
+const _n9 = _r8.firstChild!;
+$__effect(() => {
+$__setText(_n9, this.s.inner);
+});
+return _r8;
+})() : (() => {
+const _r10 = $__cloneEl(_t2);
+return _r10;
+})()));
+$__child(_n4, () => (this.s.n === 0 ? (() => {
+const _r13 = $__cloneEl(_t5);
+return _r13;
+})() : this.s.n === 1 ? (() => {
+const _r12 = $__cloneEl(_t4);
+return _r12;
+})() : true ? (() => {
+const _r11 = $__cloneEl(_t3);
+return _r11;
+})() : ''));
+(_n5 as HTMLElement).onclick = (this.toggle);
+(_n6 as HTMLElement).onclick = (this.editInner);
+(_n7 as HTMLElement).onclick = (this.grade);
+return _r0;
+}
+}
+$__defineComponent('mx-render-conditional', MxRenderConditional);
+MxRenderConditional.prototype.$$__tag = 'mx-render-conditional';

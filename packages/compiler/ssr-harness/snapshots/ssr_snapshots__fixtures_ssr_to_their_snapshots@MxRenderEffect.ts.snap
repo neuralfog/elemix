@@ -1,0 +1,38 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/MxRenderEffect.ts
+---
+import { $__ssrText } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent, $__state } from '@neuralfog/elemix/runtime';
+import { Component } from '@neuralfog/elemix';
+
+type State = { x: number; runs: number };
+
+export class MxRenderEffect extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'mx-render-effect'}><template shadowrootmode="open" shadowrootserializable=""><span class="runs">`, $__ssrText(this.state.runs), `</span><span class="label">`, $__ssrText(this.label), `</span><button class="bump">bump</button><button class="paint">paint</button></template></${this.$$__tag ?? 'mx-render-effect'}>`];
+}
+
+    state = $__state<State>({ x: 0, runs: 0 });
+    label = 'a';
+
+    bump = (): void => {
+        this.state.x++;
+    };
+
+    paint = (): void => {
+        this.label = `${this.label}!`;
+        this.render();
+    };
+
+    track(): void {
+        void this.state.x;
+        this.state.runs++;
+    }
+
+    
+}
+$__defineComponent('mx-render-effect', MxRenderEffect);
+MxRenderEffect.prototype.$$__tag = 'mx-render-effect';
+MxRenderEffect.$$__propSafe = true;
