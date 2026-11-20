@@ -11,8 +11,6 @@ A compiled frontend library built on Custom Elements - no virtual DOM, incredibl
 - Live playground: **[playground.elemix.dev](https://playground.elemix.dev/)**
 - Compiler Explorer: **[compiler-explorer.elemix.dev](https://compiler-explorer.elemix.dev/)**
 
-The **[Roadmap](ROADMAP.md)** is the full log of development.
-
 ## Packages
 
 | Package | Description | Docs |
