@@ -444,7 +444,7 @@ checksum = "0e9c71c2167ca323c882b99918929403426e2373ea17242ff5653e0d5e1058be"
 
 [[package]]
 name = "elemix-compiler"
-version = "0.9.9"
+version = "1.0.0"
 dependencies = [
  "clap",
  "console_error_panic_hook",

@@ -5,6 +5,29 @@ share one version and release together, so they share one changelog. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/) when it suits me 😂😂😂.
 
+## [1.0.0] - 2026-11-20
+
+### Added
+
+- elemix gains `silo(value)`, a shallow reactive cell for a single value. It
+  holds the value raw, outside the deep state proxy. A read subscribes, a
+  reassignment triggers, and `trigger()` notifies by hand after you mutate a held
+  array or object in place. One allocation per cell, since the silo is its own
+  dependency node. It works under SSR, and `Silo<T>` ships from the types entry.
+
+### Changed
+
+- The hydris build summary line reports how long the JS pipeline took, the bun
+  build through bytecode and brotli, as a `◷` span beside the view, bytecode and
+  compression stats.
+
+### Fixed
+
+- The compiler resolves tsconfig path aliases when inlining a `?inline` SCSS
+  import. It walks up to the nearest `tsconfig.json` and reads `paths` and
+  `baseUrl`, so an aliased stylesheet import inlines instead of only a relative
+  one. An import that matches no alias passes through untouched as before.
+
 ## [0.9.9] - 2026-11-19
 
 ### Removed

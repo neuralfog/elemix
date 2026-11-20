@@ -2,7 +2,7 @@
     "name": "elemix",
     "displayName": "Official elemix extension",
     "description": "elemix language support - syntax highlighting for `tpl` templates and compiler hints.",
-    "version": "0.9.9",
+    "version": "1.0.0",
     "publisher": "neuralfog",
     "license": "MIT",
     "author": "brownhounds",
