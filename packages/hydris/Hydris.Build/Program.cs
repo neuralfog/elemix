@@ -49,6 +49,7 @@ if (optimise)
 
 Brand.Info($"building {views.Count} view(s) from {root}");
 Brand.Blank();
+var buildTimer = Stopwatch.StartNew();
 var process = Process.Start(start);
 if (process is null) {
     Brand.Error("failed to start bun (is it on PATH?)");
@@ -99,6 +100,8 @@ if (Directory.Exists(clientDir)) {
     }
 }
 
+buildTimer.Stop();
+
 var statsPath = Path.Combine(root, ".hydris-stats.json");
 BuildStats? stats = File.Exists(statsPath)
     ? JsonSerializer.Deserialize(File.ReadAllText(statsPath), BuildJson.Default.BuildStats)
@@ -112,7 +115,8 @@ Brand.Summary(
     stats?.Hydrate ?? 0,
     bytecodeCount,
     compressedFrom,
-    compressedTo);
+    compressedTo,
+    buildTimer.Elapsed);
 
 return 0;
 

@@ -30,7 +30,7 @@ internal static class Brand {
     internal static void Compress(string path, long raw, long compressed) =>
         Console.WriteLine($"  {Amber("[compress]")} {Dim(path)}  {Dim($"{Size(raw)} → ")}{Amber(Size(compressed))}");
 
-    internal static void Summary(int views, int optimised, int hydrate, int bytecode, long compressedFrom, long compressedTo) {
+    internal static void Summary(int views, int optimised, int hydrate, int bytecode, long compressedFrom, long compressedTo, TimeSpan elapsed) {
         var builder = new StringBuilder();
         builder.Append('\n');
         builder.Append($"  {Gradient(new string('─', 54))}\n");
@@ -42,6 +42,7 @@ internal static class Brand {
         builder.Append($"    {Dim($"▣ {bytecode} bytecode")}");
         if (compressedFrom > 0)
             builder.Append($"    {Dim($"▤ {Size(compressedFrom)} → {Size(compressedTo)}")}");
+        builder.Append($"    {Dim($"◷ {Elapsed(elapsed)}")}");
         builder.Append("\n\n");
         Console.Write(builder.ToString());
     }
@@ -67,6 +68,9 @@ internal static class Brand {
         var kb = bytes / 1024.0;
         return kb < 1024 ? $"{kb:0.0} KB" : $"{kb / 1024:0.0} MB";
     }
+
+    private static string Elapsed(TimeSpan span) =>
+        span.TotalSeconds < 1 ? $"{span.TotalMilliseconds:0} ms" : $"{span.TotalSeconds:0.00} s";
 
     private static string Gradient(string text) {
         if (NoColor)
