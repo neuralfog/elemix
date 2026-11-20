@@ -1,0 +1,97 @@
+---
+source: tests/snapshots.rs
+expression: compile(&source)
+input_file: fixtures/SiloSelectApp.ts
+---
+import { $__template, $__clone, $__templateEl, $__cloneEl, $__toRaw, $__list, $__effect, $__setText, $__setClass, $__defineComponent, $__sheet } from '@neuralfog/elemix/runtime';
+import { Component, silo } from '@neuralfog/elemix';
+import type { Silo } from '@neuralfog/elemix/types';
+
+type Row = { id: number; label: Silo<string> };
+
+let nextId = 1;
+
+const makeRow = (label: string): Row => ({ id: nextId++, label: silo(label) });
+
+const seed = (): Row[] => [
+    makeRow('alpha'),
+    makeRow('beta'),
+    makeRow('gamma'),
+];
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li { cursor: pointer; }
+    li.danger { color: #b91c1c; font-weight: 700; }
+    button { font: inherit; cursor: pointer; }
+`;
+
+const _s0 = $__sheet(css);
+const _t0 = $__template('<span class="sel"> </span><div class="controls"><button class="clear">clear</button><button class="bump">bump</button><button class="append">append</button></div><ul class="rows"><!----></ul>');
+const _t1 = $__templateEl('<li><span class="rid"> </span><span class="rlabel"> </span></li>');
+
+export class SiloSelectApp extends Component {
+
+    rows = silo<Row[]>(seed());
+    selected = silo<number>(-1);
+
+    select = (e: Event): void => {
+        const li = (e.target as HTMLElement).closest('li');
+        const id = li?.dataset.id;
+        if (id) this.selected.value = Number(id);
+    };
+
+    clearSelection = (): void => {
+        this.selected.value = -1;
+    };
+
+    bumpFirst = (): void => {
+        const first = this.rows.value[0];
+        if (first) first.label.value += '!';
+    };
+
+    append = (): void => {
+        this.rows.value.push(makeRow('delta'));
+        this.rows.trigger();
+    };
+
+    $$__view(): DocumentFragment {
+const _r0 = $__clone(_t0);
+const _n1 = _r0.firstChild!;
+const _n2 = _n1.nextSibling!;
+const _n3 = _n1.firstChild!;
+const _n4 = _n2.firstChild!;
+const _n5 = _n4.nextSibling!;
+const _n6 = _n5.nextSibling!;
+const _n7 = _n2.nextSibling!;
+const _n8 = _n7.firstChild!;
+(_n4 as HTMLElement).onclick = (this.clearSelection);
+(_n5 as HTMLElement).onclick = (this.bumpFirst);
+(_n6 as HTMLElement).onclick = (this.append);
+(_n7 as HTMLElement).onclick = (this.select);
+$__list(_n8, () => (this.rows.value), (row) => row.id, (row) => {
+const _r9 = $__cloneEl(_t1);
+const _n10 = _r9.firstChild!;
+const _n11 = _n10.firstChild!;
+const _n12 = _n10.nextSibling!.firstChild!;
+const _v13 = ($__toRaw(row).id);
+_r9.setAttribute('data-id', _v13);
+_n11.data = _v13;
+$__effect(() => {
+$__setClass(_r9, (row.id === this.selected.value ? 'row danger' : 'row'));
+});
+$__effect(() => {
+$__setText(_n12, row.label.value);
+});
+return _r9;
+});
+$__effect(() => {
+$__setText(_n3, this.selected.value);
+});
+return _r0;
+}
+}
+SiloSelectApp.$$__sheets = [..._s0];
+$__defineComponent('silo-select-app', SiloSelectApp);
+SiloSelectApp.prototype.$$__tag = 'silo-select-app';

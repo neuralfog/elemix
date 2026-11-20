@@ -1,4 +1,12 @@
-export { ref, raw, viewData, param, query, csrf } from '@neuralfog/elemix';
+export {
+    ref,
+    raw,
+    silo,
+    viewData,
+    param,
+    query,
+    csrf,
+} from '@neuralfog/elemix';
 
 export const reactive = <T extends object>(value: T): T => value;
 

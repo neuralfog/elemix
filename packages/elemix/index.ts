@@ -6,3 +6,4 @@ export * from './src/utilities';
 export { tpl } from './src/tpl';
 export { createApp } from './src/createApp';
 export { reactive } from './src/runtime/state';
+export { silo } from './src/runtime/silo';

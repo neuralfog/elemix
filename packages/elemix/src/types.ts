@@ -6,4 +6,5 @@ export type Template = {
 
 export type Ref<Value> = { value: Value };
 
+export type { Silo } from './runtime/silo';
 export type { ElemixApp, ElemixConfig } from './createApp';

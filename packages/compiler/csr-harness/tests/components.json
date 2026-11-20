@@ -392,6 +392,14 @@
         "fixture": "SignalApp"
     },
     {
+        "tag": "silo-app",
+        "fixture": "SiloApp"
+    },
+    {
+        "tag": "silo-select-app",
+        "fixture": "SiloSelectApp"
+    },
+    {
         "tag": "reset-mixed",
         "fixture": "ResetMixed"
     },

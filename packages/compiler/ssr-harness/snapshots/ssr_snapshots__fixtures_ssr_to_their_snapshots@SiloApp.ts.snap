@@ -1,0 +1,68 @@
+---
+source: ssr-harness/ssr_snapshots.rs
+assertion_line: 7
+expression: "compile_ssr(&source, false).0"
+input_file: fixtures/SiloApp.ts
+---
+import { $__ssrText, $__ssrTpl, $__ssrRepeat } from '@neuralfog/elemix/ssr-runtime';
+import { $__defineComponent } from '@neuralfog/elemix/runtime';
+import { Component, silo } from '@neuralfog/elemix';
+import type { Silo } from '@neuralfog/elemix/types';
+
+type Row = { id: number; label: Silo<string> };
+
+let nextId = 1;
+
+const makeRow = (label: string): Row => ({ id: nextId++, label: silo(label) });
+
+const seed = (): Row[] => [makeRow('alpha'), makeRow('beta')];
+
+const css = `
+    :host { display: block; font-family: system-ui, sans-serif; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    button { font: inherit; cursor: pointer; }
+`;
+
+export class SiloApp extends Component {
+$$__ssr(): unknown[] {
+return [`<${this.$$__tag ?? 'silo-app'}><template shadowrootmode="open" shadowrootserializable=""><style data-ssr>${css}</style><span class="count">`, $__ssrText(this.count.value), `</span><div class="controls"><button class="append">append</button><button class="remove">remove</button><button class="bump">bump</button><button class="reset">reset</button><button class="inc">inc</button></div><ul class="rows">`, ($__ssrRepeat(
+                this.rows.value,
+                (row) =>
+                    $__ssrTpl(`<li class="row"><span class="rid">`, $__ssrText(row.id), `</span><span class="rlabel">`, $__ssrText(row.label.value), `</span></li>`),
+                (row) => row.id,
+            )), `</ul></template></${this.$$__tag ?? 'silo-app'}>`];
+}
+
+
+    rows = silo<Row[]>(seed());
+    count = silo(0);
+
+    append = (): void => {
+        this.rows.value.push(makeRow('gamma'));
+        this.rows.trigger();
+    };
+
+    removeFirst = (): void => {
+        this.rows.value.shift();
+        this.rows.trigger();
+    };
+
+    bumpFirst = (): void => {
+        const first = this.rows.value[0];
+        if (first) first.label.value += '!';
+    };
+
+    reset = (): void => {
+        nextId = 1;
+        this.rows.value = seed();
+    };
+
+    inc = (): void => {
+        this.count.value++;
+    };
+
+    
+}
+$__defineComponent('silo-app', SiloApp);
+SiloApp.prototype.$$__tag = 'silo-app';
+SiloApp.$$__propSafe = true;

@@ -385,6 +385,12 @@ public sealed class Fixtures {
     [Get("/render-app")]
     public Reply RenderApp() => Reply.View("fixtures/RenderApp");
 
+    [Get("/silo-app")]
+    public Reply SiloApp() => Reply.View("fixtures/SiloApp");
+
+    [Get("/silo-select-app")]
+    public Reply SiloSelectApp() => Reply.View("fixtures/SiloSelectApp");
+
     [Get("/second-helper")]
     public Reply TitledNote() => Reply.View("fixtures/SecondHelper@TitledNote");
 
