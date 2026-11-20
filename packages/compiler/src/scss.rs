@@ -1,4 +1,5 @@
-use std::path::Path;
+use crate::tsconfig::Aliases;
+use std::path::{Path, PathBuf};
 
 pub fn compile_path(path: &Path, minify: bool) -> Option<String> {
     let style = if minify {
@@ -18,9 +19,10 @@ pub fn inline_scss_imports(source: &str, base_dir: Option<&Path>, minify: bool) 
     let Some(dir) = base_dir else {
         return source.to_string();
     };
+    let aliases = crate::tsconfig::load(dir);
     let mut out = String::with_capacity(source.len());
     for line in source.split_inclusive('\n') {
-        match try_inline(line, dir, minify) {
+        match try_inline(line, dir, aliases.as_ref(), minify) {
             Some(replacement) => out.push_str(&replacement),
             None => out.push_str(line),
         }
@@ -28,7 +30,7 @@ pub fn inline_scss_imports(source: &str, base_dir: Option<&Path>, minify: bool) 
     out
 }
 
-fn try_inline(line: &str, dir: &Path, minify: bool) -> Option<String> {
+fn try_inline(line: &str, dir: &Path, aliases: Option<&Aliases>, minify: bool) -> Option<String> {
     let rest = line.trim_start().strip_prefix("import ")?.trim_start();
     let (ident, after) = read_ident(rest)?;
     let from = after.trim_start().strip_prefix("from ")?.trim_start();
@@ -37,12 +39,25 @@ fn try_inline(line: &str, dir: &Path, minify: bool) -> Option<String> {
         return None;
     }
     let rel = spec.strip_suffix("?inline").unwrap_or(spec);
-    let css = compile_path(&dir.join(rel), minify)?;
+    let path = resolve_path(rel, dir, aliases)?;
+    let css = compile_path(&path, minify)?;
     let newline = if line.ends_with('\n') { "\n" } else { "" };
     Some(format!(
         "const {ident} = `{}`;{newline}",
         escape_template(&css)
     ))
+}
+
+fn resolve_path(spec: &str, dir: &Path, aliases: Option<&Aliases>) -> Option<PathBuf> {
+    if let Some(aliases) = aliases {
+        for candidate in aliases.resolve(spec) {
+            if candidate.is_file() {
+                return Some(candidate);
+            }
+        }
+    }
+    let joined = dir.join(spec);
+    joined.is_file().then_some(joined)
 }
 
 fn read_ident(s: &str) -> Option<(&str, &str)> {
@@ -85,6 +100,7 @@ mod tests {
 
     const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures");
     const FEATURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/scss");
+    const ALIAS_APP: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/scss/alias/app");
 
     fn feature_css(minify: bool) -> String {
         compile_path(&Path::new(FEATURES).join("features.scss"), minify)
@@ -168,5 +184,45 @@ mod tests {
     #[test]
     fn escapes_template_metacharacters() {
         assert_eq!(escape_template("a`b${c}\\d"), "a\\`b\\${c}\\\\d");
+    }
+
+    #[test]
+    fn inlines_through_a_tsconfig_paths_alias() {
+        let src = "import css from '#styles/button.scss?inline';\n";
+        let out = inline_scss_imports(src, Some(Path::new(ALIAS_APP)), true);
+        assert!(out.starts_with("const css = `"));
+        assert!(out.contains(".btn{color:red}"));
+        assert!(out.contains(".btn:hover{color:blue}"));
+        assert!(!out.contains("import "));
+    }
+
+    #[test]
+    fn alias_to_a_missing_file_passes_through() {
+        let src = "import css from '#styles/ghost.scss?inline';\n";
+        assert_eq!(
+            inline_scss_imports(src, Some(Path::new(ALIAS_APP)), true),
+            src
+        );
+    }
+
+    #[test]
+    fn unknown_alias_passes_through() {
+        let src = "import css from '#nope/button.scss?inline';\n";
+        assert_eq!(
+            inline_scss_imports(src, Some(Path::new(ALIAS_APP)), true),
+            src
+        );
+    }
+
+    #[test]
+    fn relative_import_still_resolves_alongside_an_alias_config() {
+        let src = "import css from './button.scss?inline';\n";
+        let out = inline_scss_imports(
+            src,
+            Some(&Path::new(ALIAS_APP).join("..").join("styles")),
+            true,
+        );
+        assert!(out.starts_with("const css = `"));
+        assert!(out.contains(".btn{color:red}"));
     }
 }

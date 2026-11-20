@@ -19,6 +19,7 @@ pub mod ssr_expr;
 pub mod ssr_style;
 pub mod static_expr;
 pub mod template;
+pub mod tsconfig;
 #[cfg(feature = "wasm")]
 pub mod wasm;
 

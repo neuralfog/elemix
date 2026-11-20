@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "bundler",
+        "paths": {
+            "#styles/*": ["./styles/*"]
+        }
+    },
+    "include": ["app"]
+}
